@@ -2030,7 +2030,7 @@ function Login({ onNav, onAuth }: { onNav: (p: string) => void; onAuth: (a: Auth
 
       // ── Vérifier si le profil est incomplet (pas de photo) ──
       const profile = profiles[0] as any;
-      const isIncomplete = !profile.photo_url || profile.name === "..." || !profile.name;
+      const isIncomplete = !profile.is_complete || profile.name === "..." || !profile.name;
       if (isIncomplete) {
         // Stocker le token pour reprendre l'inscription à l'étape 2
         sessionStorage.setItem("moyo_signup_token", res.access_token);
@@ -2291,16 +2291,18 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
     }
     if (!token || !userId) { setErrorMsg("Erreur de session. Recommencez."); setLoading(false); return; }
     try {
-      // Mettre à jour le profil avec toutes les infos + photo
-      await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
-        method: "PATCH",
+      // Créer/compléter le profil (UPSERT) — indépendant de tout trigger DB
+      const upsertRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+        method: "POST",
         headers: {
           "apikey": SUPABASE_KEY,
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
-          "Prefer": "return=minimal"
+          "Prefer": "resolution=merge-duplicates,return=minimal"
         },
         body: JSON.stringify({
+          id: userId,
+          email: form.email?.trim() || null,
           name: form.name.trim(),
           city: form.city,
           account_type: form.account_type,
@@ -2318,6 +2320,13 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
           ...((() => { const ref = new URLSearchParams(window.location.search).get("ref"); return ref ? { referred_by: ref } : {}; })()),
         }),
       });
+      if (!upsertRes.ok) {
+        const errTxt = await upsertRes.text().catch(() => "");
+        console.error("[Moyo][Signup] Échec enregistrement profil:", upsertRes.status, errTxt);
+        setErrorMsg("Impossible d'enregistrer le profil. Réessayez.");
+        setLoading(false);
+        return;
+      }
       // Mettre à jour le display_name dans Supabase Auth
       try {
         await fetch(`${SUPABASE_URL}/auth/v1/user`, {
