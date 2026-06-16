@@ -2030,7 +2030,7 @@ function Login({ onNav, onAuth }: { onNav: (p: string) => void; onAuth: (a: Auth
 
       // ── Vérifier si le profil est incomplet (pas de photo) ──
       const profile = profiles[0] as any;
-      const isIncomplete = !profile.is_complete || profile.name === "..." || !profile.name;
+      const isIncomplete = !profile.photo_url || profile.name === "..." || !profile.name;
       if (isIncomplete) {
         // Stocker le token pour reprendre l'inscription à l'étape 2
         sessionStorage.setItem("moyo_signup_token", res.access_token);
@@ -2291,18 +2291,16 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
     }
     if (!token || !userId) { setErrorMsg("Erreur de session. Recommencez."); setLoading(false); return; }
     try {
-      // Créer/compléter le profil (UPSERT) — indépendant de tout trigger DB
-      const upsertRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
-        method: "POST",
+      // Mettre à jour le profil avec toutes les infos + photo
+      await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
+        method: "PATCH",
         headers: {
           "apikey": SUPABASE_KEY,
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
-          "Prefer": "resolution=merge-duplicates,return=minimal"
+          "Prefer": "return=minimal"
         },
         body: JSON.stringify({
-          id: userId,
-          email: form.email?.trim() || null,
           name: form.name.trim(),
           city: form.city,
           account_type: form.account_type,
@@ -2320,13 +2318,6 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
           ...((() => { const ref = new URLSearchParams(window.location.search).get("ref"); return ref ? { referred_by: ref } : {}; })()),
         }),
       });
-      if (!upsertRes.ok) {
-        const errTxt = await upsertRes.text().catch(() => "");
-        console.error("[Moyo][Signup] Échec enregistrement profil:", upsertRes.status, errTxt);
-        setErrorMsg("Impossible d'enregistrer le profil. Réessayez.");
-        setLoading(false);
-        return;
-      }
       // Mettre à jour le display_name dans Supabase Auth
       try {
         await fetch(`${SUPABASE_URL}/auth/v1/user`, {
@@ -4033,6 +4024,15 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
   }, [tab]);
 
   const tabs = [
+    {
+      id: "publications",
+      label: "Accueil",
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? G.rouge : "#bbb"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+        </svg>
+      ),
+    },
     {
       id: "discover",
       label: "Annuaire",
@@ -15341,7 +15341,7 @@ export default function App() {
       document.head.appendChild(s);
     }
   }, [darkMode]);
-  const [tab, setTab] = useState("discover");
+  const [tab, setTab] = useState("publications");
   const [auth, setAuth] = useState<Auth | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const lastUnreadRef = useRef<number | null>(null);
@@ -15540,7 +15540,7 @@ export default function App() {
       const sp = new URLSearchParams(window.location.search);
       if (sp.get("paiement") === "reussi") {
         setPremiumSuccess(true);
-        setTab("discover");
+        setTab("publications");
         // Nettoie l'URL pour ne pas réafficher la modale au rechargement
         const clean = window.location.origin + window.location.pathname;
         window.history.replaceState({}, "", clean);
@@ -15586,7 +15586,7 @@ export default function App() {
               setSessionLoaded(true);
             });
             setPage("app");
-            setTab("discover");
+            setTab("publications");
             // Ne pas afficher l'app tant que le refresh n'est pas terminé
             return;
           }
@@ -15595,7 +15595,7 @@ export default function App() {
           authRef.current = a;
           setAuth(a);
           setPage("app");
-          setTab("discover");
+          setTab("publications");
           setSessionLoaded(true);
 
           // Vérifier en arrière-plan que le compte existe encore
@@ -15629,7 +15629,7 @@ export default function App() {
 
   const handleAuth = (a: Auth) => {
     authRef.current = a;
-    setAuth(a); setPage("app"); setTab("discover");
+    setAuth(a); setPage("app"); setTab("publications");
     try { localStorage.setItem("moyo_session", JSON.stringify(a)); } catch {}
     // (La demande de notifications push est gérée par un useEffect dédié,
     //  pour couvrir aussi les sessions restaurées et pas seulement le login.)
@@ -16172,10 +16172,11 @@ export default function App() {
       if (t === "visitors") { setViewsReceived(0); try { localStorage.setItem(`moyo_visitors_seen_${auth!.userId}`, new Date().toISOString()); } catch {} }
     }} unreadCount={unreadCount} notifCount={notifCount} likesReceived={likesReceived} viewsReceived={viewsReceived} auth={auth} adminBadgeCount={adminBadgeCount} showAdminConfig={showAdminConfig} setShowAdminConfig={setShowAdminConfig} inConv={inConv}>
       <div key={tab} className="page-anim" style={{ width: "100%", height: "100%" }}>
+      {tab === "publications" && <Publications auth={auth} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "discover" && <Annuaire auth={auth} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "messages" && <Messages auth={auth} onUnreadCount={setUnreadCount} onShowPremium={showPremium} initialPartnerId={openConvPartnerId} onConvOpen={setInConv} />}
       {tab === "profile" && <Profile auth={auth} onLogout={handleLogout} onShowPremium={showPremium} darkMode={darkMode} onToggleDark={() => { const v = !darkMode; setDarkMode(v); localStorage.setItem("moyo_dark", v ? "1" : "0"); }} onOpenAdmin={auth.isAdmin ? () => openAdminPanel(() => setTab("admin")) : undefined} adminBadgeCount={adminBadgeCount} />}
-      {tab === "admin" && <AdminPinGate auth={auth} onBack={() => setTab("discover")} onBadgeCount={setAdminBadgeCount} />}
+      {tab === "admin" && <AdminPinGate auth={auth} onBack={() => setTab("publications")} onBadgeCount={setAdminBadgeCount} />}
       </div>
     </AppShell>
     {premiumModal && <PremiumModal reason={premiumModal} onClose={() => setPremiumModal(null)} userId={auth?.userId || ""} token={auth?.token || ""} userEmail={auth?.email || ""} />}
