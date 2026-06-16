@@ -1511,10 +1511,67 @@ function useWindowWidth() {
   return width;
 }
 
+// ── Saisie assistée (autocomplétion) de la barre de recherche d'accueil ──
+// Chaque métier porte des mots-clés "de même sens" : taper un synonyme propose le métier.
+const mbNorm = (s: string) => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+const METIER_SUGGESTIONS: { label: string; keys: string[] }[] = [
+  { label: "Maçon", keys: ["maconnerie", "dalle", "fondation", "mur", "construction", "btp", "batiment", "chantier", "beton", "parpaing"] },
+  { label: "Carreleur", keys: ["carrelage", "carreaux", "faience", "sol", "btp"] },
+  { label: "Peintre", keys: ["peinture", "enduit", "ravalement", "facade", "btp", "decoration"] },
+  { label: "Plombier", keys: ["plomberie", "fuite", "tuyau", "robinet", "sanitaire", "eau", "canalisation", "wc", "chauffe-eau"] },
+  { label: "Électricien", keys: ["electricite", "electrique", "courant", "cablage", "installation", "panne", "compteur", "lumiere"] },
+  { label: "Climatisation", keys: ["clim", "climatiseur", "froid", "frigoriste", "ventilation", "split"] },
+  { label: "Menuisier", keys: ["menuiserie", "bois", "meuble", "porte", "fenetre", "placard", "ebeniste"] },
+  { label: "Soudeur", keys: ["soudure", "metallique", "fer", "ferronnerie", "portail", "metal"] },
+  { label: "Chauffeur", keys: ["transport", "voiture", "taxi", "vtc", "course", "deplacement", "livraison", "conduite"] },
+  { label: "Mécanicien", keys: ["mecanique", "garage", "voiture", "moteur", "reparation auto", "vehicule", "vidange"] },
+  { label: "Déménageur", keys: ["demenagement", "transport meuble", "porteur", "manutention"] },
+  { label: "Coiffeur", keys: ["coiffure", "salon", "tresse", "barbier", "cheveux", "beaute", "coupe"] },
+  { label: "Maquilleuse", keys: ["maquillage", "make up", "beaute", "esthetique", "evenement"] },
+  { label: "Esthéticienne", keys: ["esthetique", "soin", "ongle", "manucure", "beaute", "spa", "massage"] },
+  { label: "Couturière", keys: ["couture", "couturier", "tailleur", "vetement", "retouche", "robe", "tissu", "mode"] },
+  { label: "Photographe", keys: ["photo", "photographie", "video", "mariage", "evenement", "studio", "cameraman"] },
+  { label: "Traiteur", keys: ["traiteur", "cuisine", "repas", "buffet", "mariage", "evenement", "restauration"] },
+  { label: "Restaurant", keys: ["resto", "restauration", "cuisine", "repas", "plat", "manger", "nourriture"] },
+  { label: "Pâtissier", keys: ["patisserie", "gateau", "boulangerie", "dessert", "anniversaire"] },
+  { label: "Décorateur", keys: ["decoration", "deco", "evenement", "mariage", "salle", "amenagement"] },
+  { label: "Développeur web", keys: ["developpeur", "dev web", "informatique", "site", "site web", "application", "appli", "programmeur", "numerique", "logiciel"] },
+  { label: "Community manager", keys: ["reseaux sociaux", "community", "marketing", "facebook", "instagram", "numerique", "communication"] },
+  { label: "Graphiste", keys: ["graphisme", "design", "logo", "affiche", "infographie", "flyer", "numerique"] },
+  { label: "Jardinier", keys: ["jardin", "jardinage", "espace vert", "gazon", "elagage", "plante"] },
+  { label: "Agriculteur", keys: ["agriculture", "agri", "champ", "ferme", "elevage", "culture", "recolte"] },
+  { label: "Investisseur", keys: ["investissement", "business", "financement", "partenaire", "capital", "projet"] },
+  { label: "Comptable", keys: ["comptabilite", "finance", "gestion", "fiscal", "impot", "business"] },
+  { label: "Avocat", keys: ["juridique", "droit", "notaire", "conseil", "justice"] },
+  { label: "Professeur", keys: ["cours", "soutien scolaire", "repetiteur", "enseignant", "formation", "education"] },
+  { label: "Agent immobilier", keys: ["immobilier", "immo", "location", "maison", "appartement", "terrain", "vente"] },
+  { label: "Commerçant", keys: ["commerce", "boutique", "vente", "grossiste", "magasin", "vendeur"] },
+];
+
 function Landing({ onNav }: { onNav: (p: string) => void }) {
   const [tab, setTab] = React.useState<"besoins" | "profils">("besoins");
   const [activeCat, setActiveCat] = React.useState("BTP");
   const [lq, setLq] = React.useState("");
+  const [sugOpen, setSugOpen] = React.useState(false);
+  const suggestions = React.useMemo(() => {
+    const q = mbNorm(lq);
+    if (q.length < 1) return [] as string[];
+    const scored: { label: string; score: number }[] = [];
+    for (const m of METIER_SUGGESTIONS) {
+      let score = -1;
+      const hay = [m.label, ...m.keys].map(mbNorm);
+      for (const t of hay) {
+        if (t === q) { score = 4; break; }
+        if (t.startsWith(q)) score = Math.max(score, 3);
+        else if (t.includes(q)) score = Math.max(score, 1);
+      }
+      // si le métier lui-même commence par la saisie, on le privilégie
+      if (mbNorm(m.label).startsWith(q)) score = Math.max(score, 3.5);
+      if (score >= 0) scored.push({ label: m.label, score });
+    }
+    scored.sort((a, b) => b.score - a.score || a.label.localeCompare(b.label));
+    return scored.slice(0, 6).map(s => s.label);
+  }, [lq]);
   const [lres, setLres] = React.useState<{ pros: any[]; pubs: any[] } | null>(null);
   const [lsearching, setLsearching] = React.useState(false);
   React.useEffect(() => {
@@ -1624,15 +1681,22 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         .mb-h1{font-size:clamp(34px,5vw,62px);font-weight:900;color:#fff;text-align:center;line-height:1.08;letter-spacing:-1.5px;max-width:720px;margin-bottom:16px;}
         .mb-h1 span{color:var(--or);}
         .mb-sub{font-size:16px;color:rgba(255,255,255,0.5);text-align:center;max-width:440px;line-height:1.6;margin-bottom:36px;}
-        .mb-search{width:100%;max-width:600px;position:relative;margin-bottom:18px;}
+        .mb-search{width:100%;max-width:600px;position:relative;margin-bottom:18px;z-index:60;}
         .mb-search input{width:100%;padding:17px 60px 17px 50px;font-size:16px;font-family:inherit;border:2px solid rgba(255,255,255,0.1);border-radius:14px;background:rgba(255,255,255,0.06);color:#fff;outline:none;}
         .mb-search input::placeholder{color:rgba(255,255,255,0.3);}
         .mb-search input:focus{border-color:var(--or);}
+        .mb-sug{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#16161D;border:1px solid rgba(212,168,67,0.25);border-radius:14px;padding:6px;z-index:100;box-shadow:0 24px 60px rgba(0,0,0,0.75);text-align:left;max-height:340px;overflow-y:auto;}
+        .mb-sug-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;cursor:pointer;color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;}
+        .mb-sug-item:hover{background:rgba(212,168,67,0.12);color:var(--or);}
         .mb-search-ic{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.4);}
         .mb-search-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--or);border:none;cursor:pointer;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
-        .mb-hints{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
-        .mb-hint{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);font-size:12px;padding:5px 12px;border-radius:100px;cursor:pointer;}
+        .mb-hints{display:flex;overflow:hidden;width:100%;max-width:560px;margin:0 auto;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);}
+        .mb-hints-track{display:flex;gap:8px;flex:0 0 auto;width:max-content;animation:mbHintScroll 22s linear infinite;}
+        .mb-hints:hover .mb-hints-track{animation-play-state:paused;}
+        .mb-hint{flex:0 0 auto;white-space:nowrap;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);font-size:12px;padding:5px 12px;border-radius:100px;cursor:pointer;}
         .mb-hint:hover{color:var(--or);border-color:rgba(212,168,67,0.3);}
+        @keyframes mbHintScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+        @media(prefers-reduced-motion:reduce){.mb-hints-track{animation:none}}
         .mb-cta-row{display:flex;gap:12px;margin-top:36px;flex-wrap:wrap;justify-content:center;}
         .mb-btn-g{background:var(--or);color:var(--nuit);font-size:15px;font-weight:800;padding:15px 30px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;}
         .mb-btn-o{background:transparent;color:#fff;font-size:15px;font-weight:700;padding:15px 30px;border-radius:12px;border:2px solid rgba(255,255,255,0.25);cursor:pointer;font-family:inherit;}
@@ -1682,9 +1746,9 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
           .mb-nav-a.hide-m{display:none;}
           .mb-hero{min-height:auto;padding:40px 18px 48px;}
           .mb-h1{font-size:30px;letter-spacing:-0.8px;}
-          .mb-sub{font-size:14px;margin-bottom:28px;}
+          .mb-sub{display:none;}
           .mb-search input{padding:15px 56px 15px 46px;font-size:15px;}
-          .mb-cta-row{flex-direction:column;width:100%;max-width:360px;margin-top:30px;}
+          .mb-cta-row{flex-direction:column;width:100%;max-width:360px;margin:30px auto 0;align-items:center;}
           .mb-cta-row button{width:100%;}
           .mb-stats{gap:20px;margin-top:36px;padding-top:24px;}
           .mb-stat b{font-size:22px;}
@@ -1731,10 +1795,8 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         </div>
         <div className="mb-nav-r">
           <button className="mb-nav-a hide-m" onClick={() => onNav("about")}>À propos</button>
-          <button className="mb-nav-a hide-m" onClick={() => onNav("login")}>Me connecter</button>
-          <button className="mb-nav-a mb-nav-cta" onClick={() => onNav("signup")}>
-            <svg width="14" height="14" style={{ color: "#0F0F1A" }}><use href="#mbi-plus"/></svg>
-            Créer un compte
+          <button className="mb-nav-a mb-nav-cta" onClick={() => onNav("login")}>
+            Me connecter
           </button>
         </div>
       </header>
@@ -1749,15 +1811,33 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         <p className="mb-sub">Du maçon au développeur, du chauffeur à l'investisseur — trouvez ce qu'il vous faut, près de chez vous.</p>
         <div className="mb-search">
           <span className="mb-search-ic"><svg width="18" height="18"><use href="#mbi-search"/></svg></span>
-          <input placeholder="Cherchez un maçon, chauffeur, plombier…" value={lq} onChange={e => setLq(e.target.value)} />
+          <input
+            placeholder="Cherchez un maçon, chauffeur, plombier…"
+            value={lq}
+            onChange={e => { setLq(e.target.value); setSugOpen(true); }}
+            onFocus={() => setSugOpen(true)}
+            onBlur={() => setSugOpen(false)}
+            autoComplete="off"
+          />
           <button className="mb-search-btn" aria-label="Rechercher"><svg width="18" height="18" style={{ color: "#0F0F1A" }}><use href="#mbi-search"/></svg></button>
+          {sugOpen && suggestions.length > 0 && (
+            <div className="mb-sug">
+              {suggestions.map(s => (
+                <div key={s} className="mb-sug-item" onMouseDown={e => { e.preventDefault(); setLq(s); setSugOpen(false); }}>
+                  <svg width="15" height="15" style={{ opacity: 0.6, flexShrink: 0 }}><use href="#mbi-search"/></svg>
+                  <span>{s}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div className="mb-hints">
-          {HINTS.map(h => <span key={h} className="mb-hint" onClick={() => setLq(h)}>{h}</span>)}
+          <div className="mb-hints-track">
+            {[...HINTS, ...HINTS].map((h, i) => <span key={h + "-" + i} className="mb-hint" onClick={() => setLq(h)}>{h}</span>)}
+          </div>
         </div>
         <div className="mb-cta-row">
           <button className="mb-btn-g" onClick={() => onNav("signup")}>Créer mon compte gratuit</button>
-          <button className="mb-btn-o" onClick={() => onNav("login")}>Me connecter</button>
         </div>
         <div className="mb-stats">
           <div className="mb-stat"><b>1 240</b><span>Besoins actifs</span></div>
@@ -1878,10 +1958,10 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
       <section className="mb-final">
         <h2>Vous avez un besoin ?<br/>Publiez-le en 30 secondes.</h2>
         <p>Gratuit, immédiat, visible par des centaines de professionnels.</p>
-        <button className="mb-btn-g" onClick={() => onNav("signup")}>
-          <svg width="16" height="16" style={{ color: "#0F0F1A", verticalAlign: "-2px", marginRight: 6 }}><use href="#mbi-plus"/></svg>
-          Publier un besoin
-        </button>
+        <div className="mb-cta-row">
+          <button className="mb-btn-g" onClick={() => onNav("signup")}>Créer mon compte</button>
+          <button className="mb-btn-o" onClick={() => onNav("login")}>Me connecter</button>
+        </div>
       </section>
     </div>
   );
