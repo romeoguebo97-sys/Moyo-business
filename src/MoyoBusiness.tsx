@@ -131,7 +131,7 @@ const getModerationMessage = (type: "insult" | "scam" | "sexual"): string => {
 const MSG_BG_STYLE: React.CSSProperties = {
   position: "relative",
 };
-const SUPER_ADMIN_ID = "1d7a2e08-4454-43ea-8db0-4d1aeba8e69d";
+const SUPER_ADMIN_ID = "3952df97-4ba6-49b3-8bb4-8a2a2880f6ff";
 const REFERRAL_BONUS_DAYS = 7;
 // Intervalles de polling — modifiables via app_settings
 let POLL_BADGES_MS = 8000;        // Fallback badges (messages/likes/matchs/vues)
@@ -1516,29 +1516,68 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
   const [activeCat, setActiveCat] = React.useState("BTP");
 
   const CATS = [
-    { id: "BTP", label: "BTP", ico: "mbi-btp", n: "214" },
-    { id: "Transport", label: "Transport", ico: "mbi-transport", n: "178" },
-    { id: "Artisanat", label: "Artisanat", ico: "mbi-craft", n: "95" },
-    { id: "Emploi", label: "Emploi", ico: "mbi-job", n: "301" },
-    { id: "Commerce", label: "Commerce", ico: "mbi-shop", n: "88" },
-    { id: "Restauration", label: "Resto", ico: "mbi-food", n: "54" },
-    { id: "Agriculture", label: "Agri", ico: "mbi-agri", n: "67" },
-    { id: "Immobilier", label: "Immo", ico: "mbi-house", n: "43" },
-    { id: "Numérique", label: "Numérique", ico: "mbi-digital", n: "112" },
-    { id: "Business", label: "Business", ico: "mbi-biz", n: "88" },
+    { id: "BTP", label: "BTP", ico: "mbi-btp", n: "214", np: "87" },
+    { id: "Transport", label: "Transport", ico: "mbi-transport", n: "178", np: "64" },
+    { id: "Artisanat", label: "Artisanat", ico: "mbi-craft", n: "95", np: "41" },
+    { id: "Emploi", label: "Emploi", ico: "mbi-job", n: "301", np: "53" },
+    { id: "Commerce", label: "Commerce", ico: "mbi-shop", n: "88", np: "38" },
+    { id: "Restauration", label: "Resto", ico: "mbi-food", n: "54", np: "29" },
+    { id: "Agriculture", label: "Agri", ico: "mbi-agri", n: "67", np: "22" },
+    { id: "Immobilier", label: "Immo", ico: "mbi-house", n: "43", np: "19" },
+    { id: "Numérique", label: "Numérique", ico: "mbi-digital", n: "112", np: "47" },
+    { id: "Business", label: "Business", ico: "mbi-biz", n: "88", np: "31" },
   ];
   const HINTS = ["Maçon", "Chauffeur", "Plombier", "Investisseur", "Dev web", "Couturière"];
   const BESOINS = [
     { cat: "BTP", date: "Il y a 2 h", title: "Cherche maçon pour construction d'une dalle", desc: "Maçon expérimenté pour couler une dalle de 60 m² à Poto-Poto. Matériaux fournis.", loc: "Poto-Poto, Brazzaville", prix: "300 000 FCFA", ini: "JM", name: "Jean-Marie K." },
     { cat: "BTP", date: "Il y a 5 h", title: "Plombier urgence - fuite eau appartement", desc: "Fuite importante dans la salle de bain. Intervention urgente souhaitée aujourd'hui.", loc: "Bacongo, Brazzaville", prix: "50 000 FCFA", ini: "SN", name: "Sophie N." },
     { cat: "BTP", date: "Hier", title: "Électricien pour installation villa", desc: "Villa neuve R+1 à câbler entièrement. Tableau, prises, éclairage. Devis demandé.", loc: "Moungali, Brazzaville", prix: "750 000 FCFA", ini: "PL", name: "Patrick L." },
+    { cat: "Transport", date: "Il y a 1 h", title: "Chauffeur avec camionnette - déménagement", desc: "Déménagement Moungali → Talangaï ce samedi. 2 pièces, quelques meubles lourds.", loc: "Moungali, Brazzaville", prix: "40 000 FCFA", ini: "AK", name: "Alain K." },
+    { cat: "Transport", date: "Il y a 4 h", title: "Livraison quotidienne de marchandises", desc: "Boutique cherche transporteur fiable pour livraisons quotidiennes en ville.", loc: "Centre-ville, Brazzaville", prix: "À négocier", ini: "FM", name: "Fatou M." },
+    { cat: "Artisanat", date: "Il y a 3 h", title: "Couturière pour tenues traditionnelles", desc: "Confection de 5 tenues (homme/femme) pour un mariage. Tissus fournis.", loc: "Bacongo, Brazzaville", prix: "120 000 FCFA", ini: "RN", name: "Régine N." },
+    { cat: "Artisanat", date: "Hier", title: "Menuisier pour meubles sur mesure", desc: "Fabrication d'une bibliothèque et d'un bureau en bois massif.", loc: "Talangaï, Brazzaville", prix: "250 000 FCFA", ini: "JP", name: "Jean-Paul O." },
+    { cat: "Emploi", date: "Il y a 6 h", title: "Recrutement vendeur(se) boutique", desc: "Boutique de prêt-à-porter recrute un vendeur sérieux, expérience souhaitée. Temps plein.", loc: "Poto-Poto, Brazzaville", prix: "120 000 FCFA/mois", ini: "DK", name: "David K." },
+    { cat: "Emploi", date: "Hier", title: "Secrétaire bilingue - PME", desc: "PME cherche secrétaire FR/EN, maîtrise Word/Excel. CDD 6 mois renouvelable.", loc: "Centre-ville, Brazzaville", prix: "180 000 FCFA/mois", ini: "CM", name: "Carine M." },
+    { cat: "Commerce", date: "Il y a 2 h", title: "Grossiste produits alimentaires", desc: "Recherche fournisseur régulier en riz, huile et sucre pour revente.", loc: "Marché Total, Brazzaville", prix: "À discuter", ini: "BG", name: "Blaise G." },
+    { cat: "Commerce", date: "Il y a 5 h", title: "Distributeur de produits cosmétiques", desc: "Cherche partenaire pour distribution de cosmétiques dans le Pool.", loc: "Pointe-Noire", prix: "À négocier", ini: "SL", name: "Sandra L." },
+    { cat: "Restauration", date: "Il y a 3 h", title: "Traiteur pour événement 100 personnes", desc: "Mariage le mois prochain, menu congolais + boissons. Devis demandé.", loc: "Mfilou, Brazzaville", prix: "600 000 FCFA", ini: "PM", name: "Prisca M." },
+    { cat: "Restauration", date: "Hier", title: "Cuisinier pour restaurant", desc: "Restaurant cherche cuisinier expérimenté en cuisine africaine et européenne.", loc: "Centre-ville, Brazzaville", prix: "150 000 FCFA/mois", ini: "HT", name: "Hervé T." },
+    { cat: "Agriculture", date: "Il y a 4 h", title: "Main d'œuvre pour plantation de manioc", desc: "Besoin de 5 ouvriers agricoles pour défrichage et plantation, 2 semaines.", loc: "Kinkala, Pool", prix: "5 000 FCFA/jour", ini: "GN", name: "Gaston N." },
+    { cat: "Agriculture", date: "Hier", title: "Fournisseur de poussins et aliments", desc: "Éleveur cherche fournisseur fiable en poussins d'un jour et provende.", loc: "Brazzaville", prix: "À négocier", ini: "EM", name: "Esther M." },
+    { cat: "Immobilier", date: "Il y a 2 h", title: "Recherche villa 3 chambres à louer", desc: "Famille cherche villa avec cour, quartier calme, bail longue durée.", loc: "Mpila, Brazzaville", prix: "250 000 FCFA/mois", ini: "OB", name: "Olga B." },
+    { cat: "Immobilier", date: "Hier", title: "Agent pour gestion locative", desc: "Propriétaire cherche agent pour gérer 4 appartements (loyers, entretien).", loc: "Pointe-Noire", prix: "Commission", ini: "RK", name: "Rodrigue K." },
+    { cat: "Numérique", date: "Il y a 1 h", title: "Développeur web pour site vitrine", desc: "PME cherche dev pour site vitrine 5 pages + formulaire de contact. Devis bienvenu.", loc: "Centre-ville, Brazzaville", prix: "250 000 FCFA", ini: "AM", name: "Amina M." },
+    { cat: "Numérique", date: "Il y a 5 h", title: "Community manager pour boutique", desc: "Gestion des pages Facebook/Instagram, création de visuels, 3 posts/semaine.", loc: "Brazzaville", prix: "80 000 FCFA/mois", ini: "YK", name: "Yann K." },
+    { cat: "Business", date: "Il y a 3 h", title: "Comptable pour clôture annuelle", desc: "TPE cherche comptable pour bilan et déclarations fiscales. Mission ponctuelle.", loc: "Centre-ville, Brazzaville", prix: "300 000 FCFA", ini: "LN", name: "Léon N." },
+    { cat: "Business", date: "Hier", title: "Consultant création d'entreprise", desc: "Accompagnement pour immatriculation et business plan d'une jeune entreprise.", loc: "Brazzaville", prix: "À discuter", ini: "FK", name: "Francine K." },
   ];
   const PROFILS = [
-    { ini: "ET", name: "Étienne T.", metier: "Maçon - 12 ans d'exp.", ville: "Poto-Poto", verif: "Vérifié" },
-    { ini: "RB", name: "Roger B.", metier: "Plombier", ville: "Bacongo", verif: "" },
-    { ini: "MK", name: "Marie-Claire K.", metier: "Entreprise BTP", ville: "Moungali", verif: "Entreprise vérifiée" },
-    { ini: "BN", name: "Bernard N.", metier: "Électricien - 8 ans", ville: "Ouenzé", verif: "Certifié" },
+    { ini: "ET", name: "Étienne T.", metier: "Maçon - 12 ans d'exp.", ville: "Poto-Poto", verif: "Vérifié", cat: "BTP" },
+    { ini: "RB", name: "Roger B.", metier: "Plombier", ville: "Bacongo", verif: "", cat: "BTP" },
+    { ini: "MK", name: "Marie-Claire K.", metier: "Entreprise BTP", ville: "Moungali", verif: "Entreprise vérifiée", cat: "BTP" },
+    { ini: "BE", name: "Bernard E.", metier: "Électricien - 8 ans", ville: "Ouenzé", verif: "Certifié", cat: "BTP" },
+    { ini: "RG", name: "Roger G.", metier: "Transporteur - camionnette", ville: "Bacongo", verif: "Vérifié", cat: "Transport" },
+    { ini: "AD", name: "André D.", metier: "Chauffeur poids lourd", ville: "Pointe-Noire", verif: "", cat: "Transport" },
+    { ini: "CM", name: "Clarisse M.", metier: "Couturière sur mesure", ville: "Talangaï", verif: "Vérifiée", cat: "Artisanat" },
+    { ini: "JO", name: "Joseph O.", metier: "Menuisier ébéniste", ville: "Mfilou", verif: "", cat: "Artisanat" },
+    { ini: "AC", name: "Agence Carrière+", metier: "Cabinet de recrutement", ville: "Brazzaville", verif: "Entreprise vérifiée", cat: "Emploi" },
+    { ini: "PN", name: "Pauline N.", metier: "Assistante RH", ville: "Centre-ville", verif: "", cat: "Emploi" },
+    { ini: "BG", name: "Boutique Géant", metier: "Grossiste alimentaire", ville: "Marché Total", verif: "Entreprise vérifiée", cat: "Commerce" },
+    { ini: "SL", name: "Sandra L.", metier: "Distributrice cosmétiques", ville: "Pointe-Noire", verif: "", cat: "Commerce" },
+    { ini: "PM", name: "Prisca M.", metier: "Traiteur événementiel", ville: "Mfilou", verif: "Vérifiée", cat: "Restauration" },
+    { ini: "CH", name: "Chef Hervé", metier: "Cuisinier", ville: "Centre-ville", verif: "", cat: "Restauration" },
+    { ini: "EM", name: "Esther M.", metier: "Éleveuse avicole", ville: "Brazzaville", verif: "Vérifiée", cat: "Agriculture" },
+    { ini: "GN", name: "Gaston N.", metier: "Maraîcher", ville: "Kinkala", verif: "", cat: "Agriculture" },
+    { ini: "RK", name: "Rodrigue K.", metier: "Agent immobilier", ville: "Pointe-Noire", verif: "Vérifié", cat: "Immobilier" },
+    { ini: "IC", name: "Immo Congo", metier: "Agence immobilière", ville: "Brazzaville", verif: "Entreprise vérifiée", cat: "Immobilier" },
+    { ini: "BN", name: "Bernard N.", metier: "Développeur web", ville: "Moungali", verif: "Certifié", cat: "Numérique" },
+    { ini: "YK", name: "Yann K.", metier: "Community manager", ville: "Brazzaville", verif: "", cat: "Numérique" },
+    { ini: "LN", name: "Léon N.", metier: "Comptable agréé", ville: "Centre-ville", verif: "Vérifié", cat: "Business" },
+    { ini: "FK", name: "Francine K.", metier: "Consultante en gestion", ville: "Brazzaville", verif: "", cat: "Business" },
   ];
+  const activeCatObj = CATS.find(c => c.id === activeCat) || CATS[0];
+  const besoinsList = BESOINS.filter(b => b.cat === activeCat);
+  const profilsList = PROFILS.filter(p => p.cat === activeCat);
 
   return (
     <div className="mb-root">
@@ -1725,13 +1764,14 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
       {/* BESOINS / PROFILS */}
       <section className="mb-sec" style={{ background: "#fff" }}>
         <div className="mb-tabs">
-          <button className={"mb-tab" + (tab === "besoins" ? " on" : "")} onClick={() => setTab("besoins")}>Besoins (214)</button>
-          <button className={"mb-tab" + (tab === "profils" ? " on" : "")} onClick={() => setTab("profils")}>Professionnels (87)</button>
+          <button className={"mb-tab" + (tab === "besoins" ? " on" : "")} onClick={() => setTab("besoins")}>Besoins ({activeCatObj.n})</button>
+          <button className={"mb-tab" + (tab === "profils" ? " on" : "")} onClick={() => setTab("profils")}>Professionnels ({activeCatObj.np})</button>
         </div>
 
         {tab === "besoins" ? (
           <div className="mb-grid">
-            {BESOINS.map((b, i) => (
+            {besoinsList.length === 0 && <p style={{ gridColumn: "1 / -1", textAlign: "center", color: "#999", padding: "30px 0", fontSize: "0.9rem" }}>Aucun besoin publié dans ce secteur pour le moment.</p>}
+            {besoinsList.map((b, i) => (
               <div key={i} className="mb-bcard">
                 <div className="mb-bhead"><span className="mb-bcat">{b.cat}</span><span className="mb-bdate">{b.date}</span></div>
                 <div className="mb-btitle">{b.title}</div>
@@ -1749,7 +1789,8 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
           </div>
         ) : (
           <div className="mb-pgrid">
-            {PROFILS.map((p, i) => (
+            {profilsList.length === 0 && <p style={{ gridColumn: "1 / -1", textAlign: "center", color: "#999", padding: "30px 0", fontSize: "0.9rem" }}>Aucun professionnel dans ce secteur pour le moment.</p>}
+            {profilsList.map((p, i) => (
               <div key={i} className="mb-pcard">
                 <div className="mb-pav">{p.ini}</div>
                 <div className="mb-pname">{p.name}</div>
@@ -15002,11 +15043,16 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
   );
 }
 
+const SEARCH_HINTS = ["Maçon","Chauffeur","Plombier","Coiffeur","Couturière","Développeur web","Électricien","Menuisier","Restaurant","Transport","Photographe","Mécanicien","Peintre","Soudeur","Traiteur","Carreleur","Climatisation","Décorateur","Frigoriste","Jardinier"];
+
 function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMessages: (partnerId: string) => void; publishNonce?: number }) {
   const [type, setType] = useState<"cherche" | "propose">("cherche");
   const [cat, setCat] = useState("all");
   const [city, setCity] = useState<string>(PUB_VILLES[0] || "Brazzaville");
   const [q, setQ] = useState("");
+  const [results, setResults] = useState<{ pros: Profile[]; pubs: Publication[] } | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [openFiche, setOpenFiche] = useState<Profile | null>(null);
   const [pubs, setPubs] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPublish, setShowPublish] = useState(false);
@@ -15027,6 +15073,23 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { if (publishNonce) setShowPublish(true); }, [publishNonce]);
+  useEffect(() => {
+    const term = q.trim();
+    if (!term) { setResults(null); setSearching(false); return; }
+    setSearching(true);
+    const h = setTimeout(async () => {
+      const v = encodeURIComponent(term);
+      try {
+        const [rPros, rPubs] = await Promise.all([
+          sb.query<Profile>(auth.token, "profiles", `?account_type=eq.pro&is_visible=neq.false&or=(company.ilike.*${v}*,metier.ilike.*${v}*,name.ilike.*${v}*,category.ilike.*${v}*)&order=is_sponsored.desc&select=*&limit=20`, auth.refreshToken),
+          sb.query<Publication>(auth.token, "publications", `?status=eq.active&or=(title.ilike.*${v}*,description.ilike.*${v}*,category.ilike.*${v}*)&order=created_at.desc&select=*,author:profiles(id,name,company,photo_url,city,profession,is_verified)&limit=20`, auth.refreshToken),
+        ]);
+        setResults({ pros: rPros || [], pubs: rPubs || [] });
+      } catch { setResults({ pros: [], pubs: [] }); }
+      finally { setSearching(false); }
+    }, 350);
+    return () => clearTimeout(h);
+  }, [q, auth.token, auth.userId, auth.refreshToken]);
 
   const list = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -15051,44 +15114,93 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
 
   return (
     <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", paddingBottom: 90 }}>
-      <div style={{ position: "sticky", top: 0, zIndex: 20, background: G.creme, padding: "14px 16px 8px" }}>
-        <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
-          <div style={{ flex: 1 }}><Input value={q} onChange={e => setQ(e.target.value)} placeholder="🔎  Maçon, chauffeur, dev web…" /></div>
-          <select value={city} onChange={e => setCity(e.target.value)} style={{ borderRadius: 12, border: `2px solid ${G.gris}`, padding: "0 8px", fontSize: 13, background: G.blanc, color: "#111", marginBottom: 18 }}>
-            {PUB_VILLES.map(v => <option key={v} value={v}>{v}</option>)}
-          </select>
-        </div>
-        <div style={{ display: "flex", gap: 4, background: G.gris, borderRadius: 12, padding: 3 }}>
-          {(["cherche", "propose"] as const).map(t => (
-            <button key={t} onClick={() => setType(t)} style={{ flex: 1, border: "none", borderRadius: 10, padding: "10px 0", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", background: type === t ? (t === "propose" ? G.vert : "#111") : "transparent", color: type === t ? "#fff" : "#666" }}>
-              {t === "cherche" ? "Je cherche" : "Je propose"}
-            </button>
-          ))}
-        </div>
-        <div style={{ display: "flex", gap: 8, overflowX: "auto", padding: "12px 0 4px" }}>
-          {PUB_CATS.map(c => (
-            <button key={c.id} onClick={() => setCat(c.id)} style={{ flex: "0 0 auto", border: `1.5px solid ${cat === c.id ? "#111" : G.gris}`, background: cat === c.id ? "#111" : G.blanc, color: cat === c.id ? "#fff" : "#666", borderRadius: 50, padding: "7px 14px", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>{c.label}</button>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ padding: "8px 16px", fontSize: "0.78rem", color: "#777", display: "flex", justifyContent: "space-between" }}>
-        <span><b style={{ color: "#111" }}>{list.length}</b> {type === "cherche" ? "besoin(s)" : "professionnel(s)"}</span>
-        <span>{city}</span>
-      </div>
-
-      <div style={{ padding: "4px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
-        {loading && <p style={{ textAlign: "center", color: "#999", padding: 30 }}>Chargement…</p>}
-        {!loading && list.length === 0 && (
-          <div style={{ textAlign: "center", padding: "50px 20px", color: "#999" }}>
-            <p style={{ fontWeight: 700, color: "#444", marginBottom: 6 }}>Aucune annonce ici</p>
-            <p style={{ fontSize: "0.85rem" }}>{type === "cherche" ? "Soyez le premier à publier votre besoin." : "Aucun professionnel pour ce filtre."}</p>
+      <div style={{ position: "sticky", top: 0, zIndex: 20, background: G.nuit, padding: "14px 14px 11px" }}>
+        {/* Recherche globale */}
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{ flex: 1, position: "relative" }}>
+            <span style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.45)", fontSize: 15 }}>🔍</span>
+            <input value={q} onChange={e => setQ(e.target.value)} placeholder="Cherchez un maçon, chauffeur, plombier…" style={{ width: "100%", padding: "13px 14px 13px 38px", fontSize: 14, fontFamily: "inherit", border: "1.5px solid rgba(255,255,255,0.12)", borderRadius: 12, background: "rgba(255,255,255,0.07)", color: "#fff", outline: "none", boxSizing: "border-box" }} />
+            {q && <button onClick={() => setQ("")} aria-label="Effacer" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", border: "none", background: "transparent", color: "rgba(255,255,255,0.5)", fontSize: 18, cursor: "pointer" }}>×</button>}
           </div>
-        )}
-        {!loading && list.map(pub => (
-          <PubCard key={pub.id} pub={pub} me={auth.userId} onContact={() => contact(pub)} onBoost={() => setBoostTarget(pub)} />
-        ))}
+          <div style={{ flexShrink: 0, width: 46, height: 46, borderRadius: 12, background: G.or, color: "#111", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>🔍</div>
+        </div>
+        {/* Suggestions défilantes (marquee) */}
+        <div style={{ overflow: "hidden", marginTop: 11, WebkitMaskImage: "linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent)", maskImage: "linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent)" }}>
+          <div style={{ display: "inline-flex", gap: 8, whiteSpace: "nowrap", animation: "moyoMarquee 32s linear infinite", willChange: "transform" }}>
+            {[...SEARCH_HINTS, ...SEARCH_HINTS].map((h, i) => (
+              <button key={i} onClick={() => setQ(h)} style={{ flex: "0 0 auto", border: "1.5px solid rgba(232,184,75,0.35)", background: "rgba(255,255,255,0.06)", color: "#fff", borderRadius: 50, padding: "6px 14px", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>{h}</button>
+            ))}
+          </div>
+        </div>
       </div>
+      <style>{`@keyframes moyoMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+
+      {/* Contrôles du feed — masqués pendant une recherche */}
+      {!q.trim() && (
+        <div style={{ padding: "12px 16px 0" }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "stretch" }}>
+            <div style={{ display: "flex", gap: 4, background: G.gris, borderRadius: 12, padding: 3, flex: 1 }}>
+              {(["cherche", "propose"] as const).map(t => (
+                <button key={t} onClick={() => setType(t)} style={{ flex: 1, border: "none", borderRadius: 10, padding: "9px 0", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer", background: type === t ? (t === "propose" ? G.vert : "#111") : "transparent", color: type === t ? "#fff" : "#666" }}>
+                  {t === "cherche" ? "Je cherche" : "Je propose"}
+                </button>
+              ))}
+            </div>
+            <select value={city} onChange={e => setCity(e.target.value)} style={{ borderRadius: 12, border: `1.5px solid ${G.gris}`, padding: "0 8px", fontSize: 13, background: G.blanc, color: "#111" }}>
+              {PUB_VILLES.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
+          </div>
+          <div style={{ display: "flex", gap: 8, overflowX: "auto", padding: "0 0 4px" }}>
+            {PUB_CATS.map(c => (
+              <button key={c.id} onClick={() => setCat(c.id)} style={{ flex: "0 0 auto", border: `1.5px solid ${cat === c.id ? "#111" : G.gris}`, background: cat === c.id ? "#111" : G.blanc, color: cat === c.id ? "#fff" : "#666", borderRadius: 50, padding: "7px 14px", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>{c.label}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {q.trim() ? (
+        /* ===== Résultats de recherche globale (annonces + professionnels) ===== */
+        <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
+          {searching && <p style={{ textAlign: "center", color: "#999", padding: 22 }}>Recherche…</p>}
+          {!searching && results && results.pros.length === 0 && results.pubs.length === 0 && (
+            <div style={{ textAlign: "center", padding: "44px 20px", color: "#999" }}>
+              <p style={{ fontWeight: 700, color: "#444", marginBottom: 6 }}>Aucun résultat pour « {q.trim()} »</p>
+              <p style={{ fontSize: "0.85rem" }}>Essayez un autre mot-clé ou un métier.</p>
+            </div>
+          )}
+          {!searching && results && results.pros.length > 0 && (
+            <>
+              <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#999", textTransform: "uppercase", letterSpacing: "0.5px" }}>Professionnels ({results.pros.length})</div>
+              {results.pros.map(pr => <ProCard key={pr.id} pro={pr} onOpen={() => setOpenFiche(pr)} isFav={false} onToggleFav={() => {}} />)}
+            </>
+          )}
+          {!searching && results && results.pubs.length > 0 && (
+            <>
+              <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#999", textTransform: "uppercase", letterSpacing: "0.5px", marginTop: 4 }}>Annonces ({results.pubs.length})</div>
+              {results.pubs.map(pub => <PubCard key={pub.id} pub={pub} me={auth.userId} onContact={() => contact(pub)} onBoost={() => setBoostTarget(pub)} />)}
+            </>
+          )}
+        </div>
+      ) : (
+        <>
+          <div style={{ padding: "8px 16px", fontSize: "0.78rem", color: "#777", display: "flex", justifyContent: "space-between" }}>
+            <span><b style={{ color: "#111" }}>{list.length}</b> {type === "cherche" ? "besoin(s)" : "professionnel(s)"}</span>
+            <span>{city}</span>
+          </div>
+          <div style={{ padding: "4px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
+            {loading && <p style={{ textAlign: "center", color: "#999", padding: 30 }}>Chargement…</p>}
+            {!loading && list.length === 0 && (
+              <div style={{ textAlign: "center", padding: "50px 20px", color: "#999" }}>
+                <p style={{ fontWeight: 700, color: "#444", marginBottom: 6 }}>Aucune annonce ici</p>
+                <p style={{ fontSize: "0.85rem" }}>{type === "cherche" ? "Soyez le premier à publier votre besoin." : "Aucun professionnel pour ce filtre."}</p>
+              </div>
+            )}
+            {!loading && list.map(pub => (
+              <PubCard key={pub.id} pub={pub} me={auth.userId} onContact={() => contact(pub)} onBoost={() => setBoostTarget(pub)} />
+            ))}
+          </div>
+        </>
+      )}
 
       <button onClick={() => setShowPublish(true)} style={{ position: "fixed", bottom: 84, left: "50%", transform: "translateX(-50%)", zIndex: 40, background: `linear-gradient(135deg,${G.or},#B8860B)`, color: "#111", border: "none", borderRadius: 50, padding: "13px 24px", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer", boxShadow: "0 8px 24px rgba(212,168,67,0.45)", display: "flex", alignItems: "center", gap: 8 }}>
         ＋ Publier une annonce
@@ -15096,6 +15208,7 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
 
       {showPublish && <PublishModal auth={auth} onClose={() => setShowPublish(false)} onPublished={(np) => { setShowPublish(false); setType(np.type); setCat(np.category); setToast("Annonce publiée ✓"); load(); setTimeout(() => setBoostTarget(np), 600); }} />}
       {boostTarget && <BoostModal auth={auth} pub={boostTarget} onClose={() => setBoostTarget(null)} onBoosted={() => { setBoostTarget(null); setToast("Annonce mise en avant ✓"); load(); }} />}
+      {openFiche && <ProFiche auth={auth} pro={openFiche} onClose={() => setOpenFiche(null)} onGoMessages={onGoMessages} onToast={(m) => setToast(m)} isFav={false} onToggleFav={() => {}} />}
       {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
     </div>
   );
