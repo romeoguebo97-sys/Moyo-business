@@ -4449,7 +4449,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
           {tabs.map(t => {
             const active = tab === t.id;
             return (
-              <div key={t.id} onClick={() => { setIsFullscreen(false); setTab(t.id); }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, cursor: "pointer", position: "relative", flex: 1 }}>
+              <div key={t.id} onClick={() => { setIsFullscreen(false); if (t.id === "publier") { onPublish(); } else { setTab(t.id); } }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, cursor: "pointer", position: "relative", flex: 1 }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "5px 8px", borderRadius: 12, background: active ? "rgba(212,168,67,0.1)" : "transparent", transition: "background 0.2s", minWidth: 48 }}>
                   <div style={{ position: "relative" }}>
                     {t.icon(active)}
