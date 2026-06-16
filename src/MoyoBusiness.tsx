@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
 
-const SUPABASE_URL = "https://mcswcapxpruiffzrxfvl.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nx44ipF3_X98flDVXxBZ5A_aztvDdgN";
+const SUPABASE_URL = "https://hqqqlwrphcsouovcrlrs.supabase.co";
+const SUPABASE_KEY = "sb_publishable_wqDI700hCPDXsf5vIdvovg_sAr16IJJ";
 
 // Enregistrement fiable d'un réglage dans app_settings : met à jour la ligne existante (PATCH),
 // et ne l'insère (POST) que si elle n'existe pas. Ne dépend d'aucun "upsert" / contrainte spéciale.
@@ -17,7 +17,7 @@ async function saveSetting(key: string, value: string, token: string): Promise<b
     return true;
   } catch { return false; }
 }
-const APP_URL = "https://www.moyo-congo.com";
+const APP_URL = "https://moyo-business.vercel.app/";
 
 const VILLES = [
   "Brazzaville","Pointe-Noire","Dolisie","Nkayi","Owando",
