@@ -1187,22 +1187,22 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
   const highlights = [
     { t: "Mise en relation personnalisée", d: "Notre équipe vous présente des profils compatibles", svg: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></> },
     { t: "Messages illimités", d: "Discutez sans aucune limite", svg: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /> },
-    { t: "Voir qui vous aime", d: "Découvrez tous vos admirateurs", svg: <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /> },
+    { t: "Voir qui s'intéresse à vous", d: "Découvrez les clients intéressés par vos services", svg: <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /> },
     { t: "Publier des statuts", d: "Partagez vos moments", svg: <><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z" /></> },
   ];
 
   const avantages = [
-    { icon: "match", titre: "Mise en relation personnalisée", desc: "Notre équipe te présente des profils compatibles" },
+    { icon: "match", titre: "Mise en relation personnalisée", desc: "Notre équipe vous présente des professionnels adaptés à vos besoins" },
     { icon: "msg", titre: "Messages illimités", desc: "Discutez avec tous vos contacts, sans aucune limite" },
-    { icon: "eye", titre: "Voir qui t'a liké", desc: "Découvre tous tes admirateurs secrets" },
-    { icon: "visitors", titre: "Voir qui a visité ton profil", desc: "Accède à la liste complète de tes Vues" },
+    { icon: "eye", titre: "Voir qui s'intéresse à vous", desc: "Découvrez les clients intéressés par votre profil" },
+    { icon: "visitors", titre: "Voir qui a visité votre profil", desc: "Accédez à la liste complète de vos visites" },
     { icon: "photo", titre: "Envoi de photos", desc: "Partage des photos dans tes conversations" },
     { icon: "status", titre: "Publier des statuts", desc: "Partage jusqu'à 2 photos visibles 24h" },
     { icon: "star2", titre: "Profil mis en avant", desc: "Apparais en premier dans l'annuaire" },
     { icon: "check2", titre: "Messages lus", desc: "Vois quand tes messages ont été lus" },
-    { icon: "filter", titre: "Filtres avancés", desc: "Filtre par ville, âge, religion" },
+    { icon: "filter", titre: "Filtres avancés", desc: "Filtre par ville et catégorie" },
     { icon: "phone", titre: "Partage tes coordonnées", desc: "Envoie ton numéro ou email librement" },
-    { icon: "gift", titre: "Offrir Premium", desc: "Offre 1 mois de Premium à un match" },
+    { icon: "gift", titre: "Offrir Premium", desc: "Offre 1 mois de Premium à un contact" },
     { icon: "referral", titre: "Parrainer & gagner", desc: "+7 jours offerts pour chaque ami abonné" },
     { icon: "verified", titre: "Profil vérifié", desc: "Badge de confiance visible sur ton profil" },
     { icon: "support", titre: "Support prioritaire", desc: "Assistance rapide 7j/7" },
@@ -2333,7 +2333,7 @@ function Login({ onNav, onAuth }: { onNav: (p: string) => void; onAuth: (a: Auth
   if (tempBanUntil) return <BanScreen until={tempBanUntil} onExpire={() => setTempBanUntil(null)} />;
   if (showForgot) return <AuthLayout onBack={() => onNav("landing")}><ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />{toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}<div style={{ textAlign: "center", marginBottom: 24 }}><div style={{  fontSize: "2rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span></div><h2 style={{  fontSize: "1.4rem", fontWeight: 700, marginTop: 8 }}>Mot de passe oublié</h2></div>{forgotSent ? <div style={{ textAlign: "center" }}><div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(212,168,67,0.08)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><p style={{ color: "#555", fontSize: "0.88rem", marginBottom: 20 }}>Email envoyé ! Vérifie ta boîte mail.</p><Btn variant="ghost" onClick={() => { setShowForgot(false); setForgotSent(false); }}>← Retour à la connexion</Btn></div> : <><Input label="Ton email" type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder="ton@email.com" icon="email" /><Btn variant="primary" onClick={handleForgot} style={{ width: "100%", marginBottom: 12 }}>Envoyer le lien</Btn><div style={{ textAlign: "center" }}><span onClick={() => setShowForgot(false)} style={{ fontSize: "0.85rem", color: "#555", cursor: "pointer" }}>← Retour</span></div></>}</AuthLayout>;
 
-  return <AuthLayout onBack={() => onNav("landing")}><ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />{toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}<div style={{ textAlign: "center", marginBottom: 28 }}><div style={{  fontSize: "2rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span></div><h2 style={{  fontSize: "1.6rem", fontWeight: 700, marginTop: 6 }}>Bon retour !</h2><p style={{ color: "#555", fontSize: "0.85rem", marginTop: 4 }}>Retrouve tes matchs</p></div><Input label="Email" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="ton@email.com" icon="email" /><Input label="Mot de passe" type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="••••••••" icon="lock" /><div style={{ textAlign: "right", marginBottom: 20, marginTop: -8 }}><span onClick={() => setShowForgot(true)} style={{ fontSize: "0.82rem", color: G.rouge, cursor: "pointer", fontWeight: 500 }}>Mot de passe oublié ?</span></div><Btn variant="primary" onClick={handleLogin} loading={loading} style={{ width: "100%" }} disabled={!form.email || !form.password}>Se connecter →</Btn><p style={{ textAlign: "center", marginTop: 20, fontSize: "0.85rem", color: "#555" }}>Pas encore de compte ? <span style={{ color: G.rouge, cursor: "pointer", fontWeight: 600 }} onClick={() => onNav("signup")}>S'inscrire</span></p></AuthLayout>;
+  return <AuthLayout onBack={() => onNav("landing")}><ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />{toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}<div style={{ textAlign: "center", marginBottom: 28 }}><div style={{  fontSize: "2rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span></div><h2 style={{  fontSize: "1.6rem", fontWeight: 700, marginTop: 6 }}>Bon retour !</h2><p style={{ color: "#555", fontSize: "0.85rem", marginTop: 4 }}>Échangez avec vos contacts</p></div><Input label="Email" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="ton@email.com" icon="email" /><Input label="Mot de passe" type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="••••••••" icon="lock" /><div style={{ textAlign: "right", marginBottom: 20, marginTop: -8 }}><span onClick={() => setShowForgot(true)} style={{ fontSize: "0.82rem", color: G.rouge, cursor: "pointer", fontWeight: 500 }}>Mot de passe oublié ?</span></div><Btn variant="primary" onClick={handleLogin} loading={loading} style={{ width: "100%" }} disabled={!form.email || !form.password}>Se connecter →</Btn><p style={{ textAlign: "center", marginTop: 20, fontSize: "0.85rem", color: "#555" }}>Pas encore de compte ? <span style={{ color: G.rouge, cursor: "pointer", fontWeight: 600 }} onClick={() => onNav("signup")}>S'inscrire</span></p></AuthLayout>;
 }
 
 function SignUp({ onNav }: { onNav: (p: string) => void }) {
@@ -3435,7 +3435,7 @@ function AdminDesktopPage() {
             </OffCanvasSection>}
             {configTab === "tarifs" && <OffCanvasSection title="Limites & Quotas">
               {([
-                ["limit_likes_free", "limitLikes" as keyof typeof appConfig, "Likes gratuits/jour", appConfig.limitLikes, "number"],
+                ["limit_likes_free", "limitLikes" as keyof typeof appConfig, "Intérêts gratuits/jour", appConfig.limitLikes, "number"],
                 ["limit_photo_size_mb", "limitPhotoSizeMb" as keyof typeof appConfig, "Taille max photo (Mo)", appConfig.limitPhotoSizeMb, "number"],
               ] as [string, keyof typeof appConfig, string, string, string][]).map(([key, ck, label, value, type]) => (
                 <EditableRow key={key} label={label} value={value} open={editingConfig === key} type={type as "text"|"number"}
@@ -3611,7 +3611,7 @@ function AdminDesktopPage() {
               <OffCanvasSection title="Intervalles de polling (ms)">
                 <div style={{ fontSize: "0.72rem", color: "#888", marginBottom: 8, lineHeight: 1.5 }}>Valeurs en millisecondes. Ex: 8000 = 8s. Min: 3000ms.</div>
                 {([
-                  ["poll_badges_ms", "Badges (likes/vues/matchs/messages)", String(POLL_BADGES_MS)],
+                  ["poll_badges_ms", "Badges (intérêts/vues/mises en relation/messages)", String(POLL_BADGES_MS)],
                   ["poll_admin_badge_ms", "Badge admin (tableau de bord)", String(POLL_ADMIN_BADGE_MS)],
                   ["poll_stats_ms", "Stats tableau de bord", String(POLL_STATS_MS)],
                   ["poll_broadcast_ms", "Broadcasts / diffusions", String(POLL_BROADCAST_MS)],
@@ -3749,7 +3749,7 @@ function AdminNotifPrefs({ auth }: { auth: Auth }) {
         return (
           <div key={a.id} style={{ background: G.creme, borderRadius: 12, padding: "12px 14px", marginBottom: 10 }}>
             <div style={{ fontSize: "0.85rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>{a.name}{a.id === auth.userId ? " (vous)" : ""}</div>
-            {([["signalements", "🚩 Signalements"], ["matchs", "💞 Matchs"], ["mises_relation", "💌 Mises en relation"], ["paiements", "💳 Paiements"]] as [keyof Prefs, string][]).map(([k, label]) => (
+            {([["signalements", "🚩 Signalements"], ["matchs", "🤝 Nouveaux contacts"], ["mises_relation", "💌 Mises en relation"], ["paiements", "💳 Paiements"]] as [keyof Prefs, string][]).map(([k, label]) => (
               <div key={k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0" }}>
                 <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "#444" }}>{label}</div>
                 <SwitchBtn on={p[k]} onToggle={() => toggle(a.id, k)} />
@@ -4158,7 +4158,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
         <SiteInfoConfig auth={auth} group="landing" />
       </OffCanvasSection>
       <OffCanvasSection title="Limites & Quotas">
-        {([["limit_likes_free","limitLikes" as keyof typeof appConfig,"Likes gratuits/jour",appConfig.limitLikes,"number"],["limit_photo_size_mb","limitPhotoSizeMb" as keyof typeof appConfig,"Taille max photo (Mo)",appConfig.limitPhotoSizeMb,"number"]] as [string, keyof typeof appConfig, string, string, string][]).map(([key,ck,label,value,type]) => (
+        {([["limit_likes_free","limitLikes" as keyof typeof appConfig,"Intérêts gratuits/jour",appConfig.limitLikes,"number"],["limit_photo_size_mb","limitPhotoSizeMb" as keyof typeof appConfig,"Taille max photo (Mo)",appConfig.limitPhotoSizeMb,"number"]] as [string, keyof typeof appConfig, string, string, string][]).map(([key,ck,label,value,type]) => (
           <EditableRow key={key} label={label} value={value} type={type as "text"|"number"} open={editingConfig === key} onOpen={() => { setEditingConfig(editingConfig === key ? null : key); setEditingConfigValue(value); }} editValue={editingConfigValue} onEdit={setEditingConfigValue} onSave={async () => { await patch(key, editingConfigValue); setAppConfig(c => ({ ...c, [ck]: editingConfigValue })); setEditingConfig(null); }} />
         ))}
         {([["limit_status_boosts","limitStatusBoosts" as keyof typeof appConfig,"Boosts statut/mois",appConfig.limitStatusBoosts]] as [string, keyof typeof appConfig, string, string][]).map(([key,ck,label,value]) => (
@@ -4241,7 +4241,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
             Valeurs en millisecondes. Ex: 8000 = 8 secondes. Min recommande: 3000ms.
           </div>
           {([
-            ["poll_badges_ms", "Badges (likes/vues/matchs)", String(POLL_BADGES_MS)],
+            ["poll_badges_ms", "Badges (intérêts/vues/mises en relation)", String(POLL_BADGES_MS)],
             ["poll_admin_badge_ms", "Badge admin", String(POLL_ADMIN_BADGE_MS)],
             ["poll_stats_ms", "Stats tableau de bord", String(POLL_STATS_MS)],
             ["poll_broadcast_ms", "Broadcasts", String(POLL_BROADCAST_MS)],
@@ -4487,84 +4487,67 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
         {/* Accordéon */}
         <div style={{ padding: "8px 0" }}>
           {[
-            { title: "Découvrir des profils", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>, items: [
-              "Sur ordinateur et tablette, l'application s'affiche en plein écran avec une barre de navigation sur la gauche (Découvrir, Likes, Vues, Matchs, Messages, Profil, Admin). Sur mobile, la navigation reste en bas de l'écran.",
-              "L'onglet Découvrir propose 3 modes d'affichage : Vue carte (swipe), Vue liste et Plein écran. Sur ordinateur, les modes et les filtres sont dans le panneau à droite de la carte.",
-              "En mode Plein écran, la carte prend toute la hauteur de l'écran pour une immersion maximale. Sur ordinateur, les panneaux latéraux restent visibles avec un effet de verre flouté.",
-              "Les profils défilent en boucle continue - vous parcourez tous les membres disponibles avant de revenir au premier. Aucun profil ne se répète avant que vous ayez tout vu.",
-              "Vous pouvez voir le profil complet de n'importe quel utilisateur gratuitement en appuyant sur les 3 traits (☰) de sa carte puis 'Voir le profil'.",
-              "Filtres disponibles : genre, ville, âge (18-99), religion.",
-              "Seuls les membres Premium génèrent des vues sur les profils qu'ils consultent. Les non-premium peuvent naviguer sans laisser de trace.",
+            { title: "L'Annuaire", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>, items: [
+              "L'onglet Accueil est l'annuaire : il regroupe les besoins publiés (Je cherche) et les services proposés (Je propose). Basculez entre les deux avec le sélecteur en haut.",
+              "Filtrez par ville et par catégorie : BTP, Transport, Restauration, Artisanat, Santé, Beauté, Événementiel, Commerce, Services, Immobilier.",
+              "Appuyez sur une annonce ou une fiche pour voir le détail et contacter directement la personne.",
+              "Les annonces mises en avant apparaissent en tête de liste avec un repère doré.",
             ]},
-            { title: "Menu ☰ - Options sur un profil", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>, items: [
-              "Appuyez une seule fois sur le bouton ☰ d'une carte pour ouvrir le menu. Fonctionne au premier tap sur tous les appareils (iPhone, Android, tablette, ordinateur).",
-              "Le menu s'ouvre depuis le bas de l'écran avec l'avatar et le nom du profil concerné.",
-              "3 options disponibles : Voir le profil (gratuit pour tous), Bloquer (retire définitivement le profil de votre Découvrir), Signaler (envoie un rapport à notre équipe).",
-              "Le menu fonctionne sur chaque profil indépendamment en mode carte, liste et plein écran.",
+            { title: "Fiche professionnelle", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>, items: [
+              "Chaque professionnel a une fiche : nom ou entreprise, métier, catégorie, ville ou zone d'intervention, description et coordonnées de contact.",
+              "Le badge bleu signale un compte vérifié. La note et le nombre d'avis renseignent sur la réputation du professionnel.",
+              "Depuis une fiche, vous pouvez contacter le professionnel, l'ajouter à vos favoris ou le signaler.",
             ]},
-            { title: "Matchs", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>, items: ["Un match se crée automatiquement quand deux personnes se likent mutuellement.", "Sur chaque match, appuyez sur les 3 traits pour accéder aux options : Voir le profil, Envoyer un message, Bloquer ou Annuler le match.", "Annuler un match supprime la conversation, les likes mutuels et les vues. Comme si vous ne vous étiez jamais matchés.", "Avec Premium, vous pouvez voir exactement qui vous a liké et qui a visité votre profil."] },
-            { title: "Mise en relation Moyo", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>, items: ["Tout le monde peut créer et enregistrer sa carte relationnelle (qui vous êtes, ce que vous recherchez). Notre équipe recherche ensuite personnellement la personne qui vous correspond selon vos critères.", "Pour faire une demande : allez sur votre page Profil → appuyez sur le bouton rouge 'Demander une mise en relation' → remplissez votre carte relationnelle et enregistrez → appuyez sur 'Envoyer ma demande'. L'envoi est réservé aux membres Premium : si vous ne l'êtes pas encore, l'option de passer Premium s'affiche à ce moment-là.", "Une fois votre demande envoyée, notre équipe analyse votre profil et vos critères pour trouver la personne qui vous correspond le mieux.", "Quand une proposition vous est faite, un modal apparaît avec la photo, le nom, l'âge et la ville de la personne. Vous choisissez d'Accepter ou de Refuser.", "Si les deux personnes acceptent → un match est créé automatiquement et une conversation s'ouvre. Si l'une refuse → la proposition est annulée.", "La proposition expire automatiquement après le délai indiqué si vous ne répondez pas. Vous pouvez en faire une nouvelle depuis votre Profil."] },
-            { title: "Messages", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, items: [`Les conversations entre clients et professionnels sont gratuites et illimitées. Chaque conversation affiche son propre badge de messages non lus.`, "Chaque message affiche l'heure d'envoi. Avec Premium : coches grises = reçu, coches bleues = lu.", "Un point vert indique que la personne est en ligne. Premium : envoi de photos, offrir Premium via le bouton cadeau.", "Répondre à un message : appuyez longuement sur un message - Répondre. Un bandeau apparaît au-dessus du champ de saisie avec un aperçu du message cité. Appuyez sur X pour annuler.", "Supprimer un message : appuyez longuement - Supprimer pour tous (efface le message pour vous et votre interlocuteur) ou Supprimer pour moi (masque le message uniquement de votre côté).", "Appuyez sur la photo de profil de votre match en haut de la conversation pour voir sa fiche complète.", "Modifier un message : appuyez longuement sur l'un de vos messages - Modifier (possible dans les 15 minutes). Le message affichera la mention 'modifié'.", "Moyo encourage les échanges respectueux et bienveillants. Les mots doux, les compliments sincères et le respect mutuel sont au coeur de notre communauté."] },
-            { title: "Mon Profil", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>, items: ["Modifiez votre photo, prénom, âge, ville, religion et bio via l'engrenage. Le bouton visible/invisible permet de disparaître de Découvrir.", "Lors de l'upload de photo, un outil de recadrage s'ouvre : glissez pour repositionner et zoomez pour ajuster. Le rectangle montre la zone visible sur les cartes, le cercle doré montre l'avatar rond.", "Utilisez Voir mon profil pour voir exactement comment les autres vous voient (mode carte et liste).", "Demandez la vérification de votre compte pour obtenir le badge bleu. Gratuit, vérification sous 24h via WhatsApp."] },
-            { title: "Bloquer et Signaler", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>, items: ["Appuyez sur les 3 traits d'un profil pour accéder aux options. Bloquer fait disparaître le profil définitivement. Signaler envoie un rapport à notre équipe sous 24h.", "Les profils bloqués sont gérables depuis votre Liste noire dans le Profil.", "Moyo dispose d'une modération automatique : les insultes, arnaques et contenus inappropriés sont détectés et bloqués avant envoi. Tout incident est signalé automatiquement à l'équipe.", "Partage de contacts : pour ta sécurité, le partage d'un numéro, d'un réseau social ou d'un lien n'est pas autorisé dans les messages ni dans ton profil (bio, nom…) en compte gratuit. Passe les premiers échanges sur Moyo ; l'abonnement Premium débloque le partage de coordonnées en conversation privée.", "Sanctions : en cas de non-respect des règles, un compte peut être averti, suspendu temporairement (avec un décompte avant reconnexion automatique) ou banni définitivement."] },
-            { title: "Premium - " + PREMIUM_PRICE_FCFA.toLocaleString() + " FCFA / mois", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, items: [
-              "Avantages : messages illimités, likes illimités, envoi de photos, confirmations de lecture, voir qui vous a liké et visité votre profil, offrir Premium à un match.",
-              "Paiement via MTN Mobile Money ou Airtel Money - les deux opérateurs sont disponibles.",
-              "Comment payer : appuyez sur 'Passer Premium' → choisissez MTN Mobile Money → appuyez sur le bouton jaune pour composer automatiquement le code de paiement sur votre téléphone → validez le paiement → entrez le numéro de transaction reçu par SMS → appuyez sur 'J'ai payé'.",
-              "Le numéro de transaction (ID) est reçu par SMS de votre opérateur après validation du paiement (ex: PP260523.2232.A52074 pour Airtel, 7753031542 pour MTN). Entrez-le exactement tel quel dans le champ prévu.",
-              "L'activation Premium se fait sous 15 minutes. Vous recevrez une notification dans l'application dès l'activation.",
-              "Après activation, l'utilisateur doit actualiser l'application pour que les changements prennent effet. Le bouton Premium sur sa page Profil devient doré et affiche le compteur de jours restants.",
-              "🎁 OFFRIR Premium à quelqu'un : si vous êtes Premium et que la personne avec qui vous discutez ne l'est pas, un bouton cadeau doré 🎁 apparaît en haut de la conversation. Appuyez dessus pour lui offrir un mois de Premium (paiement via Mobile Money). C'est un beau geste pour quelqu'un qui vous plaît.",
-              "💝 DEMANDER Premium : si vous n'êtes pas Premium et que votre interlocuteur l'est, un bouton 💝 (rouge) apparaît en haut de la conversation. Il permet de lui demander gentiment de vous offrir l'abonnement. Une fenêtre de confirmation s'ouvre avant l'envoi.",
-              "La demande de Premium est limitée à 2 fois par mois et par conversation, pour rester courtoise. La personne reçoit alors un message avec un bouton lui permettant de vous offrir Premium en un seul clic, si elle le souhaite. Elle reste entièrement libre d'accepter ou non.",
-            ]},
-            { title: "Parrainage - 7 jours offerts", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>, items: [
-              "Le parrainage est notre programme de récompense : parrainez vos amis et gagnez des jours Premium gratuits.",
-              "Comment parrainer : allez sur votre page Profil → appuyez sur le bouton vert 'Parrainer un ami' → partagez votre lien unique par WhatsApp, SMS ou tout autre canal.",
-              "Récompense : pour chaque ami qui s'inscrit via votre lien ET passe Premium, vous gagnez automatiquement 7 jours Premium offerts sur votre compte.",
-              "Les 7 jours sont ajoutés à votre Premium actuel ou démarrent immédiatement si vous n'êtes pas abonné.",
-              "Pas de limite : plus vous parrainez, plus vous cumulez. 3 filleuls Premium = 21 jours offerts.",
-              "Votre lien de parrainage est unique et permanent, disponible depuis votre page Profil.",
-            ]},
-            { title: "Statuts", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, items: [
-              "Les statuts sont réservés aux membres Premium. Ils apparaissent en haut de l'onglet Messages.",
-              "Pour publier un statut : appuyez sur votre avatar dans la barre des statuts en haut de l'onglet Messages → choisissez une photo (photos uniquement).",
-              "Chaque membre Premium peut publier jusqu'à 2 photos actives en même temps sur 24h.",
-              "Les statuts expirent automatiquement après 24h. Vous pouvez aussi supprimer un statut manuellement.",
-              "Appuyez sur le statut d'un autre membre pour le voir en plein écran.",
-              "Sur votre propre statut, appuyez sur le compteur Vues ou Likes pour voir exactement qui a vu ou aimé votre statut.",
+            { title: "Publier une annonce", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>, items: [
+              "Appuyez sur « + Publier » dans la barre du bas pour ouvrir le formulaire de publication.",
+              "Choisissez « Je cherche un professionnel » (publier un besoin) ou « Je propose mes services » (publier une offre).",
+              "Sélectionnez une catégorie, ajoutez un titre clair, une description, un budget indicatif et votre ville, puis publiez.",
+              "Votre annonce apparaît aussitôt dans l'annuaire et reste visible par les autres membres jusqu'à ce que vous la retiriez.",
             ]},
             { title: "Messagerie", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, items: [
-              "Sur ordinateur et tablette, la messagerie s'affiche en deux colonnes : la liste de vos conversations à gauche, et le chat actif à droite. Cliquez sur une conversation pour l'ouvrir sans quitter la liste.",
-              "Sur mobile, le comportement reste identique : appuyez sur une conversation pour l'ouvrir en plein écran.",
-              "Les statuts apparaissent en haut de la colonne gauche (ou en haut de l'écran sur mobile).",
+              "Lorsqu'un client et un professionnel entrent en contact, une conversation s'ouvre dans l'onglet Messages.",
+              "Les échanges sont gratuits et illimités. Chaque conversation affiche son propre badge de messages non lus.",
+              "Répondre, modifier (dans les 15 minutes) ou supprimer un message : faites un appui long sur le message concerné.",
+              "Un point vert indique qu'un membre est en ligne. Avec Premium : envoi de photos et confirmations de lecture (coches bleues = lu).",
+              "Appuyez sur l'avatar en haut de la conversation pour ouvrir la fiche complète de votre interlocuteur.",
             ]},
-            { title: "Profil", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>, items: [
-              "Sur ordinateur et tablette, votre page Profil s'affiche en deux colonnes 50/50 : le menu à gauche, le contenu à droite. Cliquez sur un item du menu pour afficher son contenu à droite sans quitter la page.",
-              "Menu disponible : Mon profil, Modifier mon profil, Modifier ma photo, Premium, Demander une mise en relation (création de la carte ouverte à tous, envoi réservé aux membres Premium), Parrainer un ami, Vérification, Profil visible/invisible, Liste noire, Mode sombre, Noter l'application, Voir mon profil, Inviter un ami, Se déconnecter, Supprimer mon compte.",
-              "Sur mobile, tout s'affiche verticalement dans une seule colonne, comme avant.",
+            { title: "Mon profil professionnel", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>, items: [
+              "Renseignez votre catégorie et votre métier à l'inscription, ou modifiez-les depuis Profil puis Modifier mon profil.",
+              "Le champ métier propose des suggestions selon la catégorie choisie ; vous pouvez aussi saisir un métier personnalisé.",
+              "Ajoutez le nom de votre entreprise (facultatif), votre ville ou zone d'intervention, une description et une photo.",
+              "Le bouton visible/invisible permet d'apparaître ou non dans l'annuaire à tout moment.",
             ]},
-            { title: "Likes", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>, items: [
-              "L'onglet Likes (coeur) affiche les profils qui vous ont liké. Le badge rouge se met à jour en temps réel.",
-              "En Premium, vous voyez les cartes complètes des personnes qui vous ont liké. En gratuit, vous voyez uniquement le compteur.",
-              "Cliquez sur un profil pour le voir en détail et liker en retour - ce qui crée un match automatiquement.",
-              "Si vous retirez un like, il disparait aussi de la liste de l'autre personne instantanément.",
+            { title: "Vérification", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>, items: [
+              "Demandez la vérification de votre compte pour obtenir le badge bleu, gage de confiance pour vos clients.",
+              "La vérification est gratuite et traitée sous 24h via WhatsApp.",
             ]},
-            { title: "Vues", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>, items: [
-              "L'onglet Vues (oeil) affiche les profils qui ont visité votre profil. Le badge se met à jour en temps réel.",
-              "En Premium, vous voyez les cartes complètes des personnes qui ont consulté votre profil.",
-              "Important : seuls les membres Premium génèrent des vues. Un membre gratuit qui consulte votre profil n'apparait pas dans vos Vues.",
-              "Vue carte ou liste disponible via le bouton en haut à droite.",
+            { title: "Premium & mise en avant - " + PREMIUM_PRICE_FCFA.toLocaleString() + " FCFA / mois", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, items: [
+              "Premium débloque : messages illimités, envoi de photos, confirmations de lecture et la mise en avant de vos annonces.",
+              "Mettre une annonce en avant la place en tête de l'annuaire avec un repère doré, pour gagner en visibilité auprès des clients.",
+              "Paiement via MTN Mobile Money ou Airtel Money (Congo), ou par carte Visa/Mastercard (diaspora).",
+              "Comment payer : appuyez sur « Passer Premium » → choisissez votre moyen de paiement → suivez les instructions → entrez le numéro de transaction reçu par SMS → « J'ai payé ». L'activation se fait sous 15 minutes.",
             ]},
-      { title: "Mode sombre", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>, items: ["Dans Profil, utilisez le bouton Mode clair/sombre pour basculer entre les deux thèmes. Votre choix est mémorisé automatiquement.", "Le mode sombre s'applique à toutes les pages sauf la page d'accueil."] },
-      { title: "Passer Premium", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, items: [
-        "Appuyez sur 'Passer Premium' depuis n'importe quel écran.",
-        "🇨🇬 Congo - Payez avec MTN MoMo ou Airtel Money : effectuez le paiement sur votre téléphone, entrez le numéro de transaction reçu par SMS, puis appuyez sur 'J'ai payé'. L'activation se fait sous 15 minutes.",
-        "🌍 Diaspora - Payez par carte : appuyez sur le bouton vert 'Visa / Mastercard'. Vous êtes redirigé vers une page de paiement sécurisée Stripe. Entrez votre carte bancaire et confirmez. L'activation est automatique et immédiate.",
-        "Une fois Premium activé, actualisez l'application pour que le statut soit mis à jour.",
-      ]},
-      { title: "Sécurité et confidentialité", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, items: ["Moyo est réservé aux personnes majeures de 18 ans et plus.", "La modération automatique bloque les insultes, menaces, arnaques et contenus inappropriés avant envoi. Le message ne part pas, un avertissement s'affiche, et un signalement est automatiquement transmis à notre équipe.", "Si votre comportement enfreint les règles, un administrateur peut vous envoyer un avertissement officiel. Une notification apparaît à votre prochaine connexion. Après plusieurs avertissements, le compte peut être banni.", "Pour supprimer votre compte, rendez-vous dans Profil puis Supprimer mon compte. Cette action est définitive et irréversible."] },
-      { title: "Assistant Moyo", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 10 4a2 2 0 0 1 2-2z"/><path d="M5 14v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4"/></svg>, items: ["L'icône verte en forme de robot à côté du bouton Guide ouvre l'Assistant Moyo.", "Il propose deux options : Besoin d'aide (répond instantanément à vos questions sur l'app) et Signaler un problème (comportement abusif, arnaque, harcèlement).", "Les signalements sont traités par notre équipe sous 24h."] },
+            { title: "Favoris", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>, items: [
+              "L'onglet Favoris regroupe les professionnels que vous avez enregistrés.",
+              "Ajoutez ou retirez un favori depuis une fiche, pour retrouver rapidement les professionnels qui vous intéressent.",
+            ]},
+            { title: "Bloquer et signaler", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>, items: [
+              "Depuis une fiche ou une conversation, vous pouvez bloquer un membre (il disparaît de votre vue) ou le signaler à notre équipe.",
+              "La modération automatique détecte et bloque insultes, arnaques et contenus inappropriés avant l'envoi d'un message.",
+              "Les comptes qui ne respectent pas les règles peuvent être avertis, suspendus temporairement ou bannis définitivement.",
+            ]},
+            { title: "Mode sombre", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>, items: [
+              "Dans Profil, basculez entre le thème clair et le thème sombre. Votre choix est mémorisé automatiquement.",
+              "Le mode sombre s'applique à toute l'application, sauf la page d'accueil.",
+            ]},
+            { title: "Sécurité et confidentialité", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, items: [
+              "Vos coordonnées ne sont partagées qu'avec les membres que vous contactez vous-même.",
+              "Pour supprimer votre compte : Profil puis Supprimer mon compte. Cette action est définitive et irréversible.",
+            ]},
+            { title: "Assistant Moyo", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 10 4a2 2 0 0 1 2-2z"/><path d="M5 14v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4"/></svg>, items: [
+              "L'icône verte en forme de robot, à côté du bouton Guide, ouvre l'Assistant Moyo.",
+              "Deux options : Besoin d'aide (réponses à vos questions sur l'application) et Signaler un problème. Les signalements sont traités sous 24h.",
+            ]},
           ].map((s, i) => (
             <div key={i} style={{ borderBottom: `1px solid ${G.gris}` }}>
               <div onClick={() => setOpenGuideSection(openGuideSection === i ? null : i)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", cursor: "pointer", background: openGuideSection === i ? "rgba(212,168,67,0.03)" : "transparent" }}>
@@ -4620,7 +4603,7 @@ const premiumConversionSlides = [
   },
   {
     id: 2,
-    title: "Découvre qui t'apprécie",
+    title: "Voir qui s'intéresse à vous",
     description: "Gagne du temps en voyant les personnes déjà intéressées par ton profil.",
     buttonText: "Passer à Premium",
     icon: (
@@ -4706,7 +4689,7 @@ const premiumAdviceSlides = [
   {
     id: 3,
     title: "Écris une bio simple",
-    description: "Quelques phrases sincères suffisent pour montrer qui tu es et ce que tu recherches.",
+    description: "Quelques phrases suffisent pour présenter votre activité et ce que vous proposez.",
     buttonText: "Compléter ma bio",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -4735,7 +4718,7 @@ const premiumAdviceSlides = [
     id: 5,
     title: "Commence avec attention",
     description: "Un message personnalisé fonctionne mieux qu'un simple \"salut\".",
-    buttonText: "Voir mes matchs",
+    buttonText: "Voir mes mises en relation",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -5297,7 +5280,7 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
     if (!file) return;
     if (!auth.isPremium) { onShowPremium("Les statuts sont réservés aux membres Premium."); return; }
     const hasRealMatch = convs.some(c => c.id !== "__support__" && c.partner?.id);
-    if (!hasRealMatch) { setToast({ msg: "Tu dois avoir au moins un match pour publier un statut.", type: "error" }); return; }
+    if (!hasRealMatch) { setToast({ msg: "Vous devez avoir au moins une mise en relation pour publier un statut.", type: "error" }); return; }
     setStatusUploading(true);
     try {
       const now = new Date().toISOString();
@@ -5496,7 +5479,7 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
         setToast({ msg: "Réponse envoyée à l'équipe Moyo.", type: "success" });
       } else {
         const match = getMatchWithUser(st.user_id);
-        if (!match) { setToast({ msg: "Vous devez avoir un match actif pour répondre à ce statut.", type: "error" }); setStatusActionLoading(false); return; }
+        if (!match) { setToast({ msg: "Vous devez avoir une mise en relation active pour répondre à ce statut.", type: "error" }); setStatusActionLoading(false); return; }
         const prefix = `[↩ Statut Moyo : ${st.caption || "Photo"}]\n`;
         await sb.insert<Message>(auth.token, "messages", { match_id: match.id, sender_id: auth.userId, content: prefix + content, is_read: false });
         setStatusReplyText("");
@@ -5722,8 +5705,8 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
       for (const id of allIds) await sb.delete(auth.token, "messages", `?match_id=eq.${id}`);
       await sb.delete(auth.token, "matches", `?user1=eq.${auth.userId}&user2=eq.${partnerId}`);
       await sb.delete(auth.token, "matches", `?user1=eq.${partnerId}&user2=eq.${auth.userId}`);
-      setToast({ msg: "Match annulé.", type: "success" });
-    } catch { setToast({ msg: "Impossible d'annuler le match.", type: "error" }); }
+      setToast({ msg: "Mise en relation annulée.", type: "success" });
+    } catch { setToast({ msg: "Impossible d'annuler la mise en relation.", type: "error" }); }
     setConfirmUnmatchPartner(false); setPartnerMenuOpen(false); setShowPartnerProfile(false);
     closeChat();
     setPartnerActionLoading(false);
@@ -6059,14 +6042,14 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       {nouveau ? (
                         <div style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(212,168,67,0.1)", color: G.rouge, borderRadius: 10, padding: "1px 8px", fontSize: "0.68rem", fontWeight: 700, flexShrink: 0 }}>
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill={G.rouge} stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                          Nouveau match · Dis bonjour !
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill={G.rouge} stroke="none"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM10 5h4v2h-4z"/></svg>
+                          Nouvelle opportunité · Présentez-vous !
                         </div>
                       ) : (
                       <div style={{ fontSize: "0.77rem", color: (c.unreadCount || 0) > 0 ? G.rouge : "#888", fontWeight: (c.unreadCount || 0) > 0 ? 600 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, minWidth: 0 }}>
                         {(() => {
                           const lm = c.lastMsg; const ct = lm?.content;
-                          if (!ct) return "Dis bonjour !";
+                          if (!ct) return "Présentez-vous !";
                           const isPhoto = ct.startsWith("[img]") && ct.endsWith("[/img]");
                           if (isPhoto || lm?.is_destroyed || lm?.is_view_once) {
                             let label = "Photo";
@@ -6981,7 +6964,7 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
             <p style={{ fontSize: "0.85rem", color: "#666", lineHeight: 1.6, marginBottom: 22 }}>La conversation, les messages et les likes mutuels seront supprimés. Cette action est irréversible et la personne n'est pas notifiée.</p>
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => setConfirmUnmatchPartner(false)} disabled={partnerActionLoading} style={{ flex: 1, padding: "12px", borderRadius: 50, border: `2px solid ${G.gris}`, background: G.blanc, color: "#555", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>Retour</button>
-              <button onClick={unmatchPartnerNow} disabled={partnerActionLoading} style={{ flex: 1, padding: "12px", borderRadius: 50, border: "none", background: G.rouge, color: "#fff", fontWeight: 700, fontSize: "0.85rem", cursor: partnerActionLoading ? "wait" : "pointer" }}>{partnerActionLoading ? "..." : "Annuler le match"}</button>
+              <button onClick={unmatchPartnerNow} disabled={partnerActionLoading} style={{ flex: 1, padding: "12px", borderRadius: 50, border: "none", background: G.rouge, color: "#fff", fontWeight: 700, fontSize: "0.85rem", cursor: partnerActionLoading ? "wait" : "pointer" }}>{partnerActionLoading ? "..." : "Annuler la mise en relation"}</button>
             </div>
           </div>
         </div>
@@ -8240,7 +8223,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                   </span>
                 </div>
                 <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.75)" }}>
-                  {isExpired ? "Réabonnez-vous pour retrouver tous vos avantages" : "Messages illimités · Likes illimités · Voir qui vous like"}
+                  {isExpired ? "Réabonnez-vous pour retrouver tous vos avantages" : "Messages illimités · Contacts illimités · Voir qui s'intéresse à vous"}
                 </div>
               </div>
               <div style={{ fontSize: "1.2rem", fontWeight: 800, color: G.or, marginLeft: 12, flexShrink: 0 }}>{PREMIUM_PRICE_FCFA.toLocaleString()}<br/><span style={{ fontSize: "0.65rem", fontWeight: 600 }}>FCFA/mois</span></div>
@@ -8446,7 +8429,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>Profil {isVisible ? "visible" : "invisible"}</div>
-              <div style={{ fontSize: "0.82rem", color: "#888", fontWeight: 400, marginTop: 2 }}>{isVisible ? "Tu apparais dans Découvrir" : "Tu n'apparais plus dans Découvrir"}</div>
+              <div style={{ fontSize: "0.82rem", color: "#888", fontWeight: 400, marginTop: 2 }}>{isVisible ? "Vous apparaissez dans l'Annuaire" : "Vous n'apparaissez plus dans l'Annuaire"}</div>
             </div>
           </div>
           <div onClick={async () => {
@@ -8547,7 +8530,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                 </div>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>Notifications</div>
-                  <div style={{ fontSize: "0.82rem", color: "#888", marginTop: 2 }}>{on ? "Activées" : "Likes, matchs et messages"}</div>
+                  <div style={{ fontSize: "0.82rem", color: "#888", marginTop: 2 }}>{on ? "Activées" : "Intérêts, mises en relation et messages"}</div>
                 </div>
               </div>
               <div onClick={async () => {
@@ -8951,7 +8934,7 @@ function PaymentCard({ p, isPending, isApproved, isRejected, onActivate, onRejec
                 : <svg viewBox="0 0 120 60" width="36" height="18" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="60" fill="#e30613" rx="4"/><text x="60" y="42" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="26" fill="white">AIRTEL</text></svg>
               }
               {p.operator === "Carte" || p.operator === "Stripe" ? "Carte bancaire" : p.operator}
-              {p.gift_for && <span style={{ background: "rgba(212,168,67,0.15)", color: "#B8860B", borderRadius: 50, padding: "2px 8px", fontSize: "0.65rem", fontWeight: 700 }}>Cadeau pour {p.gift_for_name || "un match"}</span>}
+              {p.gift_for && <span style={{ background: "rgba(212,168,67,0.15)", color: "#B8860B", borderRadius: 50, padding: "2px 8px", fontSize: "0.65rem", fontWeight: 700 }}>Cadeau pour {p.gift_for_name || "un contact"}</span>}
             </div>
             <div style={{ fontSize: "0.7rem", color: "#888" }}>{new Date(p.created_at).toLocaleString("fr-FR")} · {formatMoney(p.amount, paymentCurrency(p))}</div>
             <div style={{ fontSize: "0.62rem", color: "#bbb", fontFamily: "monospace", marginTop: 2 }}>{p.user_id}</div>
@@ -9035,7 +9018,7 @@ function logAdminAction(token: string, adminId: string, adminName: string, actio
 function categorizeAction(action: string): string {
   const a = (action || "").toLowerCase();
   if (a.includes("proposition")) return "Propositions";
-  if (a.includes("match")) return "Matchs";
+  if (a.includes("match")) return "Mises en relation";
   if (a.includes("mise en relation") || a.includes("demande")) return "Mises en relation";
   if (a.includes("avertissement")) return "Avertissements";
   if (a.includes("diffus") || a.includes("broadcast")) return "Diffusions";
@@ -9366,7 +9349,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
   // ── SONDAGES ──
   const DEFAULT_SURVEY_QUESTIONS = [
     { id: "q1", text: "Êtes-vous satisfait(e) de votre expérience sur Moyo ?", type: "single", options: ["Très satisfait(e)", "Satisfait(e)", "Moyen", "Insatisfait(e)"] },
-    { id: "q2", text: "Quelles fonctionnalités utilisez-vous le plus ?", type: "multi", options: ["Découvrir", "Messagerie", "Statuts", "Mise en relation", "Premium"] },
+    { id: "q2", text: "Quelles fonctionnalités utilisez-vous le plus ?", type: "multi", options: ["Annuaire", "Messagerie", "Statuts", "Mise en relation", "Premium"] },
     { id: "q3", text: "Recommanderiez-vous Moyo à un ami ?", type: "single", options: ["Oui, sûrement", "Peut-être", "Non"] },
   ];
   const [surveys, setSurveys] = useState<any[]>([]);
@@ -10284,7 +10267,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     { id: "t6", category: "Sécurité", title: "Sécurité - Signalement", content: "Merci pour votre signalement. Notre équipe va l'examiner dans les plus brefs délais. Nous vous tiendrons informé(e) si nécessaire." },
     { id: "t7", category: "Sécurité", title: "Sécurité - Photo non conforme", content: "Votre photo de profil ne respecte pas nos conditions. Merci d'utiliser une photo claire de votre visage, sinon votre compte pourra être suspendu." },
     { id: "t8", category: "Fonctionnalités", title: "Fonctionnalité - Explication", content: "Cette fonctionnalité vous permet de [description]. N'hésitez pas si vous avez d'autres questions !" },
-    { id: "t9", category: "Fonctionnalités", title: "Fonctionnalité - Matchs", content: "Pour discuter avec quelqu'un, likez son profil. Si la personne vous like en retour, le match se débloque automatiquement !" },
+    { id: "t9", category: "Fonctionnalités", title: "Fonctionnalité - Mises en relation", content: "Pour échanger avec un professionnel, contactez-le depuis sa fiche. La conversation s'ouvre automatiquement dans Messages." },
     { id: "t10", category: "Signalements", title: "Signalement - Suivi", content: "Votre signalement a bien été pris en compte. Merci de contribuer à la sécurité de la communauté Moyo." },
     { id: "t11", category: "Mise en avant", title: "Mise en avant - Validée", content: "Votre demande de mise en avant a été acceptée ! Votre profil apparaîtra dans les Statuts Moyo pendant 24h." },
     { id: "t12", category: "Autre", title: "Autre - Remerciement", content: "Merci beaucoup de nous avoir contactés. Belle journée sur Moyo ! 💛" },
@@ -11930,7 +11913,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {([
                     ["Membres total", "Nombre total de comptes créés sur la plateforme."],
-                    ["Matchs", "Nombre de paires qui se sont mutuellement likées."],
+                    ["Mises en relation", "Nombre de mises en relation établies."],
                     ["Messages", "Volume total de messages échangés."],
                     ["Signalements", "Nombre de signalements reçus toutes sources confondues."],
                     ["Nouveaux membres", "Inscriptions du jour en cours."],
@@ -12357,11 +12340,11 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   {([
                     ["Accès", "Le bouton burger ☰ se trouve à droite du bouton 'Aide' dans la barre du haut. ⚠️ Il est désormais réservé au Super Admin : les admins simples ne le voient pas."],
                     ["Règles - Switch même genre", "Vert = bloqué (Homme→Homme et Femme→Femme interdits). Rouge = ouvert (tous peuvent liker tous). Sauvegarde instantanée."],
-                    ["Textes des modals", "6 modals personnalisables : message même genre Homme/Femme, titre et sous-titre du match, message Premium, message likes épuisés. Cliquer sur un modal pour éditer."],
-                    ["Limites & Quotas", "Likes gratuits/jour, messages gratuits/match, taille max des photos, message de bienvenue après match. Modifier sans redéployer."],
+                    ["Textes des modals", "6 modals personnalisables : message même genre Homme/Femme, titre et sous-titre de la mise en relation, message Premium, message intérêts épuisés. Cliquer sur un modal pour éditer."],
+                    ["Limites & Quotas", "Intérêts gratuits/jour, messages gratuits/mise en relation, taille max des photos, message de bienvenue après mise en relation. Modifier sans redéployer."],
                     ["Prix & Abonnement", "Prix Premium en FCFA et durée en jours. ⚠️ Le prix modifie les boutons de paiement. La durée s'applique aux nouveaux abonnements uniquement."],
                     ["Fonctionnalités on/off", "Activer/désactiver réellement les Statuts, le Cadeau Premium et l'Assistant IA dans toute l'app. Switch vert = actif, rouge = désactivé. La modification prend effet au prochain chargement de l'app."],
-                    ["🔔 Notifications admin", "Pour chaque admin, choisir les notifications push qu'il reçoit : Signalements, Matchs, Paiements. Ex : activer 'Paiements' pour la personne qui gère les paiements → elle est prévenue à chaque nouveau paiement, même app fermée."],
+                    ["🔔 Notifications admin", "Pour chaque admin, choisir les notifications push qu'il reçoit : Signalements, Mises en relation, Paiements. Ex : activer 'Paiements' pour la personne qui gère les paiements → elle est prévenue à chaque nouveau paiement, même app fermée."],
                     ["💳 Moyens de paiement", "Couper rapidement un moyen de paiement en cas de problème (MTN, Airtel, Visa/Mastercard). Une fois coupé, il apparaît grisé et 'Temporairement indisponible' partout (achat, cadeau, diaspora)."],
                     ["🔴 Mode maintenance", "Active un écran de maintenance pour tous les utilisateurs. Seuls les admins (via ?admin=1 ou session admin active) peuvent toujours accéder au site. Personnaliser le message depuis le burger."],
                     ["Gestion des admins", "Section visible uniquement par le Super Admin. Permet de nommer Admin (accès sans Paiements), Super Admin (accès total) ou retirer les droits. Entrez l'email de l'utilisateur dans le modal de confirmation."],
@@ -12528,7 +12511,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <div data-admgrid="main" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10, marginBottom: 16 }}>
                 {([
                   ["Membres total", stats.users, G.rouge, <IcoUsers key="u"/>],
-                  ["Matchs", stats.matches, "#8e44ad", <svg key="m" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>],
+                  ["Mises en relation", stats.matches, "#8e44ad", <svg key="m" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>],
                   ["Messages", stats.messages, "#2980b9", <svg key="ms" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>],
                   ["Signalements", stats.reports, "#e67e22", <IcoAlert key="a"/>],
                 ] as [string, number, string, React.ReactNode][]).map(([label, value, color, icon]) => (
