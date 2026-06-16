@@ -139,7 +139,7 @@ let POLL_ADMIN_BADGE_MS = 5000;   // Badge admin
 let POLL_STATS_MS = 60000;        // Stats tableau de bord
 let POLL_BROADCAST_MS = 60000;    // Broadcasts
 let POLL_SUPPORT_MS = 6000;       // Messages support
-const FREE_LIMITS = { likes: 5, statusBoosts: 2 }; // valeurs par défaut, écrasées par app_settings
+const FREE_LIMITS = { statusBoosts: 2 }; // valeurs par défaut, écrasées par app_settings
 const STATUS_LIMIT = 2;
 const LIFETIME_PREMIUM_UNTIL = "2099-12-31T23:59:59.000Z";
 let PREMIUM_30_DAYS_MS = 31 * 24 * 60 * 60 * 1000; // valeur par défaut, écrasée par app_settings
@@ -246,7 +246,6 @@ fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(limit_likes_free,limit_statu
   if (map["landing_title_highlight"]) LANDING_TITLE_HIGHLIGHT = map["landing_title_highlight"];
   if (map["landing_title_end"]) LANDING_TITLE_END = map["landing_title_end"];
   if (map["landing_slogan"]) LANDING_SLOGAN = map["landing_slogan"];
-  if (map["limit_likes_free"]) FREE_LIMITS.likes = parseInt(map["limit_likes_free"]) || 5;
     if (map["limit_status_boosts"]) FREE_LIMITS.statusBoosts = parseInt(map["limit_status_boosts"]) || 2;
   if (map["premium_duration_days"]) PREMIUM_30_DAYS_MS = (parseInt(map["premium_duration_days"]) || 31) * 24 * 60 * 60 * 1000;
   if (map["premium_price_fcfa"]) PREMIUM_PRICE_FCFA = parseInt(map["premium_price_fcfa"]) || 3500;
@@ -1195,7 +1194,6 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
   const avantages = [
     { icon: "match", titre: "Mise en relation personnalisée", desc: "Notre équipe te présente des profils compatibles" },
     { icon: "msg", titre: "Messages illimités", desc: "Discutez avec tous vos contacts, sans aucune limite" },
-    { icon: "heart", titre: "Likes illimités", desc: `Like sans limite (gratuit = ${FREE_LIMITS.likes}/jour)` },
     { icon: "eye", titre: "Voir qui t'a liké", desc: "Découvre tous tes admirateurs secrets" },
     { icon: "visitors", titre: "Voir qui a visité ton profil", desc: "Accède à la liste complète de tes Vues" },
     { icon: "photo", titre: "Envoi de photos", desc: "Partage des photos dans tes conversations" },
@@ -4208,7 +4206,6 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
               "En mode Plein écran, la carte prend toute la hauteur de l'écran pour une immersion maximale. Sur ordinateur, les panneaux latéraux restent visibles avec un effet de verre flouté.",
               "Les profils défilent en boucle continue - vous parcourez tous les membres disponibles avant de revenir au premier. Aucun profil ne se répète avant que vous ayez tout vu.",
               "Vous pouvez voir le profil complet de n'importe quel utilisateur gratuitement en appuyant sur les 3 traits (☰) de sa carte puis 'Voir le profil'.",
-              `Compte gratuit : ${FREE_LIMITS.likes} likes par jour. Le compteur ❤️ X/${FREE_LIMITS.likes} s'affiche en haut à côté de 'Découvrir' et se met à jour en temps réel. Premium : likes illimités, pas de compteur.`,
               "Filtres disponibles : genre, ville, âge (18-99), religion.",
               "Seuls les membres Premium génèrent des vues sur les profils qu'ils consultent. Les non-premium peuvent naviguer sans laisser de trace.",
             ]},
@@ -5438,8 +5435,6 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
       for (const id of allIds) await sb.delete(auth.token, "messages", `?match_id=eq.${id}`);
       await sb.delete(auth.token, "matches", `?user1=eq.${auth.userId}&user2=eq.${partnerId}`);
       await sb.delete(auth.token, "matches", `?user1=eq.${partnerId}&user2=eq.${auth.userId}`);
-      await sb.delete(auth.token, "likes", `?from_user=eq.${auth.userId}&to_user=eq.${partnerId}`);
-      await sb.delete(auth.token, "likes", `?from_user=eq.${partnerId}&to_user=eq.${auth.userId}`);
       setToast({ msg: "Match annulé.", type: "success" });
     } catch { setToast({ msg: "Impossible d'annuler le match.", type: "error" }); }
     setConfirmUnmatchPartner(false); setPartnerMenuOpen(false); setShowPartnerProfile(false);
@@ -7387,8 +7382,6 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
     try {
       // ── Étape 1 : supprimer toutes les données associées en cascade ──
       await Promise.all([
-        sb.delete(auth.token, "likes", `?from_user=eq.${auth.userId}`),
-        sb.delete(auth.token, "likes", `?to_user=eq.${auth.userId}`),
         sb.delete(auth.token, "blocks", `?blocker_id=eq.${auth.userId}`),
         sb.delete(auth.token, "blocks", `?blocked_id=eq.${auth.userId}`),
         sb.delete(auth.token, "profile_views", `?viewer_id=eq.${auth.userId}`),
@@ -9981,9 +9974,6 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     maleCount: 0, femaleCount: 0,
     topCities: [] as { city: string; count: number }[],
     recentUsers: [] as AdminProfile[],
-    totalLikes: 0, likesToday: 0,
-    likesPerDay: [] as { date: string; count: number }[],
-    topLikedProfiles: [] as { name: string; city: string; count: number }[],
   });
 
   // ── Reports ──
@@ -10244,8 +10234,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
       };
 
       const [rTotalUsers, rMatches, rMessages, rTotalReports,
-             rPremium, rVerified, rBanned, rMale, rFemale, rTodayUsers,
-             rTotalLikes, rLikesToday] = await Promise.all([
+             rPremium, rVerified, rBanned, rMale, rFemale, rTodayUsers] = await Promise.all([
         fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id`, { headers: countHeader }),
         fetch(`${SUPABASE_URL}/rest/v1/matches?select=id`, { headers: countHeader }),
         fetch(`${SUPABASE_URL}/rest/v1/messages?select=id`, { headers: countHeader }),
@@ -10256,40 +10245,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
         fetch(`${SUPABASE_URL}/rest/v1/profiles?gender=eq.Homme&select=id`, { headers: countHeader }),
         fetch(`${SUPABASE_URL}/rest/v1/profiles?gender=eq.Femme&select=id`, { headers: countHeader }),
         fetch(`${SUPABASE_URL}/rest/v1/profiles?created_at=gte.${todayIso}&select=id`, { headers: countHeader }),
-        fetch(`${SUPABASE_URL}/rest/v1/likes?select=id`, { headers: countHeader }),
-        fetch(`${SUPABASE_URL}/rest/v1/likes?created_at=gte.${todayIso}&select=id`, { headers: countHeader }),
       ]);
-
-      // ── Likes par jour (30 derniers jours) ──
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const likesRaw = await fetch(`${SUPABASE_URL}/rest/v1/likes?created_at=gte.${thirtyDaysAgo}&select=created_at&order=created_at.asc&limit=5000`, {
-        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` }
-      }).then(r => r.json()).catch(() => []);
-
-      const likesByDay: Record<string, number> = {};
-      (likesRaw as { created_at: string }[]).forEach(l => {
-        const d = l.created_at?.slice(0, 10);
-        if (d) likesByDay[d] = (likesByDay[d] || 0) + 1;
-      });
-      const likesPerDay = Object.entries(likesByDay).map(([date, count]) => ({ date, count })).slice(-14);
-
-      // ── Top 5 profils les plus likés ──
-      const topLikesRaw = await fetch(`${SUPABASE_URL}/rest/v1/likes?select=to_user&limit=5000`, {
-        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` }
-      }).then(r => r.json()).catch(() => []);
-      const likeCount: Record<string, number> = {};
-      (topLikesRaw as { to_user: string }[]).forEach(l => { if (l.to_user) likeCount[l.to_user] = (likeCount[l.to_user] || 0) + 1; });
-      const topIds = Object.entries(likeCount).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id]) => id);
-      let topLikedProfiles: { name: string; city: string; count: number }[] = [];
-      if (topIds.length > 0) {
-        const topProfiles = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=in.(${topIds.join(",")})&select=id,name,city`, {
-          headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` }
-        }).then(r => r.json()).catch(() => []);
-        topLikedProfiles = topIds.map(id => {
-          const p = (topProfiles as { id: string; name: string; city: string }[]).find(x => x.id === id);
-          return { name: p?.name || "?", city: p?.city || "", count: likeCount[id] };
-        });
-      }
 
       // ── Charger un échantillon de profils pour top villes + derniers inscrits ──
       const [recentProfilesRes, reps] = await Promise.all([
@@ -10316,10 +10272,6 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
         femaleCount: parseCount(rFemale),
         topCities,
         recentUsers,
-        totalLikes: parseCount(rTotalLikes),
-        likesToday: parseCount(rLikesToday),
-        likesPerDay,
-        topLikedProfiles,
       });
       setReports(reps);
       // ── Charger automatiquement les profils reporter + reported ──
@@ -10450,8 +10402,6 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     try {
       // ── Étape 1 : supprimer toutes les données associées en cascade ──
       await Promise.all([
-        sb.delete(auth.token, "likes", `?from_user=eq.${user.id}`),
-        sb.delete(auth.token, "likes", `?to_user=eq.${user.id}`),
         sb.delete(auth.token, "blocks", `?blocker_id=eq.${user.id}`),
         sb.delete(auth.token, "blocks", `?blocked_id=eq.${user.id}`),
         sb.delete(auth.token, "profile_views", `?viewer_id=eq.${user.id}`),
@@ -12372,60 +12322,6 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               </div>{/* /admgrid-row */}
 
               {/* ── LIKES ── */}
-              {/* Total + Aujourd'hui */}
-              <div style={{ background: G.blanc, borderRadius: 16, padding: "16px", marginBottom: 14, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                <h3 style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, marginBottom: 12 }}>❤️ Likes</h3>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10 }}>
-                  <div style={{ background: "rgba(231,76,60,0.07)", borderRadius: 12, padding: "12px", border: "1px solid rgba(231,76,60,0.15)" }}>
-                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: G.rouge }}>{stats.totalLikes.toLocaleString()}</div>
-                    <div style={{ fontSize: "0.7rem", color: "#555", marginTop: 2 }}>Total likes</div>
-                  </div>
-                  <div style={{ background: "rgba(231,76,60,0.07)", borderRadius: 12, padding: "12px", border: "1px solid rgba(231,76,60,0.15)" }}>
-                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: G.rouge }}>+{stats.likesToday}</div>
-                    <div style={{ fontSize: "0.7rem", color: "#555", marginTop: 2 }}>Aujourd'hui</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Likes par jour (14 derniers jours) */}
-              {stats.likesPerDay.length > 0 && (
-                <div style={{ background: G.blanc, borderRadius: 16, padding: "16px", marginBottom: 14, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                  <h3 style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, marginBottom: 12 }}>Likes par jour (14 derniers jours)</h3>
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 80 }}>
-                    {(() => {
-                      const max = Math.max(...stats.likesPerDay.map(d => d.count), 1);
-                      return stats.likesPerDay.map((d, i) => (
-                        <div key={i} style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                          <div style={{ width: "100%", background: G.rouge, borderRadius: "4px 4px 0 0", height: `${Math.round((d.count / max) * 64)}px`, minHeight: 3, opacity: 0.8 }} />
-                          <div style={{ fontSize: "0.52rem", color: "#aaa", transform: "rotate(-30deg)", whiteSpace: "nowrap" }}>{d.date.slice(5)}</div>
-                        </div>
-                      ));
-                    })()}
-                  </div>
-                </div>
-              )}
-
-              {/* Top 5 profils les plus likés */}
-              {stats.topLikedProfiles.length > 0 && (
-                <div style={{ background: G.blanc, borderRadius: 16, padding: "16px", marginBottom: 14, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                  <h3 style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, marginBottom: 12 }}>🏆 Top profils les plus likés</h3>
-                  {stats.topLikedProfiles.map((p, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: i < stats.topLikedProfiles.length - 1 ? `1px solid ${G.gris}` : "none" }}>
-                      <div style={{ width: 28, height: 28, borderRadius: "50%", background: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : G.creme, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.75rem", color: i < 3 ? "#333" : "#888", flexShrink: 0 }}>
-                        {i + 1}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>{p.name}</div>
-                        <div style={{ fontSize: "0.7rem", color: "#888" }}>{p.city}</div>
-                      </div>
-                      <div style={{ background: "rgba(231,76,60,0.1)", borderRadius: 8, padding: "4px 8px", fontSize: "0.78rem", fontWeight: 700, color: G.rouge }}>
-                        ❤️ {p.count}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
               {/* Derniers inscrits */}
               {stats.recentUsers.length > 0 && (
                 <div style={{ background: G.blanc, borderRadius: 16, padding: "16px", marginBottom: 14, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
@@ -16007,14 +15903,13 @@ export default function App() {
     const loadLikesReceived = async () => {
       let dIds = new Set<string>();
       try {
-        const [likes, views, myMatches] = await Promise.all([
-          sb.query<{ from_user: string }>(auth.token, "likes", `?to_user=eq.${auth.userId}&select=from_user`),
+        const [views, myMatches] = await Promise.all([
           sb.query<{ viewer_id: string }>(auth.token, "profile_views", `?viewed_id=eq.${auth.userId}&viewer_id=neq.${auth.userId}&select=viewer_id`),
           sb.query<{ user1: string; user2: string }>(auth.token, "matches", `?or=(user1.eq.${auth.userId},user2.eq.${auth.userId})&select=user1,user2`),
         ]);
         const matchedIds = new Set<string>();
         if (Array.isArray(myMatches)) myMatches.forEach(mm => matchedIds.add(mm.user1 === auth.userId ? mm.user2 : mm.user1));
-        const likesCount = Array.isArray(likes) ? new Set(likes.filter(l => !dIds.has(l.from_user) && !matchedIds.has(l.from_user)).map(l => l.from_user)).size : 0;
+        const likesCount = 0;
         const viewsCount = Array.isArray(views) ? [...new Set(views.map(v => v.viewer_id))].filter(id => !dIds.has(id)).length : 0;
         const currentTab = document.querySelector('[data-active-tab]')?.getAttribute('data-active-tab') || '';
         // Ne pas écraser le zéro si l'onglet est actif OU si l'utilisateur l'a consulté récemment
