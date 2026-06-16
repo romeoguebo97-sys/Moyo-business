@@ -131,7 +131,7 @@ const getModerationMessage = (type: "insult" | "scam" | "sexual"): string => {
 const MSG_BG_STYLE: React.CSSProperties = {
   position: "relative",
 };
-const SUPER_ADMIN_ID = "3952df97-4ba6-49b3-8bb4-8a2a2880f6ff";
+const SUPER_ADMIN_ID = "1d7a2e08-4454-43ea-8db0-4d1aeba8e69d";
 const REFERRAL_BONUS_DAYS = 7;
 // Intervalles de polling — modifiables via app_settings
 let POLL_BADGES_MS = 8000;        // Fallback badges (messages/likes/matchs/vues)
