@@ -4001,7 +4001,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
   );
 }
 
-function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceived, viewsReceived, auth, adminBadgeCount, showAdminConfig, setShowAdminConfig, inConv }: { children: React.ReactNode; tab: string; setTab: (t: string) => void; unreadCount: number; notifCount: number; likesReceived: number; viewsReceived: number; auth: Auth; adminBadgeCount?: number; showAdminConfig: boolean; setShowAdminConfig: (v: boolean) => void; inConv: boolean; }) {
+function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceived, viewsReceived, auth, adminBadgeCount, showAdminConfig, setShowAdminConfig, inConv, onPublish }: { children: React.ReactNode; tab: string; setTab: (t: string) => void; unreadCount: number; notifCount: number; likesReceived: number; viewsReceived: number; auth: Auth; adminBadgeCount?: number; showAdminConfig: boolean; setShowAdminConfig: (v: boolean) => void; inConv: boolean; onPublish: () => void; }) {
   const [showGuide, setShowGuide] = useState(false);
   const [openGuideSection, setOpenGuideSection] = useState<number | null>(null);
   const [showBot, setShowBot] = useState(false);
@@ -4035,11 +4035,20 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
     },
     {
       id: "discover",
-      label: "Annuaire",
+      label: "Parcourir",
       icon: (active: boolean) => (
         <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? G.rouge : "none"} stroke={active ? G.rouge : "#bbb"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
           <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      ),
+    },
+    {
+      id: "publier",
+      label: "Publier",
+      icon: (active: boolean) => (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={active ? G.rouge : "#bbb"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
       ),
     },
@@ -4121,7 +4130,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
               return null;
             };
             return (
-              <div key={t.id} className={`moyo-nav-item${active ? " active" : ""}`} onClick={() => { setIsFullscreen(false); setTab(t.id); }}>
+              <div key={t.id} className={`moyo-nav-item${active ? " active" : ""}`} onClick={() => { setIsFullscreen(false); if (t.id === "publier") { onPublish(); } else { setTab(t.id); } }}>
                 <div className="moyo-nav-icon">{t.icon(active)}</div>
                 {t.label}
                 {getBadge()}
@@ -14993,7 +15002,7 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
   );
 }
 
-function Publications({ auth, onGoMessages }: { auth: Auth; onGoMessages: (partnerId: string) => void }) {
+function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMessages: (partnerId: string) => void; publishNonce?: number }) {
   const [type, setType] = useState<"cherche" | "propose">("cherche");
   const [cat, setCat] = useState("all");
   const [city, setCity] = useState<string>(PUB_VILLES[0] || "Brazzaville");
@@ -15017,6 +15026,7 @@ function Publications({ auth, onGoMessages }: { auth: Auth; onGoMessages: (partn
   }, [auth.token, auth.refreshToken, type, cat, city]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { if (publishNonce) setShowPublish(true); }, [publishNonce]);
 
   const list = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -15342,6 +15352,7 @@ export default function App() {
     }
   }, [darkMode]);
   const [tab, setTab] = useState("publications");
+  const [publishNonce, setPublishNonce] = useState(0);
   const [auth, setAuth] = useState<Auth | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const lastUnreadRef = useRef<number | null>(null);
@@ -16170,9 +16181,9 @@ export default function App() {
       }
       if (t === "likes") { setLikesReceived(0); try { localStorage.setItem(`moyo_likes_seen_${auth!.userId}`, new Date().toISOString()); } catch {} }
       if (t === "visitors") { setViewsReceived(0); try { localStorage.setItem(`moyo_visitors_seen_${auth!.userId}`, new Date().toISOString()); } catch {} }
-    }} unreadCount={unreadCount} notifCount={notifCount} likesReceived={likesReceived} viewsReceived={viewsReceived} auth={auth} adminBadgeCount={adminBadgeCount} showAdminConfig={showAdminConfig} setShowAdminConfig={setShowAdminConfig} inConv={inConv}>
+    }} unreadCount={unreadCount} notifCount={notifCount} likesReceived={likesReceived} viewsReceived={viewsReceived} auth={auth} adminBadgeCount={adminBadgeCount} showAdminConfig={showAdminConfig} setShowAdminConfig={setShowAdminConfig} inConv={inConv} onPublish={() => { setTab("publications"); setPublishNonce(n => n + 1); }}>
       <div key={tab} className="page-anim" style={{ width: "100%", height: "100%" }}>
-      {tab === "publications" && <Publications auth={auth} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
+      {tab === "publications" && <Publications auth={auth} publishNonce={publishNonce} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "discover" && <Annuaire auth={auth} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "messages" && <Messages auth={auth} onUnreadCount={setUnreadCount} onShowPremium={showPremium} initialPartnerId={openConvPartnerId} onConvOpen={setInConv} />}
       {tab === "profile" && <Profile auth={auth} onLogout={handleLogout} onShowPremium={showPremium} darkMode={darkMode} onToggleDark={() => { const v = !darkMode; setDarkMode(v); localStorage.setItem("moyo_dark", v ? "1" : "0"); }} onOpenAdmin={auth.isAdmin ? () => openAdminPanel(() => setTab("admin")) : undefined} adminBadgeCount={adminBadgeCount} />}
