@@ -1604,7 +1604,59 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
     { id: "Numérique", label: "Numérique", ico: "mbi-digital", n: "112", np: "47" },
     { id: "Business", label: "Business", ico: "mbi-biz", n: "88", np: "31" },
   ];
-  const HINTS = ["Maçon", "Chauffeur", "Plombier", "Investisseur", "Dev web", "Couturière"];
+  const HINTS = BUSINESS_CATEGORIES_SORTED.map(c => c.metiers[0]);
+  // ── Bandeau métiers : auto-défilement + manipulation (glisser / molette / tactile) ──
+  const hintsRef = React.useRef<HTMLDivElement | null>(null);
+  const posRef = React.useRef(0);          // position de défilement automatique (float)
+  const pauseRef = React.useRef(false);    // l'auto-défilement est suspendu pendant l'interaction
+  const resumeTo = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dragRef = React.useRef({ active: false, startX: 0, startScroll: 0, moved: false });
+  const pauseAuto = () => { pauseRef.current = true; if (resumeTo.current) clearTimeout(resumeTo.current); };
+  const resumeSoon = () => { if (resumeTo.current) clearTimeout(resumeTo.current); resumeTo.current = setTimeout(() => { pauseRef.current = false; }, 1400); };
+  React.useEffect(() => {
+    const el = hintsRef.current; if (!el) return;
+    const reduce = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const speed = 0.45; // px par frame (~27 px/s)
+    let raf = 0;
+    const step = () => {
+      const half = el.scrollWidth / 2 || 1;
+      if (pauseRef.current || reduce) {
+        posRef.current = el.scrollLeft;            // on suit la position de l'utilisateur
+      } else {
+        posRef.current += speed;
+        if (posRef.current >= half) posRef.current -= half;
+        el.scrollLeft = posRef.current;
+      }
+      // boucle infinie dans les deux sens
+      if (el.scrollLeft >= half) { el.scrollLeft -= half; posRef.current = el.scrollLeft; }
+      else if (el.scrollLeft <= 0) { el.scrollLeft += half; posRef.current = el.scrollLeft; }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  const onHintsPointerDown = (e: React.PointerEvent) => {
+    pauseAuto();
+    const el = hintsRef.current; if (!el) return;
+    if (e.pointerType === "mouse") {              // glisser-déposer à la souris (le tactile utilise le scroll natif)
+      dragRef.current = { active: true, startX: e.clientX, startScroll: el.scrollLeft, moved: false };
+      try { el.setPointerCapture(e.pointerId); } catch {}
+      el.style.cursor = "grabbing";
+    }
+  };
+  const onHintsPointerMove = (e: React.PointerEvent) => {
+    const el = hintsRef.current; const d = dragRef.current;
+    if (!el || !d.active) return;
+    const dx = e.clientX - d.startX;
+    if (Math.abs(dx) > 4) d.moved = true;
+    el.scrollLeft = d.startScroll - dx;
+  };
+  const onHintsPointerUp = (e: React.PointerEvent) => {
+    const el = hintsRef.current;
+    if (el) { try { el.releasePointerCapture(e.pointerId); } catch {} el.style.cursor = "grab"; }
+    dragRef.current.active = false;
+    resumeSoon();
+  };
   const BESOINS = [
     { cat: "BTP", date: "Il y a 2 h", title: "Cherche maçon pour construction d'une dalle", desc: "Maçon expérimenté pour couler une dalle de 60 m² à Poto-Poto. Matériaux fournis.", loc: "Poto-Poto, Brazzaville", prix: "300 000 FCFA", ini: "JM", name: "Jean-Marie K." },
     { cat: "BTP", date: "Il y a 5 h", title: "Plombier urgence - fuite eau appartement", desc: "Fuite importante dans la salle de bain. Intervention urgente souhaitée aujourd'hui.", loc: "Bacongo, Brazzaville", prix: "50 000 FCFA", ini: "SN", name: "Sophie N." },
@@ -1690,13 +1742,15 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         .mb-sug-item:hover{background:rgba(212,168,67,0.12);color:var(--or);}
         .mb-search-ic{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.4);}
         .mb-search-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--or);border:none;cursor:pointer;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
-        .mb-hints{display:flex;overflow:hidden;width:100%;max-width:560px;margin:0 auto;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);}
-        .mb-hints-track{display:flex;gap:8px;flex:0 0 auto;width:max-content;animation:mbHintScroll 22s linear infinite;}
-        .mb-hints:hover .mb-hints-track{animation-play-state:paused;}
+        .mb-hints{display:flex;overflow-x:auto;overflow-y:hidden;width:100%;max-width:560px;margin:0 auto;cursor:grab;scroll-behavior:auto;touch-action:pan-x;-ms-overflow-style:none;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);}
+        .mb-hints::-webkit-scrollbar{display:none;}
+        .mb-hints:active{cursor:grabbing;}
+        .mb-hints-track{display:flex;gap:8px;flex:0 0 auto;width:max-content;user-select:none;}
+        .mb-hint{user-select:none;}
+        @media(prefers-reduced-motion:reduce){.mb-hints{scroll-behavior:auto;}}
         .mb-hint{flex:0 0 auto;white-space:nowrap;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);font-size:12px;padding:5px 12px;border-radius:100px;cursor:pointer;}
         .mb-hint:hover{color:var(--or);border-color:rgba(212,168,67,0.3);}
-        @keyframes mbHintScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-        @media(prefers-reduced-motion:reduce){.mb-hints-track{animation:none}}
+        @media(prefers-reduced-motion:reduce){.mb-hints{scroll-behavior:auto;}}
         .mb-cta-row{display:flex;gap:12px;margin-top:36px;flex-wrap:wrap;justify-content:center;}
         .mb-btn-g{background:var(--or);color:var(--nuit);font-size:15px;font-weight:800;padding:15px 30px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;}
         .mb-btn-o{background:transparent;color:#fff;font-size:15px;font-weight:700;padding:15px 30px;border-radius:12px;border:2px solid rgba(255,255,255,0.25);cursor:pointer;font-family:inherit;}
@@ -1831,9 +1885,28 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
             </div>
           )}
         </div>
-        <div className="mb-hints">
+        <div
+          className="mb-hints"
+          ref={hintsRef}
+          onPointerDown={onHintsPointerDown}
+          onPointerMove={onHintsPointerMove}
+          onPointerUp={onHintsPointerUp}
+          onPointerCancel={onHintsPointerUp}
+          onPointerLeave={(e) => { if (dragRef.current.active) onHintsPointerUp(e); }}
+          onMouseEnter={pauseAuto}
+          onMouseLeave={resumeSoon}
+          onWheel={() => { pauseAuto(); resumeSoon(); }}
+          onTouchStart={pauseAuto}
+          onTouchEnd={resumeSoon}
+        >
           <div className="mb-hints-track">
-            {[...HINTS, ...HINTS].map((h, i) => <span key={h + "-" + i} className="mb-hint" onClick={() => setLq(h)}>{h}</span>)}
+            {[...HINTS, ...HINTS].map((h, i) => (
+              <span
+                key={h + "-" + i}
+                className="mb-hint"
+                onClick={() => { if (dragRef.current.moved) { dragRef.current.moved = false; return; } setLq(h); }}
+              >{h}</span>
+            ))}
           </div>
         </div>
         <div className="mb-cta-row">
@@ -2661,7 +2734,11 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
           </div>
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Votre métier <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>(obligatoire)</span></label>
-            <input value={form.metier} onChange={e => upd("metier", e.target.value.slice(0, 60))} placeholder="Ex : Maçon, Coiffeuse, Développeur web…" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+            <input list="moyo-metiers-signup" value={form.metier} onChange={e => upd("metier", e.target.value.slice(0, 60))} placeholder="Ex : Maçon, Coiffeuse, Développeur web…" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+            <datalist id="moyo-metiers-signup">
+              {metiersForCategory(form.category).map(m => <option key={m} value={m} />)}
+            </datalist>
+            <div style={{ fontSize: "0.76rem", color: "#888", marginTop: 6 }}>{form.category ? "Choisissez dans la liste ou saisissez votre métier." : "Sélectionnez d'abord une catégorie pour des suggestions ciblées."}</div>
           </div>
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Entreprise <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
@@ -7682,7 +7759,10 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             {PUB_CATS.filter(c => c.id !== "all").map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
           </select>
           <label style={L}>Métier</label>
-          <input value={form.metier || ""} onChange={e => setForm(f => ({ ...f, metier: e.target.value.slice(0, 60) }))} placeholder="Ex : Maçon, Coiffeuse, Développeur web…" style={I} />
+          <input list="moyo-metiers-profile" value={form.metier || ""} onChange={e => setForm(f => ({ ...f, metier: e.target.value.slice(0, 60) }))} placeholder="Ex : Maçon, Coiffeuse, Développeur web…" style={I} />
+          <datalist id="moyo-metiers-profile">
+            {metiersForCategory(form.category).map(m => <option key={m} value={m} />)}
+          </datalist>
           <label style={L}>Entreprise <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
           <input value={form.company || ""} onChange={e => setForm(f => ({ ...f, company: e.target.value.slice(0, 60) }))} placeholder="Nom de l'entreprise" style={I} />
         </>}
@@ -15004,18 +15084,69 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
    create policy pub_update on publications for update using (auth.uid() = user_id);
 ============================================================================ */
 
+// ════════════════════════════════════════════════════════════════════════
+//  SOURCE UNIQUE — Catégories & métiers (Business)
+//  Toute la taxonomie professionnelle vit ici : inscription, profil pro,
+//  Annuaire et filtres s'alimentent de cette seule constante.
+//  Pour chaque catégorie : id, nom, icône, ordre d'affichage et liste de métiers.
+// ════════════════════════════════════════════════════════════════════════
+type BusinessCategory = { id: string; name: string; icon: string; order: number; metiers: string[] };
+const BUSINESS_CATEGORIES: BusinessCategory[] = [
+  { id: "BTP", name: "BTP", icon: "🏗️", order: 1, metiers: [
+    "Maçon", "Peintre", "Carreleur", "Plombier", "Électricien", "Menuisier",
+    "Architecte", "Conducteur de travaux", "Technicien bâtiment", "Soudeur", "Étancheur", "Couvreur",
+  ] },
+  { id: "Transport", name: "Transport", icon: "🚚", order: 2, metiers: [
+    "Chauffeur privé", "Taxi", "Livreur", "Transporteur", "Déménageur",
+    "Location de véhicule", "Chauffeur poids lourd", "Coursier",
+  ] },
+  { id: "Restauration", name: "Restauration", icon: "🍽️", order: 3, metiers: [
+    "Restaurant", "Traiteur", "Pâtissier", "Boulanger", "Cuisinier à domicile",
+    "Fast-food", "Bar", "Café", "Service traiteur événementiel",
+  ] },
+  { id: "Artisanat", name: "Artisanat", icon: "🧵", order: 4, metiers: [
+    "Couturier", "Styliste", "Cordonnier", "Tapissier", "Bijoutier",
+    "Sculpteur", "Décorateur", "Fabricant de meubles",
+  ] },
+  { id: "Santé", name: "Santé", icon: "🩺", order: 5, metiers: [
+    "Infirmier", "Médecin", "Kinésithérapeute", "Pharmacien", "Sage-femme",
+    "Psychologue", "Nutritionniste", "Dentiste", "Opticien",
+  ] },
+  { id: "Beauté", name: "Beauté", icon: "💇", order: 6, metiers: [
+    "Coiffeur", "Maquilleur", "Esthéticienne", "Barbier", "Prothésiste ongulaire",
+    "Spa", "Massage", "Soins du visage", "Parfumerie",
+  ] },
+  { id: "Événementiel", name: "Événementiel", icon: "🎉", order: 7, metiers: [
+    "Photographe", "Vidéaste", "DJ", "Décorateur événementiel", "Maître de cérémonie",
+    "Location de salle", "Sonorisation", "Wedding planner", "Hôtesse événementielle",
+  ] },
+  { id: "Commerce", name: "Commerce", icon: "🛍️", order: 8, metiers: [
+    "Boutique", "Supermarché", "Alimentation", "Vendeur de téléphones", "Vêtements",
+    "Chaussures", "Cosmétique", "Quincaillerie", "Électroménager",
+  ] },
+  { id: "Services", name: "Services", icon: "💼", order: 9, metiers: [
+    "Développeur web", "Graphiste", "Community manager", "Consultant marketing", "Comptable",
+    "Juriste", "Traducteur", "Enseignant", "Réparateur de téléphone", "Informaticien", "Secrétaire indépendant",
+  ] },
+  { id: "Immobilier", name: "Immobilier", icon: "🏠", order: 10, metiers: [
+    "Agent immobilier", "Promoteur", "Gestion locative", "Courtier", "Architecte d'intérieur",
+    "Syndic", "Expert immobilier", "Constructeur", "Location d'appartement",
+  ] },
+];
+// Catégories triées selon l'ordre d'affichage défini ci-dessus.
+const BUSINESS_CATEGORIES_SORTED = [...BUSINESS_CATEGORIES].sort((a, b) => a.order - b.order);
+// Liste à plat de tous les métiers (dédoublonnée), pour la recherche et les suggestions globales.
+const BUSINESS_METIERS_FLAT: string[] = Array.from(new Set(BUSINESS_CATEGORIES_SORTED.flatMap(c => c.metiers)));
+// Métiers d'une catégorie donnée ; si aucune catégorie, on renvoie tous les métiers.
+const metiersForCategory = (catId?: string | null): string[] => {
+  if (!catId) return BUSINESS_METIERS_FLAT;
+  return BUSINESS_CATEGORIES.find(c => c.id === catId)?.metiers || BUSINESS_METIERS_FLAT;
+};
+
+// PUB_CATS et BIZ_CATEGORIES DÉRIVENT de la source unique (mêmes id que la base).
 const PUB_CATS = [
   { id: "all", label: "Tout" },
-  { id: "BTP", label: "BTP" },
-  { id: "Transport", label: "Transport" },
-  { id: "Restauration", label: "Restauration" },
-  { id: "Artisanat", label: "Artisanat" },
-  { id: "Santé", label: "Santé" },
-  { id: "Beauté", label: "Beauté" },
-  { id: "Événementiel", label: "Événementiel" },
-  { id: "Commerce", label: "Commerce" },
-  { id: "Services", label: "Services" },
-  { id: "Immobilier", label: "Immobilier" },
+  ...BUSINESS_CATEGORIES_SORTED.map(c => ({ id: c.id, label: c.name })),
 ];
 // Liste officielle fermée (sans "Tout") — réutilisable partout
 const BIZ_CATEGORIES = PUB_CATS.filter(c => c.id !== "all");
@@ -15194,7 +15325,7 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
   );
 }
 
-const SEARCH_HINTS = ["Maçon","Chauffeur","Plombier","Coiffeur","Couturière","Développeur web","Électricien","Menuisier","Restaurant","Transport","Photographe","Mécanicien","Peintre","Soudeur","Traiteur","Carreleur","Climatisation","Décorateur","Frigoriste","Jardinier"];
+const SEARCH_HINTS = BUSINESS_METIERS_FLAT.slice(0, 24);
 
 function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMessages: (partnerId: string) => void; publishNonce?: number }) {
   const [type, setType] = useState<"cherche" | "propose">("cherche");
@@ -15265,26 +15396,6 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
 
   return (
     <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", paddingBottom: 90 }}>
-      <div style={{ position: "sticky", top: 0, zIndex: 20, background: G.nuit, padding: "14px 14px 11px" }}>
-        {/* Recherche globale */}
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <div style={{ flex: 1, position: "relative" }}>
-            <span style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.45)", fontSize: 15 }}>🔍</span>
-            <input value={q} onChange={e => setQ(e.target.value)} placeholder="Cherchez un maçon, chauffeur, plombier…" style={{ width: "100%", padding: "13px 14px 13px 38px", fontSize: 14, fontFamily: "inherit", border: "1.5px solid rgba(255,255,255,0.12)", borderRadius: 12, background: "rgba(255,255,255,0.07)", color: "#fff", outline: "none", boxSizing: "border-box" }} />
-            {q && <button onClick={() => setQ("")} aria-label="Effacer" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", border: "none", background: "transparent", color: "rgba(255,255,255,0.5)", fontSize: 18, cursor: "pointer" }}>×</button>}
-          </div>
-          <div style={{ flexShrink: 0, width: 46, height: 46, borderRadius: 12, background: G.or, color: "#111", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>🔍</div>
-        </div>
-        {/* Suggestions défilantes (marquee) */}
-        <div style={{ overflow: "hidden", marginTop: 11, WebkitMaskImage: "linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent)", maskImage: "linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent)" }}>
-          <div style={{ display: "inline-flex", gap: 8, whiteSpace: "nowrap", animation: "moyoMarquee 32s linear infinite", willChange: "transform" }}>
-            {[...SEARCH_HINTS, ...SEARCH_HINTS].map((h, i) => (
-              <button key={i} onClick={() => setQ(h)} style={{ flex: "0 0 auto", border: "1.5px solid rgba(212,168,67,0.35)", background: "rgba(255,255,255,0.06)", color: "#fff", borderRadius: 50, padding: "6px 14px", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>{h}</button>
-            ))}
-          </div>
-        </div>
-      </div>
-      <style>{`@keyframes moyoMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
 
       {/* Contrôles du feed — masqués pendant une recherche */}
       {!q.trim() && (
@@ -15352,10 +15463,6 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
           </div>
         </>
       )}
-
-      <button onClick={() => setShowPublish(true)} style={{ position: "fixed", bottom: 84, left: "50%", transform: "translateX(-50%)", zIndex: 40, background: `linear-gradient(135deg,${G.or},#B8860B)`, color: "#111", border: "none", borderRadius: 50, padding: "13px 24px", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer", boxShadow: "0 8px 24px rgba(212,168,67,0.45)", display: "flex", alignItems: "center", gap: 8 }}>
-        ＋ Publier une annonce
-      </button>
 
       {showPublish && <PublishModal auth={auth} onClose={() => setShowPublish(false)} onPublished={(np) => { setShowPublish(false); setType(np.type); setCat(np.category); setToast("Annonce publiée ✓"); load(); setTimeout(() => setBoostTarget(np), 600); }} />}
       {boostTarget && <BoostModal auth={auth} pub={boostTarget} onClose={() => setBoostTarget(null)} onBoosted={() => { setBoostTarget(null); setToast("Annonce mise en avant ✓"); load(); }} />}
