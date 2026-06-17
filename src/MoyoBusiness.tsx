@@ -1883,7 +1883,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
       {/* NAV */}
       <header className="mb-nav">
         <div className="mb-logo" onClick={() => onNav("landing")}>
-          <div className="mb-logo-ic"><svg width="20" height="20" style={{ color: "#0F0F1A" }}><use href="#mbi-biz"/></svg></div>
+          <div className="mb-logo-ic"><svg width="20" height="20" style={{ color: "#08080D" }}><use href="#mbi-biz"/></svg></div>
           <span className="mb-logo-tx">Moyo <span>Business</span></span>
         </div>
         <div className="mb-nav-r">
@@ -3248,7 +3248,7 @@ function EditableRow({ label, value, open, onOpen, editValue, onEdit, onSave, hi
     <div>
       <div onClick={onOpen} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: 10, background: open ? "rgba(212,168,67,0.06)" : G2.creme, cursor: "pointer", border: `1px solid ${open ? G2.rouge : "transparent"}` }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "#2C1A0E" }}>{label}</div>
+          <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "#121218" }}>{label}</div>
           <div style={{ fontSize: "0.7rem", color: "#999", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
         </div>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={G2.rouge} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginLeft: 8 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -4371,20 +4371,19 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
   const tabs = [
     {
       id: "publications",
-      label: "Accueil",
+      label: "Annonces",
       icon: (active: boolean) => (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? G.rouge : "#6B7280"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+          <path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
         </svg>
       ),
     },
     {
       id: "discover",
-      label: "Parcourir",
+      label: "Répertoire",
       icon: (active: boolean) => (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? G.rouge : "none"} stroke={active ? G.rouge : "#6B7280"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? G.rouge : "#6B7280"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="4" y="2" width="16" height="20" rx="2"/><path d="M16 2v20"/><circle cx="10" cy="10" r="2"/><path d="M7.5 15.5a2.8 2.8 0 0 1 5 0"/>
         </svg>
       ),
     },
@@ -4513,17 +4512,33 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
     ) : (
       <>
         {/* Header mobile */}
-        <div style={{ padding: "8px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", background: G.blanc, borderBottom: `1px solid ${G.gris}`, position: "fixed", top: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 500, zIndex: 100, boxSizing: "border-box", visibility: inConv ? "hidden" : "visible", pointerEvents: inConv ? "none" : "auto" }}>
-          <div style={{ marginLeft: 4, fontSize: "1.6rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span></div>
+        <div style={{ padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", background: G.blanc, borderBottom: `1px solid ${G.gris}`, position: "fixed", top: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 500, zIndex: 100, boxSizing: "border-box", visibility: inConv ? "hidden" : "visible", pointerEvents: inConv ? "none" : "auto" }}>
+          <div style={{ marginLeft: 4, lineHeight: 0.95 }}>
+            <div style={{ fontSize: "1.5rem", color: G.or, fontWeight: 900, letterSpacing: "-0.5px" }}>Moyo</div>
+            <div style={{ fontSize: "0.95rem", color: "#9AA0A6", fontWeight: 800, letterSpacing: "-0.2px" }}>Business</div>
+          </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginRight: 4 }}>
-            <div onClick={() => setShowGuide(true)} style={{ fontSize: "0.72rem", fontWeight: 700, color: "#333", background: "white", borderRadius: 50, padding: "5px 14px", cursor: "pointer", border: "1.5px solid #ddd", letterSpacing: "0.02em" }}>Guide</div>
+            <div onClick={() => setShowGuide(true)} style={{ fontSize: "0.82rem", fontWeight: 700, color: "#1A1A1A", background: "white", borderRadius: 12, padding: "9px 16px", cursor: "pointer", border: `1.5px solid ${G.gris}`, display: "flex", alignItems: "center", gap: 7 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Guide
+            </div>
           </div>
         </div>
-        <div style={{ flex: 1, overflowY: "auto", paddingBottom: isFullscreen ? 0 : 71, paddingTop: 45, transition: "padding-bottom 0.35s cubic-bezier(0.4,0,0.2,1)" }}>{children}</div>
+        <div style={{ flex: 1, overflowY: "auto", paddingBottom: isFullscreen ? 0 : 71, paddingTop: 64, transition: "padding-bottom 0.35s cubic-bezier(0.4,0,0.2,1)" }}>{children}</div>
         {/* Footer mobile */}
         <div className={isFullscreen ? "moyo-footer-hidden" : "moyo-footer-visible"} style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 500, background: G.blanc, borderTop: `1px solid #eee`, display: "flex", justifyContent: "space-around", alignItems: "center", padding: "5px 4px 13px", zIndex: 50, visibility: inConv ? "hidden" : "visible", pointerEvents: inConv ? "none" : "auto" }}>
           {tabs.map(t => {
             const active = tab === t.id;
+            if (t.id === "publier") {
+              return (
+                <div key={t.id} onClick={() => { setIsFullscreen(false); onPublish(); }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer", flex: 1 }}>
+                  <div style={{ width: 52, height: 52, marginTop: -18, borderRadius: 16, background: G.or, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(212,168,67,0.45)", border: `3px solid ${G.blanc}` }}>
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </div>
+                  <div style={{ fontSize: "0.56rem", fontWeight: 700, color: "#6B7280", whiteSpace: "nowrap" }}>Publier</div>
+                </div>
+              );
+            }
             return (
               <div key={t.id} onClick={() => { setIsFullscreen(false); if (t.id === "publier") { onPublish(); } else { setTab(t.id); } }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, cursor: "pointer", position: "relative", flex: 1 }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "5px 8px", borderRadius: 12, background: active ? "rgba(212,168,67,0.1)" : "transparent", transition: "background 0.2s", minWidth: 48 }}>
@@ -8259,7 +8274,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
         {(!isWideProfile || ["darkmode","main"].includes(activeSection)) && <div style={{ background: G.blanc, borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", border: `1px solid #E8E8E8` }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ width: 42, height: 42, borderRadius: "50%", background: darkMode ? "rgba(0,0,0,0.1)" : "rgba(212,168,67,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={darkMode ? "#2C1A0E" : G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={darkMode ? "#121218" : G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 {darkMode
                   ? <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                   : <><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></>
@@ -8271,7 +8286,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
               <div style={{ fontSize: "0.82rem", color: "#888", marginTop: 2 }}>{darkMode ? "Thème sombre activé" : "Thème clair activé"}</div>
             </div>
           </div>
-          <div onClick={onToggleDark} style={{ width: 52, height: 28, borderRadius: 50, background: darkMode ? "#2C1A0E" : G.gris, cursor: "pointer", position: "relative", transition: "background 0.3s", flexShrink: 0 }}>
+          <div onClick={onToggleDark} style={{ width: 52, height: 28, borderRadius: 50, background: darkMode ? "#121218" : G.gris, cursor: "pointer", position: "relative", transition: "background 0.3s", flexShrink: 0 }}>
             <div style={{ position: "absolute", top: 3, left: darkMode ? 27 : 3, width: 22, height: 22, borderRadius: "50%", background: G.blanc, boxShadow: "0 2px 6px rgba(0,0,0,0.2)", transition: "left 0.3s" }} />
           </div>
         </div>}
@@ -14951,36 +14966,53 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
-function PubCard({ pub, me, onContact, onBoost }: { pub: Publication; me: string; onContact: () => void; onBoost: () => void }) {
+function PubCard({ pub, me, onContact, onBoost, onViewProfile }: { pub: Publication; me: string; onContact: () => void; onBoost: () => void; onViewProfile?: () => void }) {
   const isProp = pub.type === "propose";
   const mine = pub.user_id === me;
   const priceTxt = isProp ? (pub.budget ? "À partir de " + fmtFCFA(pub.budget) : "Tarif à discuter") : "Budget : " + fmtFCFA(pub.budget);
   return (
-    <div style={{ background: G.blanc, border: `1.5px solid ${pub.is_boosted ? G.or : G.gris}`, borderRadius: 14, padding: 16, position: "relative", boxShadow: pub.is_boosted ? "0 4px 18px rgba(212,168,67,0.18)" : "none" }}>
-      {pub.is_boosted && <div style={{ position: "absolute", top: -1, right: 14, background: G.or, color: "#111", fontSize: 10, fontWeight: 800, padding: "3px 9px", borderRadius: "0 0 7px 7px", letterSpacing: 0.3 }}>★ EN AVANT</div>}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 9 }}>
-        <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, padding: "4px 8px", borderRadius: 5, background: isProp ? "rgba(26,92,58,0.12)" : "rgba(212,168,67,0.18)", color: isProp ? G.vert : "#8B6914" }}>{pub.category}</span>
-        <span style={{ fontSize: 11, color: "#999" }}>{timeAgo(pub.created_at)}</span>
+    <div style={{ background: G.blanc, border: `1.5px solid ${pub.is_boosted ? G.or : G.gris}`, borderRadius: 16, padding: 16, position: "relative", boxShadow: pub.is_boosted ? "0 6px 20px rgba(212,168,67,0.18)" : "0 2px 8px rgba(0,0,0,0.04)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+        <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, padding: "5px 10px", borderRadius: 7, background: isProp ? "rgba(22,163,74,0.12)" : "rgba(212,168,67,0.18)", color: isProp ? "#16A34A" : "#8B6914" }}>{pub.category}</span>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
+          {pub.is_boosted && <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: G.or, color: "#fff", fontSize: 10.5, fontWeight: 800, padding: "4px 9px", borderRadius: 7, letterSpacing: 0.3 }}>★ EN AVANT</span>}
+          <span style={{ fontSize: 11.5, color: "#9AA0A6" }}>{timeAgo(pub.created_at)}</span>
+        </div>
       </div>
-      <div style={{ fontSize: 15, fontWeight: 800, color: "#111", marginBottom: 5, lineHeight: 1.3 }}>{pub.title}</div>
-      <div style={{ fontSize: 13, color: "#777", lineHeight: 1.5, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{pub.description}</div>
-      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 13, fontSize: 12, color: "#777", fontWeight: 600 }}>
-        <span>📍 {pub.location || pub.city}</span>
-        <span style={{ color: "#111" }}>🏷️ {priceTxt}</span>
+      <div style={{ fontSize: 16, fontWeight: 800, color: "#1A1A1A", marginBottom: 5, lineHeight: 1.3 }}>{pub.title}</div>
+      <div style={{ fontSize: 13.5, color: "#6B7280", lineHeight: 1.5, marginBottom: 13, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{pub.description}</div>
+      <div style={{ borderTop: `1px solid ${G.gris}`, margin: "0 -16px 12px", padding: "12px 16px 0" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13, color: "#6B7280", fontWeight: 600 }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>📍 {pub.location || pub.city}</span>
+          <span style={{ width: 1, height: 16, background: G.gris }} />
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "#1A1A1A" }}>🏷️ {priceTxt}</span>
+        </div>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Avatar url={pub.author?.photo_url} size={30} />
-          <div style={{ lineHeight: 1.25 }}>
-            <div style={{ fontSize: 12.5, fontWeight: 700, color: "#111" }}>{pub.author?.name || "Utilisateur"}</div>
-            <div style={{ fontSize: 10.5, color: "#999" }}>{pub.author?.profession || (isProp ? "Professionnel" : "Particulier")}</div>
+      <div style={{ borderTop: `1px solid ${G.gris}`, margin: "0 -16px", padding: "13px 16px 0", display: "flex", alignItems: "center", gap: 10 }}>
+        <div onClick={onViewProfile} style={{ display: "flex", alignItems: "center", gap: 8, cursor: onViewProfile ? "pointer" : "default", minWidth: 0, flexShrink: 1 }}>
+          <Avatar url={pub.author?.photo_url} size={40} />
+          <div style={{ lineHeight: 1.25, minWidth: 0 }}>
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: "#1A1A1A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pub.author?.name || "Utilisateur"}</div>
+            <div style={{ fontSize: 11.5, color: "#9AA0A6" }}>{pub.author?.profession || (isProp ? "Professionnel" : "Client")}</div>
           </div>
         </div>
-        {mine
-          ? (!pub.is_boosted
-            ? <Btn variant="gold" onClick={onBoost} style={{ padding: "8px 14px", fontSize: "0.8rem" }}>Mettre en avant</Btn>
-            : <span style={{ fontSize: 11, color: G.vert, fontWeight: 700 }}>Mon annonce</span>)
-          : <Btn variant={isProp ? "primary" : "gold"} onClick={onContact} style={{ padding: "8px 14px", fontSize: "0.8rem" }}>{isProp ? "Contacter" : "Je suis intéressé"}</Btn>}
+        <div style={{ flex: 1 }} />
+        {mine ? (
+          !pub.is_boosted
+            ? <button onClick={onBoost} style={{ background: G.or, color: "#fff", border: "none", borderRadius: 11, padding: "10px 14px", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer", flexShrink: 0 }}>Mettre en avant</button>
+            : <span style={{ fontSize: 11.5, color: "#16A34A", fontWeight: 700, flexShrink: 0 }}>Mon annonce</span>
+        ) : (
+          <>
+            <button onClick={onViewProfile} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#fff", color: G.or, border: `1.5px solid ${G.or}`, borderRadius: 11, padding: "9px 12px", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              Voir le profil
+            </button>
+            <button onClick={onContact} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#16A34A", color: "#fff", border: "none", borderRadius: 11, padding: "10px 13px", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              {isProp ? "Écrire au pro" : "Écrire au client"}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -15162,28 +15194,61 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
     } catch { setToast("Connexion impossible, réessayez."); }
   }
 
+  async function openAuthor(pub: Publication) {
+    const id = pub.user_id;
+    try {
+      const rows = await sb.query<Profile>(auth.token, "profiles", `?id=eq.${id}&select=*&limit=1`, auth.refreshToken);
+      if (rows && rows[0]) setOpenFiche(rows[0]);
+      else if (pub.author) setOpenFiche(pub.author as any);
+    } catch { if (pub.author) setOpenFiche(pub.author as any); }
+  }
+
   return (
     <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", paddingBottom: 90 }}>
 
       {/* Contrôles du feed — masqués pendant une recherche */}
       {!q.trim() && (
-        <div style={{ padding: "12px 16px 0" }}>
-          <div style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "stretch" }}>
-            <div style={{ display: "flex", gap: 4, background: G.gris, borderRadius: 12, padding: 3, flex: 1 }}>
-              {(["cherche", "propose"] as const).map(t => (
-                <button key={t} onClick={() => setType(t)} style={{ flex: 1, border: "none", borderRadius: 10, padding: "9px 0", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer", background: type === t ? (t === "propose" ? G.vert : "#111") : "transparent", color: type === t ? "#fff" : "#666" }}>
-                  {t === "cherche" ? "Je cherche" : "Je propose"}
+        <div style={{ padding: "14px 16px 0" }}>
+          {/* Deux cartes de bascule */}
+          <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
+            {([
+              { t: "cherche" as const, title: "Besoins publiés", sub: "Des clients recherchent des professionnels", icon: (on: boolean) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={on ? "#08080D" : G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
+              { t: "propose" as const, title: "Services proposés", sub: "Des professionnels présentent leurs services", icon: (on: boolean) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={on ? "#08080D" : G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M3 9h18"/></svg> },
+            ]).map(c => {
+              const on = type === c.t;
+              return (
+                <button key={c.t} onClick={() => setType(c.t)} style={{ flex: 1, textAlign: "left", cursor: "pointer", borderRadius: 16, padding: 14, border: on ? "1px solid #08080D" : `1px solid ${G.gris}`, background: on ? "#08080D" : G.blanc, boxShadow: on ? "0 6px 18px rgba(0,0,0,0.18)" : "0 2px 8px rgba(0,0,0,0.04)", transition: "all .18s ease", fontFamily: "inherit" }}>
+                  <div style={{ width: 46, height: 46, borderRadius: "50%", background: on ? "#fff" : "rgba(212,168,67,0.15)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>{c.icon(on)}</div>
+                  <div style={{ fontSize: "0.98rem", fontWeight: 800, color: on ? "#fff" : "#1A1A1A", marginBottom: 3 }}>{c.title}</div>
+                  <div style={{ fontSize: "0.74rem", lineHeight: 1.35, color: on ? "rgba(255,255,255,0.6)" : "#6B7280" }}>{c.sub}</div>
                 </button>
-              ))}
-            </div>
-            <select value={city} onChange={e => setCity(e.target.value)} style={{ borderRadius: 12, border: `1.5px solid ${G.gris}`, padding: "0 8px", fontSize: 13, background: G.blanc, color: "#111" }}>
+              );
+            })}
+          </div>
+          {/* Localisation */}
+          <div style={{ position: "relative", marginBottom: 14 }}>
+            <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", display: "flex" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </span>
+            <select value={city} onChange={e => setCity(e.target.value)} style={{ width: "100%", appearance: "none", WebkitAppearance: "none", MozAppearance: "none", border: `1px solid ${G.gris}`, background: G.blanc, color: "#1A1A1A", borderRadius: 14, padding: "15px 42px 15px 46px", fontSize: "0.95rem", fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", boxSizing: "border-box" }}>
               {PUB_VILLES.map(v => <option key={v} value={v}>{v}</option>)}
             </select>
+            <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", display: "flex" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
           </div>
+          {/* Chips catégories */}
           <div style={{ display: "flex", gap: 8, overflowX: "auto", padding: "0 0 4px" }}>
-            {PUB_CATS.map(c => (
-              <button key={c.id} onClick={() => setCat(c.id)} style={{ flex: "0 0 auto", border: `1.5px solid ${cat === c.id ? "#111" : G.gris}`, background: cat === c.id ? "#111" : G.blanc, color: cat === c.id ? "#fff" : "#666", borderRadius: 50, padding: "7px 14px", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>{c.label}</button>
-            ))}
+            {PUB_CATS.map(c => {
+              const on = cat === c.id;
+              const ic = BUSINESS_CATEGORIES.find(b => b.id === c.id)?.icon;
+              return (
+                <button key={c.id} onClick={() => setCat(c.id)} style={{ flex: "0 0 auto", display: "flex", alignItems: "center", gap: 6, border: on ? "1px solid #08080D" : `1px solid ${G.gris}`, background: on ? "#08080D" : G.blanc, color: on ? "#fff" : "#1A1A1A", borderRadius: 50, padding: "9px 16px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+                  {ic && c.id !== "all" && <span style={{ fontSize: "0.9rem" }}>{ic}</span>}
+                  {c.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -15213,21 +15278,24 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
         </div>
       ) : (
         <>
-          <div style={{ padding: "8px 16px", fontSize: "0.78rem", color: "#777", display: "flex", justifyContent: "space-between" }}>
-            <span><b style={{ color: "#111" }}>{list.length}</b> {type === "cherche" ? "besoin(s)" : "professionnel(s)"}</span>
+          <div style={{ padding: "12px 16px 4px", fontSize: "0.86rem", color: "#6B7280", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span><b style={{ color: "#1A1A1A", fontWeight: 800 }}>{list.length}</b> {type === "cherche" ? (list.length > 1 ? "besoins publiés" : "besoin publié") : (list.length > 1 ? "services proposés" : "service proposé")}</span>
             <span>{city}</span>
           </div>
-          <div style={{ padding: "4px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ padding: "6px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
             {loading && <p style={{ textAlign: "center", color: "#999", padding: 30 }}>Chargement…</p>}
-            {!loading && list.length === 0 && (
-              <div style={{ textAlign: "center", padding: "50px 20px", color: "#999" }}>
-                <p style={{ fontWeight: 700, color: "#444", marginBottom: 6 }}>Aucune annonce ici</p>
-                <p style={{ fontSize: "0.85rem" }}>{type === "cherche" ? "Soyez le premier à publier votre besoin." : "Aucun professionnel pour ce filtre."}</p>
+            {!loading && list.map(pub => (
+              <PubCard key={pub.id} pub={pub} me={auth.userId} onContact={() => contact(pub)} onBoost={() => setBoostTarget(pub)} onViewProfile={() => openAuthor(pub)} />
+            ))}
+            {!loading && (
+              <div style={{ textAlign: "center", padding: "34px 20px 12px", color: "#9AA0A6" }}>
+                <svg width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="#D7D9DE" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 16px", display: "block" }}>
+                  <rect x="4" y="3" width="13" height="17" rx="2"/><path d="M8 3v-.5A1.5 1.5 0 0 1 9.5 1h2A1.5 1.5 0 0 1 13 2.5V3"/><line x1="8" y1="8" x2="13" y2="8"/><line x1="8" y1="11.5" x2="11" y2="11.5"/><circle cx="16.5" cy="16.5" r="4"/><line x1="19.4" y1="19.4" x2="22" y2="22"/>
+                </svg>
+                <div style={{ fontSize: "1rem", fontWeight: 800, color: "#1A1A1A", marginBottom: 5 }}>{list.length === 0 ? (type === "cherche" ? "Aucun besoin publié pour le moment" : "Aucun service proposé pour le moment") : (type === "cherche" ? "Aucun autre besoin publié pour le moment" : "Aucun autre service pour le moment")}</div>
+                <div style={{ fontSize: "0.88rem", color: "#6B7280" }}>{type === "cherche" ? "Soyez le premier à publier votre besoin" : "Proposez vos services dès maintenant"}</div>
               </div>
             )}
-            {!loading && list.map(pub => (
-              <PubCard key={pub.id} pub={pub} me={auth.userId} onContact={() => contact(pub)} onBoost={() => setBoostTarget(pub)} />
-            ))}
           </div>
         </>
       )}
@@ -15253,7 +15321,7 @@ function ProCard({ pro, onOpen, isFav, onToggleFav }: { pro: Profile; onOpen: ()
       <div style={{ flexShrink: 0 }}>
         {pro.photo_url
           ? <img src={pro.photo_url} alt="" style={{ width: 62, height: 62, borderRadius: 12, objectFit: "cover" }} />
-          : <div style={{ width: 62, height: 62, borderRadius: 12, background: "#2C1A0E", color: G.or, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 800 }}>{(pro.company || pro.name || "?").charAt(0).toUpperCase()}</div>}
+          : <div style={{ width: 62, height: 62, borderRadius: 12, background: "#121218", color: G.or, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 800 }}>{(pro.company || pro.name || "?").charAt(0).toUpperCase()}</div>}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
@@ -15309,13 +15377,13 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 90, background: G.creme, overflowY: "auto" }}>
       {/* Header */}
-      <div style={{ position: "relative", background: "#0F0F1A", padding: "16px 16px 22px" }}>
+      <div style={{ position: "relative", background: "#08080D", padding: "16px 16px 22px" }}>
         <button onClick={onClose} style={{ position: "absolute", top: 14, left: 14, width: 36, height: 36, borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.12)", color: "#fff", fontSize: 20, cursor: "pointer", zIndex: 2 }}>←</button>
         {pro.is_sponsored && <div style={{ position: "absolute", top: 16, right: 16, background: G.or, color: "#111", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 50 }}>★ SPONSORISÉ</div>}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 20 }}>
           {pro.photo_url
             ? <img src={pro.photo_url} alt="" style={{ width: 96, height: 96, borderRadius: 20, objectFit: "cover", border: `2px solid ${G.or}` }} />
-            : <div style={{ width: 96, height: 96, borderRadius: 20, background: "#2C1A0E", color: G.or, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, fontWeight: 800 }}>{(pro.company || pro.name || "?").charAt(0).toUpperCase()}</div>}
+            : <div style={{ width: 96, height: 96, borderRadius: 20, background: "#121218", color: G.or, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, fontWeight: 800 }}>{(pro.company || pro.name || "?").charAt(0).toUpperCase()}</div>}
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12 }}>
             <span style={{ fontSize: "1.3rem", fontWeight: 900, color: "#fff" }}>{pro.company || pro.name}</span>
             {pro.is_verified && <VerifiedBadge size={18} />}
