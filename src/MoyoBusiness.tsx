@@ -14961,9 +14961,17 @@ const PUB_CATS = [
 const BIZ_CATEGORIES = PUB_CATS.filter(c => c.id !== "all");
 const PUB_VILLES = VILLES.filter(v => !v.startsWith("──"));
 
+// Localisation hiérarchique : Ville → Arrondissements (pour la proposition de service).
+const ARRONDISSEMENTS: Record<string, string[]> = {
+  "Brazzaville": ["Makélékélé", "Bacongo", "Poto-Poto", "Moungali", "Ouenzé", "Talangaï", "Mfilou", "Madibou", "Djiri"],
+  "Pointe-Noire": ["Lumumba", "Mvoumvou", "Tié-Tié", "Loandjili", "Mongo-Mpoukou", "Ngoyo"],
+};
+// Villes principales (sélecteur « Ville » de la localisation, hors arrondissements/quartiers).
+const VILLES_PRINCIPALES = ["Brazzaville", "Pointe-Noire", "Dolisie", "Nkayi", "Oyo", "Owando", "Impfondo", "Ouesso", "Sibiti", "Mossendjo", "Gamboma", "Ewo", "Madingou", "Djambala", "Kinkala", "Mossaka", "Odziba", "Kintélé", "Pointe-Indienne", "AUTRES"];
+
 type Publication = {
   id: string; user_id: string; type: "cherche" | "propose"; category: string;
-  title: string; description: string; budget?: number | null; city: string; location?: string | null;
+  title: string; description: string; budget?: number | null; city: string; location?: string | null; metier?: string | null; photos?: string[] | null;
   is_boosted?: boolean; boosted_until?: string | null; status?: string; created_at?: string;
   author?: { id: string; name: string; photo_url?: string | null; city?: string; profession?: string; is_verified?: boolean };
 };
@@ -15058,33 +15066,113 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile }: { pub: Publicat
 function PublishModal({ auth, onClose, onPublished, embedded, presetType }: { auth: Auth; onClose: () => void; onPublished: (p: Publication) => void; embedded?: boolean; presetType?: "cherche" | "propose" }) {
   const [type, setType] = useState<"cherche" | "propose">(presetType || "cherche");
   const [cat, setCat] = useState("BTP");
+  const [metier, setMetier] = useState<string>(() => metiersForCategory("BTP")[0] || "");
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [budget, setBudget] = useState("");
-  const [city, setCity] = useState<string>(PUB_VILLES[0] || "Brazzaville");
-  const [loc, setLoc] = useState("");
+  const [city, setCity] = useState<string>("Brazzaville");
+  const [arrond, setArrond] = useState<string>("");
+  const [quartier, setQuartier] = useState<string>("");
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const ok = !!(title.trim() && desc.trim() && budget && city);
+  const photoInput = useRef<HTMLInputElement>(null);
+
+  const arrOptions = ARRONDISSEMENTS[city] || [];
+  const hasArr = arrOptions.length > 0;
+  const isPropose = type === "propose";
+  const okLoc = isPropose ? (!!city && (!hasArr || !!arrond)) : !!city;
+  const ok = !!(title.trim() && desc.trim() && budget && cat && metier && okLoc);
+
+  // Quand la catégorie change, on réaligne le métier sur la liste de cette catégorie.
+  useEffect(() => {
+    const list = metiersForCategory(cat);
+    if (!list.includes(metier)) setMetier(list[0] || "");
+  }, [cat]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Quand la ville change, on réinitialise arrondissement + quartier.
+  useEffect(() => { setArrond(""); setQuartier(""); }, [city]);
+
+  async function addPhotos(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setUploading(true);
+    const slots = Math.max(0, 5 - photos.length);
+    const added: string[] = [];
+    for (const file of files.slice(0, slots)) {
+      try {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `${auth.userId}/pub_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.${ext}`;
+        const up = await fetch(`${SUPABASE_URL}/storage/v1/object/avatars/${path}`, { method: "POST", headers: { "Authorization": `Bearer ${auth.token}`, "Content-Type": file.type || "image/jpeg", "x-upsert": "true" }, body: file });
+        if (up.ok) added.push(`${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`);
+      } catch { /* on ignore les échecs d'upload individuels */ }
+    }
+    if (added.length) setPhotos(p => [...p, ...added].slice(0, 5));
+    setUploading(false);
+    if (photoInput.current) photoInput.current.value = "";
+  }
 
   async function submit() {
     if (!ok) return;
     setSaving(true);
+    const locParts = isPropose ? [arrond, quartier].filter(x => x && x !== "Autre") : [];
+    const base = {
+      user_id: auth.userId, type, category: cat, title: title.trim(), description: desc.trim(),
+      budget: parseInt(budget, 10) || null, city, location: locParts.join(" · ") || null, status: "active",
+    };
+    // Insertion défensive : on tente avec les champs optionnels (metier/photos) ; si la colonne
+    // n'existe pas encore en base, on retente progressivement sans, pour ne jamais bloquer la publication.
+    const attempts: object[] = [
+      { ...base, metier, photos: photos.length ? photos : null },
+      { ...base, metier },
+      base,
+    ];
     try {
-      const rows = await sb.insert<Publication>(auth.token, "publications", {
-        user_id: auth.userId, type, category: cat, title: title.trim(), description: desc.trim(),
-        budget: parseInt(budget, 10) || null, city, location: loc.trim() || null, status: "active",
-      }, auth.refreshToken);
-      onPublished(rows[0] || ({ id: "", user_id: auth.userId, type, category: cat, title, description: desc, city } as Publication));
+      let row: Publication | undefined;
+      for (const payload of attempts) {
+        const rows = await sb.insert<Publication>(auth.token, "publications", payload, auth.refreshToken);
+        if (rows[0] && (rows[0] as { id?: string }).id) { row = rows[0]; break; }
+      }
+      onPublished(row || ({ id: "", user_id: auth.userId, type, category: cat, title, description: desc, city } as Publication));
     } catch { setSaving(false); }
   }
 
-  const ta: React.CSSProperties = { width: "100%", boxSizing: "border-box", marginTop: 7, marginBottom: 16, padding: 13, border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: 16, fontFamily: "inherit", resize: "vertical", background: G.blanc, color: "#111" };
+  const headerTitle = isPropose ? "Proposer un service" : presetType === "cherche" ? "Publier votre besoin" : "Publier une annonce";
 
-  const headerTitle = presetType === "cherche" ? "Je cherche un professionnel" : presetType === "propose" ? "Je propose mes services" : "Publier une annonce";
+  const lbl = (txt: string) => <label style={{ display: "block", fontWeight: 700, fontSize: "0.9rem", color: "#1A1A1A", marginBottom: 8 }}>{txt} <span style={{ color: "#E11D48" }}>*</span></label>;
+  const fieldSel: React.CSSProperties = { width: "100%", appearance: "none", WebkitAppearance: "none", MozAppearance: "none", border: `1.5px solid ${G.gris}`, background: G.blanc, color: "#1A1A1A", borderRadius: 14, padding: "15px 42px 15px 48px", fontSize: 16, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxSizing: "border-box" };
+  const fieldInput: React.CSSProperties = { width: "100%", border: `1.5px solid ${G.gris}`, background: G.blanc, color: "#1A1A1A", borderRadius: 14, padding: "15px 16px", fontSize: 16, fontWeight: 500, fontFamily: "inherit", boxSizing: "border-box", outline: "none" };
+  const iconLeft = (node: React.ReactNode) => <span style={{ position: "absolute", left: 15, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", display: "flex" }}>{node}</span>;
+  const chevronRight = <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", display: "flex" }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>;
+
+  // Ligne d'un sélecteur de localisation (icône + label + valeur + chevron, select transparent par-dessus).
+  const locRow = (icon: React.ReactNode, label: string, value: string, placeholder: string, options: string[], onChange: (v: string) => void, last: boolean) => (
+    <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12, padding: "13px 15px", borderBottom: last ? "none" : `1px solid ${G.gris}` }}>
+      <span style={{ display: "flex", flexShrink: 0 }}>{icon}</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: "0.74rem", color: "#9AA0A6", fontWeight: 600 }}>{label}</div>
+        <div style={{ fontSize: "0.95rem", color: value ? "#1A1A1A" : "#9AA0A6", fontWeight: value ? 700 : 500 }}>{value || placeholder}</div>
+      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
+      <select value={value} onChange={e => onChange(e.target.value)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
+        <option value="">{placeholder}</option>
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
+      </select>
+    </div>
+  );
 
   const body = (
     <>
-      {!presetType && (
+      {presetType ? (
+        <div style={{ borderRadius: 18, padding: "22px 18px", marginBottom: 22, textAlign: "center", background: "#08080D", boxShadow: "0 10px 24px rgba(8,8,13,0.28)" }}>
+          <div style={{ marginBottom: 8, display: "flex", justifyContent: "center" }}>
+            {isPropose
+              ? <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+              : <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>}
+          </div>
+          <div style={{ color: "#fff", fontWeight: 800, fontSize: "1.05rem" }}>{isPropose ? "Je propose" : "Je recherche"}</div>
+          <div style={{ color: "rgba(255,255,255,0.78)", fontSize: "0.9rem", marginTop: 2 }}>{isPropose ? "un service" : "un professionnel"}</div>
+        </div>
+      ) : (
         <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
           {(["cherche", "propose"] as const).map(t => (
             <div key={t} onClick={() => setType(t)} style={{ flex: 1, padding: "13px 10px", borderRadius: 12, cursor: "pointer", textAlign: "center", border: `1.5px solid ${type === t ? (t === "propose" ? G.vert : "#111") : G.gris}`, background: type === t ? (t === "propose" ? G.vert : "#111") : G.blanc, color: type === t ? "#fff" : "#111" }}>
@@ -15094,45 +15182,116 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType }: { au
           ))}
         </div>
       )}
-      <label style={{ fontWeight: 600, fontSize: "0.88rem", color: "#555" }}>Catégorie</label>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, margin: "7px 0 16px" }}>
-        {PUB_CATS.filter(c => c.id !== "all").map(c => (
-          <button key={c.id} onClick={() => setCat(c.id)} style={{ border: `1.5px solid ${cat === c.id ? "#111" : G.gris}`, background: cat === c.id ? "#111" : G.blanc, color: cat === c.id ? "#fff" : "#666", borderRadius: 50, padding: "7px 13px", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer" }}>{c.label}</button>
-        ))}
+
+      {lbl("Catégorie")}
+      <div style={{ position: "relative", marginBottom: 18 }}>
+        {iconLeft(catIcon(cat, G.or, 22))}
+        <select value={cat} onChange={e => setCat(e.target.value)} style={fieldSel}>
+          {PUB_CATS.filter(c => c.id !== "all").map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+        </select>
+        {chevronRight}
       </div>
-      <Input label={type === "cherche" ? "Titre de l'annonce" : "Votre service / métier"} value={title} onChange={e => setTitle(e.target.value)} placeholder={type === "cherche" ? "Ex : Cherche maçon pour une dalle" : "Ex : Maçon - 12 ans d'expérience"} />
-      <label style={{ fontWeight: 600, fontSize: "0.88rem", color: "#555" }}>Description</label>
-      <textarea value={desc} onChange={e => setDesc(e.target.value)} rows={3} placeholder="Détails, surface, délais, matériaux fournis…" style={ta} />
-      <Input label={type === "cherche" ? "Budget (FCFA)" : "Tarif à partir de (FCFA)"} type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="300000" />
-      <div style={{ display: "flex", gap: 10 }}>
-        <div style={{ flex: 1 }}>
-          <label style={{ fontWeight: 600, fontSize: "0.88rem", color: "#555" }}>Ville</label>
-          <select value={city} onChange={e => setCity(e.target.value)} style={{ width: "100%", marginTop: 7, padding: 13, border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: 16, background: G.blanc, color: "#111" }}>
-            {PUB_VILLES.map(v => <option key={v} value={v}>{v}</option>)}
-          </select>
-        </div>
-        <div style={{ flex: 1 }}>
-          <label style={{ fontWeight: 600, fontSize: "0.88rem", color: "#555" }}>Quartier</label>
-          <select value={loc} onChange={e => setLoc(e.target.value)} style={{ width: "100%", marginTop: 7, padding: 13, border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: 16, background: G.blanc, color: "#111" }}>
-            <option value="">— Choisir —</option>
-            {PUB_VILLES.map(v => <option key={v} value={v}>{v}</option>)}
-          </select>
+
+      {lbl("Métier")}
+      <div style={{ position: "relative", marginBottom: 18 }}>
+        {iconLeft(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>)}
+        <select value={metier} onChange={e => setMetier(e.target.value)} style={fieldSel}>
+          {metiersForCategory(cat).map(m => <option key={m} value={m}>{m}</option>)}
+        </select>
+        {chevronRight}
+      </div>
+
+      {lbl(isPropose ? "Nom de votre service" : "Titre de l'annonce")}
+      <input value={title} onChange={e => setTitle(e.target.value)} placeholder={isPropose ? "Ex : Travaux de maçonnerie générale" : "Ex : Recherche maçon pour une dalle"} style={{ ...fieldInput, marginBottom: 18 }} />
+
+      {lbl("Description")}
+      <div style={{ position: "relative", marginBottom: 18 }}>
+        <textarea value={desc} onChange={e => setDesc(e.target.value.slice(0, 500))} rows={4} maxLength={500} placeholder={isPropose ? "Décrivez votre service, vos compétences, vos méthodes…" : "Détails, surface, délais, matériaux fournis…"} style={{ ...fieldInput, resize: "vertical", paddingBottom: 28 }} />
+        <span style={{ position: "absolute", right: 14, bottom: 14, fontSize: "0.75rem", color: "#9AA0A6", pointerEvents: "none" }}>{desc.length}/500</span>
+      </div>
+
+      {lbl(isPropose ? "Tarif indicatif (FCFA)" : "Budget (FCFA)")}
+      <div style={{ position: "relative", marginBottom: 18 }}>
+        {iconLeft(isPropose
+          ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="M21 12a2 2 0 0 0-2-2h-4a2 2 0 0 0 0 4h4a2 2 0 0 0 2-2z"/></svg>)}
+        <input type="number" inputMode="numeric" value={budget} onChange={e => setBudget(e.target.value)} placeholder={isPropose ? "Ex : à partir de 50 000" : "300000"} style={{ ...fieldSel, cursor: "text", padding: "15px 64px 15px 48px", fontWeight: 500 }} />
+        <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", color: "#9AA0A6", fontSize: 14, fontWeight: 700, pointerEvents: "none" }}>FCFA</span>
+      </div>
+
+      {isPropose ? (
+        <>
+          {lbl("Localisation")}
+          <div style={{ border: `1.5px solid ${G.gris}`, borderRadius: 14, background: G.blanc, marginBottom: 18, overflow: "hidden" }}>
+            {locRow(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, "Ville", city, "Sélectionnez une ville", VILLES_PRINCIPALES, setCity, false)}
+            {locRow(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M8 10h.01M16 10h.01M12 10h.01M8 14h.01M16 14h.01M12 14h.01"/></svg>, "Arrondissement", arrond, hasArr ? "Sélectionnez un arrondissement" : "—", arrOptions, setArrond, false)}
+            {locRow(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/></svg>, "Quartier", quartier, "Sélectionnez un quartier", ["Autre"], setQuartier, true)}
+          </div>
+
+          <label style={{ display: "block", fontWeight: 700, fontSize: "0.9rem", color: "#1A1A1A", marginBottom: 8 }}>Photos <span style={{ color: "#9AA0A6", fontWeight: 500 }}>(optionnel)</span></label>
+          <div style={{ border: `1.5px solid ${G.gris}`, borderRadius: 14, background: G.blanc, padding: "14px 15px", marginBottom: 18 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5a2 2 0 0 0-2.8 0L5 21"/></svg>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: "0.92rem", fontWeight: 700, color: "#1A1A1A", lineHeight: 1.3 }}>Ajouter des photos de vos réalisations</div>
+                <div style={{ fontSize: "0.78rem", color: "#9AA0A6", marginTop: 2 }}>Jusqu'à 5 photos</div>
+              </div>
+              <button onClick={() => photoInput.current?.click()} disabled={photos.length >= 5 || uploading} aria-label="Ajouter une photo" style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 12, border: "none", background: "rgba(212,168,67,0.16)", color: G.or, cursor: photos.length >= 5 || uploading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: photos.length >= 5 ? 0.5 : 1 }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
+            <input ref={photoInput} type="file" accept="image/*" multiple onChange={addPhotos} style={{ display: "none" }} />
+            {(photos.length > 0 || uploading) && (
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+                {photos.map((u, i) => (
+                  <div key={i} style={{ position: "relative", width: 64, height: 64, borderRadius: 10, overflow: "hidden", border: `1px solid ${G.gris}` }}>
+                    <img src={u} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <button onClick={() => setPhotos(p => p.filter((_, j) => j !== i))} aria-label="Retirer" style={{ position: "absolute", top: 2, right: 2, width: 20, height: 20, borderRadius: "50%", border: "none", background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: 12, lineHeight: "20px", cursor: "pointer", padding: 0 }}>×</button>
+                  </div>
+                ))}
+                {uploading && <div style={{ width: 64, height: 64, borderRadius: 10, border: `1px dashed ${G.gris}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", color: "#9AA0A6" }}>Envoi…</div>}
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          {lbl("Ville")}
+          <div style={{ position: "relative", marginBottom: 18 }}>
+            {iconLeft(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>)}
+            <select value={city} onChange={e => setCity(e.target.value)} style={fieldSel}>
+              {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
+            </select>
+            {chevronRight}
+          </div>
+        </>
+      )}
+
+      <div style={{ display: "flex", gap: 12, alignItems: "flex-start", background: "rgba(212,168,67,0.1)", border: "1px solid rgba(212,168,67,0.35)", borderRadius: 14, padding: "14px 15px", marginBottom: 20 }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div style={{ fontSize: "0.84rem", lineHeight: 1.45, color: "#5b4a1e" }}>
+          <b style={{ color: "#3d3210" }}>Vos informations restent confidentielles</b><br />
+          {isPropose ? "Seuls les clients intéressés pourront vous contacter." : "Seuls les professionnels intéressés pourront vous contacter."}
         </div>
       </div>
-      <Btn variant="gold" onClick={submit} disabled={!ok} loading={saving} style={{ width: "100%", marginTop: 8 }}>Publier l'annonce</Btn>
+
+      <Btn variant="gold" onClick={submit} disabled={!ok} loading={saving} style={{ width: "100%", padding: "16px", fontSize: "1rem", fontWeight: 800, borderRadius: 14, boxShadow: "0 8px 20px rgba(212,168,67,0.35)" }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        {isPropose ? "Publier mon service" : "Publier l'annonce"}
+      </Btn>
     </>
   );
 
   if (embedded) {
     return (
       <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
-        <div style={{ position: "sticky", top: 0, zIndex: 5, background: G.creme, display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", borderBottom: `1px solid ${G.gris}` }}>
-          <button onClick={onClose} aria-label="Retour" style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: G.blanc, boxShadow: "0 1px 4px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <div style={{ position: "sticky", top: 0, zIndex: 5, background: G.creme, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "16px 18px", borderBottom: `1px solid ${G.gris}` }}>
+          <h3 style={{ fontSize: 18, fontWeight: 900, margin: 0, color: "#1A1A1A" }}>{headerTitle}</h3>
+          <button onClick={onClose} aria-label="Fermer" style={{ width: 32, height: 32, borderRadius: "50%", border: "none", background: G.gris, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
-          <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>{headerTitle}</h3>
         </div>
-        <div style={{ padding: "16px 20px 28px" }}>{body}</div>
+        <div style={{ padding: "18px 18px 32px" }}>{body}</div>
       </div>
     );
   }
