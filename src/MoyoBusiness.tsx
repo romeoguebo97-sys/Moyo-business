@@ -20,10 +20,17 @@ async function saveSetting(key: string, value: string, token: string): Promise<b
 const APP_URL = "https://moyo-business.vercel.app/";
 
 const VILLES = [
-  "Brazzaville","Pointe-Noire","Dolisie","Nkayi","Owando",
-  "Ouesso","Impfondo","Sibiti","Djambala","Kinkala",
-  "Ewo","Gamboma","Madingou","Mossaka","Odziba",
+  "── Brazzaville ──",
+  "Brazzaville",
+  "Makélékélé","Bacongo","Poto-Poto","Moungali","Ouenzé","Talangaï","Mfilou","Madibou","Djiri","Kintélé",
+  "── Pointe-Noire ──",
+  "Pointe-Noire",
+  "Lumumba","Mvoumvou","Tié-Tié","Loandjili","Mongo-Mpoukou","Ngoyo","Pointe-Indienne",
+  "── Autres villes ──",
+  "Dolisie","Nkayi","Oyo","Owando","Impfondo","Ouesso","Sibiti","Mossendjo","Gamboma","Ewo","Madingou","Djambala","Kinkala","Mossaka","Odziba",
+  "── Diaspora ──",
   "Diaspora Europe","Diaspora Amérique","Diaspora Asie / Océanie","Diaspora Afrique (autre pays)",
+  "AUTRES",
 ];
 
 const CONTACT_PATTERNS = [
@@ -1769,6 +1776,8 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         .mb-field:focus-within{border-color:var(--or);}
         .mb-field-ic{display:flex;align-items:center;color:rgba(255,255,255,0.42);flex-shrink:0;}
         .mb-field input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:#fff;font-size:15px;font-family:inherit;padding:15px 0;}
+        .mb-field select{flex:1;min-width:0;background:transparent;border:none;outline:none;color:#fff;font-size:15px;font-family:inherit;padding:15px 22px 15px 0;-webkit-appearance:none;appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ffffff88' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right center;}
+        .mb-field select option{color:#111;background:#fff;}
         .mb-field input::placeholder{color:rgba(255,255,255,0.42);}
         .mb-search-go{width:100%;background:var(--or);color:var(--nuit);border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .16s ease;}
         .mb-search-go:hover{background:#C29735;}
@@ -1942,24 +1951,14 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
             <span className="mb-field-ic">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             </span>
-            <input
-              placeholder="Lieu de la mission (ex : Brazzaville, Pointe-Noire…)"
+            <select
               value={lcity}
-              onChange={e => { setLcity(e.target.value); setCityOpen(true); setSugOpen(false); }}
-              onFocus={() => { setCityOpen(true); setSugOpen(false); }}
-              onBlur={() => setCityOpen(false)}
-              autoComplete="off"
-            />
-            {cityOpen && citySuggestions.length > 0 && (
-              <div className="mb-sug">
-                {citySuggestions.map(c => (
-                  <div key={c} className="mb-sug-item" onMouseDown={e => { e.preventDefault(); setLcity(c); setCityOpen(false); }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6, flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    <span>{c}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+              onChange={e => { setLcity(e.target.value); setCityOpen(false); setSugOpen(false); }}
+              onFocus={() => { setCityOpen(false); setSugOpen(false); }}
+            >
+              <option value="">Toutes les villes</option>
+              {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
           <button className="mb-search-go" onClick={() => { setSugOpen(false); setCityOpen(false); (document.activeElement as HTMLElement | null)?.blur?.(); }}>
             Rechercher
@@ -7561,7 +7560,10 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
 
         {isPro && <>
           <label style={L}>Zone d'intervention <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
-          <input value={form.zone || ""} onChange={e => setForm(f => ({ ...f, zone: e.target.value.slice(0, 80) }))} placeholder="Ex : Brazzaville et périphérie" style={I} />
+          <select value={form.zone || ""} onChange={e => setForm(f => ({ ...f, zone: e.target.value }))} style={I}>
+            <option value="">— Choisir —</option>
+            {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
+          </select>
           <label style={L}>Horaires <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
           <input value={form.hours || ""} onChange={e => setForm(f => ({ ...f, hours: e.target.value.slice(0, 80) }))} placeholder="Ex : Lun-Sam 8h-18h" style={I} />
         </>}
@@ -15053,8 +15055,8 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile }: { pub: Publicat
   );
 }
 
-function PublishModal({ auth, onClose, onPublished }: { auth: Auth; onClose: () => void; onPublished: (p: Publication) => void }) {
-  const [type, setType] = useState<"cherche" | "propose">("cherche");
+function PublishModal({ auth, onClose, onPublished, embedded, presetType }: { auth: Auth; onClose: () => void; onPublished: (p: Publication) => void; embedded?: boolean; presetType?: "cherche" | "propose" }) {
+  const [type, setType] = useState<"cherche" | "propose">(presetType || "cherche");
   const [cat, setCat] = useState("BTP");
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
@@ -15078,16 +15080,20 @@ function PublishModal({ auth, onClose, onPublished }: { auth: Auth; onClose: () 
 
   const ta: React.CSSProperties = { width: "100%", boxSizing: "border-box", marginTop: 7, marginBottom: 16, padding: 13, border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: 16, fontFamily: "inherit", resize: "vertical", background: G.blanc, color: "#111" };
 
-  return (
-    <Sheet title="Publier une annonce" onClose={onClose}>
-      <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
-        {(["cherche", "propose"] as const).map(t => (
-          <div key={t} onClick={() => setType(t)} style={{ flex: 1, padding: "13px 10px", borderRadius: 12, cursor: "pointer", textAlign: "center", border: `1.5px solid ${type === t ? (t === "propose" ? G.vert : "#111") : G.gris}`, background: type === t ? (t === "propose" ? G.vert : "#111") : G.blanc, color: type === t ? "#fff" : "#111" }}>
-            <b style={{ display: "block", fontSize: 14 }}>{t === "cherche" ? "Je cherche" : "Je propose"}</b>
-            <small style={{ fontSize: 11, opacity: 0.8 }}>{t === "cherche" ? "un professionnel" : "mes services"}</small>
-          </div>
-        ))}
-      </div>
+  const headerTitle = presetType === "cherche" ? "Je cherche un professionnel" : presetType === "propose" ? "Je propose mes services" : "Publier une annonce";
+
+  const body = (
+    <>
+      {!presetType && (
+        <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
+          {(["cherche", "propose"] as const).map(t => (
+            <div key={t} onClick={() => setType(t)} style={{ flex: 1, padding: "13px 10px", borderRadius: 12, cursor: "pointer", textAlign: "center", border: `1.5px solid ${type === t ? (t === "propose" ? G.vert : "#111") : G.gris}`, background: type === t ? (t === "propose" ? G.vert : "#111") : G.blanc, color: type === t ? "#fff" : "#111" }}>
+              <b style={{ display: "block", fontSize: 14 }}>{t === "cherche" ? "Je cherche" : "Je propose"}</b>
+              <small style={{ fontSize: 11, opacity: 0.8 }}>{t === "cherche" ? "un professionnel" : "mes services"}</small>
+            </div>
+          ))}
+        </div>
+      )}
       <label style={{ fontWeight: 600, fontSize: "0.88rem", color: "#555" }}>Catégorie</label>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, margin: "7px 0 16px" }}>
         {PUB_CATS.filter(c => c.id !== "all").map(c => (
@@ -15105,9 +15111,35 @@ function PublishModal({ auth, onClose, onPublished }: { auth: Auth; onClose: () 
             {PUB_VILLES.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
         </div>
-        <div style={{ flex: 1 }}><Input label="Quartier" value={loc} onChange={e => setLoc(e.target.value)} placeholder="Poto-Poto" /></div>
+        <div style={{ flex: 1 }}>
+          <label style={{ fontWeight: 600, fontSize: "0.88rem", color: "#555" }}>Quartier</label>
+          <select value={loc} onChange={e => setLoc(e.target.value)} style={{ width: "100%", marginTop: 7, padding: 13, border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: 16, background: G.blanc, color: "#111" }}>
+            <option value="">— Choisir —</option>
+            {PUB_VILLES.map(v => <option key={v} value={v}>{v}</option>)}
+          </select>
+        </div>
       </div>
       <Btn variant="gold" onClick={submit} disabled={!ok} loading={saving} style={{ width: "100%", marginTop: 8 }}>Publier l'annonce</Btn>
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
+        <div style={{ position: "sticky", top: 0, zIndex: 5, background: G.creme, display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", borderBottom: `1px solid ${G.gris}` }}>
+          <button onClick={onClose} aria-label="Retour" style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: G.blanc, boxShadow: "0 1px 4px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>{headerTitle}</h3>
+        </div>
+        <div style={{ padding: "16px 20px 28px" }}>{body}</div>
+      </div>
+    );
+  }
+
+  return (
+    <Sheet title="Publier une annonce" onClose={onClose}>
+      {body}
     </Sheet>
   );
 }
@@ -15340,6 +15372,97 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
       {boostTarget && <BoostModal auth={auth} pub={boostTarget} onClose={() => setBoostTarget(null)} onBoosted={() => { setBoostTarget(null); setToast("Annonce mise en avant ✓"); load(); }} />}
       {openFiche && <ProFiche auth={auth} pro={openFiche} onClose={() => setOpenFiche(null)} onGoMessages={onGoMessages} onToast={(m) => setToast(m)} isFav={false} onToggleFav={() => {}} />}
       {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
+    </div>
+  );
+}
+
+/* ============================================================================
+   MOYO BUSINESS — HUB PUBLIER : menu à 3 choix (rendu DANS le shell → navbar visible)
+   1) Je cherche un professionnel  2) Je propose mes services  3) Voir mes publications
+============================================================================ */
+function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: () => void; onGoMessages: (pid: string) => void }) {
+  const [pubs, setPubs] = useState<Publication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [boostTarget, setBoostTarget] = useState<Publication | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const rows = await sb.query<Publication>(auth.token, "publications", `?user_id=eq.${auth.userId}&order=created_at.desc&select=*,author:profiles(id,name,photo_url,city,profession,is_verified)`, auth.refreshToken);
+      setPubs(rows);
+    } catch { setPubs([]); }
+    setLoading(false);
+  }, [auth.token, auth.userId, auth.refreshToken]);
+  useEffect(() => { load(); }, [load]);
+
+  return (
+    <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 5, background: G.creme, display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", borderBottom: `1px solid ${G.gris}` }}>
+        <button onClick={onBack} aria-label="Retour" style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: G.blanc, boxShadow: "0 1px 4px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Mes publications</h3>
+      </div>
+      <div style={{ padding: "14px 16px 96px", display: "flex", flexDirection: "column", gap: 14 }}>
+        {loading && <p style={{ textAlign: "center", color: "#999", padding: 22 }}>Chargement…</p>}
+        {!loading && pubs.length === 0 && (
+          <div style={{ textAlign: "center", padding: "48px 20px", color: "#999" }}>
+            <p style={{ fontWeight: 700, color: "#444", marginBottom: 6 }}>Aucune publication pour le moment</p>
+            <p style={{ fontSize: "0.85rem" }}>Vos annonces publiées apparaîtront ici.</p>
+          </div>
+        )}
+        {!loading && pubs.map(p => (
+          <PubCard key={p.id} pub={p} me={auth.userId} onContact={() => onGoMessages(p.user_id)} onBoost={() => setBoostTarget(p)} />
+        ))}
+      </div>
+      {boostTarget && <BoostModal auth={auth} pub={boostTarget} onClose={() => setBoostTarget(null)} onBoosted={() => { setBoostTarget(null); setToast("Annonce mise en avant ✓"); load(); }} />}
+      {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
+    </div>
+  );
+}
+
+function PublierHub({ auth, onGoFeed, onGoMessages }: { auth: Auth; onGoFeed: () => void; onGoMessages: (pid: string) => void }) {
+  const [view, setView] = useState<"menu" | "cherche" | "propose" | "mes">("menu");
+
+  if (view === "cherche" || view === "propose") {
+    return <PublishModal auth={auth} embedded presetType={view} onClose={() => setView("menu")} onPublished={() => { setView("menu"); onGoFeed(); }} />;
+  }
+  if (view === "mes") {
+    return <MyPublications auth={auth} onBack={() => setView("menu")} onGoMessages={onGoMessages} />;
+  }
+
+  const items: { key: "cherche" | "propose" | "mes"; title: string; sub: string; tint: string; bg: string; icon: React.ReactNode }[] = [
+    {
+      key: "cherche", title: "Je cherche un professionnel", sub: "Publiez un besoin et recevez des propositions", tint: "#111", bg: "rgba(17,17,17,0.08)",
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>,
+    },
+    {
+      key: "propose", title: "Je propose mes services", sub: "Mettez votre activité en avant auprès des clients", tint: G.vert, bg: "rgba(22,163,74,0.12)",
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>,
+    },
+    {
+      key: "mes", title: "Voir mes publications", sub: "Gérez et boostez vos annonces", tint: G.or, bg: "rgba(212,168,67,0.16)",
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+    },
+  ];
+
+  return (
+    <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", padding: "22px 16px 96px" }}>
+      <h2 style={{ fontSize: "1.5rem", fontWeight: 900, color: "#1A1A1A", margin: "0 0 4px", letterSpacing: "-0.5px" }}>Publier</h2>
+      <p style={{ fontSize: "0.92rem", color: "#6B7280", margin: "0 0 22px" }}>Que souhaitez-vous faire ?</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {items.map(it => (
+          <button key={it.key} onClick={() => setView(it.key)} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", textAlign: "left", cursor: "pointer", background: G.blanc, border: `1px solid ${G.gris}`, borderRadius: 18, padding: "18px 16px", boxShadow: "0 2px 10px rgba(0,0,0,0.04)", fontFamily: "inherit" }}>
+            <div style={{ width: 52, height: 52, flexShrink: 0, borderRadius: 14, background: it.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>{it.icon}</div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: "1rem", fontWeight: 800, color: "#1A1A1A", marginBottom: 3, letterSpacing: "-0.2px" }}>{it.title}</div>
+              <div style={{ fontSize: "0.8rem", lineHeight: 1.35, color: "#6B7280" }}>{it.sub}</div>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9CDD3" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -16441,9 +16564,10 @@ export default function App() {
       }
       if (t === "likes") { setLikesReceived(0); try { localStorage.setItem(`moyo_likes_seen_${auth!.userId}`, new Date().toISOString()); } catch {} }
       if (t === "visitors") { setViewsReceived(0); try { localStorage.setItem(`moyo_visitors_seen_${auth!.userId}`, new Date().toISOString()); } catch {} }
-    }} unreadCount={unreadCount} notifCount={notifCount} likesReceived={likesReceived} viewsReceived={viewsReceived} auth={auth} adminBadgeCount={adminBadgeCount} showAdminConfig={showAdminConfig} setShowAdminConfig={setShowAdminConfig} inConv={inConv} onPublish={() => { setTab("publications"); setPublishNonce(n => n + 1); }}>
+    }} unreadCount={unreadCount} notifCount={notifCount} likesReceived={likesReceived} viewsReceived={viewsReceived} auth={auth} adminBadgeCount={adminBadgeCount} showAdminConfig={showAdminConfig} setShowAdminConfig={setShowAdminConfig} inConv={inConv} onPublish={() => { setTab("publier"); }}>
       <div key={tab} className="page-anim" style={{ width: "100%", height: "100%" }}>
       {tab === "publications" && <Publications auth={auth} publishNonce={publishNonce} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
+      {tab === "publier" && <PublierHub auth={auth} onGoFeed={() => setTab("publications")} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "discover" && <Annuaire auth={auth} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "messages" && <Messages auth={auth} onUnreadCount={setUnreadCount} onShowPremium={showPremium} initialPartnerId={openConvPartnerId} onConvOpen={setInConv} />}
       {tab === "profile" && <Profile auth={auth} onLogout={handleLogout} onShowPremium={showPremium} darkMode={darkMode} onToggleDark={() => { const v = !darkMode; setDarkMode(v); localStorage.setItem("moyo_dark", v ? "1" : "0"); }} onOpenAdmin={auth.isAdmin ? () => openAdminPanel(() => setTab("admin")) : undefined} adminBadgeCount={adminBadgeCount} />}
