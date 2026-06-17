@@ -131,7 +131,7 @@ const getModerationMessage = (type: "insult" | "scam" | "sexual"): string => {
 const MSG_BG_STYLE: React.CSSProperties = {
   position: "relative",
 };
-const SUPER_ADMIN_ID = "1d7a2e08-4454-43ea-8db0-4d1aeba8e69d";
+const SUPER_ADMIN_ID = "3952df97-4ba6-49b3-8bb4-8a2a2880f6ff";
 const REFERRAL_BONUS_DAYS = 7;
 // Intervalles de polling — modifiables via app_settings
 let POLL_BADGES_MS = 8000;        // Fallback badges (messages/likes/matchs/vues)
@@ -171,7 +171,6 @@ let PAY_CB_ENABLED = true;
 
 // Interrupteurs globaux de fonctionnalités (pilotés depuis Config > Général & Règles > Fonctionnalités)
 let FEATURE_STATUSES = true;
-let FEATURE_GIFT_PREMIUM = true;
 let FEATURE_ASSISTANT = true;
 // Coordonnées de paiement (modifiables depuis Config admin)
 let PAY_MTN_NUMBER = "065132012";
@@ -222,7 +221,6 @@ fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(limit_likes_free,limit_statu
   if (map["pay_airtel_enabled"] !== undefined) PAY_AIRTEL_ENABLED = map["pay_airtel_enabled"] !== "false";
   if (map["pay_cb_enabled"] !== undefined) PAY_CB_ENABLED = map["pay_cb_enabled"] !== "false";
   if (map["feature_statuses"] !== undefined) FEATURE_STATUSES = map["feature_statuses"] !== "false";
-  if (map["feature_gift_premium"] !== undefined) FEATURE_GIFT_PREMIUM = map["feature_gift_premium"] !== "false";
   if (map["feature_assistant"] !== undefined) FEATURE_ASSISTANT = map["feature_assistant"] !== "false";
   if (map["custom_banned_words"] !== undefined) buildCustomBannedRegex(map["custom_banned_words"]);
   if (map["contact_banned_words"] !== undefined) buildContactBannedRegex(map["contact_banned_words"]);
@@ -282,9 +280,6 @@ const SUPPORT_PREFIX_USER = "[SUPPORT_USER]";
 const SUPPORT_PREFIX_REPLY = "[SUPPORT_REPLY]";
 // Message envoyé automatiquement par l'Assistant Moyo lors d'une tentative de partage de contact (gratuit) — éditable depuis la config admin
 let AUTO_MOD_CONTACT_REPLY = "Bonjour, notre système informatique a détecté une tentative d'échange de coordonnées personnelles. Cette action enfreint les Conditions Générales d'Utilisation de Moyo. Le partage de coordonnées étant réservé aux membres Premium, nous vous invitons à respecter les règles de la communauté afin d'éviter toute restriction ou suppression définitive de votre compte.";
-// Demande de Premium (un non-Premium demande à son interlocuteur Premium de lui offrir)
-const GIFT_REQUEST_PREFIX = "[GIFTREQ]";
-const GIFT_REQUEST_TEXT = "💝 Et si tu m'offrais Premium ? On pourrait discuter sans aucune limite 🥰";
 const isSupportReason = (reason?: string) => !!reason && (reason.startsWith(SUPPORT_PREFIX_USER) || reason.startsWith(SUPPORT_PREFIX_REPLY));
 const cleanSupportReason = (reason?: string) => (reason || "").replace(SUPPORT_PREFIX_USER, "").replace(SUPPORT_PREFIX_REPLY, "").trim();
 
@@ -1202,7 +1197,6 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
     { icon: "check2", titre: "Messages lus", desc: "Vois quand tes messages ont été lus" },
     { icon: "filter", titre: "Filtres avancés", desc: "Filtre par ville et catégorie" },
     { icon: "phone", titre: "Partage tes coordonnées", desc: "Envoie ton numéro ou email librement" },
-    { icon: "gift", titre: "Offrir Premium", desc: "Offre 1 mois de Premium à un contact" },
     { icon: "referral", titre: "Parrainer & gagner", desc: "+7 jours offerts pour chaque ami abonné" },
     { icon: "verified", titre: "Profil vérifié", desc: "Badge de confiance visible sur ton profil" },
     { icon: "support", titre: "Support prioritaire", desc: "Assistance rapide 7j/7" },
@@ -1553,6 +1547,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
   const [activeCat, setActiveCat] = React.useState("BTP");
   const [lq, setLq] = React.useState("");
   const [sugOpen, setSugOpen] = React.useState(false);
+  const [menuOpen, setMenuOpen] = React.useState(false);
   const suggestions = React.useMemo(() => {
     const q = mbNorm(lq);
     if (q.length < 1) return [] as string[];
@@ -1572,25 +1567,46 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
     scored.sort((a, b) => b.score - a.score || a.label.localeCompare(b.label));
     return scored.slice(0, 6).map(s => s.label);
   }, [lq]);
+  const [lcity, setLcity] = React.useState("");
+  const [cityOpen, setCityOpen] = React.useState(false);
+  const citySuggestions = React.useMemo(() => {
+    const list = VILLES.filter(v => !v.startsWith("──"));
+    const q = mbNorm(lcity);
+    if (!q) return list.slice(0, 6);
+    const scored: { v: string; s: number }[] = [];
+    for (const v of list) {
+      const nv = mbNorm(v);
+      if (nv === q) scored.push({ v, s: 3 });
+      else if (nv.startsWith(q)) scored.push({ v, s: 2 });
+      else if (nv.includes(q)) scored.push({ v, s: 1 });
+    }
+    scored.sort((a, b) => b.s - a.s || a.v.localeCompare(b.v));
+    return scored.slice(0, 6).map(x => x.v);
+  }, [lcity]);
   const [lres, setLres] = React.useState<{ pros: any[]; pubs: any[] } | null>(null);
   const [lsearching, setLsearching] = React.useState(false);
   React.useEffect(() => {
     const term = lq.trim();
-    if (!term) { setLres(null); setLsearching(false); return; }
+    const city = lcity.trim();
+    if (!term && !city) { setLres(null); setLsearching(false); return; }
     setLsearching(true);
     const h = setTimeout(async () => {
       const v = encodeURIComponent(term);
+      const vcity = encodeURIComponent(city);
+      const cityP = city ? `&city=ilike.*${vcity}*` : "";
+      const termPro = term ? `&or=(company.ilike.*${v}*,metier.ilike.*${v}*,name.ilike.*${v}*,category.ilike.*${v}*)` : "";
+      const termPub = term ? `&or=(title.ilike.*${v}*,description.ilike.*${v}*,category.ilike.*${v}*)` : "";
       try {
         const [pros, pubs] = await Promise.all([
-          sb.query<any>(SUPABASE_KEY, "profiles", `?account_type=eq.pro&is_visible=neq.false&or=(company.ilike.*${v}*,metier.ilike.*${v}*,name.ilike.*${v}*,category.ilike.*${v}*)&select=id,name,company,metier,city,category,is_verified&limit=24`),
-          sb.query<any>(SUPABASE_KEY, "publications", `?status=eq.active&or=(title.ilike.*${v}*,description.ilike.*${v}*,category.ilike.*${v}*)&order=created_at.desc&select=id,type,title,description,category,city,location,budget&limit=24`),
+          sb.query<any>(SUPABASE_KEY, "profiles", `?account_type=eq.pro&is_visible=neq.false${termPro}${cityP}&select=id,name,company,metier,city,category,is_verified&limit=24`),
+          sb.query<any>(SUPABASE_KEY, "publications", `?status=eq.active${termPub}${cityP}&order=created_at.desc&select=id,type,title,description,category,city,location,budget&limit=24`),
         ]);
         setLres({ pros: pros || [], pubs: pubs || [] });
       } catch { setLres({ pros: [], pubs: [] }); }
       finally { setLsearching(false); }
     }, 350);
     return () => clearTimeout(h);
-  }, [lq]);
+  }, [lq, lcity]);
 
   const CATS = [
     { id: "BTP", label: "BTP", ico: "mbi-btp", n: "214", np: "87" },
@@ -1717,7 +1733,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
           font-family:'Inter',-apple-system,system-ui,sans-serif; color:var(--nuit); background:var(--creme);
         }
         .mb-root *{box-sizing:border-box;}
-        .mb-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(8,8,13,0.96);backdrop-filter:blur(8px);border-bottom:1px solid rgba(212,168,67,0.15);}
+        .mb-nav{position:sticky;top:0;z-index:80;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(8,8,13,0.96);backdrop-filter:blur(8px);border-bottom:1px solid rgba(212,168,67,0.15);}
         .mb-logo{display:flex;align-items:center;gap:10px;cursor:pointer;}
         .mb-logo-ic{width:34px;height:34px;background:var(--or);border-radius:8px;display:flex;align-items:center;justify-content:center;}
         .mb-logo-tx{font-size:18px;font-weight:900;color:#fff;letter-spacing:-0.3px;}
@@ -1726,14 +1742,36 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         .mb-nav-a{color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;border:none;background:transparent;font-family:inherit;}
         .mb-nav-a:hover{color:var(--or);}
         .mb-nav-cta{background:var(--or);color:var(--nuit);font-weight:800;border-radius:8px;display:flex;align-items:center;gap:6px;}
+        .mb-nav-outline{border:1.5px solid rgba(255,255,255,0.4);border-radius:8px;}
+        .mb-nav-outline:hover{border-color:var(--or);}
+        .mb-burger{display:none;width:42px;height:42px;align-items:center;justify-content:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:11px;color:#fff;cursor:pointer;padding:0;flex-shrink:0;}
+        .mb-menu-ov{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:90;opacity:0;pointer-events:none;transition:opacity .38s ease;backdrop-filter:blur(2px);}
+        .mb-menu-ov.open{opacity:1;pointer-events:auto;}
+        .mb-drawer{position:fixed;top:0;right:0;height:100vh;height:100dvh;width:82%;max-width:330px;background:#0d0d12;border-left:1px solid rgba(212,168,67,0.18);z-index:95;display:flex;flex-direction:column;gap:10px;padding:18px 18px calc(18px + env(safe-area-inset-bottom));transform:translateX(100%);transition:transform .42s cubic-bezier(0.22,0.61,0.36,1);box-shadow:-24px 0 70px rgba(0,0,0,0.55);will-change:transform;}
+        .mb-drawer.open{transform:translateX(0);}
+        .mb-drawer-top{display:flex;align-items:center;justify-content:space-between;padding:4px 2px 14px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.08);}
+        .mb-drawer-x{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;cursor:pointer;padding:0;}
+        .mb-menu-cta{width:100%;padding:15px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.4);background:transparent;color:#fff;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;text-align:center;transition:border-color .2s ease;}
+        .mb-menu-cta:hover{border-color:var(--or);}
+        .mb-menu-cta.gold{background:var(--or);border-color:var(--or);color:var(--nuit);font-weight:800;}
+        .mb-menu-item{width:100%;padding:14px;border-radius:12px;border:none;background:transparent;color:rgba(255,255,255,0.72);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;text-align:center;}
+        .mb-menu-item:hover{color:var(--or);}
         .mb-hero{min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--nuit);padding:60px 24px;position:relative;overflow:hidden;}
         .mb-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(212,168,67,0.08),transparent 70%),radial-gradient(ellipse 40% 60% at 80% 80%,rgba(74,124,40,0.12),transparent 60%);}
         .mb-hero>*{position:relative;z-index:1;}
         .mb-badge{display:flex;align-items:center;gap:6px;background:rgba(212,168,67,0.12);border:1px solid rgba(212,168,67,0.3);color:var(--or);font-size:12px;font-weight:700;padding:6px 14px;border-radius:100px;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:26px;}
-        .mb-h1{font-size:clamp(34px,5vw,62px);font-weight:900;color:#fff;text-align:center;line-height:1.08;letter-spacing:-1.5px;max-width:720px;margin-bottom:16px;}
+        .mb-h1{font-size:clamp(34px,5vw,62px);font-weight:900;color:#fff;text-align:center;line-height:1.08;letter-spacing:-1.5px;max-width:720px;margin-bottom:26px;}
         .mb-h1 span{color:var(--or);}
         .mb-sub{font-size:16px;color:rgba(255,255,255,0.5);text-align:center;max-width:440px;line-height:1.6;margin-bottom:36px;}
-        .mb-search{width:100%;max-width:600px;position:relative;margin-bottom:18px;z-index:60;}
+        .mb-search{width:100%;max-width:600px;position:relative;margin-top:8px;margin-bottom:26px;z-index:60;}
+        .mb-searchcard{width:100%;max-width:600px;margin:8px auto 26px;position:relative;z-index:60;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:8px;display:flex;flex-direction:column;gap:6px;box-shadow:0 14px 46px rgba(0,0,0,0.32);}
+        .mb-field{position:relative;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:0 14px;transition:border-color .18s ease;}
+        .mb-field:focus-within{border-color:var(--or);}
+        .mb-field-ic{display:flex;align-items:center;color:rgba(255,255,255,0.42);flex-shrink:0;}
+        .mb-field input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:#fff;font-size:15px;font-family:inherit;padding:15px 0;}
+        .mb-field input::placeholder{color:rgba(255,255,255,0.42);}
+        .mb-search-go{width:100%;background:var(--or);color:var(--nuit);border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .16s ease;}
+        .mb-search-go:hover{background:#C29735;}
         .mb-search input{width:100%;padding:17px 60px 17px 50px;font-size:16px;font-family:inherit;border:2px solid rgba(255,255,255,0.1);border-radius:14px;background:rgba(255,255,255,0.06);color:#fff;outline:none;}
         .mb-search input::placeholder{color:rgba(255,255,255,0.3);}
         .mb-search input:focus{border-color:var(--or);}
@@ -1797,14 +1835,15 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         .mb-final p{font-size:15px;color:rgba(255,255,255,0.45);margin-bottom:28px;}
         @media(max-width:768px){
           .mb-nav{padding:12px 16px;}
+          .mb-burger{display:flex;}
           .mb-nav-a.hide-m{display:none;}
-          .mb-hero{min-height:auto;padding:40px 18px 48px;}
+          .mb-hero{min-height:auto;padding:48px 18px 56px;}
           .mb-h1{font-size:30px;letter-spacing:-0.8px;}
           .mb-sub{display:none;}
           .mb-search input{padding:15px 56px 15px 46px;font-size:15px;}
           .mb-cta-row{flex-direction:column;width:100%;max-width:360px;margin:30px auto 0;align-items:center;}
           .mb-cta-row button{width:100%;}
-          .mb-stats{gap:20px;margin-top:36px;padding-top:24px;}
+          .mb-stats{gap:20px;margin-top:44px;padding-top:28px;}
           .mb-stat b{font-size:22px;}
           .mb-sec{padding:44px 16px;}
           .mb-cats{grid-template-columns:repeat(3,1fr);gap:10px;}
@@ -1848,42 +1887,84 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
           <span className="mb-logo-tx">Moyo <span>Business</span></span>
         </div>
         <div className="mb-nav-r">
-          <button className="mb-nav-a hide-m" onClick={() => onNav("about")}>À propos</button>
-          <button className="mb-nav-a mb-nav-cta" onClick={() => onNav("login")}>
-            Me connecter
+          <button className="mb-nav-a hide-m" onClick={() => onNav("about")}>Qui sommes-nous</button>
+          <button className="mb-nav-a mb-nav-cta hide-m" onClick={() => onNav("signup")}>Créer mon compte</button>
+          <button className="mb-nav-a mb-nav-outline hide-m" onClick={() => onNav("login")}>Me connecter</button>
+          <button className="mb-burger" aria-label="Menu" onClick={() => setMenuOpen(o => !o)}>
+            {menuOpen ? (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            ) : (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+            )}
           </button>
+        </div>
+        <div className={`mb-menu-ov${menuOpen ? " open" : ""}`} onClick={() => setMenuOpen(false)} />
+        <div className={`mb-drawer${menuOpen ? " open" : ""}`} role="dialog" aria-hidden={!menuOpen}>
+          <div className="mb-drawer-top">
+            <span className="mb-logo-tx" style={{ fontSize: 17 }}>Moyo <span>Business</span></span>
+            <button className="mb-drawer-x" aria-label="Fermer" onClick={() => setMenuOpen(false)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <button className="mb-menu-cta" onClick={() => { setMenuOpen(false); onNav("login"); }}>Me connecter</button>
+          <button className="mb-menu-cta gold" onClick={() => { setMenuOpen(false); onNav("signup"); }}>Créer mon compte</button>
+          <button className="mb-menu-item" onClick={() => { setMenuOpen(false); onNav("about"); }}>Qui sommes-nous</button>
         </div>
       </header>
 
       {/* HERO */}
       <section className="mb-hero">
-        <div className="mb-badge">
-          <svg width="12" height="12" style={{ color: "#E8B84B" }}><use href="#mbi-flag"/></svg>
-          Congo-Brazzaville · Beta
-        </div>
-        <h1 className="mb-h1">Connectons les besoins<br/>aux <span>compétences</span></h1>
-        <p className="mb-sub">Du maçon au développeur, du chauffeur à l'investisseur — trouvez ce qu'il vous faut, près de chez vous.</p>
-        <div className="mb-search">
-          <span className="mb-search-ic"><svg width="18" height="18"><use href="#mbi-search"/></svg></span>
-          <input
-            placeholder="Cherchez un maçon, chauffeur, plombier…"
-            value={lq}
-            onChange={e => { setLq(e.target.value); setSugOpen(true); }}
-            onFocus={() => setSugOpen(true)}
-            onBlur={() => setSugOpen(false)}
-            autoComplete="off"
-          />
-          <button className="mb-search-btn" aria-label="Rechercher"><svg width="18" height="18" style={{ color: "#0F0F1A" }}><use href="#mbi-search"/></svg></button>
-          {sugOpen && suggestions.length > 0 && (
-            <div className="mb-sug">
-              {suggestions.map(s => (
-                <div key={s} className="mb-sug-item" onMouseDown={e => { e.preventDefault(); setLq(s); setSugOpen(false); }}>
-                  <svg width="15" height="15" style={{ opacity: 0.6, flexShrink: 0 }}><use href="#mbi-search"/></svg>
-                  <span>{s}</span>
-                </div>
-              ))}
-            </div>
-          )}
+        <h1 className="mb-h1">Connectons les besoins<br/>aux <span>compétences congolaises</span></h1>
+        <p className="mb-sub">Du maçon au développeur, du chauffeur à l'investisseur : trouvez ce qu'il vous faut, près de chez vous.</p>
+        <div className="mb-searchcard">
+          <div className="mb-field">
+            <span className="mb-field-ic"><svg width="18" height="18"><use href="#mbi-search"/></svg></span>
+            <input
+              placeholder="Cherchez un maçon, chauffeur, plombier…"
+              value={lq}
+              onChange={e => { setLq(e.target.value); setSugOpen(true); setCityOpen(false); }}
+              onFocus={() => { setSugOpen(true); setCityOpen(false); }}
+              onBlur={() => setSugOpen(false)}
+              autoComplete="off"
+            />
+            {sugOpen && suggestions.length > 0 && (
+              <div className="mb-sug">
+                {suggestions.map(s => (
+                  <div key={s} className="mb-sug-item" onMouseDown={e => { e.preventDefault(); setLq(s); setSugOpen(false); }}>
+                    <svg width="15" height="15" style={{ opacity: 0.6, flexShrink: 0 }}><use href="#mbi-search"/></svg>
+                    <span>{s}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="mb-field">
+            <span className="mb-field-ic">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </span>
+            <input
+              placeholder="Lieu de la mission (ex : Brazzaville, Pointe-Noire…)"
+              value={lcity}
+              onChange={e => { setLcity(e.target.value); setCityOpen(true); setSugOpen(false); }}
+              onFocus={() => { setCityOpen(true); setSugOpen(false); }}
+              onBlur={() => setCityOpen(false)}
+              autoComplete="off"
+            />
+            {cityOpen && citySuggestions.length > 0 && (
+              <div className="mb-sug">
+                {citySuggestions.map(c => (
+                  <div key={c} className="mb-sug-item" onMouseDown={e => { e.preventDefault(); setLcity(c); setCityOpen(false); }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6, flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>{c}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <button className="mb-search-go" onClick={() => { setSugOpen(false); setCityOpen(false); (document.activeElement as HTMLElement | null)?.blur?.(); }}>
+            Rechercher
+            <svg width="17" height="17"><use href="#mbi-search"/></svg>
+          </button>
         </div>
         <div
           className="mb-hints"
@@ -1909,9 +1990,6 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
             ))}
           </div>
         </div>
-        <div className="mb-cta-row">
-          <button className="mb-btn-g" onClick={() => onNav("signup")}>Créer mon compte gratuit</button>
-        </div>
         <div className="mb-stats">
           <div className="mb-stat"><b>1 240</b><span>Besoins actifs</span></div>
           <div className="mb-stat"><b>3 800</b><span>Professionnels</span></div>
@@ -1919,10 +1997,10 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         </div>
       </section>
 
-      {lq.trim() && (
+      {(lq.trim() || lcity.trim()) && (
         <section className="mb-sec" style={{ background: "#fff" }}>
           <p className="mb-sec-lbl">Résultats</p>
-          <h2 className="mb-sec-title">« {lq.trim()} »</h2>
+          <h2 className="mb-sec-title">« {[lq.trim(), lcity.trim()].filter(Boolean).join(" · ")} »</h2>
           {lsearching && <p style={{ textAlign: "center", color: "#999", padding: "16px 0" }}>Recherche…</p>}
           {!lsearching && lres && lres.pros.length === 0 && lres.pubs.length === 0 && (
             <p style={{ textAlign: "center", color: "#999", padding: "16px 0" }}>Aucun résultat. Essayez un autre métier ou mot-clé.</p>
@@ -2800,7 +2878,6 @@ const BOT_FAQ = [
   { q: ["sombre", "thème", "dark", "nuit"], r: "Dans Profil, utilisez le bouton Mode clair/sombre pour basculer entre les deux thèmes." },
   { q: ["annuler", "supprimer conversation", "fin"], r: "Vous pouvez supprimer une conversation : les messages sont effacés de votre côté. Vous pouvez aussi bloquer un contact depuis sa fiche." },
   { q: ["répondre", "citer", "reply", "bandeau", "réponse message"], r: "Appuyez longuement sur un message → Répondre. Un bandeau s'affiche au-dessus du champ de saisie avec un aperçu du message cité. Appuyez sur ✕ pour annuler." },
-  { q: ["offrir premium", "demander premium", "cadeau premium", "offrir abonnement", "demander abonnement", "demander cadeau", "cadeau doré"], r: "Dans une conversation : si vous êtes Premium et que l'autre ne l'est pas, un bouton cadeau doré 🎁 permet de lui offrir Premium. Si vous n'êtes pas Premium et que l'autre l'est, un bouton 💝 permet de lui demander de vous l'offrir (une fenêtre de confirmation s'ouvre ; limite de 2 demandes par mois et par conversation). La personne reçoit alors un message avec un bouton pour offrir Premium en un clic." },
   { q: ["modifier message", "éditer message", "corriger message"], r: "Appuyez longuement sur l'un de vos messages → Modifier (possible pendant 15 minutes après l'envoi). Le message modifié affiche la mention 'modifié'." },
   { q: ["supprimer message", "effacer message", "pour moi", "pour tous"], r: "Appuyez longuement sur un message → Supprimer pour tous (efface le message des deux côtés) ou Supprimer pour moi (masque le message uniquement de votre côté)." },
   { q: ["avertissement", "sanction", "notification officielle", "banni", "suspension"], r: "Un avertissement est une notification officielle MOYO qui apparaît à votre connexion. Vous devez cliquer \"OK, j\'ai compris\" pour continuer. Plusieurs avertissements peuvent entraîner la suspension du compte." },
@@ -3494,7 +3571,6 @@ function AdminDesktopPage() {
             {configTab === "general" && <OffCanvasSection title="Fonctionnalités">
               {([
                 ["feature_statuses", "featureStatuses" as keyof typeof appConfig, "Statuts (Stories)"],
-                ["feature_gift_premium", "featureGiftPremium" as keyof typeof appConfig, "Cadeau Premium"],
                 ["feature_assistant", "featureAssistant" as keyof typeof appConfig, "Assistant IA"],
               ] as [string, keyof typeof appConfig, string][]).map(([key, ck, label]) => (
                 <div key={key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", background: G.creme, borderRadius: 12 }}>
@@ -3842,7 +3918,7 @@ function PaymentMethodsConfig({ auth }: { auth: Auth }) {
   return (
     <div>
       <div style={{ fontSize: "0.72rem", color: "#888", marginBottom: 10, lineHeight: 1.5 }}>
-        Désactive un moyen de paiement en cas de problème (ex : numéro indisponible). Une fois coupé, il apparaît grisé et « Temporairement indisponible » partout (achat, cadeau, diaspora).
+        Désactive un moyen de paiement en cas de problème (ex : numéro indisponible). Une fois coupé, il apparaît grisé et « Temporairement indisponible » partout .
       </div>
       {loading ? (
         <div style={{ textAlign: "center", padding: 16, color: "#aaa", fontSize: "0.8rem" }}>Chargement…</div>
@@ -4171,7 +4247,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
         ))}
       </OffCanvasSection>
       <OffCanvasSection title="Fonctionnalités">
-        {([["feature_statuses","featureStatuses" as keyof typeof appConfig,"Statuts (Stories)"],["feature_gift_premium","featureGiftPremium" as keyof typeof appConfig,"Cadeau Premium"],["feature_assistant","featureAssistant" as keyof typeof appConfig,"Assistant IA"],["maintenance_mode","maintenanceMode" as keyof typeof appConfig,"Mode maintenance"]] as [string, keyof typeof appConfig, string][]).map(([key,ck,label]) => (
+        {([["feature_statuses","featureStatuses" as keyof typeof appConfig,"Statuts (Stories)"],["feature_assistant","featureAssistant" as keyof typeof appConfig,"Assistant IA"],["maintenance_mode","maintenanceMode" as keyof typeof appConfig,"Mode maintenance"]] as [string, keyof typeof appConfig, string][]).map(([key,ck,label]) => (
           <div key={key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", background: G.creme, borderRadius: 12 }}>
             <div style={{ fontSize: "0.83rem", fontWeight: 600, color: key === "maintenance_mode" ? G.rouge : "#1a1a1a" }}>{label}</div>
             <SwitchBtn on={appConfig[ck] === "true"} onToggle={async () => { const v = appConfig[ck] !== "true" ? "true" : "false"; setAppConfig(c => ({ ...c, [ck]: v })); await patch(key, v); }} />
@@ -4953,7 +5029,6 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
   const [partnerMenuOpen, setPartnerMenuOpen] = useState(false);
   const [partnerReportOpen, setPartnerReportOpen] = useState(false);
   const [confirmUnmatchPartner, setConfirmUnmatchPartner] = useState(false);
-  const [confirmGiftRequest, setConfirmGiftRequest] = useState(false);
   const [partnerActionLoading, setPartnerActionLoading] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ msg: Message; x: number; y: number } | null>(null);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
@@ -5664,30 +5739,6 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
     } catch { setToast({ msg: "Impossible d'envoyer le signalement.", type: "error" }); }
     setPartnerActionLoading(false);
   };
-  const requestGiftNow = async () => {
-    if (!open?.id || !open.partner?.id) return;
-    const key = `moyo_giftreq_${open.id}`;
-    const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
-    // On garde l'historique des envois (timestamps) sur 30 jours, max 2 demandes
-    let history: number[] = [];
-    try { history = JSON.parse(localStorage.getItem(key) || "[]"); } catch { history = []; }
-    if (!Array.isArray(history)) history = [];
-    const now = Date.now();
-    history = history.filter(t => typeof t === "number" && now - t < MONTH_MS);
-    if (history.length >= 2) {
-      setToast({ msg: "Tu as atteint la limite de 2 demandes ce mois-ci pour cette conversation 😊", type: "error" });
-      setConfirmGiftRequest(false);
-      return;
-    }
-    try {
-      const res = await sb.insert<Message>(auth.token, "messages", { match_id: open.id, sender_id: auth.userId, content: GIFT_REQUEST_PREFIX + GIFT_REQUEST_TEXT, is_read: false });
-      if (res[0]) setMsgs(m => [...m, res[0]]);
-      history.push(now);
-      try { localStorage.setItem(key, JSON.stringify(history)); } catch {}
-      setToast({ msg: `Demande envoyée à ${open.partner?.name}. Elle recevra une notification et pourra choisir librement de t'offrir Premium.`, type: "success" });
-    } catch { setToast({ msg: "Impossible d'envoyer la demande.", type: "error" }); }
-    setConfirmGiftRequest(false);
-  };
   const unmatchPartnerNow = async () => {
     const partnerId = open?.partner?.id;
     if (!partnerId) return;
@@ -5866,19 +5917,6 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
     setBurnMsg(null);
   };
 
-  const [showGift, setShowGift] = useState(false);
-  const [giftStep, setGiftStep] = useState<"operator" | "mtn" | "airtel">("operator");
-  const [giftTxRef, setGiftTxRef] = useState("");
-  const [giftTxSent, setGiftTxSent] = useState(false);
-  const [giftPlanId, setGiftPlanId] = useState("1mois");
-  const GIFT_PLANS = [
-    { id: "1sem", label: "1 semaine", per: "semaine", amount: PREMIUM_PRICE_WEEK_FCFA },
-    { id: "1mois", label: "1 mois", per: "mois", amount: PREMIUM_PRICE_FCFA, popular: true },
-    { id: "2mois", label: "2 mois", per: "2 mois", amount: PREMIUM_PRICE_2MONTH_FCFA, badge: (PREMIUM_PRICE_FCFA > 0 && PREMIUM_PRICE_2MONTH_FCFA < PREMIUM_PRICE_FCFA * 2) ? `-${Math.floor((1 - PREMIUM_PRICE_2MONTH_FCFA / (PREMIUM_PRICE_FCFA * 2)) * 100)}%` : null },
-  ];
-  const giftPlan = GIFT_PLANS.find(p => p.id === giftPlanId) || GIFT_PLANS[1];
-  const giftAmount = giftPlan.amount;
-  const [giftTxLoading, setGiftTxLoading] = useState(false);
 
   const isWideMsg = window.innerWidth >= 768;
 
@@ -6115,225 +6153,12 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
           <div style={{ fontWeight: 700, fontSize: "0.92rem", color: G.brun }}>{open.partner?.name}</div>
           {open.partner?.id === SUPPORT_TEAM_ID ? <div style={{ fontSize: "0.7rem", color: "#27ae60", fontWeight: 600 }}>● Répond sous 24h</div> : open.partner?.hide_online_status ? null : (() => { const s = getOnlineStatus(open.partner?.last_seen); return <div style={{ fontSize: "0.7rem", color: s.color, fontWeight: 600 }}>● {s.label}</div>; })()}
         </div>
-        {/* Bouton "Demander Premium" (💝, rouge Moyo) : visible si JE ne suis pas Premium et que mon interlocuteur l'est */}
-        {FEATURE_GIFT_PREMIUM && !auth.isPremium && open.partner?.is_premium && open.partner?.id !== SUPPORT_TEAM_ID && (
-          <div onClick={() => setConfirmGiftRequest(true)} title="Demander à recevoir Premium" style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(212,168,67,0.12)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, fontSize: "1.05rem" }}>
-            💝
-          </div>
-        )}
-        {/* Bouton cadeau - offrir Premium : visible UNIQUEMENT aux utilisateurs Premium */}
-        {FEATURE_GIFT_PREMIUM && auth.isPremium && !open.partner?.is_premium && (
-          <div onClick={() => setShowGift(true)} style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(212,168,67,0.12)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }} title="Offrir Premium">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5" rx="1"/>
-              <path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
-            </svg>
-          </div>
-        )}
         <div onClick={() => setShowDeleteConv(true)} style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(180,60,60,0.08)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }} title="Supprimer la conversation">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
           </svg>
         </div>
       </div>
-
-      {/* Modal Offrir Premium */}
-      {showGift && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 400, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-          <div style={{ background: G.blanc, borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 500, maxHeight: "92vh", overflowY: "auto", paddingBottom: "env(safe-area-inset-bottom)" }}>
-
-            {/* ── Étape choix opérateur ── */}
-            {giftStep === "operator" && (
-              <>
-                <div style={{ background: `linear-gradient(135deg,#D4A843,#B8922E)`, padding: "20px 20px 18px" }}>
-                  <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-                    <div onClick={() => { setShowGift(false); setGiftStep("operator"); setGiftTxRef(""); setGiftTxSent(false); }} style={{ cursor: "pointer", background: "rgba(255,255,255,0.2)", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-                    </div>
-                    <div>
-                      <div style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.72rem", fontWeight: 600 }}>Offrir à</div>
-                      <div style={{ color: "#fff", fontSize: "1.2rem", fontWeight: 800 }}>{open.partner?.name}</div>
-                    </div>
-                    <div style={{ marginLeft: "auto", textAlign: "right" }}>
-                      <div style={{ color: "#fff", fontSize: "1.4rem", fontWeight: 800 }}>{`${giftAmount.toLocaleString()} FCFA`}</div>
-                      <div style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.72rem" }}>{giftPlan.label} Premium</div>
-                    </div>
-                  </div>
-                </div>
-                <div style={{ padding: "20px 20px 28px" }}>
-                  <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#888", textAlign: "center", marginBottom: 12, textTransform: "uppercase", letterSpacing: 0.5 }}>Choisissez la formule à offrir</div>
-                  <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
-                    {GIFT_PLANS.map(pl => {
-                      const sel = pl.id === giftPlanId;
-                      return (
-                        <div key={pl.id} onClick={() => setGiftPlanId(pl.id)} style={{ flex: 1, position: "relative", cursor: "pointer", background: sel ? "#FBF1D8" : G.blanc, border: `2px solid ${sel ? "#D4A843" : "#ece9e2"}`, borderRadius: 14, padding: "13px 6px 11px", textAlign: "center", boxShadow: sel ? "0 4px 14px rgba(212,168,67,0.28)" : "0 1px 4px rgba(0,0,0,0.04)" }}>
-                          {pl.popular && <div style={{ position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)", background: "#D4A843", color: "#fff", fontSize: "0.52rem", fontWeight: 800, letterSpacing: 0.5, padding: "2px 8px", borderRadius: 50, whiteSpace: "nowrap" }}>POPULAIRE</div>}
-                          {pl.badge && <div style={{ position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)", background: "#16A34A", color: "#fff", fontSize: "0.52rem", fontWeight: 800, letterSpacing: 0.5, padding: "2px 8px", borderRadius: 50, whiteSpace: "nowrap" }}>{pl.badge}</div>}
-                          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: sel ? "#7a5a10" : "#8a8a8a", marginBottom: 5 }}>{pl.label}</div>
-                          <div style={{ fontSize: "0.95rem", fontWeight: 800, color: sel ? "#3a2e10" : "#1a1a2e", lineHeight: 1.05 }}>{pl.amount.toLocaleString("fr-FR")}</div>
-                          <div style={{ fontSize: "0.58rem", fontWeight: 700, color: sel ? "#7a5a10" : "#9a9a9a" }}>FCFA</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#888", textAlign: "center", marginBottom: 14, textTransform: "uppercase", letterSpacing: 0.5 }}>Congo - Choisissez votre opérateur</div>
-                  <button onClick={() => PAY_MTN_ENABLED && setGiftStep("mtn")} disabled={!PAY_MTN_ENABLED} style={{ width: "100%", background: PAY_MTN_ENABLED ? "linear-gradient(135deg,#FFCC00,#F5A623)" : "#cccccc", color: PAY_MTN_ENABLED ? "#1a1a1a" : "#888", border: "none", borderRadius: 14, padding: "14px 16px", fontSize: "0.95rem", fontWeight: 800, cursor: PAY_MTN_ENABLED ? "pointer" : "not-allowed", marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: PAY_MTN_ENABLED ? "0 4px 14px rgba(245,166,35,0.35)" : "none", opacity: PAY_MTN_ENABLED ? 1 : 0.7 }}>
-                    <div style={{ width: "18%", display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
-                      <svg viewBox="0 0 120 60" width="54" height="27" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="60" fill="#FFCC00" rx="4"/><ellipse cx="60" cy="30" rx="52" ry="24" fill="none" stroke="#1a1a1a" strokeWidth="4"/><text x="60" y="38" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="22" fill="#1a1a1a">MTN</text></svg>
-                    </div>
-                    <span style={{ flex: 1, textAlign: "center" }}>MTN Mobile Money{!PAY_MTN_ENABLED && <span style={{ display: "block", fontSize: "0.62rem", fontWeight: 700 }}>Temporairement indisponible</span>}</span>
-                  </button>
-                  <button onClick={() => PAY_AIRTEL_ENABLED && setGiftStep("airtel")} disabled={!PAY_AIRTEL_ENABLED} style={{ width: "100%", background: PAY_AIRTEL_ENABLED ? "linear-gradient(135deg,#e8f4f8,#d0e8f0)" : "#cccccc", color: PAY_AIRTEL_ENABLED ? "#c0392b" : "#888", border: PAY_AIRTEL_ENABLED ? "2px solid #e74c3c" : "2px solid #bbb", borderRadius: 14, padding: "14px 16px", fontSize: "0.95rem", fontWeight: 800, cursor: PAY_AIRTEL_ENABLED ? "pointer" : "not-allowed", marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: PAY_AIRTEL_ENABLED ? "0 4px 14px rgba(231,76,60,0.15)" : "none", opacity: PAY_AIRTEL_ENABLED ? 1 : 0.7 }}>
-                    <div style={{ width: "18%", display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
-                      <svg viewBox="0 0 80 60" width="40" height="30" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="80" height="60" fill="#fff0f0" rx="4"/>
-                        <path d="M12 38 Q8 18 22 12 Q36 6 38 20 Q40 34 28 36 Q16 38 14 30" fill="#e74c3c" stroke="none"/>
-                        <text x="44" y="28" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="13" fill="#e74c3c">airtel</text>
-                        <text x="44" y="44" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="13" fill="#D4A843">money</text>
-                      </svg>
-                    </div>
-                    <span style={{ flex: 1, textAlign: "center" }}>Airtel Money{!PAY_AIRTEL_ENABLED && <span style={{ display: "block", fontSize: "0.62rem", fontWeight: 700 }}>Temporairement indisponible</span>}</span>
-                  </button>
-                  {/* Stripe pour la diaspora */}
-                  <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#888", textAlign: "center", margin: "14px 0 8px", textTransform: "uppercase", letterSpacing: 0.5 }}>Diaspora - Payer par carte</div>
-                  <button onClick={async () => {
-                    try {
-                      const win = window.open("", "_blank");
-                      const r = await fetch(`${SUPABASE_URL}/functions/v1/create-stripe-session`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${auth.token}`, "apikey": SUPABASE_KEY },
-                        body: JSON.stringify({ user_id: open.partner?.id || auth.userId, user_email: auth.email || "", amount_euros: PREMIUM_PRICE_EUR }),
-                      });
-                      const data = await r.json();
-                      if (data.url && win) { win.location.href = data.url; }
-                      else { win?.close(); alert("Erreur : " + (data.error || "inconnue")); }
-                    } catch (e: any) { alert("Erreur : " + (e?.message || "réseau")); }
-                  }} disabled={!PAY_CB_ENABLED} style={{ width: "100%", background: PAY_CB_ENABLED ? "linear-gradient(135deg,#16A34A,#0D2E1C)" : "#cccccc", color: PAY_CB_ENABLED ? "white" : "#888", border: "none", borderRadius: 14, padding: "14px 16px", fontSize: "0.95rem", fontWeight: 800, cursor: PAY_CB_ENABLED ? "pointer" : "not-allowed", marginBottom: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, boxShadow: PAY_CB_ENABLED ? "0 4px 14px rgba(26,92,58,0.4)" : "none", opacity: PAY_CB_ENABLED ? 1 : 0.7 }}>
-                    <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={PAY_CB_ENABLED ? "white" : "#888"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                      Visa / Mastercard · {PREMIUM_PRICE_EUR}€ · 1 mois
-                    </span>
-                    {!PAY_CB_ENABLED && <span style={{ fontSize: "0.62rem", fontWeight: 700 }}>Temporairement indisponible</span>}
-                  </button>
-                  <button onClick={() => { setShowGift(false); setGiftStep("operator"); setGiftTxRef(""); setGiftTxSent(false); }} style={{ width: "100%", fontSize: "0.88rem", color: "#555", cursor: "pointer", fontWeight: 600, padding: "13px", borderRadius: 50, border: `2px solid ${G.gris}`, background: G.blanc }}>Non merci, plus tard</button>
-                </div>
-              </>
-            )}
-
-            {/* ── Étape MTN ── */}
-            {giftStep === "mtn" && (
-              <>
-                <div style={{ background: "linear-gradient(135deg,#FFCC00,#F5A623)", padding: "20px 20px 16px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-                    <div onClick={() => setGiftStep("operator")} style={{ cursor: "pointer", background: "rgba(0,0,0,0.1)", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-                    </div>
-                    <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, display: "flex", alignItems: "center", gap: 8 }}>
-                      <svg viewBox="0 0 120 60" width="42" height="21" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="60" fill="#FFCC00" rx="4"/><ellipse cx="60" cy="30" rx="52" ry="24" fill="none" stroke="#1a1a1a" strokeWidth="4"/><text x="60" y="38" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="22" fill="#1a1a1a">MTN</text></svg>
-                      Cadeau Premium pour {open.partner?.name}
-                    </div>
-                  </div>
-                  <div style={{ fontSize: "0.78rem", color: "rgba(0,0,0,0.6)", marginLeft: 42 }}>{`${giftAmount.toLocaleString()} FCFA · ${giftPlan.label}`}</div>
-                </div>
-                <div style={{ padding: "20px 20px 32px" }}>
-                  <div style={{ background: "#fffbf0", border: "2px solid #FFCC00", borderRadius: 14, padding: "16px", marginBottom: 16 }}>
-                    <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#F5A623", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>① Effectuez votre paiement MTN Mobile Money, qui sera reçu et traité par notre Responsable des finances : {PAY_MTN_RESPONSABLE}</div>
-                    <a href={`tel:*105*2*1*${PAY_MTN_NUMBER}*${giftAmount}%23`} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", background: "linear-gradient(135deg,#FFCC00,#F5A623)", color: G.brun, border: "none", borderRadius: 50, padding: "15px", fontSize: "0.95rem", fontWeight: 800, cursor: "pointer", textDecoration: "none", boxShadow: "0 4px 14px rgba(245,166,35,0.35)", boxSizing: "border-box" as any }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.53a16 16 0 0 0 6.06 6.06l1.09-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                      {`Appuyer pour payer - ${giftAmount.toLocaleString()} FCFA`}
-                    </a>
-                    <div style={{ textAlign: "center", marginTop: 8, fontSize: "0.78rem", color: "#888", fontFamily: "monospace", letterSpacing: 1 }}>{`*105*1*1*${PAY_MTN_NUMBER}*${giftAmount}#`}</div>
-                  </div>
-                  <div style={{ background: G.creme, borderRadius: 14, padding: "16px", marginBottom: 16 }}>
-                    <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#555", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>② Entrez votre numéro de transaction</div>
-                    <div style={{ fontSize: "0.78rem", color: "#777", marginBottom: 10, lineHeight: 1.5 }}>Après validation du paiement MTN, vous recevrez un SMS avec un numéro de transaction (ID). Entrez ce numéro ID ci-dessous.</div>
-                    <input value={giftTxRef} onChange={e => setGiftTxRef(e.target.value)} placeholder="Ex de l'ID : 7753031542" style={{ width: "100%", boxSizing: "border-box", padding: "12px 14px", borderRadius: 10, border: `2px solid ${giftTxRef ? "#FFCC00" : G.gris}`, fontSize: "0.9rem", outline: "none", fontFamily: "inherit", fontWeight: 600 }} />
-                  </div>
-                  {!giftTxSent ? (
-                    <button disabled={!giftTxRef.trim() || giftTxLoading} onClick={async () => {
-                      setGiftTxLoading(true);
-                      try {
-                        await fetch(`${SUPABASE_URL}/rest/v1/payment_requests`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=representation" },
-                          body: JSON.stringify({ user_id: auth.userId, operator: "MTN", tx_ref: giftTxRef.trim(), amount: giftAmount, status: "pending", gift_for: open.partner?.id, gift_for_name: open.partner?.name }),
-                        });
-                        setGiftTxSent(true);
-                      } catch { setGiftTxSent(true); }
-                      setGiftTxLoading(false);
-                    }} style={{ width: "100%", background: !giftTxRef.trim() || giftTxLoading ? "#ccc" : "linear-gradient(135deg,#FFCC00,#F5A623)", color: G.brun, border: "none", borderRadius: 50, padding: "15px", fontSize: "0.95rem", fontWeight: 800, cursor: !giftTxRef.trim() ? "not-allowed" : "pointer" }}>
-                      {giftTxLoading ? "Envoi en cours…" : "J'ai payé - Envoyer la preuve"}
-                    </button>
-                  ) : (
-                    <div style={{ background: "rgba(39,174,96,0.08)", border: "2px solid #27ae60", borderRadius: 14, padding: "18px", textAlign: "center" }}>
-                      <div style={{ fontSize: "2rem", marginBottom: 8 }}>✅</div>
-                      <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#27ae60", marginBottom: 6 }}>Preuve envoyée !</div>
-                      <div style={{ fontSize: "0.82rem", color: "#555", lineHeight: 1.6 }}>Notre équipe va vérifier et activer le Premium de {open.partner?.name} rapidement.</div>
-                      <button onClick={() => { setShowGift(false); setGiftStep("operator"); setGiftTxRef(""); setGiftTxSent(false); }} style={{ marginTop: 14, background: "#27ae60", color: "#fff", border: "none", borderRadius: 50, padding: "12px 28px", fontWeight: 700, cursor: "pointer", fontSize: "0.88rem" }}>Fermer</button>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-            {giftStep === "airtel" && (
-              <>
-                <div style={{ background: "linear-gradient(135deg,#e74c3c,#c0392b)", padding: "20px 20px 16px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-                    <div onClick={() => setGiftStep("operator")} style={{ cursor: "pointer", background: "rgba(255,255,255,0.2)", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-                    </div>
-                    <div style={{ fontWeight: 800, fontSize: "1.05rem", color: "#fff" }}>Cadeau Airtel Money pour {open.partner?.name}</div>
-                  </div>
-                  <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.8)", marginLeft: 42 }}>{`${giftAmount.toLocaleString()} FCFA - ${giftPlan.label} Premium`}</div>
-                </div>
-                <div style={{ padding: "20px 20px 32px" }}>
-                  <div style={{ background: "#fff5f5", border: "2px solid #e74c3c", borderRadius: 14, padding: "16px", marginBottom: 16 }}>
-                    <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#e74c3c", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>① Effectuez votre paiement Airtel Money, qui sera reçu et traité par notre Responsable des finances : {PAY_AIRTEL_RESPONSABLE}</div>
-                    <a href={`tel:*128*2*1*1*${PAY_AIRTEL_NUMBER}*${giftAmount}%23`} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", background: "linear-gradient(135deg,#e74c3c,#c0392b)", color: "#fff", border: "none", borderRadius: 50, padding: "15px", fontSize: "0.95rem", fontWeight: 800, cursor: "pointer", textDecoration: "none", boxShadow: "0 4px 14px rgba(231,76,60,0.35)", boxSizing: "border-box" as any }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.53a16 16 0 0 0 6.06 6.06l1.09-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                      {`Appuyer pour payer - ${giftAmount.toLocaleString()} FCFA`}
-                    </a>
-                    <div style={{ textAlign: "center", marginTop: 8, fontSize: "0.78rem", color: "#888", fontFamily: "monospace", letterSpacing: 1 }}>{`*128*2*1*1*${PAY_AIRTEL_NUMBER}*${giftAmount}#`}</div>
-                  </div>
-                  <div style={{ background: G.creme, borderRadius: 14, padding: "16px", marginBottom: 16 }}>
-                    <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#555", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>② Entrez votre numéro de transaction</div>
-                    <div style={{ fontSize: "0.78rem", color: "#777", marginBottom: 10, lineHeight: 1.5 }}>Après validation du paiement Airtel, vous recevrez un SMS avec un numéro de transaction (ID). Entrez ce numéro ID ci-dessous.</div>
-                    <input value={giftTxRef} onChange={e => setGiftTxRef(e.target.value)} placeholder="Ex de l'ID : PP260523.2232.A52074" style={{ width: "100%", boxSizing: "border-box", padding: "12px 14px", borderRadius: 10, border: `2px solid ${giftTxRef ? "#e74c3c" : G.gris}`, fontSize: "0.9rem", outline: "none", fontFamily: "inherit", fontWeight: 600 }} />
-                  </div>
-                  {!giftTxSent ? (
-                    <button disabled={!giftTxRef.trim() || giftTxLoading} onClick={async () => {
-                      setGiftTxLoading(true);
-                      try {
-                        await fetch(`${SUPABASE_URL}/rest/v1/payment_requests`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=representation" },
-                          body: JSON.stringify({ user_id: auth.userId, operator: "Airtel", tx_ref: giftTxRef.trim(), amount: giftAmount, status: "pending", gift_for: open.partner?.id, gift_for_name: open.partner?.name }),
-                        });
-                        setGiftTxSent(true);
-                      } catch { setGiftTxSent(true); }
-                      setGiftTxLoading(false);
-                    }} style={{ width: "100%", background: !giftTxRef.trim() || giftTxLoading ? "#ccc" : "linear-gradient(135deg,#e74c3c,#c0392b)", color: "#fff", border: "none", borderRadius: 50, padding: "15px", fontSize: "0.95rem", fontWeight: 800, cursor: !giftTxRef.trim() ? "not-allowed" : "pointer" }}>
-                      {giftTxLoading ? "Envoi en cours…" : "J'ai payé - Envoyer la preuve"}
-                    </button>
-                  ) : (
-                    <div style={{ background: "rgba(39,174,96,0.08)", border: "2px solid #27ae60", borderRadius: 14, padding: "18px", textAlign: "center" }}>
-                      <div style={{ fontSize: "2rem", marginBottom: 8 }}>✅</div>
-                      <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#27ae60", marginBottom: 6 }}>Preuve envoyée !</div>
-                      <div style={{ fontSize: "0.82rem", color: "#555", lineHeight: 1.6 }}>Notre équipe va vérifier et activer le Premium de {open.partner?.name} rapidement.</div>
-                      <button onClick={() => { setShowGift(false); setGiftStep("operator"); setGiftTxRef(""); setGiftTxSent(false); }} style={{ marginTop: 14, background: "#27ae60", color: "#fff", border: "none", borderRadius: 50, padding: "12px 28px", fontWeight: 700, cursor: "pointer", fontSize: "0.88rem" }}>Fermer</button>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Zone messages */}
       <div ref={scrollContainerRef} onScroll={(e) => {
@@ -6479,24 +6304,6 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={isMine ? "rgba(255,255,255,0.85)" : "#555"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                       </div>
                       {(() => {
-                        // ── Demande de Premium (message spécial) ──
-                        if (m.content.startsWith(GIFT_REQUEST_PREFIX)) {
-                          return (
-                            <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 200 }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                <span style={{ fontSize: "1.3rem" }}>💝</span>
-                                <span style={{ fontSize: "0.86rem", fontWeight: 600 }}>{GIFT_REQUEST_TEXT.replace("💝 ", "")}</span>
-                              </div>
-                              {/* Le bouton "Offrir Premium" n'apparaît que pour le destinataire Premium */}
-                              {!isMine && auth.isPremium && !open.partner?.is_premium && (
-                                <button onClick={(e) => { e.stopPropagation(); setShowGift(true); }} style={{ background: "linear-gradient(135deg,#D4A843,#B8860B)", color: "#fff", border: "none", borderRadius: 50, padding: "9px 14px", fontSize: "0.82rem", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-                                  Lui offrir Premium 🎁
-                                </button>
-                              )}
-                            </div>
-                          );
-                        }
                         const replyMatch = m.content.match(/^\[↩ (.+?) : ([\s\S]+?)\]\n([\s\S]*)$/);
                         if (replyMatch) {
                           const [, who, quoted, body] = replyMatch;
@@ -6913,13 +6720,7 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
                 <>
                   <div onClick={() => setPartnerMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 1 }} />
                   <div style={{ position: "absolute", top: 54, right: 58, background: G.blanc, borderRadius: 14, overflow: "hidden", boxShadow: "0 8px 28px rgba(0,0,0,0.25)", zIndex: 2, minWidth: 185 }}>
-                    {auth.isPremium && !open.partner.is_premium && (
-                      <div onClick={() => { setPartnerMenuOpen(false); setShowPartnerProfile(false); setShowGift(true); }} style={{ padding: "13px 16px", fontSize: "0.88rem", fontWeight: 600, color: "#B8860B", cursor: "pointer", borderBottom: "1px solid #F5F5F5", display: "flex", alignItems: "center", gap: 8 }}>
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-                        Offrir Premium
-                      </div>
-                    )}
-                    <div onClick={() => { setPartnerMenuOpen(false); setConfirmUnmatchPartner(true); }} style={{ padding: "13px 16px", fontSize: "0.88rem", fontWeight: 600, color: G.brun, cursor: "pointer", borderBottom: "1px solid #F5F5F5" }}>Annuler le match</div>
+                    <div onClick={() => { setPartnerMenuOpen(false); setConfirmUnmatchPartner(true); }} style={{ padding: "13px 16px", fontSize: "0.88rem", fontWeight: 600, color: G.brun, cursor: "pointer", borderBottom: "1px solid #F5F5F5" }}>Annuler la mise en relation</div>
                     <div onClick={blockPartnerNow} style={{ padding: "13px 16px", fontSize: "0.88rem", fontWeight: 600, color: G.brun, cursor: partnerActionLoading ? "wait" : "pointer", borderBottom: "1px solid #F5F5F5" }}>Bloquer</div>
                     <div onClick={() => { setPartnerMenuOpen(false); setPartnerReportOpen(true); }} style={{ padding: "13px 16px", fontSize: "0.88rem", fontWeight: 600, color: "#e74c3c", cursor: "pointer" }}>Signaler</div>
                   </div>
@@ -6970,21 +6771,6 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
         </div>
       )}
       {/* Confirmation : demander Premium */}
-      {confirmGiftRequest && open.partner && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 520, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }} onClick={() => setConfirmGiftRequest(false)}>
-          <div onClick={e => e.stopPropagation()} style={{ background: G.blanc, borderRadius: 20, padding: "26px 22px", width: "100%", maxWidth: 340, textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
-            <div style={{ width: 54, height: 54, borderRadius: "50%", background: "rgba(212,168,67,0.12)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontSize: "1.7rem" }}>
-              💝
-            </div>
-            <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>Demander Premium à {open.partner.name} ?</h3>
-            <p style={{ fontSize: "0.85rem", color: "#666", lineHeight: 1.6, marginBottom: 22 }}>{open.partner.name} recevra un message lui proposant de t'offrir l'abonnement Premium. Tu peux faire 2 demandes par mois.</p>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setConfirmGiftRequest(false)} style={{ flex: 1, padding: "12px", borderRadius: 50, border: `2px solid ${G.gris}`, background: G.blanc, color: "#555", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>Annuler</button>
-              <button onClick={requestGiftNow} style={{ flex: 1, padding: "12px", borderRadius: 50, border: "none", background: `linear-gradient(135deg,${G.rouge},${G.rougeDark})`, color: "#fff", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>💝 Envoyer</button>
-            </div>
-          </div>
-        </div>
-      )}
       </div>{/* fin chat */}
     </div>
   );
@@ -12343,7 +12129,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     ["Textes des modals", "6 modals personnalisables : message même genre Homme/Femme, titre et sous-titre de la mise en relation, message Premium, message intérêts épuisés. Cliquer sur un modal pour éditer."],
                     ["Limites & Quotas", "Intérêts gratuits/jour, messages gratuits/mise en relation, taille max des photos, message de bienvenue après mise en relation. Modifier sans redéployer."],
                     ["Prix & Abonnement", "Prix Premium en FCFA et durée en jours. ⚠️ Le prix modifie les boutons de paiement. La durée s'applique aux nouveaux abonnements uniquement."],
-                    ["Fonctionnalités on/off", "Activer/désactiver réellement les Statuts, le Cadeau Premium et l'Assistant IA dans toute l'app. Switch vert = actif, rouge = désactivé. La modification prend effet au prochain chargement de l'app."],
+                    ["Fonctionnalités on/off", "Activer/désactiver réellement les Statuts et l'Assistant IA dans toute l'app. Switch vert = actif, rouge = désactivé. La modification prend effet au prochain chargement de l'app."],
                     ["🔔 Notifications admin", "Pour chaque admin, choisir les notifications push qu'il reçoit : Signalements, Mises en relation, Paiements. Ex : activer 'Paiements' pour la personne qui gère les paiements → elle est prévenue à chaque nouveau paiement, même app fermée."],
                     ["💳 Moyens de paiement", "Couper rapidement un moyen de paiement en cas de problème (MTN, Airtel, Visa/Mastercard). Une fois coupé, il apparaît grisé et 'Temporairement indisponible' partout (achat, cadeau, diaspora)."],
                     ["🔴 Mode maintenance", "Active un écran de maintenance pour tous les utilisateurs. Seuls les admins (via ?admin=1 ou session admin active) peuvent toujours accéder au site. Personnaliser le message depuis le burger."],
@@ -12369,10 +12155,9 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     ["📝 Notes internes", "Sur chaque fiche utilisateur et chaque signalement, un bloc de notes visibles uniquement par les admins. Cliquez sur '📝 Notes internes' pour le déplier. Idéal pour se coordonner (ex : 'je m'en occupe, ne pas traiter en double'). N'importe quel admin peut supprimer une note."],
                     ["🗂 Archives repliées", "Dans Signalements → Archivés, chaque carte est repliée en une ligne compacte. Cliquez dessus pour voir le détail, puis 'Replier' pour refermer. Évite l'encombrement."],
                     ["🔔 Notifications utilisateur", "Les utilisateurs peuvent activer/réactiver leurs notifications depuis leur Profil (switch Notifications), même s'ils avaient refusé au départ."],
-                    ["🎁💝 Offrir / Demander Premium", "Dans une conversation : un membre Premium peut OFFRIR Premium à l'autre (bouton 🎁 doré). Un non-Premium peut DEMANDER à recevoir Premium (bouton 💝 rouge, max 2 fois/mois). La personne reçoit un message avec un bouton pour offrir en un clic."],
                     ["💳 Paiements réorganisés", "L'onglet Paiements est maintenant en 4 sous-onglets : Demandes, Traitées, Données financières (CA par mois, réinitialisable sans rien effacer) et Archivage (suppression définitive). Archiver un paiement ne retire plus le Premium."],
                     ["🗂 Historique : suppression multiple", "Dans Historique, le bouton 'Sélectionner' permet de cocher plusieurs actions et de les supprimer en une seule fois (Super Admin), au lieu d'une par une."],
-                    ["🎚 Interrupteurs de fonctionnalités", "Dans Configuration ⚙️ → Fonctionnalités, les switches Statuts, Cadeau Premium et Assistant IA activent/désactivent vraiment ces fonctions (effet au prochain chargement de l'app)."],
+                    ["🎚 Interrupteurs de fonctionnalités", "Dans Configuration ⚙️ → Fonctionnalités, les switches Statuts et Assistant IA activent/désactivent vraiment ces fonctions (effet au prochain chargement de l'app)."],
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
