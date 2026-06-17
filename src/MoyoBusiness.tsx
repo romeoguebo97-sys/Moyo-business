@@ -4532,10 +4532,10 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
             if (t.id === "publier") {
               return (
                 <div key={t.id} onClick={() => { setIsFullscreen(false); onPublish(); }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer", flex: 1 }}>
-                  <div style={{ width: 52, height: 52, marginTop: -18, borderRadius: 16, background: G.or, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(212,168,67,0.45)", border: `3px solid ${G.blanc}` }}>
+                  <div style={{ width: 56, height: 56, marginTop: -16, borderRadius: 18, background: G.or, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 16px rgba(212,168,67,0.4)", border: `4px solid ${G.blanc}` }}>
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   </div>
-                  <div style={{ fontSize: "0.56rem", fontWeight: 700, color: "#6B7280", whiteSpace: "nowrap" }}>Publier</div>
+                  <div style={{ fontSize: "0.56rem", fontWeight: 700, color: "#6B7280", whiteSpace: "nowrap", marginTop: 1 }}>Publier</div>
                 </div>
               );
             }
@@ -14926,6 +14926,27 @@ const metiersForCategory = (catId?: string | null): string[] => {
   return BUSINESS_CATEGORIES.find(c => c.id === catId)?.metiers || BUSINESS_METIERS_FLAT;
 };
 
+// Icônes SVG (au lieu d'emojis) — par catégorie, plus une épingle et une étiquette.
+function catIcon(id: string, color: string, size = 16) {
+  const p = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  switch (id) {
+    case "BTP": return <svg {...p}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/></svg>;
+    case "Transport": return <svg {...p}><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M14 9h4l4 4v4a1 1 0 0 1-1 1h-1"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>;
+    case "Restauration": return <svg {...p}><path d="M3 2v7c0 1.1.9 2 2 2a2 2 0 0 0 2-2V2"/><path d="M5 2v20"/><path d="M19 15V2a4 4 0 0 0-3 4v7h3Zm0 0v7"/></svg>;
+    case "Artisanat": return <svg {...p}><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>;
+    case "Santé": return <svg {...p}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
+    case "Beauté": return <svg {...p}><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/></svg>;
+    case "Événementiel": return <svg {...p}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+    case "Commerce": return <svg {...p}><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>;
+    case "Services": return <svg {...p}><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>;
+    case "Immobilier": return <svg {...p}><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/></svg>;
+    default: return null;
+  }
+}
+const PinIcon = ({ color = "#9AA0A6", size = 14 }: { color?: string; size?: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
+const TagIcon = ({ color = "#1A1A1A", size = 14 }: { color?: string; size?: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
+
+
 // PUB_CATS et BIZ_CATEGORIES DÉRIVENT de la source unique (mêmes id que la base).
 const PUB_CATS = [
   { id: "all", label: "Tout" },
@@ -14983,9 +15004,9 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile }: { pub: Publicat
       <div style={{ fontSize: 13.5, color: "#6B7280", lineHeight: 1.5, marginBottom: 13, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{pub.description}</div>
       <div style={{ borderTop: `1px solid ${G.gris}`, margin: "0 -16px 12px", padding: "12px 16px 0" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13, color: "#6B7280", fontWeight: 600 }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>📍 {pub.location || pub.city}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><PinIcon color="#9AA0A6" /> {pub.location || pub.city}</span>
           <span style={{ width: 1, height: 16, background: G.gris }} />
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "#1A1A1A" }}>🏷️ {priceTxt}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "#1A1A1A" }}><TagIcon color="#1A1A1A" /> {priceTxt}</span>
         </div>
       </div>
       <div style={{ borderTop: `1px solid ${G.gris}`, margin: "0 -16px", padding: "13px 16px 0", display: "flex", alignItems: "center", gap: 10 }}>
@@ -15212,15 +15233,15 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
           {/* Deux cartes de bascule */}
           <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
             {([
-              { t: "cherche" as const, title: "Besoins publiés", sub: "Des clients recherchent des professionnels", icon: (on: boolean) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={on ? "#08080D" : G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
-              { t: "propose" as const, title: "Services proposés", sub: "Des professionnels présentent leurs services", icon: (on: boolean) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={on ? "#08080D" : G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M3 9h18"/></svg> },
+              { t: "cherche" as const, title: "Besoins publiés", sub: "Des clients recherchent des professionnels", icon: (on: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={on ? "#08080D" : G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
+              { t: "propose" as const, title: "Services proposés", sub: "Des professionnels présentent leurs services", icon: (on: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={on ? "#08080D" : G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M3 9h18"/></svg> },
             ]).map(c => {
               const on = type === c.t;
               return (
-                <button key={c.t} onClick={() => setType(c.t)} style={{ flex: 1, textAlign: "left", cursor: "pointer", borderRadius: 16, padding: 14, border: on ? "1px solid #08080D" : `1px solid ${G.gris}`, background: on ? "#08080D" : G.blanc, boxShadow: on ? "0 6px 18px rgba(0,0,0,0.18)" : "0 2px 8px rgba(0,0,0,0.04)", transition: "all .18s ease", fontFamily: "inherit" }}>
-                  <div style={{ width: 46, height: 46, borderRadius: "50%", background: on ? "#fff" : "rgba(212,168,67,0.15)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>{c.icon(on)}</div>
-                  <div style={{ fontSize: "0.98rem", fontWeight: 800, color: on ? "#fff" : "#1A1A1A", marginBottom: 3 }}>{c.title}</div>
-                  <div style={{ fontSize: "0.74rem", lineHeight: 1.35, color: on ? "rgba(255,255,255,0.6)" : "#6B7280" }}>{c.sub}</div>
+                <button key={c.t} onClick={() => setType(c.t)} style={{ flex: 1, textAlign: "left", cursor: "pointer", borderRadius: 16, padding: "13px 13px 14px", border: on ? "1px solid #08080D" : `1px solid ${G.gris}`, background: on ? "#08080D" : G.blanc, boxShadow: on ? "0 8px 22px rgba(8,8,13,0.22)" : "0 2px 8px rgba(0,0,0,0.04)", transition: "all .18s ease", fontFamily: "inherit" }}>
+                  <div style={{ width: 38, height: 38, borderRadius: "50%", background: on ? "#fff" : "rgba(212,168,67,0.14)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 9 }}>{c.icon(on)}</div>
+                  <div style={{ fontSize: "0.92rem", fontWeight: 800, color: on ? "#fff" : "#1A1A1A", marginBottom: 3, letterSpacing: "-0.2px" }}>{c.title}</div>
+                  <div style={{ fontSize: "0.72rem", lineHeight: 1.35, color: on ? "rgba(255,255,255,0.6)" : "#6B7280" }}>{c.sub}</div>
                 </button>
               );
             })}
@@ -15241,10 +15262,9 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
           <div style={{ display: "flex", gap: 8, overflowX: "auto", padding: "0 0 4px" }}>
             {PUB_CATS.map(c => {
               const on = cat === c.id;
-              const ic = BUSINESS_CATEGORIES.find(b => b.id === c.id)?.icon;
               return (
                 <button key={c.id} onClick={() => setCat(c.id)} style={{ flex: "0 0 auto", display: "flex", alignItems: "center", gap: 6, border: on ? "1px solid #08080D" : `1px solid ${G.gris}`, background: on ? "#08080D" : G.blanc, color: on ? "#fff" : "#1A1A1A", borderRadius: 50, padding: "9px 16px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
-                  {ic && c.id !== "all" && <span style={{ fontSize: "0.9rem" }}>{ic}</span>}
+                  {c.id !== "all" && catIcon(c.id, on ? "#fff" : G.or, 16)}
                   {c.label}
                 </button>
               );
@@ -15331,7 +15351,7 @@ function ProCard({ pro, onOpen, isFav, onToggleFav }: { pro: Profile; onOpen: ()
         <div style={{ fontSize: "0.82rem", color: "#444", fontWeight: 600, marginBottom: 5 }}>{pro.metier || "Professionnel"}</div>
         <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
           {cat && <span style={{ background: "rgba(212,168,67,0.15)", color: "#8B6914", borderRadius: 50, padding: "2px 8px", fontSize: "0.66rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.3 }}>{cat}</span>}
-          <span style={{ fontSize: "0.74rem", color: "#777", fontWeight: 600 }}>📍 {pro.city}{pro.zone ? " · " + pro.zone : ""}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: "0.74rem", color: "#777", fontWeight: 600 }}><PinIcon color="#9AA0A6" size={13} /> {pro.city}{pro.zone ? " · " + pro.zone : ""}</span>
         </div>
         <div style={{ marginTop: 6, fontSize: "0.76rem", fontWeight: 700, color: "#333" }}>
           <span style={{ color: G.or }}>★</span> {pro.rating_count ? `${(pro.rating_avg || 0).toFixed(1)} (${pro.rating_count})` : "Nouveau"}
@@ -15392,7 +15412,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
           <div style={{ fontSize: "0.92rem", color: G.or, fontWeight: 700, marginTop: 4 }}>{pro.metier}</div>
           <div style={{ display: "flex", gap: 7, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
             {cat && <span style={{ background: "rgba(212,168,75,0.2)", color: G.or, borderRadius: 50, padding: "3px 11px", fontSize: "0.72rem", fontWeight: 700 }}>{cat}</span>}
-            <span style={{ background: "rgba(255,255,255,0.1)", color: "#fff", borderRadius: 50, padding: "3px 11px", fontSize: "0.72rem", fontWeight: 600 }}>📍 {pro.city}{pro.zone ? " · " + pro.zone : ""}</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.1)", color: "#fff", borderRadius: 50, padding: "3px 11px", fontSize: "0.72rem", fontWeight: 600 }}><PinIcon color="#fff" size={12} /> {pro.city}{pro.zone ? " · " + pro.zone : ""}</span>
           </div>
           <div style={{ marginTop: 10, fontSize: "0.86rem", fontWeight: 700, color: "#fff" }}>
             <span style={{ color: G.or }}>★</span> {pro.rating_count ? `${(pro.rating_avg || 0).toFixed(1)} · ${pro.rating_count} avis` : "Nouveau professionnel"}
@@ -15432,8 +15452,8 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
         {/* Infos pratiques */}
         {(pro.hours || pro.zone) && <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 16, marginBottom: 14 }}>
           <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#999", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Infos pratiques</div>
-          {pro.hours && <div style={{ fontSize: "0.86rem", color: "#333", marginBottom: 6 }}>🕒 {pro.hours}</div>}
-          {pro.zone && <div style={{ fontSize: "0.86rem", color: "#333" }}>📍 Zone : {pro.zone}</div>}
+          {pro.hours && <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.86rem", color: "#333", marginBottom: 6 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>{pro.hours}</div>}
+          {pro.zone && <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.86rem", color: "#333" }}><PinIcon color="#9AA0A6" size={14} />Zone : {pro.zone}</div>}
         </div>}
 
         {/* Réseaux */}
