@@ -1556,6 +1556,13 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
   const [lq, setLq] = React.useState("");
   const [sugOpen, setSugOpen] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
+  React.useEffect(() => {
+    if (!menuOpen) return;
+    const onResize = () => { if (window.innerWidth >= 769) setMenuOpen(false); };
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [menuOpen]);
   const suggestions = React.useMemo(() => {
     const q = mbNorm(lq);
     if (q.length < 1) return [] as string[];
@@ -1862,6 +1869,12 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
           .mb-grid,.mb-pgrid{grid-template-columns:1fr;}
           .mb-final{padding:48px 18px;}
           .mb-final .mb-btn-g{width:100%;max-width:360px;}
+        }
+        @media(min-width:769px){
+          /* Au-delà du mobile, la nav desktop est affichée : le tiroir mobile ne doit jamais apparaître */
+          .mb-burger{display:none !important;}
+          .mb-menu-ov{display:none !important;opacity:0 !important;pointer-events:none !important;}
+          .mb-drawer{display:none !important;transform:translateX(100%) !important;}
         }
         @media(max-width:420px){
           .mb-cats{grid-template-columns:repeat(2,1fr);}
@@ -4430,7 +4443,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
   );
 }
 
-function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceived, viewsReceived, auth, adminBadgeCount, showAdminConfig, setShowAdminConfig, inConv, onPublish }: { children: React.ReactNode; tab: string; setTab: (t: string) => void; unreadCount: number; notifCount: number; likesReceived: number; viewsReceived: number; auth: Auth; adminBadgeCount?: number; showAdminConfig: boolean; setShowAdminConfig: (v: boolean) => void; inConv: boolean; onPublish: () => void; }) {
+function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceived, viewsReceived, auth, accountType, adminBadgeCount, showAdminConfig, setShowAdminConfig, inConv, onPublish }: { children: React.ReactNode; tab: string; setTab: (t: string) => void; unreadCount: number; notifCount: number; likesReceived: number; viewsReceived: number; auth: Auth; accountType?: string; adminBadgeCount?: number; showAdminConfig: boolean; setShowAdminConfig: (v: boolean) => void; inConv: boolean; onPublish: () => void; }) {
   const [showGuide, setShowGuide] = useState(false);
   const [openGuideSection, setOpenGuideSection] = useState<number | null>(null);
   const [showBot, setShowBot] = useState(false);
@@ -4464,11 +4477,17 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
     },
     {
       id: "discover",
-      label: "Répertoire",
+      label: accountType === "pro" ? "Sous-traitants" : "Répertoire",
       icon: (active: boolean) => (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? G.rouge : "#6B7280"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="4" y="2" width="16" height="20" rx="2"/><path d="M16 2v20"/><circle cx="10" cy="10" r="2"/><path d="M7.5 15.5a2.8 2.8 0 0 1 5 0"/>
-        </svg>
+        accountType === "pro" ? (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? G.rouge : "#6B7280"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 17 8 20l-5-5 3-3"/><path d="m13 7 3-3 5 5-3 3"/><path d="m8 12 3 3"/><path d="m13 9 3 3"/><path d="M6.5 12.5 5 14"/><path d="M19 10l-1.5 1.5"/>
+          </svg>
+        ) : (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? G.rouge : "#6B7280"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="4" y="2" width="16" height="20" rx="2"/><path d="M16 2v20"/><circle cx="10" cy="10" r="2"/><path d="M7.5 15.5a2.8 2.8 0 0 1 5 0"/>
+          </svg>
+        )
       ),
     },
     {
@@ -15432,8 +15451,8 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
 
 const SEARCH_HINTS = BUSINESS_METIERS_FLAT.slice(0, 24);
 
-function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMessages: (partnerId: string) => void; publishNonce?: number }) {
-  const [type] = useState<"cherche" | "propose">("cherche");
+function Publications({ auth, accountType, onGoMessages, publishNonce }: { auth: Auth; accountType?: string; onGoMessages: (partnerId: string) => void; publishNonce?: number }) {
+  const type: "cherche" | "propose" = accountType === "client" ? "propose" : "cherche";
   const [cat, setCat] = useState("all");
   const [metier, setMetier] = useState("");
   const [city, setCity] = useState<string>(PUB_VILLES[0] || "Brazzaville");
@@ -15800,8 +15819,9 @@ function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: ()
   );
 }
 
-function PublierHub({ auth, onGoFeed, onGoMessages }: { auth: Auth; onGoFeed: () => void; onGoMessages: (pid: string) => void }) {
+function PublierHub({ auth, accountType, onGoFeed, onGoMessages }: { auth: Auth; accountType?: string; onGoFeed: () => void; onGoMessages: (pid: string) => void }) {
   const [view, setView] = useState<"menu" | "cherche" | "propose" | "mes">("menu");
+  const isPro = accountType === "pro";
 
   if (view === "cherche" || view === "propose") {
     return <PublishModal auth={auth} embedded presetType={view} onClose={() => setView("menu")} onPublished={() => { setView("menu"); onGoFeed(); }} />;
@@ -15810,7 +15830,7 @@ function PublierHub({ auth, onGoFeed, onGoMessages }: { auth: Auth; onGoFeed: ()
     return <MyPublications auth={auth} onBack={() => setView("menu")} onGoMessages={onGoMessages} />;
   }
 
-  const items: { key: "cherche" | "propose" | "mes"; title: string; sub: string; tint: string; bg: string; icon: React.ReactNode }[] = [
+  const allItems: { key: "cherche" | "propose" | "mes"; title: string; sub: string; tint: string; bg: string; icon: React.ReactNode }[] = [
     {
       key: "cherche", title: "Je cherche un professionnel", sub: "Publiez un besoin et recevez des propositions", tint: "#111", bg: "rgba(17,17,17,0.08)",
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>,
@@ -15820,10 +15840,12 @@ function PublierHub({ auth, onGoFeed, onGoMessages }: { auth: Auth; onGoFeed: ()
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>,
     },
     {
-      key: "mes", title: "Voir mes publications", sub: "Gérez et boostez vos annonces", tint: G.or, bg: "rgba(212,168,67,0.16)",
+      key: "mes", title: isPro ? "Voir mes services publiés" : "Voir mes besoins publiés", sub: "Gérez et boostez vos annonces", tint: G.or, bg: "rgba(212,168,67,0.16)",
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
     },
   ];
+  // L'app connaît le type de compte : on n'affiche que l'action pertinente (pas de question superflue).
+  const items = allItems.filter(it => it.key === "mes" || (isPro ? it.key === "propose" : it.key === "cherche"));
 
   return (
     <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", padding: "22px 16px 96px" }}>
@@ -15994,29 +16016,39 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
   );
 }
 
-function Annuaire({ auth, onGoMessages }: { auth: Auth; onGoMessages: (partnerId: string) => void }) {
+function Annuaire({ auth, accountType, myCategory, onGoMessages }: { auth: Auth; accountType?: string; myCategory?: string; onGoMessages: (partnerId: string) => void }) {
+  const isPro = accountType === "pro";
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("all");
+  const [metier, setMetier] = useState("");
   const [city, setCity] = useState("all");
+  const [quartier, setQuartier] = useState("");
   const [pros, setPros] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [openFiche, setOpenFiche] = useState<Profile | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [favs, setFavs] = useState<Set<string>>(new Set());
 
+  // Pour un pro, la catégorie est verrouillée sur la sienne (onglet « Sous-traitants »).
+  const effectiveCat = isPro ? (myCategory || "all") : cat;
+  const metierOptions = metiersForCategory(effectiveCat === "all" ? null : effectiveCat);
+
   const load = useCallback(async () => {
     setLoading(true);
     let p = `?account_type=eq.pro&is_visible=neq.false&is_complete=eq.true&order=is_sponsored.desc,rating_avg.desc.nullslast,created_at.desc&select=*`;
-    if (cat !== "all") p += `&category=eq.${encodeURIComponent(cat)}`;
+    if (effectiveCat !== "all") p += `&category=eq.${encodeURIComponent(effectiveCat)}`;
     if (city !== "all") p += `&city=eq.${encodeURIComponent(city)}`;
+    if (metier) p += `&metier=eq.${encodeURIComponent(metier)}`;
     try {
       const rows = await sb.query<Profile>(auth.token, "profiles", p, auth.refreshToken);
       setPros(rows);
     } catch { setPros([]); }
     setLoading(false);
-  }, [auth.token, auth.refreshToken, cat, city]);
+  }, [auth.token, auth.refreshToken, effectiveCat, city, metier]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { setMetier(""); }, [effectiveCat]);
+  useEffect(() => { setQuartier(""); }, [city]);
 
   // Favoris : chargement des fiches enregistrées par l'utilisateur
   useEffect(() => {
@@ -16038,14 +16070,35 @@ function Annuaire({ auth, onGoMessages }: { auth: Auth; onGoMessages: (partnerId
   }, [favs, auth.token, auth.userId, auth.refreshToken]);
 
   const list = useMemo(() => {
+    let arr = pros;
+    if (quartier) {
+      const qa = quartier.toLowerCase();
+      arr = arr.filter(p => (`${p.zone || ""} ${p.city || ""}`).toLowerCase().includes(qa));
+    }
     const t = q.trim().toLowerCase();
-    if (!t) return pros;
-    return pros.filter(p => (`${p.company || ""} ${p.name || ""} ${p.metier || ""} ${p.category || ""}`).toLowerCase().includes(t));
-  }, [pros, q]);
+    if (t) arr = arr.filter(p => (`${p.company || ""} ${p.name || ""} ${p.metier || ""} ${p.category || ""}`).toLowerCase().includes(t));
+    return arr;
+  }, [pros, q, quartier]);
 
   return (
     <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", paddingBottom: 90 }}>
       <div style={{ position: "sticky", top: 0, zIndex: 20, background: G.creme, padding: "14px 16px 8px" }}>
+        {/* En-tête : Répertoire (client) ou Sous-traitants (pro, catégorie verrouillée) */}
+        {isPro ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <h2 style={{ fontSize: "1.3rem", fontWeight: 900, color: "#1A1A1A", margin: 0, letterSpacing: "-0.4px" }}>Sous-traitants</h2>
+              <p style={{ fontSize: "0.8rem", color: "#6B7280", margin: "2px 0 0" }}>Les professionnels de votre catégorie</p>
+            </div>
+            <span style={{ flexShrink: 0, display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(212,168,67,0.16)", color: "#8B6914", borderRadius: 50, padding: "7px 13px", fontSize: "0.82rem", fontWeight: 800 }}>
+              {effectiveCat !== "all" && catIcon(effectiveCat, "#8B6914", 15)}
+              {effectiveCat === "all" ? "Toutes" : (PUB_CATS.find(c => c.id === effectiveCat)?.label || effectiveCat)}
+            </span>
+          </div>
+        ) : (
+          <h2 style={{ fontSize: "1.3rem", fontWeight: 900, color: "#1A1A1A", margin: "0 0 12px", letterSpacing: "-0.4px" }}>Répertoire</h2>
+        )}
+
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           <div style={{ flex: 1 }}><Input value={q} onChange={e => setQ(e.target.value)} placeholder="🔎  Coiffeur, maçon, restaurant…" /></div>
           <select value={city} onChange={e => setCity(e.target.value)} style={{ borderRadius: 12, border: `2px solid ${G.gris}`, padding: "0 8px", fontSize: 13, background: G.blanc, color: "#111", marginBottom: 18 }}>
@@ -16053,11 +16106,52 @@ function Annuaire({ auth, onGoMessages }: { auth: Auth; onGoMessages: (partnerId
             {PUB_VILLES.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
         </div>
-        <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 }}>
-          {PUB_CATS.map(c => (
-            <button key={c.id} onClick={() => setCat(c.id)} style={{ flex: "0 0 auto", border: `1.5px solid ${cat === c.id ? "#111" : G.gris}`, background: cat === c.id ? "#111" : G.blanc, color: cat === c.id ? "#fff" : "#666", borderRadius: 50, padding: "7px 14px", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>{c.label}</button>
-          ))}
+
+        {/* Catégorie (client uniquement) + Métier */}
+        <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+          {!isPro && (
+            <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", gap: 9, borderRadius: 14, padding: "10px 12px", border: `1px solid ${G.gris}`, background: G.blanc }}>
+              <div style={{ width: 32, height: 32, flexShrink: 0, borderRadius: "50%", background: "rgba(212,168,67,0.14)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: "0.64rem", fontWeight: 700, color: "#9AA0A6", textTransform: "uppercase", letterSpacing: "0.4px" }}>Catégorie</div>
+                <div style={{ fontSize: "0.86rem", fontWeight: 800, color: "#1A1A1A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{cat === "all" ? "Toutes" : (PUB_CATS.find(c => c.id === cat)?.label || cat)}</div>
+              </div>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
+              <select value={cat} onChange={e => setCat(e.target.value)} aria-label="Catégorie" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer" }}>
+                <option value="all">Toutes les catégories</option>
+                {PUB_CATS.filter(c => c.id !== "all").map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+              </select>
+            </div>
+          )}
+          <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", gap: 9, borderRadius: 14, padding: "10px 12px", border: `1px solid ${G.gris}`, background: G.blanc }}>
+            <div style={{ width: 32, height: 32, flexShrink: 0, borderRadius: "50%", background: "rgba(212,168,67,0.14)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: "0.64rem", fontWeight: 700, color: "#9AA0A6", textTransform: "uppercase", letterSpacing: "0.4px" }}>Métier</div>
+              <div style={{ fontSize: "0.86rem", fontWeight: 800, color: metier ? "#1A1A1A" : "#9AA0A6", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metier || "Tous"}</div>
+            </div>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
+            <select value={metier} onChange={e => setMetier(e.target.value)} aria-label="Métier" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer" }}>
+              <option value="">Tous les métiers</option>
+              {metierOptions.map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </div>
         </div>
+
+        {/* Quartiers / arrondissements de la ville sélectionnée */}
+        {city !== "all" && (ARRONDISSEMENTS[city] || []).length > 0 && (
+          <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 }}>
+            {[{ id: "", label: "Tout" }, ...((ARRONDISSEMENTS[city] || []).map(a => ({ id: a, label: a })))].map(qc => {
+              const on = quartier === qc.id;
+              return (
+                <button key={qc.id || "tout"} onClick={() => setQuartier(qc.id)} style={{ flex: "0 0 auto", border: `1.5px solid ${on ? "#111" : G.gris}`, background: on ? "#111" : G.blanc, color: on ? "#fff" : "#666", borderRadius: 50, padding: "7px 14px", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>{qc.label}</button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div style={{ padding: "8px 16px", fontSize: "0.78rem", color: "#777", display: "flex", justifyContent: "space-between" }}>
@@ -16125,6 +16219,8 @@ export default function App() {
   const [pendingWarning, setPendingWarning] = useState<{ id: string; warning_number: number; reason: string } | null>(null);
   const [pendingBroadcast, setPendingBroadcast] = useState<{ id: string; message: string } | null>(null);
   const [userGender, setUserGender] = useState<string>("");
+  const [meType, setMeType] = useState<string>("");
+  const [meCategory, setMeCategory] = useState<string>("");
   const [selfBan, setSelfBan] = useState<{ until: string | null } | null>(null);
   // ── Sondages (côté membre) ──
   const [activeSurvey, setActiveSurvey] = useState<any | null>(null);
@@ -16453,8 +16549,8 @@ export default function App() {
   useEffect(() => {
     if (!auth?.userId) return;
     if (!userGender) {
-      fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${auth.userId}&select=gender`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` } })
-        .then(r => r.ok ? r.json() : []).then((d: any) => { if (Array.isArray(d) && d[0]?.gender) setUserGender(d[0].gender); }).catch(() => {});
+      fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${auth.userId}&select=gender,account_type,category`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` } })
+        .then(r => r.ok ? r.json() : []).then((d: any) => { if (Array.isArray(d) && d[0]) { if (d[0].gender) setUserGender(d[0].gender); setMeType(d[0].account_type || ""); setMeCategory(d[0].category || ""); } }).catch(() => {});
     }
     const checkBroadcast = async () => {
       try {
@@ -16942,11 +17038,11 @@ export default function App() {
       }
       if (t === "likes") { setLikesReceived(0); try { localStorage.setItem(`moyo_likes_seen_${auth!.userId}`, new Date().toISOString()); } catch {} }
       if (t === "visitors") { setViewsReceived(0); try { localStorage.setItem(`moyo_visitors_seen_${auth!.userId}`, new Date().toISOString()); } catch {} }
-    }} unreadCount={unreadCount} notifCount={notifCount} likesReceived={likesReceived} viewsReceived={viewsReceived} auth={auth} adminBadgeCount={adminBadgeCount} showAdminConfig={showAdminConfig} setShowAdminConfig={setShowAdminConfig} inConv={inConv} onPublish={() => { setTab("publier"); }}>
+    }} unreadCount={unreadCount} notifCount={notifCount} likesReceived={likesReceived} viewsReceived={viewsReceived} auth={auth} accountType={meType} adminBadgeCount={adminBadgeCount} showAdminConfig={showAdminConfig} setShowAdminConfig={setShowAdminConfig} inConv={inConv} onPublish={() => { setTab("publier"); }}>
       <div key={tab} className="page-anim" style={{ width: "100%", height: "100%" }}>
-      {tab === "publications" && <Publications auth={auth} publishNonce={publishNonce} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
-      {tab === "publier" && <PublierHub auth={auth} onGoFeed={() => setTab("publications")} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
-      {tab === "discover" && <Annuaire auth={auth} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
+      {tab === "publications" && <Publications auth={auth} accountType={meType} publishNonce={publishNonce} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
+      {tab === "publier" && <PublierHub auth={auth} accountType={meType} onGoFeed={() => setTab("publications")} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
+      {tab === "discover" && <Annuaire auth={auth} accountType={meType} myCategory={meCategory} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "messages" && <Messages auth={auth} onUnreadCount={setUnreadCount} onShowPremium={showPremium} initialPartnerId={openConvPartnerId} onConvOpen={setInConv} />}
       {tab === "profile" && <Profile auth={auth} onLogout={handleLogout} onShowPremium={showPremium} darkMode={darkMode} onToggleDark={() => { const v = !darkMode; setDarkMode(v); localStorage.setItem("moyo_dark", v ? "1" : "0"); }} onOpenAdmin={auth.isAdmin ? () => openAdminPanel(() => setTab("admin")) : undefined} adminBadgeCount={adminBadgeCount} />}
       {tab === "admin" && <AdminPinGate auth={auth} onBack={() => setTab("publications")} onBadgeCount={setAdminBadgeCount} />}
