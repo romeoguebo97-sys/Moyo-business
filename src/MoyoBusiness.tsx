@@ -828,6 +828,7 @@ const GLOBAL_CSS = `
   /* ── Transitions d'ouverture/fermeture des conversations (style WhatsApp/iMessage) ── */
   @keyframes convSlideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
   @keyframes convSlideOut{from{transform:translateX(0)}to{transform:translateX(100%)}}
+  @keyframes moyoSheetUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
   .conv-enter{animation:convSlideIn .26s cubic-bezier(.22,.61,.36,1)}
   .conv-leave{animation:convSlideOut .24s cubic-bezier(.4,0,.7,.3) forwards}
   @media(prefers-reduced-motion:reduce){.skeleton{animation:none}.page-anim{animation:none}.conv-enter,.conv-leave{animation:none}button:active,.tap:active,.card-hover:active{transform:none}}
@@ -3122,16 +3123,61 @@ const openAdminPanel = (fallback: () => void) => {
 
 // ─── Admin Desktop page (mounted when ?admin=1) ───────────────────────────────
 // ── Composants helpers pour le off-canvas ──
-// Modale de confirmation au style Moyo (réutilisable, autonome)
-function ConfirmModal({ msg, onConfirm, onCancel, confirmLabel = "Confirmer", danger = false }: { msg: string; onConfirm: () => void; onCancel: () => void; confirmLabel?: string; danger?: boolean }) {
+// Modale de confirmation au style Moyo (bottom sheet réutilisable : icône ronde teintée, titre, message, bouton principal + Annuler).
+// L'icône, la teinte, le titre, le texte et les libellés s'adaptent à chaque situation via `preset` ou via les props directes.
+type ConfirmTone = "danger" | "gold" | "green" | "blue" | "neutral";
+const CONFIRM_TONES: Record<ConfirmTone, { tint: string; solid: string; stroke: string }> = {
+  danger: { tint: "rgba(239,68,68,0.12)", solid: "linear-gradient(135deg,#EF4444,#DC2626)", stroke: "#EF4444" },
+  gold: { tint: "rgba(212,168,67,0.16)", solid: `linear-gradient(135deg,${G.or},${G.rougeDark})`, stroke: G.or },
+  green: { tint: "rgba(22,163,74,0.12)", solid: "linear-gradient(135deg,#16A34A,#0D5C2E)", stroke: G.vert },
+  blue: { tint: "rgba(37,99,235,0.12)", solid: "linear-gradient(135deg,#2563EB,#1E40AF)", stroke: "#2563EB" },
+  neutral: { tint: "rgba(107,114,128,0.14)", solid: "linear-gradient(135deg,#4B5563,#374151)", stroke: "#6B7280" },
+};
+const confirmSvg = (paths: React.ReactNode, stroke: string, fill = "none") => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill={fill} stroke={stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{paths}</svg>
+);
+const CONFIRM_ICONS = (stroke: string): Record<string, React.ReactNode> => ({
+  delete: confirmSvg(<><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></>, stroke),
+  edit: confirmSvg(<><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></>, stroke),
+  pause: confirmSvg(<><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></>, stroke),
+  play: confirmSvg(<polygon points="5 3 19 12 5 21 5 3"/>, stroke),
+  publish: confirmSvg(<><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></>, stroke),
+  validate: confirmSvg(<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>, stroke),
+  boost: confirmSvg(<><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></>, stroke),
+  logout: confirmSvg(<><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></>, stroke),
+  warning: confirmSvg(<><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>, stroke),
+});
+const CONFIRM_PRESETS: Record<string, { tone: ConfirmTone; icon: string }> = {
+  delete: { tone: "danger", icon: "delete" },
+  edit: { tone: "gold", icon: "edit" },
+  pause: { tone: "neutral", icon: "pause" },
+  play: { tone: "green", icon: "play" },
+  publish: { tone: "gold", icon: "publish" },
+  validate: { tone: "green", icon: "validate" },
+  boost: { tone: "blue", icon: "boost" },
+  logout: { tone: "danger", icon: "logout" },
+  warning: { tone: "danger", icon: "warning" },
+};
+
+function ConfirmModal({ msg, message, title, onConfirm, onCancel, confirmLabel = "Confirmer", cancelLabel = "Annuler", danger = false, tone, icon, preset, loading = false }: {
+  msg?: string; message?: string; title?: string;
+  onConfirm: () => void; onCancel: () => void;
+  confirmLabel?: string; cancelLabel?: string; danger?: boolean;
+  tone?: ConfirmTone; icon?: React.ReactNode; preset?: string; loading?: boolean;
+}) {
+  const presetCfg = preset ? CONFIRM_PRESETS[preset] : undefined;
+  const finalTone: ConfirmTone = tone || (danger ? "danger" : presetCfg?.tone) || "green";
+  const t = CONFIRM_TONES[finalTone];
+  const finalIcon = icon || (presetCfg ? CONFIRM_ICONS(t.stroke)[presetCfg.icon] : CONFIRM_ICONS(t.stroke)[finalTone === "danger" ? "warning" : "validate"]);
+  const body = message || msg || "";
   return (
-    <div onClick={onCancel} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: G.blanc, borderRadius: 18, padding: "26px 24px", width: "100%", maxWidth: 380, boxShadow: "0 24px 70px rgba(0,0,0,0.3)" }}>
-        <p style={{ fontSize: "0.92rem", color: "#111", lineHeight: 1.6, marginBottom: 22, fontWeight: 500, whiteSpace: "pre-line", textAlign: "center" }}>{msg}</p>
-        <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onCancel} style={{ flex: 1, padding: "12px", borderRadius: 50, border: `1.5px solid ${G.gris}`, background: G.creme, fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", color: "#555" }}>Annuler</button>
-          <button onClick={() => { onConfirm(); }} style={{ flex: 1, padding: "12px", borderRadius: 50, border: "none", background: danger ? G.rouge : `linear-gradient(135deg,${G.vert},#0D2E1C)`, color: "#fff", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer" }}>{confirmLabel}</button>
-        </div>
+    <div onClick={onCancel} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: G.blanc, borderRadius: "26px 26px 0 0", padding: "30px 24px calc(28px + env(safe-area-inset-bottom))", width: "100%", maxWidth: 500, boxShadow: "0 -10px 50px rgba(0,0,0,0.25)", animation: "moyoSheetUp .26s cubic-bezier(.16,1,.3,1)" }}>
+        <div style={{ width: 66, height: 66, borderRadius: "50%", background: t.tint, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>{finalIcon}</div>
+        {title && <h3 style={{ fontSize: "1.18rem", fontWeight: 900, color: "#1A1A1A", textAlign: "center", margin: "0 0 8px", letterSpacing: "-0.3px" }}>{title}</h3>}
+        {body && <p style={{ fontSize: "0.92rem", color: "#6B7280", lineHeight: 1.6, margin: "0 auto 24px", fontWeight: 500, whiteSpace: "pre-line", textAlign: "center", maxWidth: 360 }}>{body}</p>}
+        <button onClick={onConfirm} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: 14, border: "none", background: t.solid, color: "#fff", fontSize: "1rem", fontWeight: 800, fontFamily: "inherit", cursor: loading ? "wait" : "pointer", boxShadow: `0 8px 20px ${t.tint.replace("0.1", "0.3").replace("0.12", "0.32").replace("0.14", "0.3").replace("0.16", "0.34")}`, marginBottom: 11 }}>{loading ? "…" : confirmLabel}</button>
+        <button onClick={onCancel} disabled={loading} style={{ width: "100%", padding: "15px", borderRadius: 14, border: `1.5px solid ${G.gris}`, background: G.blanc, color: "#374151", fontSize: "0.95rem", fontWeight: 700, fontFamily: "inherit", cursor: "pointer" }}>{cancelLabel}</button>
       </div>
     </div>
   );
@@ -5088,6 +5134,7 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
   const [showStatusComposer, setShowStatusComposer] = useState(false);
   const [statusUploading, setStatusUploading] = useState(false);
   const [statusDeleting, setStatusDeleting] = useState(false);
+  const [pendingDelStatus, setPendingDelStatus] = useState<StatusPost | null>(null);
   const [statusPreview, setStatusPreview] = useState<StatusPost | null>(null);
   const [statusPreviewList, setStatusPreviewList] = useState<StatusPost[]>([]);
   const [statusPreviewIndex, setStatusPreviewIndex] = useState(0);
@@ -5418,8 +5465,6 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
       setToast({ msg: "Tu ne peux supprimer que tes propres statuts.", type: "error" });
       return;
     }
-    const ok = window.confirm("Supprimer ce statut ?");
-    if (!ok) return;
 
     setStatusDeleting(true);
     try {
@@ -6706,17 +6751,7 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
       )}
 
       {/* Modal suppression */}
-      {showDeleteConv && <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 400, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-        <div style={{ background: G.blanc, borderRadius: 20, padding: "28px 24px", width: "100%", maxWidth: 320, textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
-          <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(212,168,67,0.08)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
-          <h3 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: 8, color: G.brun }}>Supprimer la conversation ?</h3>
-          <p style={{ fontSize: "0.88rem", color: "#666", marginBottom: 20, lineHeight: 1.6 }}>Tous les messages seront supprimés. Cette action est irréversible.</p>
-          <div style={{ display: "flex", gap: 10 }}>
-            <Btn variant="ghost" onClick={() => setShowDeleteConv(false)} style={{ flex: 1 }}>Annuler</Btn>
-            <Btn variant="danger" onClick={deleteConv} style={{ flex: 1 }}>Supprimer</Btn>
-          </div>
-        </div>
-      </div>}
+      {showDeleteConv && <ConfirmModal preset="delete" title="Supprimer la conversation ?" message="Tous les messages seront supprimés. Cette action est irréversible." confirmLabel="Supprimer" onConfirm={deleteConv} onCancel={() => setShowDeleteConv(false)} />}
 
       {/* Modal profil partenaire */}
       {showPartnerProfile && open.partner && (
@@ -6776,16 +6811,16 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
       )}
       {/* Confirmation annulation du match */}
       {confirmUnmatchPartner && open.partner && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 520, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }} onClick={() => !partnerActionLoading && setConfirmUnmatchPartner(false)}>
-          <div onClick={e => e.stopPropagation()} style={{ background: G.blanc, borderRadius: 20, padding: "26px 22px", width: "100%", maxWidth: 340, textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>Annuler le match avec {open.partner.name} ?</h3>
-            <p style={{ fontSize: "0.85rem", color: "#666", lineHeight: 1.6, marginBottom: 22 }}>La conversation, les messages et les likes mutuels seront supprimés. Cette action est irréversible et la personne n'est pas notifiée.</p>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setConfirmUnmatchPartner(false)} disabled={partnerActionLoading} style={{ flex: 1, padding: "12px", borderRadius: 50, border: `2px solid ${G.gris}`, background: G.blanc, color: "#555", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>Retour</button>
-              <button onClick={unmatchPartnerNow} disabled={partnerActionLoading} style={{ flex: 1, padding: "12px", borderRadius: 50, border: "none", background: G.rouge, color: "#fff", fontWeight: 700, fontSize: "0.85rem", cursor: partnerActionLoading ? "wait" : "pointer" }}>{partnerActionLoading ? "..." : "Annuler la mise en relation"}</button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          preset="delete"
+          title={`Annuler le match avec ${open.partner.name} ?`}
+          message="La conversation, les messages et les likes mutuels seront supprimés. Cette action est irréversible et la personne n'est pas notifiée."
+          confirmLabel="Annuler la mise en relation"
+          cancelLabel="Retour"
+          loading={partnerActionLoading}
+          onConfirm={unmatchPartnerNow}
+          onCancel={() => !partnerActionLoading && setConfirmUnmatchPartner(false)}
+        />
       )}
       {/* Confirmation : demander Premium */}
       </div>{/* fin chat */}
@@ -6870,7 +6905,7 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
           </div>
           {statusPreview.user_id === auth.userId && (
             <button
-              onClick={(e) => { e.stopPropagation(); handleDeleteStatus(statusPreview); }}
+              onClick={(e) => { e.stopPropagation(); if (statusPreview?.user_id === auth.userId) setPendingDelStatus(statusPreview); else setToast({ msg: "Tu ne peux supprimer que tes propres statuts.", type: "error" }); }}
               disabled={statusDeleting}
               title="Supprimer ce statut"
               style={{ marginLeft: "auto", width: 40, height: 40, borderRadius: "50%", border: "none", background: "rgba(212,168,67,0.92)", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: statusDeleting ? "wait" : "pointer", opacity: statusDeleting ? 0.65 : 1, padding: 0, boxShadow: "0 6px 16px rgba(0,0,0,0.22)" }}
@@ -6929,6 +6964,7 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
         )}
       </div>
     )}
+    {pendingDelStatus && <ConfirmModal preset="delete" title="Supprimer ce statut ?" message="Ce statut sera définitivement supprimé. Cette action est irréversible." confirmLabel="Supprimer" loading={statusDeleting} onConfirm={async () => { const s = pendingDelStatus; setPendingDelStatus(null); await handleDeleteStatus(s); }} onCancel={() => setPendingDelStatus(null)} />}
     {statusPeopleModal && (
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 800, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={() => setStatusPeopleModal(null)}>
         <div style={{ background: G.blanc, borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 500, maxHeight: "60vh", display: "flex", flexDirection: "column", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
@@ -8580,46 +8616,20 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
       )}
 
       {showLogout && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 400, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <div style={{ background: G.blanc, borderRadius: 20, padding: "28px 24px", width: "100%", maxWidth: 320, textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}>
-            <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(212,168,67,0.08)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            </div>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: G.brun, marginBottom: 8 }}>Se déconnecter ?</h3>
-            <p style={{ fontSize: "0.88rem", fontWeight: 400, color: "#666", marginBottom: 24, lineHeight: 1.6 }}>Tu seras redirigé vers la page d'accueil. À bientôt sur Moyo !</p>
-            <div style={{ display: "flex", gap: 10 }}>
-              <Btn variant="ghost" onClick={() => setShowLogout(false)} style={{ flex: 1 }}>Annuler</Btn>
-              <Btn variant="danger" onClick={() => { sb.signOut(auth.token); onLogout(); }} style={{ flex: 1 }}>Se déconnecter</Btn>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal preset="logout" tone="neutral" title="Se déconnecter ?" message="Tu seras redirigé vers la page d'accueil. À bientôt sur Moyo !" confirmLabel="Se déconnecter" onConfirm={() => { sb.signOut(auth.token); onLogout(); }} onCancel={() => setShowLogout(false)} />
       )}
 
       {showDelete && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 400, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <div style={{ background: G.blanc, borderRadius: 20, padding: "28px 24px", width: "100%", maxWidth: 320, textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}>
-            <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>⚠️</div>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: G.brun, marginBottom: 8 }}>Supprimer mon compte ?</h3>
-            <p style={{ fontSize: "0.88rem", fontWeight: 400, color: "#666", marginBottom: 6, lineHeight: 1.6 }}>Ton profil, tes likes, tes matchs et tes messages seront <strong style={{ color: G.brun }}>définitivement supprimés</strong>.</p>
-            <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "#e74c3c", marginBottom: deleteError ? 10 : 24 }}>Cette action est irréversible.</p>
-            {deleteError && (
-              <div style={{ background: "rgba(231,76,60,0.08)", border: "1px solid rgba(231,76,60,0.25)", borderRadius: 10, padding: "10px 14px", marginBottom: 16, fontSize: "0.78rem", color: "#e74c3c", lineHeight: 1.5, textAlign: "left" }}>
-                {deleteError}
-              </div>
-            )}
-            {deleteLoading ? (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "12px 0", color: "#888", fontSize: "0.88rem" }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2.5" strokeLinecap="round" style={{ animation: "pulse 0.8s ease-in-out infinite" }}><circle cx="12" cy="12" r="10"/></svg>
-                Suppression en cours…
-              </div>
-            ) : (
-              <div style={{ display: "flex", gap: 10 }}>
-                <Btn variant="ghost" onClick={() => { setShowDelete(false); setDeleteError(""); }} style={{ flex: 1 }}>Non, garder</Btn>
-                <Btn variant="danger" onClick={handleDelete} style={{ flex: 1 }}>Oui, supprimer</Btn>
-              </div>
-            )}
-          </div>
-        </div>
+        <ConfirmModal
+          preset="delete"
+          title="Supprimer mon compte ?"
+          message={`Ton profil, tes likes, tes matchs et tes messages seront définitivement supprimés. Cette action est irréversible.${deleteError ? "\n\n" + deleteError : ""}`}
+          confirmLabel="Oui, supprimer"
+          cancelLabel="Non, garder"
+          loading={deleteLoading}
+          onConfirm={handleDelete}
+          onCancel={() => { setShowDelete(false); setDeleteError(""); }}
+        />
       )}
       </div>{/* fin colonne droite */}
     </div>
@@ -10933,18 +10943,12 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
 
       {/* Modal confirmation */}
       {confirmModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 10010, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <div style={{ background: G.blanc, borderRadius: 20, padding: "28px 24px", width: "100%", maxWidth: 320, textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
-            <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(212,168,67,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2.5" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            </div>
-            <p style={{ fontSize: "0.9rem", color: "#111", lineHeight: 1.6, marginBottom: 22, fontWeight: 500, whiteSpace: "pre-line", textAlign: "left" }}>{confirmModal.msg}</p>
-            <div style={{ display: "flex", gap: 10 }}>
-              <Btn variant="ghost" onClick={() => setConfirmModal(null)} style={{ flex: 1, padding: "11px" }}>Annuler</Btn>
-              <Btn variant="danger" onClick={() => { confirmModal.onConfirm(); setConfirmModal(null); }} style={{ flex: 1, padding: "11px" }}>Confirmer</Btn>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          preset="warning"
+          message={confirmModal.msg}
+          onConfirm={() => { confirmModal.onConfirm(); setConfirmModal(null); }}
+          onCancel={() => setConfirmModal(null)}
+        />
       )}
 
       {/* Modal avertissement admin */}
@@ -15000,12 +15004,13 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
-function PubCard({ pub, me, onContact, onBoost, onViewProfile }: { pub: Publication; me: string; onContact: () => void; onBoost: () => void; onViewProfile?: () => void }) {
+function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: Publication; me: string; onContact: () => void; onBoost: () => void; onViewProfile?: () => void; onOpen?: () => void }) {
   const isProp = pub.type === "propose";
   const mine = pub.user_id === me;
   const priceTxt = isProp ? (pub.budget ? "À partir de " + fmtFCFA(pub.budget) : "Tarif à discuter") : "Budget : " + fmtFCFA(pub.budget);
   return (
     <div style={{ background: G.blanc, border: `1.5px solid ${pub.is_boosted ? G.or : G.gris}`, borderRadius: 16, padding: 16, position: "relative", boxShadow: pub.is_boosted ? "0 6px 20px rgba(212,168,67,0.18)" : "0 2px 8px rgba(0,0,0,0.04)" }}>
+      <div onClick={onOpen} style={{ cursor: onOpen ? "pointer" : "default" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
         <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, padding: "5px 10px", borderRadius: 7, background: isProp ? "rgba(22,163,74,0.12)" : "rgba(212,168,67,0.18)", color: isProp ? "#16A34A" : "#8B6914" }}>{pub.category}</span>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
@@ -15021,6 +15026,7 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile }: { pub: Publicat
           <span style={{ width: 1, height: 16, background: G.gris }} />
           <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "#1A1A1A" }}><TagIcon color="#1A1A1A" /> {priceTxt}</span>
         </div>
+      </div>
       </div>
       <div style={{ borderTop: `1px solid ${G.gris}`, margin: "0 -16px", padding: "13px 16px 0" }}>
         {mine ? (
@@ -15063,20 +15069,22 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile }: { pub: Publicat
   );
 }
 
-function PublishModal({ auth, onClose, onPublished, embedded, presetType }: { auth: Auth; onClose: () => void; onPublished: (p: Publication) => void; embedded?: boolean; presetType?: "cherche" | "propose" }) {
-  const [type, setType] = useState<"cherche" | "propose">(presetType || "cherche");
-  const [cat, setCat] = useState("BTP");
-  const [metier, setMetier] = useState<string>(() => metiersForCategory("BTP")[0] || "");
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
-  const [budget, setBudget] = useState("");
-  const [city, setCity] = useState<string>("Brazzaville");
-  const [arrond, setArrond] = useState<string>("");
-  const [quartier, setQuartier] = useState<string>("");
-  const [photos, setPhotos] = useState<string[]>([]);
+function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPub }: { auth: Auth; onClose: () => void; onPublished: (p: Publication) => void; embedded?: boolean; presetType?: "cherche" | "propose"; editPub?: Publication }) {
+  const [type, setType] = useState<"cherche" | "propose">(editPub?.type || presetType || "cherche");
+  const [cat, setCat] = useState(editPub?.category || "BTP");
+  const [metier, setMetier] = useState<string>(() => editPub?.metier || metiersForCategory(editPub?.category || "BTP")[0] || "");
+  const [title, setTitle] = useState(editPub?.title || "");
+  const [desc, setDesc] = useState(editPub?.description || "");
+  const [budget, setBudget] = useState(editPub?.budget ? String(editPub.budget) : "");
+  const [city, setCity] = useState<string>(editPub?.city || "Brazzaville");
+  const [arrond, setArrond] = useState<string>(() => editPub?.location ? (editPub.location.split(" · ")[0] || "") : "");
+  const [quartier, setQuartier] = useState<string>(() => editPub?.location ? (editPub.location.split(" · ")[1] || "") : "");
+  const [photos, setPhotos] = useState<string[]>(editPub?.photos || []);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [confirmPub, setConfirmPub] = useState(false);
   const photoInput = useRef<HTMLInputElement>(null);
+  const firstCity = useRef(true);
 
   const arrOptions = ARRONDISSEMENTS[city] || [];
   const hasArr = arrOptions.length > 0;
@@ -15089,8 +15097,11 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType }: { au
     const list = metiersForCategory(cat);
     if (!list.includes(metier)) setMetier(list[0] || "");
   }, [cat]); // eslint-disable-line react-hooks/exhaustive-deps
-  // Quand la ville change, on réinitialise arrondissement + quartier.
-  useEffect(() => { setArrond(""); setQuartier(""); }, [city]);
+  // Quand la ville change, on réinitialise arrondissement + quartier (sauf au montage, pour l'édition).
+  useEffect(() => {
+    if (firstCity.current) { firstCity.current = false; return; }
+    setArrond(""); setQuartier("");
+  }, [city]);
 
   async function addPhotos(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
@@ -15117,26 +15128,37 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType }: { au
     const locParts = isPropose ? [arrond, quartier].filter(x => x && x !== "Autre") : [];
     const base = {
       user_id: auth.userId, type, category: cat, title: title.trim(), description: desc.trim(),
-      budget: parseInt(budget, 10) || null, city, location: locParts.join(" · ") || null, status: "active",
+      budget: parseInt(budget, 10) || null, city, location: locParts.join(" · ") || null, status: editPub?.status || "active",
     };
-    // Insertion défensive : on tente avec les champs optionnels (metier/photos) ; si la colonne
-    // n'existe pas encore en base, on retente progressivement sans, pour ne jamais bloquer la publication.
+    // Écriture défensive : on tente avec les champs optionnels (metier/photos) ; si la colonne
+    // n'existe pas encore en base, on retente progressivement sans, pour ne jamais bloquer l'opération.
     const attempts: object[] = [
       { ...base, metier, photos: photos.length ? photos : null },
       { ...base, metier },
       base,
     ];
+    const hasId = (x: unknown): x is Publication => !!x && typeof x === "object" && !!(x as { id?: string }).id;
     try {
       let row: Publication | undefined;
-      for (const payload of attempts) {
-        const rows = await sb.insert<Publication>(auth.token, "publications", payload, auth.refreshToken);
-        if (rows[0] && (rows[0] as { id?: string }).id) { row = rows[0]; break; }
+      if (editPub) {
+        for (const payload of attempts) {
+          const res = await sb.update(auth.token, "publications", editPub.id, payload, auth.refreshToken);
+          const r = Array.isArray(res) ? res[0] : res;
+          if (hasId(r)) { row = r; break; }
+        }
+        onPublished(row || ({ ...editPub, ...base, metier, photos } as Publication));
+      } else {
+        for (const payload of attempts) {
+          const rows = await sb.insert<Publication>(auth.token, "publications", payload, auth.refreshToken);
+          if (hasId(rows[0])) { row = rows[0]; break; }
+        }
+        onPublished(row || ({ id: "", user_id: auth.userId, type, category: cat, title, description: desc, city } as Publication));
       }
-      onPublished(row || ({ id: "", user_id: auth.userId, type, category: cat, title, description: desc, city } as Publication));
     } catch { setSaving(false); }
   }
 
-  const headerTitle = isPropose ? "Proposer un service" : presetType === "cherche" ? "Publier votre besoin" : "Publier une annonce";
+  const headerTitle = editPub ? "Modifier l'annonce" : isPropose ? "Proposer un service" : presetType === "cherche" ? "Publier votre besoin" : "Publier une annonce";
+  const submitLabel = editPub ? "Enregistrer les modifications" : isPropose ? "Publier mon service" : "Publier l'annonce";
 
   const lbl = (txt: string) => <label style={{ display: "block", fontWeight: 700, fontSize: "0.9rem", color: "#1A1A1A", marginBottom: 8 }}>{txt} <span style={{ color: "#E11D48" }}>*</span></label>;
   const fieldSel: React.CSSProperties = { width: "100%", appearance: "none", WebkitAppearance: "none", MozAppearance: "none", border: `1.5px solid ${G.gris}`, background: G.blanc, color: "#1A1A1A", borderRadius: 14, padding: "15px 42px 15px 48px", fontSize: 16, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxSizing: "border-box" };
@@ -15275,10 +15297,20 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType }: { au
         </div>
       </div>
 
-      <Btn variant="gold" onClick={submit} disabled={!ok} loading={saving} style={{ width: "100%", padding: "16px", fontSize: "1rem", fontWeight: 800, borderRadius: 14, boxShadow: "0 8px 20px rgba(212,168,67,0.35)" }}>
+      <Btn variant="gold" onClick={() => { if (ok) setConfirmPub(true); }} disabled={!ok} loading={saving} style={{ width: "100%", padding: "16px", fontSize: "1rem", fontWeight: 800, borderRadius: 14, boxShadow: "0 8px 20px rgba(212,168,67,0.35)" }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        {isPropose ? "Publier mon service" : "Publier l'annonce"}
+        {submitLabel}
       </Btn>
+
+      {confirmPub && <ConfirmModal
+        preset={editPub ? "edit" : "publish"}
+        title={editPub ? "Enregistrer les modifications" : isPropose ? "Publier mon service" : "Publier votre annonce"}
+        message={editPub ? "Confirmer la mise à jour de votre annonce ?" : "Votre annonce sera visible par les autres utilisateurs."}
+        confirmLabel={editPub ? "Enregistrer" : isPropose ? "Publier mon service" : "Publier l'annonce"}
+        loading={saving}
+        onConfirm={() => { setConfirmPub(false); submit(); }}
+        onCancel={() => setConfirmPub(false)}
+      />}
     </>
   );
 
@@ -15539,10 +15571,126 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
    MOYO BUSINESS — HUB PUBLIER : menu à 3 choix (rendu DANS le shell → navbar visible)
    1) Je cherche un professionnel  2) Je propose mes services  3) Voir mes publications
 ============================================================================ */
+function PubDetail({ auth, pub: initialPub, onBack, onChanged }: { auth: Auth; pub: Publication; onBack: () => void; onChanged: (p?: Publication) => void }) {
+  const [pub, setPub] = useState<Publication>(initialPub);
+  const [expanded, setExpanded] = useState(false);
+  const [boost, setBoost] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
+  const [confirmPause, setConfirmPause] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const isProp = pub.type === "propose";
+  const paused = pub.status === "paused";
+  const priceTxt = isProp ? (pub.budget ? "À partir de " + fmtFCFA(pub.budget) : "Tarif à discuter") : "Budget : " + fmtFCFA(pub.budget);
+  const vues = Number((pub as { views?: number }).views ?? 0);
+  const reponses = Number((pub as { responses?: number }).responses ?? 0);
+  const longDesc = (pub.description || "").length > 120;
+
+  async function togglePause() {
+    setBusy(true);
+    const next = paused ? "active" : "paused";
+    try { await sb.update(auth.token, "publications", pub.id, { status: next }, auth.refreshToken); } catch { /* */ }
+    const np = { ...pub, status: next };
+    setPub(np); setBusy(false);
+    setToast(next === "paused" ? "Annonce mise en pause" : "Annonce réactivée");
+    onChanged(np);
+  }
+  async function doDelete() {
+    setBusy(true);
+    try { await sb.delete(auth.token, "publications", `?id=eq.${pub.id}`, auth.refreshToken); } catch { /* */ }
+    setBusy(false);
+    onChanged();
+    onBack();
+  }
+
+  if (editing) {
+    return <PublishModal auth={auth} embedded presetType={pub.type} editPub={pub} onClose={() => setEditing(false)} onPublished={(updated) => { setEditing(false); const np = updated && updated.id ? updated : { ...pub }; setPub(np); onChanged(np); setToast("Annonce modifiée ✓"); }} />;
+  }
+
+  const actionBtn = (bg: string, color: string, icon: React.ReactNode, label: string, onClick: () => void, disabled?: boolean) => (
+    <button onClick={onClick} disabled={disabled || busy} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, background: bg, color, border: "none", borderRadius: 14, padding: "15px", fontSize: "0.95rem", fontWeight: 700, fontFamily: "inherit", cursor: disabled || busy ? "not-allowed" : "pointer", opacity: disabled ? 0.55 : 1 }}>
+      {icon}{label}
+    </button>
+  );
+
+  return (
+    <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 5, background: G.creme, display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", borderBottom: `1px solid ${G.gris}` }}>
+        <button onClick={onBack} aria-label="Retour" style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: G.blanc, boxShadow: "0 1px 4px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Mon annonce</h3>
+      </div>
+
+      <div style={{ padding: "18px 18px 110px" }}>
+        {/* badge + statut + date */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, padding: "5px 10px", borderRadius: 7, background: isProp ? "rgba(22,163,74,0.12)" : "rgba(212,168,67,0.18)", color: isProp ? "#16A34A" : "#8B6914" }}>{pub.category}</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 20, background: paused ? "rgba(107,114,128,0.12)" : "rgba(22,163,74,0.12)", color: paused ? "#6B7280" : "#16A34A" }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: paused ? "#6B7280" : "#16A34A" }} />{paused ? "En pause" : "Active"}
+            </span>
+          </div>
+          <span style={{ fontSize: 12.5, color: "#9AA0A6", flexShrink: 0 }}>{timeAgo(pub.created_at)}</span>
+        </div>
+
+        <h2 style={{ fontSize: "1.35rem", fontWeight: 900, color: "#1A1A1A", margin: "0 0 16px", lineHeight: 1.25, letterSpacing: "-0.3px" }}>{pub.title}</h2>
+
+        {pub.photos && pub.photos.length > 0 && (
+          <div style={{ display: "flex", gap: 8, overflowX: "auto", marginBottom: 16, paddingBottom: 2 }}>
+            {pub.photos.map((u, i) => <img key={i} src={u} alt="" style={{ width: 96, height: 96, objectFit: "cover", borderRadius: 12, flexShrink: 0, border: `1px solid ${G.gris}` }} />)}
+          </div>
+        )}
+
+        <div style={{ fontSize: "0.95rem", fontWeight: 800, color: "#1A1A1A", marginBottom: 7 }}>Description</div>
+        <div style={{ fontSize: "0.95rem", color: "#4B5563", lineHeight: 1.6, ...(expanded ? {} : { display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }) }}>{pub.description}</div>
+        {longDesc && <button onClick={() => setExpanded(v => !v)} style={{ background: "none", border: "none", color: G.or, fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", padding: "6px 0 0", fontFamily: "inherit" }}>{expanded ? "Voir moins" : "Voir plus"}</button>}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, margin: "18px 0 4px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: "0.95rem", color: "#374151", fontWeight: 600 }}><PinIcon color="#EF4444" /> {pub.location ? `${pub.location}, ${pub.city}` : pub.city}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: "0.95rem", color: "#374151", fontWeight: 600 }}><TagIcon color={G.or} /> {priceTxt}</div>
+        </div>
+
+        {/* statistiques */}
+        <div style={{ fontSize: "0.95rem", fontWeight: 800, color: "#1A1A1A", margin: "22px 0 12px" }}>Statistiques</div>
+        <div style={{ display: "flex", gap: 12, marginBottom: 22 }}>
+          {[{ n: vues, l: "Vues" }, { n: reponses, l: "Réponses" }].map(s => (
+            <div key={s.l} style={{ flex: 1, background: G.blanc, border: `1px solid ${G.gris}`, borderRadius: 14, padding: "16px 12px", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+              <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "#1A1A1A", lineHeight: 1.1 }}>{s.n}</div>
+              <div style={{ fontSize: "0.82rem", color: "#9AA0A6", marginTop: 3 }}>{s.l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* actions */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {actionBtn("rgba(212,168,67,0.15)", "#8B6914", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>, "Modifier l'annonce", () => setEditing(true))}
+          {actionBtn("rgba(107,114,128,0.12)", "#374151", paused
+            ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>,
+            paused ? "Reprendre l'annonce" : "Mettre en pause", () => setConfirmPause(true))}
+          {actionBtn("rgba(37,99,235,0.1)", "#2563EB", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>,
+            pub.is_boosted ? "Déjà mise en avant ✓" : "Mettre en avant", () => setBoost(true), !!pub.is_boosted)}
+          {actionBtn("rgba(220,38,38,0.08)", "#DC2626", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>, "Supprimer l'annonce", () => setConfirmDel(true))}
+        </div>
+      </div>
+
+      {confirmDel && <ConfirmModal preset="delete" title="Supprimer l'annonce" message="Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible." confirmLabel="Oui, supprimer" loading={busy} onConfirm={doDelete} onCancel={() => setConfirmDel(false)} />}
+      {confirmPause && <ConfirmModal preset={paused ? "play" : "pause"} title={paused ? "Reprendre l'annonce" : "Mettre en pause"} message={paused ? "Votre annonce redeviendra visible par les autres utilisateurs." : "Votre annonce sera masquée du fil public jusqu'à sa reprise."} confirmLabel={paused ? "Oui, reprendre" : "Oui, mettre en pause"} loading={busy} onConfirm={() => { setConfirmPause(false); togglePause(); }} onCancel={() => setConfirmPause(false)} />}
+
+      {boost && <BoostModal auth={auth} pub={pub} onClose={() => setBoost(false)} onBoosted={() => { setBoost(false); const np = { ...pub, is_boosted: true }; setPub(np); setToast("Annonce mise en avant ✓"); onChanged(np); }} />}
+      {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
+    </div>
+  );
+}
+
 function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: () => void; onGoMessages: (pid: string) => void }) {
   const [pubs, setPubs] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [boostTarget, setBoostTarget] = useState<Publication | null>(null);
+  const [detail, setDetail] = useState<Publication | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -15554,6 +15702,10 @@ function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: ()
     setLoading(false);
   }, [auth.token, auth.userId, auth.refreshToken]);
   useEffect(() => { load(); }, [load]);
+
+  if (detail) {
+    return <PubDetail auth={auth} pub={detail} onBack={() => setDetail(null)} onChanged={(p) => { if (p) setDetail(d => d ? p : d); load(); }} />;
+  }
 
   return (
     <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
@@ -15572,7 +15724,7 @@ function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: ()
           </div>
         )}
         {!loading && pubs.map(p => (
-          <PubCard key={p.id} pub={p} me={auth.userId} onContact={() => onGoMessages(p.user_id)} onBoost={() => setBoostTarget(p)} />
+          <PubCard key={p.id} pub={p} me={auth.userId} onOpen={() => setDetail(p)} onContact={() => onGoMessages(p.user_id)} onBoost={() => setBoostTarget(p)} />
         ))}
       </div>
       {boostTarget && <BoostModal auth={auth} pub={boostTarget} onClose={() => setBoostTarget(null)} onBoosted={() => { setBoostTarget(null); setToast("Annonce mise en avant ✓"); load(); }} />}
