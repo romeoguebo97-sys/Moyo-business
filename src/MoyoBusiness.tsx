@@ -17,7 +17,7 @@ async function saveSetting(key: string, value: string, token: string): Promise<b
     return true;
   } catch { return false; }
 }
-const APP_URL = "https://moyo-business.vercel.app/";
+const APP_URL = "https://business.moyo-congo.com/";
 
 const VILLES = [
   "── Brazzaville ──",
@@ -2745,8 +2745,8 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
       {step === 1 && <>
         <p style={{ textAlign: "center", fontSize: "0.92rem", color: "#666", lineHeight: 1.6, margin: "-4px 0 20px" }}>Choisissez ce qui vous correspond le mieux pour continuer.</p>
         {[
-          { val: "client", title: "Je suis un client", sub: "Je recherche des professionnels pour répondre à mes besoins.", tint: "rgba(212,168,67,0.14)", ring: G.or, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> },
-          { val: "pro", title: "Je suis un professionnel", sub: "Je propose mes services et je recherche des clients.", tint: "rgba(22,163,74,0.12)", ring: G.vert, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
+          { val: "client", title: "j'ai un besoin", sub: "Je recherche des professionnels pour répondre à mes besoins.", tint: "rgba(212,168,67,0.14)", ring: G.or, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> },
+          { val: "pro", title: "Je suis un professionnel", sub: "Je propose mes services et je recherche des marchés.", tint: "rgba(22,163,74,0.12)", ring: G.vert, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
         ].map(c => {
           const on = form.account_type === c.val;
           return (
