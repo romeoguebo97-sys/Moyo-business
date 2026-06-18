@@ -2732,8 +2732,8 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
       {step === 1 && <>
         <p style={{ textAlign: "center", fontSize: "0.92rem", color: "#666", lineHeight: 1.6, margin: "-4px 0 20px" }}>Choisissez ce qui vous correspond le mieux pour continuer.</p>
         {[
-          { val: "client", title: "J'ai un besoin", sub: "Je recherche des professionnels pour répondre à mes besoins.", tint: "rgba(212,168,67,0.14)", ring: G.or, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> },
-          { val: "pro", title: "Je suis un professionnel", sub: "Je propose mes services et je recherche des marchés.", tint: "rgba(22,163,74,0.12)", ring: G.vert, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
+          { val: "client", title: "Je suis un client", sub: "Je recherche des professionnels pour répondre à mes besoins.", tint: "rgba(212,168,67,0.14)", ring: G.or, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> },
+          { val: "pro", title: "Je suis un professionnel", sub: "Je propose mes services et je recherche des clients.", tint: "rgba(22,163,74,0.12)", ring: G.vert, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
         ].map(c => {
           const on = form.account_type === c.val;
           return (
@@ -15025,7 +15025,7 @@ const VILLES_PRINCIPALES = ["Brazzaville", "Pointe-Noire", "Dolisie", "Nkayi", "
 
 type Publication = {
   id: string; user_id: string; type: "cherche" | "propose"; category: string;
-  title: string; description: string; budget?: number | null; city: string; location?: string | null; metier?: string | null; photos?: string[] | null;
+  title: string; description: string; budget?: number | null; city: string; location?: string | null; metier?: string | null; arrondissement?: string | null; photos?: string[] | null;
   is_boosted?: boolean; boosted_until?: string | null; status?: string; created_at?: string;
   author?: { id: string; name: string; photo_url?: string | null; city?: string; profession?: string; is_verified?: boolean };
 };
@@ -15127,7 +15127,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
   const [desc, setDesc] = useState(editPub?.description || "");
   const [budget, setBudget] = useState(editPub?.budget ? String(editPub.budget) : "");
   const [city, setCity] = useState<string>(editPub?.city || "Brazzaville");
-  const [arrond, setArrond] = useState<string>(() => editPub?.location ? (editPub.location.split(" · ")[0] || "") : "");
+  const [arrond, setArrond] = useState<string>(() => editPub?.arrondissement || (editPub?.location ? (editPub.location.split(" · ")[0] || "") : ""));
   const [quartier, setQuartier] = useState<string>(() => editPub?.location ? (editPub.location.split(" · ")[1] || "") : "");
   const [photos, setPhotos] = useState<string[]>(editPub?.photos || []);
   const [uploading, setUploading] = useState(false);
@@ -15175,16 +15175,16 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
   async function submit() {
     if (!ok) return;
     setSaving(true);
-    const locParts = isPropose ? [arrond, quartier].filter(x => x && x !== "Autre") : [];
+    const locParts = [arrond, isPropose ? quartier : ""].filter(x => x && x !== "Autre");
     const base = {
       user_id: auth.userId, type, category: cat, title: title.trim(), description: desc.trim(),
       budget: parseInt(budget, 10) || null, city, location: locParts.join(" · ") || null, status: editPub?.status || "active",
+      metier: metier || null, arrondissement: arrond || null,
     };
-    // Écriture défensive : on tente avec les champs optionnels (metier/photos) ; si la colonne
-    // n'existe pas encore en base, on retente progressivement sans, pour ne jamais bloquer l'opération.
+    // `metier` et `arrondissement` ont des colonnes dédiées. `photos` peut ne pas exister encore :
+    // on tente avec, et si la colonne manque on retente sans, pour ne jamais bloquer l'opération.
     const attempts: object[] = [
-      { ...base, metier, photos: photos.length ? photos : null },
-      { ...base, metier },
+      { ...base, photos: photos.length ? photos : null },
       base,
     ];
     const hasId = (x: unknown): x is Publication => !!x && typeof x === "object" && !!(x as { id?: string }).id;
@@ -15196,7 +15196,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
           const r = Array.isArray(res) ? res[0] : res;
           if (hasId(r)) { row = r; break; }
         }
-        onPublished(row || ({ ...editPub, ...base, metier, photos } as Publication));
+        onPublished(row || ({ ...editPub, ...base, photos } as Publication));
       } else {
         for (const payload of attempts) {
           const rows = await sb.insert<Publication>(auth.token, "publications", payload, auth.refreshToken);
@@ -15328,13 +15328,10 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
         </>
       ) : (
         <>
-          {lbl("Ville")}
-          <div style={{ position: "relative", marginBottom: 18 }}>
-            {iconLeft(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>)}
-            <select value={city} onChange={e => setCity(e.target.value)} style={fieldSel}>
-              {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
-            </select>
-            {chevronRight}
+          {lbl("Localisation")}
+          <div style={{ border: `1.5px solid ${G.gris}`, borderRadius: 14, background: G.blanc, marginBottom: 18, overflow: "hidden" }}>
+            {locRow(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, "Ville", city, "Sélectionnez une ville", VILLES_PRINCIPALES, setCity, !hasArr)}
+            {hasArr && locRow(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M8 10h.01M16 10h.01M12 10h.01M8 14h.01M16 14h.01M12 14h.01"/></svg>, "Arrondissement", arrond, "Sélectionnez un arrondissement", arrOptions, setArrond, true)}
           </div>
         </>
       )}
@@ -15436,9 +15433,11 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
 const SEARCH_HINTS = BUSINESS_METIERS_FLAT.slice(0, 24);
 
 function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMessages: (partnerId: string) => void; publishNonce?: number }) {
-  const [type, setType] = useState<"cherche" | "propose">("cherche");
+  const [type] = useState<"cherche" | "propose">("cherche");
   const [cat, setCat] = useState("all");
+  const [metier, setMetier] = useState("");
   const [city, setCity] = useState<string>(PUB_VILLES[0] || "Brazzaville");
+  const [quartier, setQuartier] = useState("");
   const [q, setQ] = useState("");
   const [results, setResults] = useState<{ pros: Profile[]; pubs: Publication[] } | null>(null);
   const [searching, setSearching] = useState(false);
@@ -15454,14 +15453,18 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
     let p = `?status=eq.active&type=eq.${type}&order=is_boosted.desc,created_at.desc&select=*,author:profiles(id,name,photo_url,city,profession,is_verified)`;
     if (cat !== "all") p += `&category=eq.${encodeURIComponent(cat)}`;
     if (city) p += `&city=eq.${encodeURIComponent(city)}`;
+    if (metier) p += `&metier=eq.${encodeURIComponent(metier)}`;
+    if (quartier) p += `&arrondissement=eq.${encodeURIComponent(quartier)}`;
     try {
       const rows = await sb.query<Publication>(auth.token, "publications", p, auth.refreshToken);
       setPubs(rows);
     } catch { setPubs([]); }
     setLoading(false);
-  }, [auth.token, auth.refreshToken, type, cat, city]);
+  }, [auth.token, auth.refreshToken, type, cat, city, metier, quartier]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { setMetier(""); }, [cat]);
+  useEffect(() => { setQuartier(""); }, [city]);
   useEffect(() => { if (publishNonce) setShowPublish(true); }, [publishNonce]);
   useEffect(() => {
     const term = q.trim();
@@ -15517,23 +15520,38 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
       {/* Contrôles du feed — masqués pendant une recherche */}
       {!q.trim() && (
         <div style={{ padding: "14px 16px 0" }}>
-          {/* Deux cartes de bascule */}
+          {/* Deux sélecteurs : Catégorie + Métier */}
           <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
-            {([
-              { t: "cherche" as const, title: "Besoins publiés", sub: "Des clients recherchent des professionnels", icon: (on: boolean) => <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={on ? "#08080D" : G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
-              { t: "propose" as const, title: "Services proposés", sub: "Des professionnels présentent leurs services", icon: (on: boolean) => <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={on ? "#08080D" : G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M3 9h18"/></svg> },
-            ]).map(c => {
-              const on = type === c.t;
-              return (
-                <button key={c.t} onClick={() => setType(c.t)} style={{ flex: 1, textAlign: "left", cursor: "pointer", borderRadius: 16, padding: "14px 13px", border: on ? "1px solid #08080D" : `1px solid ${G.gris}`, background: on ? "#08080D" : G.blanc, boxShadow: on ? "0 8px 22px rgba(8,8,13,0.22)" : "0 2px 8px rgba(0,0,0,0.04)", transition: "all .18s ease", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 11 }}>
-                  <div style={{ width: 42, height: 42, flexShrink: 0, borderRadius: "50%", background: on ? "#fff" : "rgba(212,168,67,0.14)", display: "flex", alignItems: "center", justifyContent: "center" }}>{c.icon(on)}</div>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: "0.9rem", fontWeight: 800, color: on ? "#fff" : "#1A1A1A", marginBottom: 2, letterSpacing: "-0.2px" }}>{c.title}</div>
-                    <div style={{ fontSize: "0.72rem", lineHeight: 1.3, color: on ? "rgba(255,255,255,0.6)" : "#6B7280" }}>{c.sub}</div>
-                  </div>
-                </button>
-              );
-            })}
+            {/* Catégorie */}
+            <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", gap: 10, borderRadius: 16, padding: "12px 12px", border: `1px solid ${G.gris}`, background: G.blanc, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+              <div style={{ width: 38, height: 38, flexShrink: 0, borderRadius: "50%", background: "rgba(212,168,67,0.14)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "#9AA0A6", textTransform: "uppercase", letterSpacing: "0.4px" }}>Catégorie</div>
+                <div style={{ fontSize: "0.92rem", fontWeight: 800, color: "#1A1A1A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{cat === "all" ? "Toutes" : (PUB_CATS.find(c => c.id === cat)?.label || cat)}</div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
+              <select value={cat} onChange={e => setCat(e.target.value)} aria-label="Catégorie" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
+                <option value="all">Toutes les catégories</option>
+                {PUB_CATS.filter(c => c.id !== "all").map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+              </select>
+            </div>
+            {/* Métier */}
+            <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", gap: 10, borderRadius: 16, padding: "12px 12px", border: `1px solid ${G.gris}`, background: G.blanc, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+              <div style={{ width: 38, height: 38, flexShrink: 0, borderRadius: "50%", background: "rgba(212,168,67,0.14)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "#9AA0A6", textTransform: "uppercase", letterSpacing: "0.4px" }}>Métier</div>
+                <div style={{ fontSize: "0.92rem", fontWeight: 800, color: metier ? "#1A1A1A" : "#9AA0A6", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metier || "Tous"}</div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
+              <select value={metier} onChange={e => setMetier(e.target.value)} aria-label="Métier" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
+                <option value="">Tous les métiers</option>
+                {metiersForCategory(cat === "all" ? null : cat).map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
           </div>
           {/* Localisation */}
           <div style={{ position: "relative", marginBottom: 14 }}>
@@ -15547,14 +15565,13 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </span>
           </div>
-          {/* Chips catégories */}
+          {/* Chips quartiers / arrondissements de la ville */}
           <div style={{ display: "flex", gap: 8, overflowX: "auto", padding: "0 0 4px" }}>
-            {PUB_CATS.map(c => {
-              const on = cat === c.id;
+            {[{ id: "", label: "Tout" }, ...((ARRONDISSEMENTS[city] || []).map(a => ({ id: a, label: a })))].map(qc => {
+              const on = quartier === qc.id;
               return (
-                <button key={c.id} onClick={() => setCat(c.id)} style={{ flex: "0 0 auto", display: "flex", alignItems: "center", gap: 6, border: on ? "1px solid #08080D" : `1px solid ${G.gris}`, background: on ? "#08080D" : G.blanc, color: on ? "#fff" : "#1A1A1A", borderRadius: 50, padding: "9px 16px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
-                  {c.id !== "all" && catIcon(c.id, on ? "#fff" : G.or, 16)}
-                  {c.label}
+                <button key={qc.id || "tout"} onClick={() => setQuartier(qc.id)} style={{ flex: "0 0 auto", display: "flex", alignItems: "center", gap: 6, border: on ? "1px solid #08080D" : `1px solid ${G.gris}`, background: on ? "#08080D" : G.blanc, color: on ? "#fff" : "#1A1A1A", borderRadius: 50, padding: "9px 16px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+                  {qc.label}
                 </button>
               );
             })}
@@ -15609,7 +15626,7 @@ function Publications({ auth, onGoMessages, publishNonce }: { auth: Auth; onGoMe
         </>
       )}
 
-      {showPublish && <PublishModal auth={auth} onClose={() => setShowPublish(false)} onPublished={(np) => { setShowPublish(false); setType(np.type); setCat(np.category); setToast("Annonce publiée ✓"); load(); setTimeout(() => setBoostTarget(np), 600); }} />}
+      {showPublish && <PublishModal auth={auth} onClose={() => setShowPublish(false)} onPublished={(np) => { setShowPublish(false); setCat(np.category); setToast("Annonce publiée ✓"); load(); setTimeout(() => setBoostTarget(np), 600); }} />}
       {boostTarget && <BoostModal auth={auth} pub={boostTarget} onClose={() => setBoostTarget(null)} onBoosted={() => { setBoostTarget(null); setToast("Annonce mise en avant ✓"); load(); }} />}
       {openFiche && <ProFiche auth={auth} pro={openFiche} onClose={() => setOpenFiche(null)} onGoMessages={onGoMessages} onToast={(m) => setToast(m)} isFav={false} onToggleFav={() => {}} />}
       {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
