@@ -2422,7 +2422,8 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
   // Nettoyer le flag après lecture
   if (isResume) sessionStorage.removeItem("moyo_signup_resume");
 
-  const [step, setStep] = useState(isResume && resumeToken && resumeUid ? 2 : 1);
+  const resumeMode = !!(isResume && resumeToken && resumeUid);
+  const [step, setStep] = useState(1);
   const [tempToken, setTempToken] = useState<string | null>(isResume ? resumeToken : sessionStorage.getItem("moyo_signup_token"));
   const [tempUserId, setTempUserId] = useState<string | null>(isResume ? resumeUid : sessionStorage.getItem("moyo_signup_uid"));
   const [form, setForm] = useState({ email: "", password: "", name: "", age: "", city: "", gender: "", bio: "", religion: "", profession: "", hobbies: "", phone: "", account_type: "", company: "", metier: "", category: "", whatsapp: "" });
@@ -2540,7 +2541,7 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
             headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${loginTry.access_token}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
             body: JSON.stringify({ name: "...", photo_url: null, bio: "", age: 18, city: "Brazzaville", gender: "Homme" })
           });
-          setStep(2);
+          setStep(3);
           setLoading(false);
           return;
         } else {
@@ -2574,14 +2575,14 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
         setTempUserId(finalUserId);
         sessionStorage.setItem("moyo_signup_uid", finalUserId);
       }
-      setStep(2);
+      setStep(3);
     } catch (err) {
       // Même en cas d'erreur réseau, si on a le userId de signUp on continue
       if (authRes?.user?.id) {
         setTempUserId(authRes.user.id);
         sessionStorage.setItem("moyo_signup_uid", authRes.user.id);
       }
-      setStep(2);
+      setStep(3);
     }
     setLoading(false);
   };
@@ -2610,11 +2611,16 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
   // Étape 3 → finaliser le profil
   const handleSubmit = async () => {
     setLoading(true);
-    if (!form.name.trim() || !form.account_type || !form.city) {
-      setErrorMsg("Veuillez renseigner votre nom, votre type de compte et votre ville."); setLoading(false); return;
-    }
-    if (form.account_type === "pro" && (!form.metier.trim() || !form.category)) {
-      setErrorMsg("Pour un compte professionnel, indiquez votre métier et votre catégorie."); setLoading(false); return;
+    const isPro = form.account_type === "pro";
+    if (!form.account_type) { setErrorMsg("Veuillez choisir un type de compte."); setLoading(false); return; }
+    if (isPro) {
+      if (!form.company.trim() || !form.category || !form.metier.trim() || !form.city || !form.phone.trim() || !form.bio.trim()) {
+        setErrorMsg("Veuillez renseigner le nom de votre activité, votre catégorie, votre métier, votre ville, votre numéro et la présentation de votre activité."); setLoading(false); return;
+      }
+    } else {
+      if (!form.name.trim() || !form.city || !form.phone.trim()) {
+        setErrorMsg("Veuillez renseigner votre nom complet, votre ville et votre numéro de téléphone."); setLoading(false); return;
+      }
     }
     let token = tempToken;
     let userId = tempUserId;
@@ -2633,6 +2639,18 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
       } catch {}
     }
     if (!token || !userId) { setErrorMsg("Erreur de session. Recommencez."); setLoading(false); return; }
+    const isProAcc = form.account_type === "pro";
+    const displayName = (isProAcc ? form.company : form.name).trim();
+    // Upload de la photo si l'utilisateur en a choisi une et qu'elle n'est pas encore en ligne
+    let finalPhotoUrl = photoUrl;
+    if (photoFile && !finalPhotoUrl) {
+      try {
+        const ext = photoFile.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `${userId}/avatar.${ext}`;
+        const up = await fetch(`${SUPABASE_URL}/storage/v1/object/avatars/${path}`, { method: "POST", headers: { "Authorization": `Bearer ${token}`, "Content-Type": photoFile.type || "image/jpeg", "x-upsert": "true" }, body: photoFile });
+        if (up.ok) finalPhotoUrl = `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;
+      } catch { /* upload non bloquant */ }
+    }
     try {
       // Mettre à jour le profil avec toutes les infos + photo
       await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
@@ -2644,14 +2662,14 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
           "Prefer": "return=minimal"
         },
         body: JSON.stringify({
-          name: form.name.trim(),
+          name: displayName,
           city: form.city,
           account_type: form.account_type,
           bio: form.bio.trim(),
           phone: form.phone.trim() || null,
-          photo_url: photoUrl,
+          photo_url: finalPhotoUrl,
           is_complete: true,
-          ...(form.account_type === "pro" ? {
+          ...(isProAcc ? {
             metier: form.metier.trim() || null,
             profession: form.metier.trim() || null,
             company: form.company.trim() || null,
@@ -2666,7 +2684,7 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
         await fetch(`${SUPABASE_URL}/auth/v1/user`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${token}` },
-          body: JSON.stringify({ data: { display_name: form.name.trim() } }),
+          body: JSON.stringify({ data: { display_name: displayName } }),
         });
       } catch {}
       setLoading(false);
@@ -2680,8 +2698,10 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
     }
   };
 
+  const isPro = form.account_type === "pro";
+
   return (
-    <AuthLayout onBack={() => step === 1 ? onNav("landing") : setStep(s => s - 1)}>
+    <AuthLayout onBack={() => step === 1 ? onNav("landing") : (step === 3 && resumeMode) ? setStep(1) : setStep(s => s - 1)}>
       <ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />
       {successMsg && <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}><div style={{ background: G.blanc, borderRadius: 20, padding: "28px 24px", width: "100%", maxWidth: 320, textAlign: "center" }}><div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(26,92,58,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><h3 style={{ fontSize: "1.3rem", fontWeight: 700, color: "#111", marginBottom: 10 }}>COMPTE CRÉÉ !</h3><p style={{ fontSize: "0.92rem", color: "#555", lineHeight: 1.6, marginBottom: 20 }}>{signupSuccessMsg}</p><div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: "0.78rem", color: "#aaa" }}><div style={{ width: 8, height: 8, borderRadius: "50%", background: G.rouge }} />Redirection...</div></div></div>}
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
@@ -2693,9 +2713,9 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 10, background: "rgba(212,168,67,0.08)", border: `1.5px solid rgba(212,168,67,0.2)`, borderRadius: 50, padding: "6px 16px" }}>
           <div style={{ width: 22, height: 22, borderRadius: "50%", background: G.rouge, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 800, color: "#fff" }}>{step}</div>
           <span style={{ fontSize: "0.88rem", fontWeight: 700, color: G.rouge }}>
-            {step === 1 && "Identifiant et mot de passe"}
-            {step === 2 && "Photo de profil"}
-            {step === 3 && "Vos informations"}
+            {step === 1 && "Choix du type de compte"}
+            {step === 2 && "Email et mot de passe"}
+            {step === 3 && "Informations et photo"}
           </span>
           <span style={{ fontSize: "0.75rem", color: "#555", fontWeight: 500 }}>{step}/3</span>
         </div>
@@ -2708,15 +2728,43 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
         ))}
       </div>
 
-      {/* ÉTAPE 1 - Email + mot de passe */}
+      {/* ÉTAPE 1 - Choix du type de compte */}
       {step === 1 && <>
+        <p style={{ textAlign: "center", fontSize: "0.92rem", color: "#666", lineHeight: 1.6, margin: "-4px 0 20px" }}>Choisissez ce qui vous correspond le mieux pour continuer.</p>
+        {[
+          { val: "client", title: "Je suis un client", sub: "Je recherche des professionnels pour répondre à mes besoins.", tint: "rgba(212,168,67,0.14)", ring: G.or, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> },
+          { val: "pro", title: "Je suis un professionnel", sub: "Je propose mes services et je recherche des clients.", tint: "rgba(22,163,74,0.12)", ring: G.vert, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
+        ].map(c => {
+          const on = form.account_type === c.val;
+          return (
+            <div key={c.val} onClick={() => upd("account_type", c.val)} style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 15px", borderRadius: 16, cursor: "pointer", marginBottom: 14, border: `2px solid ${on ? c.ring : G.gris}`, background: on ? c.tint.replace(/0\.1[0-9]?/, "0.06") : G.blanc, boxShadow: on ? `0 4px 16px ${c.tint}` : "0 1px 4px rgba(0,0,0,0.03)", transition: "all .15s" }}>
+              <div style={{ width: 50, height: 50, flexShrink: 0, borderRadius: "50%", background: c.tint, display: "flex", alignItems: "center", justifyContent: "center" }}>{c.icon}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 800, fontSize: "1rem", color: "#1A1A1A", marginBottom: 3 }}>{c.title}</div>
+                <div style={{ fontSize: "0.8rem", color: "#6B7280", lineHeight: 1.4 }}>{c.sub}</div>
+              </div>
+              <div style={{ width: 22, height: 22, flexShrink: 0, borderRadius: "50%", border: `2px solid ${on ? c.ring : G.gris}`, background: on ? c.ring : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+              </div>
+            </div>
+          );
+        })}
+        <Btn variant="primary" onClick={() => { if (form.account_type) setStep(resumeMode ? 3 : 2); }} disabled={!form.account_type} style={{ width: "100%", marginTop: 6 }}>Continuer →</Btn>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, marginTop: 18, fontSize: "0.78rem", color: "#9AA0A6" }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Vos informations sont sécurisées et protégées.
+        </div>
+      </>}
+
+      {/* ÉTAPE 2 - Email + mot de passe */}
+      {step === 2 && <>
         <Input label="Email" type="email" value={form.email} onChange={e => upd("email", e.target.value)} placeholder="ton@email.com" icon="email" />
         <Input label="Veuillez définir votre mot de passe" type="password" value={form.password} onChange={e => upd("password", e.target.value)} placeholder="Minimum 6 caractères" icon="lock" hint="Au moins 6 caractères" />
         <Btn variant="primary" onClick={checkEmailAndContinue} loading={loading} style={{ width: "100%", marginTop: 8 }} disabled={!form.email || form.password.length < 6}>Continuer →</Btn>
       </>}
 
-      {/* ÉTAPE 2 - Photo */}
-      {step === 2 && <>
+      {/* ÉTAPE 3 - Informations + photo (fusionnée, adaptée au type de compte) */}
+      {step === 3 && <>
         {/* CropModal pour l'inscription */}
         {cropSrcSignup && (
           <CropModal
@@ -2726,124 +2774,115 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
               const croppedFile = new File([blob], "avatar.jpg", { type: "image/jpeg" });
               setPhotoFile(croppedFile);
               setPhotoPreview(URL.createObjectURL(blob));
+              setPhotoUrl(null);
               if (fileRef.current) fileRef.current.value = "";
             }}
             onCancel={() => { setCropSrcSignup(null); if (fileRef.current) fileRef.current.value = ""; }}
           />
         )}
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <p style={{ fontSize: "0.9rem", color: "#555", marginBottom: 24, lineHeight: 1.6 }}>
-            Ajoute une photo pour que les autres puissent te reconnaître 😊
-          </p>
-          <input ref={fileRef} type="file" accept="image/*" onChange={e => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = () => setCropSrcSignup(reader.result as string);
-            reader.readAsDataURL(file);
-          }} style={{ display: "none" }} />
-          <div style={{ position: "relative", width: 80, height: 80, margin: "0 auto 16px" }} onClick={() => fileRef.current?.click()}>
+        <input ref={fileRef} type="file" accept="image/*" onChange={e => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => setCropSrcSignup(reader.result as string);
+          reader.readAsDataURL(file);
+        }} style={{ display: "none" }} />
+
+        {/* Photo de profil */}
+        <label style={{ display: "block", fontWeight: 600, marginBottom: 10, fontSize: "0.9rem", color: "#1A1A1A" }}>Photo de profil</label>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 22 }}>
+          <div style={{ position: "relative", width: 92, height: 92 }} onClick={() => fileRef.current?.click()}>
             {photoPreview ? (
-              <div style={{ width: 80, height: 80, borderRadius: "50%", overflow: "hidden", border: `3px solid ${G.rouge}`, cursor: "pointer" }}>
+              <div style={{ width: 92, height: 92, borderRadius: "50%", overflow: "hidden", border: `3px solid ${isPro ? G.vert : G.or}`, cursor: "pointer" }}>
                 <img src={photoPreview} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" />
               </div>
             ) : (
-              <div style={{ width: 80, height: 80, borderRadius: "50%", background: `linear-gradient(135deg,${G.rouge},${G.rougeDark})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 18px rgba(212,168,67,0.4)", cursor: "pointer" }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                  <circle cx="12" cy="13" r="4"/>
-                </svg>
+              <div style={{ width: 92, height: 92, borderRadius: "50%", background: G.cremeDark || "#EEF0F4", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", border: `1px solid ${G.gris}` }}>
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="#C9CDD3" stroke="none"><circle cx="12" cy="8.5" r="4"/><path d="M4 21a8 8 0 0 1 16 0z"/></svg>
               </div>
             )}
-            <div style={{ position: "absolute", bottom: 0, right: 0, width: 24, height: 24, borderRadius: "50%", background: G.blanc, border: `2px solid ${G.rouge}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem", color: G.rouge, fontWeight: 900, lineHeight: 1, pointerEvents: "none" }}>+</div>
-          </div>
-          {photoPreview
-            ? <div onClick={() => fileRef.current?.click()} style={{ fontSize: "0.82rem", color: G.rouge, cursor: "pointer", fontWeight: 600 }}>Changer la photo</div>
-            : <p style={{ fontSize: "0.78rem", color: "#e74c3c", fontWeight: 600, marginTop: 4 }}>Une photo est obligatoire</p>
-          }
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <Btn variant="ghost" onClick={() => setStep(1)} style={{ flex: 1 }}>← Retour</Btn>
-          <Btn variant="primary" onClick={handlePhotoAndContinue} loading={uploadingPhoto} style={{ flex: 2 }} disabled={!photoPreview}>
-            {uploadingPhoto ? "Upload en cours..." : "Continuer →"}
-          </Btn>
-        </div>
-      </>}
-
-      {/* ÉTAPE 3 - Infos personnelles */}
-      {step === 3 && <>
-        {photoPreview && (
-          <div style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(26,92,58,0.06)", borderRadius: 12, padding: "8px 14px", marginBottom: 16 }}>
-            <img src={photoPreview} alt="" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover" }} loading="lazy" />
-            <div style={{ fontSize: "0.78rem", color: "#16A34A", fontWeight: 600 }}>
-              {photoUrl ? "✓ Photo uploadée avec succès" : "Photo en cours d'upload..."}
+            <div style={{ position: "absolute", bottom: 2, right: 2, width: 30, height: 30, borderRadius: "50%", background: isPro ? "#2563EB" : G.or, border: "3px solid #fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 6px rgba(0,0,0,0.2)" }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </div>
           </div>
-        )}
-        <Input label={<>Prénom <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>(obligatoire)</span></>} value={form.name} onChange={e => upd("name", e.target.value)} placeholder="Ex: Faïda" icon="user" />
-        {/* Type de compte */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Vous êtes <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>(obligatoire)</span></label>
-          <div style={{ display: "flex", gap: 10 }}>
-            {[["client", "Un client", "Je cherche un pro"], ["pro", "Un professionnel", "Je propose mes services"]].map(([val, title, sub]) => (
-              <div key={val} onClick={() => upd("account_type", val)} style={{ flex: 1, padding: "13px 10px", borderRadius: 12, textAlign: "center", cursor: "pointer", border: `2px solid ${form.account_type === val ? G.rouge : G.gris}`, background: form.account_type === val ? "rgba(212,168,67,0.06)" : G.blanc }}>
-                <div style={{ fontWeight: 700, fontSize: "0.9rem", color: "#111" }}>{title}</div>
-                <div style={{ fontSize: "0.72rem", color: "#777", marginTop: 2 }}>{sub}</div>
-              </div>
-            ))}
-          </div>
         </div>
-        {/* Ville */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Ville <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>(obligatoire)</span></label>
-          <select value={form.city} onChange={e => upd("city", e.target.value)} style={{ width: "100%", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }}>
-            <option value="">Sélectionne ta ville</option>
-            {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
-        {/* Champs professionnels */}
-        {form.account_type === "pro" && <>
+
+        {isPro ? <>
+          {/* Nom de l'activité */}
           <div style={{ marginBottom: 18 }}>
-            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Catégorie <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>(obligatoire)</span></label>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Nom de votre activité ou entreprise <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <input value={form.company} onChange={e => upd("company", e.target.value.slice(0, 60))} placeholder="ex : Royal Beauty" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+          </div>
+          {/* Catégorie */}
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Catégorie <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
             <select value={form.category} onChange={e => upd("category", e.target.value)} style={{ width: "100%", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }}>
-              <option value="">Sélectionne ta catégorie</option>
+              <option value="">Sélectionnez une catégorie</option>
               {PUB_CATS.filter(c => c.id !== "all").map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
             </select>
           </div>
+          {/* Métier */}
           <div style={{ marginBottom: 18 }}>
-            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Votre métier <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>(obligatoire)</span></label>
-            <input list="moyo-metiers-signup" value={form.metier} onChange={e => upd("metier", e.target.value.slice(0, 60))} placeholder="Ex : Maçon, Coiffeuse, Développeur web…" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Métier <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <input list="moyo-metiers-signup" value={form.metier} onChange={e => upd("metier", e.target.value.slice(0, 60))} placeholder="Sélectionnez votre métier" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
             <datalist id="moyo-metiers-signup">
               {metiersForCategory(form.category).map(m => <option key={m} value={m} />)}
             </datalist>
-            <div style={{ fontSize: "0.76rem", color: "#888", marginTop: 6 }}>{form.category ? "Choisissez dans la liste ou saisissez votre métier." : "Sélectionnez d'abord une catégorie pour des suggestions ciblées."}</div>
           </div>
+          {/* Ville */}
           <div style={{ marginBottom: 18 }}>
-            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Entreprise <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
-            <input value={form.company} onChange={e => upd("company", e.target.value.slice(0, 60))} placeholder="Nom de votre entreprise" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Ville <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <select value={form.city} onChange={e => upd("city", e.target.value)} style={{ width: "100%", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }}>
+              <option value="">Sélectionnez votre ville</option>
+              {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
+          {/* Téléphone */}
           <div style={{ marginBottom: 18 }}>
-            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>WhatsApp public <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(visible sur votre fiche)</span></label>
-            <input value={form.whatsapp} onChange={e => upd("whatsapp", e.target.value.slice(0, 25))} placeholder="+242 06 000 00 00" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Numéro de téléphone <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <input value={form.phone} onChange={e => upd("phone", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
           </div>
+          {/* WhatsApp public */}
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>WhatsApp public <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
+            <input value={form.whatsapp} onChange={e => upd("whatsapp", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+          </div>
+          {/* Présentation de l'activité */}
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Présentation de votre activité <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <textarea value={form.bio} onChange={e => upd("bio", e.target.value.slice(0, 300))} placeholder="Décrivez vos services…" rows={3} maxLength={300} style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none", resize: "none" }} />
+            <div style={{ textAlign: "right", fontSize: "0.75rem", color: form.bio.length >= 290 ? G.rouge : "#aaa", marginTop: 4 }}>{form.bio.length}/300</div>
+          </div>
+          <Btn variant="primary" onClick={handleSubmit} loading={loading} style={{ width: "100%" }} disabled={!form.company || !form.category || !form.metier || !form.city || !form.phone || !form.bio.trim()}>Créer mon compte professionnel</Btn>
+        </> : <>
+          {/* Nom complet */}
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Nom complet <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <input value={form.name} onChange={e => upd("name", e.target.value.slice(0, 60))} placeholder="ex : Faïda" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+          </div>
+          {/* Ville */}
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Ville <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <select value={form.city} onChange={e => upd("city", e.target.value)} style={{ width: "100%", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }}>
+              <option value="">Sélectionnez votre ville</option>
+              {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          {/* Téléphone */}
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Numéro de téléphone <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <input value={form.phone} onChange={e => upd("phone", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+          </div>
+          {/* Bio */}
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Bio <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
+            <textarea value={form.bio} onChange={e => upd("bio", e.target.value.slice(0, 200))} placeholder="Parlez un peu de vous…" rows={3} maxLength={200} style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none", resize: "none" }} />
+            <div style={{ textAlign: "right", fontSize: "0.75rem", color: form.bio.length >= 190 ? G.rouge : "#aaa", marginTop: 4 }}>{form.bio.length}/200</div>
+          </div>
+          <Btn variant="primary" onClick={handleSubmit} loading={loading} style={{ width: "100%" }} disabled={!form.name || !form.city || !form.phone}>Créer mon compte</Btn>
         </>}
-        {/* Description / Bio */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>{form.account_type === "pro" ? "Description de votre activité" : "Bio"} <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
-          <textarea value={form.bio} onChange={e => upd("bio", e.target.value.slice(0, 300))} placeholder={form.account_type === "pro" ? "Présentez vos services, votre expérience…" : "Parlez un peu de vous…"} rows={3} maxLength={300} style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none", resize: "none" }} />
-          <div style={{ textAlign: "right", fontSize: "0.75rem", color: form.bio.length >= 290 ? G.rouge : "#aaa", marginTop: 4 }}>{form.bio.length}/300</div>
-        </div>
-        {/* Téléphone privé */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Numéro de téléphone <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(privé)</span></label>
-          <input value={form.phone} onChange={e => upd("phone", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
-          <div style={{ fontSize: "0.76rem", color: "#7a7a7a", lineHeight: 1.5, marginTop: 6 }}>Ce numéro reste privé : il sert à la récupération de votre compte et aux notifications. Pour être contacté publiquement, renseignez votre WhatsApp public ci-dessus.</div>
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <Btn variant="ghost" onClick={() => setStep(2)} style={{ flex: 1 }}>← Retour</Btn>
-          <Btn variant="primary" onClick={handleSubmit} loading={loading} style={{ flex: 2 }} disabled={!form.name || !form.account_type || !form.city || (form.account_type === "pro" && (!form.metier || !form.category))}>Créer mon compte</Btn>
-        </div>
       </>}
+
 
       <p style={{ textAlign: "center", marginTop: 20, fontSize: "0.85rem", color: "#555" }}>
         Déjà un compte ? <span style={{ color: G.rouge, cursor: "pointer", fontWeight: 600 }} onClick={() => onNav("login")}>Se connecter</span>
@@ -14034,11 +14073,22 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
           )}
           {confirmDeleteStatus && (
             <ConfirmModal
-              msg={"Supprimer ce statut ?\n\nCette action est irréversible."}
+              preset="delete"
+              title="Supprimer ce statut ?"
+              message="Cette action est irréversible."
               confirmLabel="Supprimer"
-              danger
               onConfirm={() => { const s = confirmDeleteStatus; setConfirmDeleteStatus(null); deleteOfficialStatus(s); }}
               onCancel={() => setConfirmDeleteStatus(null)}
+            />
+          )}
+          {pendingDelReview && (
+            <ConfirmModal
+              preset="delete"
+              title="Supprimer l'avis ?"
+              message={`L'avis de ${pendingDelReview.name || "cet utilisateur"} sera définitivement supprimé.`}
+              confirmLabel="Supprimer"
+              onConfirm={() => { const id = pendingDelReview.id; setPendingDelReview(null); deleteReview(id); }}
+              onCancel={() => setPendingDelReview(null)}
             />
           )}
         </div>
