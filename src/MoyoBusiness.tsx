@@ -1623,18 +1623,9 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
     return () => clearTimeout(h);
   }, [lq, lcity]);
 
-  const CATS = [
-    { id: "BTP", label: "BTP", ico: "mbi-btp", n: "214", np: "87" },
-    { id: "Transport", label: "Transport", ico: "mbi-transport", n: "178", np: "64" },
-    { id: "Artisanat", label: "Artisanat", ico: "mbi-craft", n: "95", np: "41" },
-    { id: "Emploi", label: "Emploi", ico: "mbi-job", n: "301", np: "53" },
-    { id: "Commerce", label: "Commerce", ico: "mbi-shop", n: "88", np: "38" },
-    { id: "Restauration", label: "Resto", ico: "mbi-food", n: "54", np: "29" },
-    { id: "Agriculture", label: "Agri", ico: "mbi-agri", n: "67", np: "22" },
-    { id: "Immobilier", label: "Immo", ico: "mbi-house", n: "43", np: "19" },
-    { id: "Numérique", label: "Numérique", ico: "mbi-digital", n: "112", np: "47" },
-    { id: "Business", label: "Business", ico: "mbi-biz", n: "88", np: "31" },
-  ];
+  // Bandeau « Explorer par secteur » : dérivé de la SOURCE UNIQUE
+  // (BUSINESS_CATEGORIES_SORTED) → reste toujours synchronisé avec la taxonomie.
+  const CATS = BUSINESS_CATEGORIES_SORTED.map(c => ({ id: c.id, label: c.name }));
   const HINTS = BUSINESS_CATEGORIES_SORTED.map(c => c.metiers[0]);
   // ── Bandeau métiers : auto-défilement + manipulation (glisser / molette / tactile) ──
   const hintsRef = React.useRef<HTMLDivElement | null>(null);
@@ -14952,73 +14943,199 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
 //  Pour chaque catégorie : id, nom, icône, ordre d'affichage et liste de métiers.
 // ════════════════════════════════════════════════════════════════════════
 type BusinessCategory = { id: string; name: string; icon: string; order: number; metiers: string[] };
+
+// ────────────────────────────────────────────────────────────────────────
+//  POUR AJOUTER / SUPPRIMER UN MÉTIER OU UNE CATÉGORIE :
+//  ➜ modifier UNIQUEMENT le tableau BUSINESS_CATEGORIES ci-dessous.
+//  • L'ordre des CATÉGORIES suit le champ `order` (volontaire : importance
+//    économique), pas l'ordre alphabétique.
+//  • Les MÉTIERS peuvent être saisis dans n'importe quel ordre : ils sont
+//    triés alphabétiquement et dédoublonnés automatiquement (voir plus bas).
+//  Aucune autre partie de l'application n'a besoin d'être touchée : tout
+//  (inscription, profil, annuaire, filtres, recherche…) dérive d'ici.
+// ────────────────────────────────────────────────────────────────────────
 const BUSINESS_CATEGORIES: BusinessCategory[] = [
   { id: "BTP", name: "BTP", icon: "🏗️", order: 1, metiers: [
-    "Maçon", "Peintre", "Carreleur", "Plombier", "Électricien", "Menuisier",
-    "Architecte", "Conducteur de travaux", "Technicien bâtiment", "Soudeur", "Étancheur", "Couvreur",
+    "Architecte", "Carreleur", "Charpentier", "Chef de chantier", "Climaticien", "Coffreur",
+    "Conducteur d'engins", "Conducteur de travaux", "Couvreur", "Électricien bâtiment", "Étancheur",
+    "Façadier", "Ferrailleur", "Géomètre", "Ingénieur BTP", "Maçon", "Marbrier", "Menuisier",
+    "Peintre bâtiment", "Plombier", "Serrurier", "Serrurerie", "Soudeur", "Staffeur",
+    "Technicien bâtiment", "Topographe", "Vitrier",
   ] },
-  { id: "Transport", name: "Transport", icon: "🚚", order: 2, metiers: [
-    "Chauffeur privé", "Taxi", "Livreur", "Transporteur", "Déménageur",
-    "Location de véhicule", "Chauffeur poids lourd", "Coursier",
+  { id: "Commerce", name: "Commerce", icon: "🛍️", order: 2, metiers: [
+    "Boutique cadeaux", "Boutique cosmétique", "Boutique décoration", "Boutique de chaussures",
+    "Boutique de vêtements", "Cave à boissons", "Dépôt de boissons", "Épicerie", "Fleuriste",
+    "Librairie", "Papeterie", "Quincaillerie", "Supermarché", "Vente d'électroménager",
+    "Vente de gaz", "Vente de matériaux de construction", "Vente de meubles",
+    "Vente de pièces automobiles", "Vente de téléphones", "Vente d'ordinateurs",
   ] },
-  { id: "Restauration", name: "Restauration", icon: "🍽️", order: 3, metiers: [
-    "Restaurant", "Traiteur", "Pâtissier", "Boulanger", "Cuisinier à domicile",
-    "Fast-food", "Bar", "Café", "Service traiteur événementiel",
+  { id: "Services", name: "Services", icon: "💼", order: 3, metiers: [
+    "Agent de saisie", "Aide à domicile", "Assistant administratif", "Baby-sitter", "Blanchisserie",
+    "Community manager", "Comptable", "Consultant marketing", "Cybercafé", "Dame de ménage",
+    "Développeur web", "Désinfection", "Entretien espaces verts", "Femme de ménage", "Garde d'enfants",
+    "Graphiste", "Homme de ménage", "Informaticien", "Interprète", "Jardinier", "Juriste",
+    "Nettoyage professionnel", "Nounou", "Paysagiste", "Photocopie & bureautique", "Pressing",
+    "Rédacteur", "Réparateur informatique", "Réparateur téléphone", "Repassage",
+    "Secrétaire indépendant", "Service de livraison", "Traducteur",
   ] },
-  { id: "Artisanat", name: "Artisanat", icon: "🧵", order: 4, metiers: [
-    "Couturier", "Styliste", "Cordonnier", "Tapissier", "Bijoutier",
-    "Sculpteur", "Décorateur", "Fabricant de meubles",
+  { id: "Transport", name: "Transport", icon: "🚚", order: 4, metiers: [
+    "Agence de voyage", "Chauffeur poids lourd", "Chauffeur privé", "Coursier", "Déménageur",
+    "Livreur", "Location de bus", "Location de camion", "Location de véhicule", "Logisticien",
+    "Taxi", "Transport scolaire", "Transport fluvial", "Transport interurbain", "Transporteur",
   ] },
-  { id: "Santé", name: "Santé", icon: "🩺", order: 5, metiers: [
-    "Infirmier", "Médecin", "Kinésithérapeute", "Pharmacien", "Sage-femme",
-    "Psychologue", "Nutritionniste", "Dentiste", "Opticien",
+  { id: "Automobile & Moto", name: "Automobile & Moto", icon: "🚗", order: 5, metiers: [
+    "Auto-école", "Carrossier", "Climatisation automobile", "Dépannage automobile",
+    "Diagnostique automobile", "Électricien automobile", "Lavage automobile", "Location de motos",
+    "Mécanicien automobile", "Mécanicien moto", "Tôlier", "Vente de pièces détachées",
+    "Vulcanisateur",
   ] },
-  { id: "Beauté", name: "Beauté", icon: "💇", order: 6, metiers: [
-    "Coiffeur", "Maquilleur", "Esthéticienne", "Barbier", "Prothésiste ongulaire",
-    "Spa", "Massage", "Soins du visage", "Parfumerie",
+  { id: "Agriculture & Élevage", name: "Agriculture & Élevage", icon: "🌱", order: 6, metiers: [
+    "Agriculteur", "Agronome", "Aviculteur", "Éleveur", "Éleveur de bovins", "Éleveur de chèvres",
+    "Éleveur de porcs", "Éleveur de volailles", "Fournisseur d'intrants agricoles", "Horticulteur",
+    "Maraîcher", "Pépiniériste", "Pisciculteur", "Producteur de fruits", "Producteur de légumes",
   ] },
-  { id: "Événementiel", name: "Événementiel", icon: "🎉", order: 7, metiers: [
-    "Photographe", "Vidéaste", "DJ", "Décorateur événementiel", "Maître de cérémonie",
-    "Location de salle", "Sonorisation", "Wedding planner", "Hôtesse événementielle",
+  { id: "Immobilier", name: "Immobilier", icon: "🏠", order: 7, metiers: [
+    "Agent immobilier", "Architecte d'intérieur", "Constructeur", "Courtier immobilier",
+    "Expert immobilier", "Gestion locative", "Location d'appartement", "Location de maison",
+    "Promoteur immobilier", "Syndic", "Vente de terrains",
   ] },
-  { id: "Commerce", name: "Commerce", icon: "🛍️", order: 8, metiers: [
-    "Boutique", "Supermarché", "Alimentation", "Vendeur de téléphones", "Vêtements",
-    "Chaussures", "Cosmétique", "Quincaillerie", "Électroménager",
+  { id: "Santé", name: "Santé", icon: "🩺", order: 8, metiers: [
+    "Ambulancier", "Centre médical", "Clinique privée", "Dentiste", "Herboriste", "Infirmier",
+    "Kinésithérapeute", "Laboratoire d'analyses", "Médecin", "Nutritionniste", "Opticien",
+    "Pharmacien", "Psychologue", "Sage-femme", "Tradipraticien",
   ] },
-  { id: "Services", name: "Services", icon: "💼", order: 9, metiers: [
-    "Développeur web", "Graphiste", "Community manager", "Consultant marketing", "Comptable",
-    "Juriste", "Traducteur", "Enseignant", "Réparateur de téléphone", "Informaticien", "Secrétaire indépendant",
+  { id: "Beauté", name: "Beauté", icon: "💇", order: 9, metiers: [
+    "Barbier", "Coiffeur", "Coiffeuse", "Esthéticienne", "Institut de beauté", "Maquilleur",
+    "Massage", "Parfumerie", "Prothésiste ongulaire", "Salon de coiffure", "Soins du visage", "Spa",
   ] },
-  { id: "Immobilier", name: "Immobilier", icon: "🏠", order: 10, metiers: [
-    "Agent immobilier", "Promoteur", "Gestion locative", "Courtier", "Architecte d'intérieur",
-    "Syndic", "Expert immobilier", "Constructeur", "Location d'appartement",
+  { id: "Restauration", name: "Restauration", icon: "🍽️", order: 10, metiers: [
+    "Bar", "Boulanger", "Café", "Cuisinier à domicile", "Fast-food", "Glacier", "Pâtissier",
+    "Restaurant", "Service traiteur événementiel", "Traiteur",
+  ] },
+  { id: "Éducation & Formation", name: "Éducation & Formation", icon: "🎓", order: 11, metiers: [
+    "Centre de formation", "Coach scolaire", "École privée", "Formateur professionnel",
+    "Formation informatique", "Formation langues", "Professeur particulier", "Soutien scolaire",
+  ] },
+  { id: "Événementiel", name: "Événementiel", icon: "🎉", order: 12, metiers: [
+    "Décorateur événementiel", "Décoration florale", "DJ", "Fleuriste événementiel",
+    "Hôtesse événementielle", "Location de matériel", "Location de salle", "Location de chapiteaux",
+    "Location de chaises", "Location de tables", "Maître de cérémonie", "Photographe",
+    "Sonorisation", "Vidéaste", "Wedding planner",
+  ] },
+  { id: "Médias, Communication & Publicité", name: "Médias, Communication & Publicité", icon: "📣", order: 13, metiers: [
+    "Agence de communication", "Attaché de presse", "Community manager", "Créateur de contenu",
+    "Designer graphique", "Enseigne publicitaire", "Graphiste", "Habillage de boutique",
+    "Habillage de véhicule", "Imprimeur", "Impression grand format", "Infographiste",
+    "Peinture publicitaire", "Photographe publicitaire", "Consultant marketing", "Sérigraphie",
+    "Signalétique", "Vidéaste publicitaire",
+  ] },
+  { id: "Arts & Culture", name: "Arts & Culture", icon: "🎨", order: 14, metiers: [
+    "Acteur", "Arrangeur musical", "Artiste peintre", "Bassiste", "Batteur", "Beatmaker",
+    "Calligraphe", "Chanteur", "Chorale", "Chorégraphe", "Comédien", "Compositeur", "Conteur",
+    "Danseur", "Dessinateur", "Écrivain", "Fresquiste", "Galerie d'art", "Graffeur", "Guitariste",
+    "Humoriste", "Illustrateur", "Ingénieur du son", "Musicien", "Peintre muraliste", "Pianiste",
+    "Poète", "Portraitiste", "Producteur musical", "Sculpteur", "Studio d'enregistrement",
+  ] },
+  { id: "Finance & Assurance", name: "Finance & Assurance", icon: "💰", order: 15, metiers: [
+    "Assurance", "Conseiller financier", "Courtier en assurance", "Expert-comptable", "Fiscaliste",
+    "Gestion de patrimoine", "Microfinance", "Transfert d'argent",
+  ] },
+  { id: "Droit & Administration", name: "Droit & Administration", icon: "⚖️", order: 16, metiers: [
+    "Avocat", "Conseiller juridique", "Consultant administratif", "Création d'entreprise",
+    "Formalités administratives", "Huissier", "Notaire",
+  ] },
+  { id: "Énergie & Carburants", name: "Énergie & Carburants", icon: "⚡", order: 17, metiers: [
+    "Distributeur de gaz domestique", "Électricien industriel", "Électricien solaire",
+    "Exploitant de station-service", "Froid et climatisation", "Gérant de station-service",
+    "Groupe électrogène", "Installation électrique", "Installation gaz domestique",
+    "Installateur panneaux solaires", "Livreur de carburant", "Maintenance de pompes à carburant",
+    "Pompiste", "Réparation climatiseur", "Réparation réfrigérateur", "Station-service",
+    "Technicien électroménager", "Vendeur de bouteilles de gaz", "Vendeur de carburant",
+  ] },
+  { id: "Industrie & Production", name: "Industrie & Production", icon: "🏭", order: 18, metiers: [
+    "Conditionnement", "Emballage", "Fabrication industrielle", "Maintenance industrielle",
+    "Menuiserie industrielle", "Métallurgie", "Production alimentaire", "Usinage",
+  ] },
+  { id: "Sécurité", name: "Sécurité", icon: "🛡️", order: 19, metiers: [
+    "Agent de sécurité", "Contrôle d'accès", "Installation vidéosurveillance",
+    "Sécurité événementielle", "Sécurité incendie", "Société de gardiennage",
+  ] },
+  { id: "Sports & Bien-être", name: "Sports & Bien-être", icon: "🏋️", order: 20, metiers: [
+    "Coach sportif", "Fitness", "Nutrition sportive", "Personal trainer", "Préparateur physique",
+    "Professeur d'arts martiaux", "Professeur de danse", "Professeur de natation", "Salle de sport",
+    "Yoga",
+  ] },
+  { id: "Artisanat", name: "Artisanat", icon: "🧵", order: 21, metiers: [
+    "Artisan d'art", "Bijoutier", "Cordonnier", "Couturier", "Décorateur", "Ébéniste",
+    "Fabricant de meubles", "Sculpteur", "Styliste", "Tapissier",
   ] },
 ];
-// Catégories triées selon l'ordre d'affichage défini ci-dessus.
-const BUSINESS_CATEGORIES_SORTED = [...BUSINESS_CATEGORIES].sort((a, b) => a.order - b.order);
-// Liste à plat de tous les métiers (dédoublonnée), pour la recherche et les suggestions globales.
-const BUSINESS_METIERS_FLAT: string[] = Array.from(new Set(BUSINESS_CATEGORIES_SORTED.flatMap(c => c.metiers)));
-// Métiers d'une catégorie donnée ; si aucune catégorie, on renvoie tous les métiers.
+
+// Normalisation d'une liste de métiers : nettoyage, dédoublonnage (insensible
+// à la casse/accents pour la détection des doublons) et tri alphabétique
+// français. Garantit qu'aucun métier n'est dupliqué dans une même catégorie
+// et que tout s'affiche dans l'ordre alphabétique, quel que soit l'ordre de saisie.
+const frCollator = new Intl.Collator("fr", { sensitivity: "base", numeric: true });
+function sortMetiers(list: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of list) {
+    const m = (raw || "").trim();
+    if (!m) continue;
+    const key = m.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (seen.has(key)) continue; // doublon dans la même catégorie : ignoré
+    seen.add(key);
+    out.push(m);
+  }
+  return out.sort((a, b) => frCollator.compare(a, b));
+}
+
+// Source unique normalisée : catégories dans l'ordre métier défini (`order`),
+// métiers triés alphabétiquement et dédoublonnés automatiquement.
+// C'EST CETTE LISTE que toute l'application doit consommer.
+const BUSINESS_CATEGORIES_SORTED: BusinessCategory[] = [...BUSINESS_CATEGORIES]
+  .sort((a, b) => a.order - b.order)
+  .map(c => ({ ...c, metiers: sortMetiers(c.metiers) }));
+
+// Liste à plat de tous les métiers (dédoublonnée + triée), pour la recherche
+// et les suggestions globales.
+const BUSINESS_METIERS_FLAT: string[] = sortMetiers(BUSINESS_CATEGORIES_SORTED.flatMap(c => c.metiers));
+
+// Métiers d'une catégorie donnée (déjà triés) ; si aucune catégorie, on renvoie tous les métiers.
 const metiersForCategory = (catId?: string | null): string[] => {
   if (!catId) return BUSINESS_METIERS_FLAT;
-  return BUSINESS_CATEGORIES.find(c => c.id === catId)?.metiers || BUSINESS_METIERS_FLAT;
+  return BUSINESS_CATEGORIES_SORTED.find(c => c.id === catId)?.metiers || BUSINESS_METIERS_FLAT;
 };
 
-// Icônes SVG (au lieu d'emojis) — par catégorie, plus une épingle et une étiquette.
+// Icônes SVG (au lieu d'emojis) — une par catégorie (même `id` que la source unique),
+// plus une épingle et une étiquette. Toute nouvelle catégorie ajoutée à
+// BUSINESS_CATEGORIES devrait avoir son `case` ici ; à défaut, une icône
+// générique (étiquette) est affichée.
 function catIcon(id: string, color: string, size = 16) {
   const p = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   switch (id) {
     case "BTP": return <svg {...p}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/></svg>;
-    case "Transport": return <svg {...p}><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M14 9h4l4 4v4a1 1 0 0 1-1 1h-1"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>;
-    case "Restauration": return <svg {...p}><path d="M3 2v7c0 1.1.9 2 2 2a2 2 0 0 0 2-2V2"/><path d="M5 2v20"/><path d="M19 15V2a4 4 0 0 0-3 4v7h3Zm0 0v7"/></svg>;
-    case "Artisanat": return <svg {...p}><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>;
-    case "Santé": return <svg {...p}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
-    case "Beauté": return <svg {...p}><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/></svg>;
-    case "Événementiel": return <svg {...p}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
     case "Commerce": return <svg {...p}><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>;
     case "Services": return <svg {...p}><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>;
+    case "Transport": return <svg {...p}><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M14 9h4l4 4v4a1 1 0 0 1-1 1h-1"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>;
+    case "Automobile & Moto": return <svg {...p}><path d="M5 13l2-5a2 2 0 0 1 1.9-1.4h6.2A2 2 0 0 1 17 8l2 5"/><path d="M5 13h14a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1"/><path d="M5 13a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h1"/><circle cx="8" cy="18" r="2"/><circle cx="16" cy="18" r="2"/></svg>;
+    case "Agriculture & Élevage": return <svg {...p}><path d="M12 21c0-5 2-9 8-11-1 6-4 9-8 11Z"/><path d="M12 21c0-5-2-9-8-11 1 6 4 9 8 11Z"/><path d="M12 21V9"/></svg>;
     case "Immobilier": return <svg {...p}><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/></svg>;
-    default: return null;
+    case "Santé": return <svg {...p}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
+    case "Beauté": return <svg {...p}><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/></svg>;
+    case "Restauration": return <svg {...p}><path d="M3 2v7c0 1.1.9 2 2 2a2 2 0 0 0 2-2V2"/><path d="M5 2v20"/><path d="M19 15V2a4 4 0 0 0-3 4v7h3Zm0 0v7"/></svg>;
+    case "Éducation & Formation": return <svg {...p}><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/></svg>;
+    case "Événementiel": return <svg {...p}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+    case "Médias, Communication & Publicité": return <svg {...p}><path d="M3 11l15-6v14L3 13Z"/><path d="M3 11v2a2 2 0 0 0 2 2h1"/><path d="M11 18l-1 3"/><path d="M18 8a3 3 0 0 1 0 6"/></svg>;
+    case "Arts & Culture": return <svg {...p}><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.2a2 2 0 0 1 2-2h2.3A4.7 4.7 0 0 0 22 10.7C22 5.9 17.5 2 12 2Z"/></svg>;
+    case "Finance & Assurance": return <svg {...p}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;
+    case "Droit & Administration": return <svg {...p}><path d="M12 3v18"/><path d="M5 7h14"/><path d="M7 7l-3 6a3 3 0 0 0 6 0Z"/><path d="M17 7l-3 6a3 3 0 0 0 6 0Z"/><path d="M8 21h8"/></svg>;
+    case "Énergie & Carburants": return <svg {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
+    case "Industrie & Production": return <svg {...p}><path d="M2 20h20"/><path d="M4 20V9l5 4V9l5 4V5l5 3v12"/></svg>;
+    case "Sécurité": return <svg {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>;
+    case "Sports & Bien-être": return <svg {...p}><path d="M6.5 6.5 17.5 17.5"/><path d="M21 21l-1-1"/><path d="M3 3l1 1"/><path d="M18 22l4-4"/><path d="M2 6l4-4"/><path d="M3 10l7-7"/><path d="M14 21l7-7"/></svg>;
+    case "Artisanat": return <svg {...p}><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>;
+    default: return <svg {...p}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
   }
 }
 const PinIcon = ({ color = "#9AA0A6", size = 14 }: { color?: string; size?: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
