@@ -298,6 +298,7 @@ const G = {
   vert: "#16A34A",
   creme: "var(--c-creme)", cremeDark: "var(--c-cremeDark)",
   brun: "var(--c-brun)", brunLight: "var(--c-brunLight)", blanc: "var(--c-blanc)", gris: "var(--c-gris)",
+  fond: "var(--c-fond)",
 };
 
 // Affiche une notification locale de façon compatible Android + ordinateur + PWA.
@@ -794,15 +795,15 @@ const sb = {
 };
 
 const GLOBAL_CSS = `
-  :root{ --c-creme:#F8F9FB; --c-cremeDark:#EEF0F4; --c-blanc:#FFFFFF; --c-gris:#E5E7EB; --c-brun:#1A1A1A; --c-brunLight:#6B7280; }
-  :root[data-theme="dark"], [data-theme="dark"]{ --c-creme:#08080D; --c-cremeDark:#121218; --c-blanc:#16161D; --c-gris:#26262F; --c-brun:#F3F4F6; --c-brunLight:#9CA3AF; }
+  :root{ --c-creme:#F8F9FB; --c-cremeDark:#EEF0F4; --c-blanc:#FFFFFF; --c-gris:#E5E7EB; --c-brun:#1A1A1A; --c-brunLight:#6B7280; --c-fond:#E8E9EE; }
+  :root[data-theme="dark"], [data-theme="dark"]{ --c-creme:#08080D; --c-cremeDark:#121218; --c-blanc:#16161D; --c-gris:#26262F; --c-brun:#F3F4F6; --c-brunLight:#9CA3AF; --c-fond:#08080D; }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
-  html{overflow-x:hidden;width:100%;max-width:100vw;background-color:var(--c-creme);-webkit-text-size-adjust:100%;text-size-adjust:100%}
-  body{overflow-x:hidden;width:100%;max-width:100vw;min-height:100vh;-webkit-text-size-adjust:100%;text-size-adjust:100%;background-color:var(--c-creme)}
+  html{overflow-x:hidden;width:100%;max-width:100vw;background-color:var(--c-fond);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{overflow-x:hidden;width:100%;max-width:100vw;min-height:100vh;-webkit-text-size-adjust:100%;text-size-adjust:100%;background-color:var(--c-fond)}
   /* PWA iOS 18 : forcer touch-action:auto sur les champs pour que le clavier natif apparaisse */
   input,textarea,select{touch-action:auto !important}
-  html{background-color:var(--c-creme)}
-  #root{overflow-x:hidden;width:100%;max-width:100vw;min-height:100vh;background-color:var(--c-creme)}
+  html{background-color:var(--c-fond)}
+  #root{overflow-x:hidden;width:100%;max-width:100vw;min-height:100vh;background-color:var(--c-fond)}
   /* Fix clavier iOS - la barre reste fixe au-dessus du clavier */
   [data-chat-container]{height:100%;height:-webkit-fill-available;}
   @supports(height:100dvh){[data-chat-container]{height:100dvh;}}
@@ -2130,7 +2131,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
 
 function About({ onBack }: { onBack: () => void }) {
   return (
-    <div style={{ minHeight: "100vh", background: G.creme }}>
+    <div style={{ minHeight: "100vh", background: G.fond }}>
       {/* Header vert */}
       <div style={{ background: `linear-gradient(160deg,${G.vert},#0D2E1C)`, padding: "24px 24px 40px" }}>
         <div style={{ display: "flex", alignItems: "center", marginBottom: 20 }}>
@@ -2833,10 +2834,10 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
           {/* Métier */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Métier <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
-            <input list="moyo-metiers-signup" value={form.metier} disabled={!form.category} onChange={e => upd("metier", e.target.value.slice(0, 60))} placeholder={form.category ? "Sélectionnez votre métier" : "Choisissez d'abord une catégorie"} style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: form.category ? G.blanc : "#F3F4F6", color: "#111", outline: "none", cursor: form.category ? "text" : "not-allowed" }} />
-            <datalist id="moyo-metiers-signup">
-              {(form.category ? metiersForCategory(form.category) : []).map(m => <option key={m} value={m} />)}
-            </datalist>
+            <select value={form.metier} disabled={!form.category} onChange={e => upd("metier", e.target.value)} style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: form.category ? G.blanc : "#F3F4F6", color: "#111", outline: "none", cursor: form.category ? "pointer" : "not-allowed" }}>
+              <option value="">{form.category ? "Sélectionnez votre métier" : "Choisissez d'abord une catégorie"}</option>
+              {(form.category ? metiersForCategory(form.category) : []).map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
           </div>
           {/* Ville */}
           <div style={{ marginBottom: 18 }}>
@@ -2917,7 +2918,6 @@ const BOT_FAQ = [
   { q: ["numéro", "numero", "whatsapp", "contact", "téléphone", "coordonnées"], r: "Les professionnels peuvent afficher leurs coordonnées publiques (WhatsApp, téléphone, réseaux) sur leur fiche pour être contactés facilement. Restez vigilant face aux arnaques : ne communiquez jamais d'informations bancaires." },
   { q: ["suspendu", "suspension", "banni temporaire", "décompte", "temporaire", "réactiver"], r: "Une suspension temporaire affiche un décompte : à la fin, tu peux te reconnecter automatiquement, rien à faire. Une suspension définitive nécessite de contacter l'assistance pour toute réclamation." },
   { q: ["photo", "image", "profil", "modifier"], r: "Allez dans l'onglet Profil → Modifier ma photo. Un outil de recadrage s'ouvre pour cadrer votre photo parfaitement." },
-  { q: ["visible", "invisible", "disparaître", "cacher"], r: "Dans Profil, activez le bouton Profil invisible. Vous n'apparaissez plus dans l'annuaire sans supprimer votre compte." },
   { q: ["badge", "vérifié", "vérification", "bleu"], r: "La vérification est gratuite. Allez dans Profil → Faire vérifier mon compte → WhatsApp. Réponse sous 24h." },
   { q: ["bloquer", "signaler", "harcèlement", "problème"], r: "Appuyez sur les 3 traits d'un profil → Bloquer ou Signaler. Les profils bloqués sont gérables depuis votre Liste noire dans le Profil." },
   { q: ["supprimer", "compte", "désinscrire"], r: "Dans Profil → Supprimer mon compte. Cette action est définitive et irréversible." },
@@ -4535,7 +4535,96 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
   const isTablet = screenWidth >= 768 && screenWidth < 1024;
   const isWide = screenWidth >= 768;
 
-  return <div data-active-tab={tab} style={{ maxWidth: isWide ? "none" : 500, margin: "0 auto", minHeight: "100vh", display: "flex", flexDirection: isWide ? "row" : "column", background: isWide ? "#EAEDF2" : G.creme, boxShadow: isWide ? "none" : "0 0 60px rgba(0,0,0,0.12)" }}>
+  // Guide adapté au type de compte : "pro" (professionnel qui propose) ou "client" (particulier qui cherche).
+  const isProAccount = accountType === "pro";
+  const guideSections = [
+    { title: "L'Annuaire", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>, items: isProAccount ? [
+        "L'onglet Accueil est l'annuaire : les besoins publiés par les clients (Je cherche) et les services proposés par les professionnels (Je propose). Basculez entre les deux avec le sélecteur en haut.",
+        `Filtrez par ville et par catégorie : ${BIZ_CATEGORIES.length} secteurs disponibles (${BIZ_CATEGORIES.slice(0, 6).map(c => c.label).join(", ")}…).`,
+        "Parcourez les besoins des clients pour proposer vos services, et appuyez sur une annonce pour répondre directement.",
+        "Les annonces mises en avant apparaissent en tête de liste avec un repère doré.",
+      ] : [
+        "L'onglet Accueil est l'annuaire : retrouvez les professionnels près de chez vous et les besoins déjà publiés. Basculez entre Je cherche et Je propose avec le sélecteur en haut.",
+        `Filtrez par ville et par catégorie : ${BIZ_CATEGORIES.length} secteurs disponibles (${BIZ_CATEGORIES.slice(0, 6).map(c => c.label).join(", ")}…). Choisissez d'abord une catégorie, puis affinez par métier.`,
+        "Appuyez sur une fiche pour voir le détail du professionnel et le contacter directement.",
+        "Les annonces mises en avant apparaissent en tête de liste avec un repère doré.",
+      ] },
+    { title: isProAccount ? "Proposer mes services" : "Publier un besoin", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>, items: isProAccount ? [
+        "Appuyez sur « + Publier » dans la barre du bas pour publier une offre de service.",
+        "Choisissez « Je propose mes services », sélectionnez votre catégorie, ajoutez un titre clair, une description et votre ville ou zone d'intervention, puis publiez.",
+        "Votre offre apparaît aussitôt dans l'annuaire et reste visible par les clients jusqu'à ce que vous la retiriez.",
+      ] : [
+        "Appuyez sur « + Publier » dans la barre du bas pour décrire ce que vous recherchez.",
+        "Choisissez « Je cherche un professionnel », sélectionnez une catégorie, ajoutez un titre clair, une description, un budget indicatif et votre ville, puis publiez.",
+        "Votre besoin apparaît aussitôt dans l'annuaire : les professionnels concernés peuvent vous répondre directement.",
+      ] },
+    isProAccount
+      ? { title: "Ma fiche professionnelle", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>, items: [
+          "Votre fiche est votre vitrine : nom ou entreprise, métier, catégorie, ville ou zone d'intervention, description et coordonnées de contact.",
+          "Le badge bleu signale un compte vérifié. La note et le nombre d'avis renseignent les clients sur votre réputation.",
+          "Soignez votre photo et votre description : c'est ce que voient les clients avant de vous contacter.",
+        ] }
+      : { title: "Consulter une fiche", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>, items: [
+          "Chaque professionnel a une fiche : nom ou entreprise, métier, catégorie, ville ou zone d'intervention, description et coordonnées.",
+          "Le badge bleu signale un compte vérifié. La note et le nombre d'avis vous aident à choisir un professionnel de confiance.",
+          "Depuis une fiche, vous pouvez contacter le professionnel, l'ajouter à vos favoris ou le signaler.",
+        ] },
+    { title: "Messagerie", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, items: [
+        "Lorsqu'un client et un professionnel entrent en contact, une conversation s'ouvre dans l'onglet Messages.",
+        "Les échanges sont gratuits et illimités. Chaque conversation affiche son propre badge de messages non lus.",
+        "Répondre, modifier (dans les 15 minutes) ou supprimer un message : faites un appui long sur le message concerné.",
+        "Un point vert indique qu'un membre est en ligne. Avec Premium : envoi de photos et confirmations de lecture (coches bleues = lu).",
+        "Appuyez sur l'avatar en haut de la conversation pour ouvrir la fiche complète de votre interlocuteur.",
+      ] },
+    isProAccount
+      ? { title: "Mon profil professionnel", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>, items: [
+          "Renseignez votre catégorie et votre métier à l'inscription, ou modifiez-les depuis Profil puis Modifier mon profil.",
+          "Le champ métier propose des suggestions selon la catégorie choisie ; vous pouvez aussi saisir un métier personnalisé.",
+          "Ajoutez le nom de votre entreprise (facultatif), votre ville ou zone d'intervention, une description et une photo.",
+        ] }
+      : { title: "Mon profil", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>, items: [
+          "Renseignez votre nom, votre ville et une photo depuis Profil puis Modifier mon profil.",
+          "Ajoutez votre numéro WhatsApp (privé) pour être recontacté plus facilement par les professionnels.",
+        ] },
+    ...(isProAccount ? [{ title: "Vérification", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>, items: [
+        "Demandez la vérification de votre compte pour obtenir le badge bleu, gage de confiance pour vos clients.",
+        "La vérification est gratuite et traitée sous 24h via WhatsApp.",
+      ] }] : []),
+    { title: "Premium - " + PREMIUM_PRICE_FCFA.toLocaleString() + " FCFA / mois", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, items: isProAccount ? [
+        "Premium débloque : messages illimités, envoi de photos, confirmations de lecture et la mise en avant de vos offres.",
+        "Mettre une offre en avant la place en tête de l'annuaire avec un repère doré, pour gagner en visibilité auprès des clients.",
+        "Paiement via MTN Mobile Money ou Airtel Money (Congo), ou par carte Visa/Mastercard (diaspora).",
+        "Comment payer : appuyez sur « Passer Premium » → choisissez votre moyen de paiement → suivez les instructions → entrez le numéro de transaction reçu par SMS → « J'ai payé ». L'activation se fait sous 15 minutes.",
+      ] : [
+        "Premium débloque : messages illimités, envoi de photos, confirmations de lecture et la mise en avant de vos besoins.",
+        "Mettre un besoin en avant le place en tête de l'annuaire avec un repère doré, pour attirer plus vite les bons professionnels.",
+        "Paiement via MTN Mobile Money ou Airtel Money (Congo), ou par carte Visa/Mastercard (diaspora).",
+        "Comment payer : appuyez sur « Passer Premium » → choisissez votre moyen de paiement → suivez les instructions → entrez le numéro de transaction reçu par SMS → « J'ai payé ». L'activation se fait sous 15 minutes.",
+      ] },
+    { title: "Favoris", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>, items: [
+        "L'onglet Favoris regroupe les professionnels que vous avez enregistrés.",
+        "Ajoutez ou retirez un favori depuis une fiche, pour retrouver rapidement les professionnels qui vous intéressent.",
+      ] },
+    { title: "Bloquer et signaler", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>, items: [
+        "Depuis une fiche ou une conversation, vous pouvez bloquer un membre (il disparaît de votre vue) ou le signaler à notre équipe.",
+        "La modération automatique détecte et bloque insultes, arnaques et contenus inappropriés avant l'envoi d'un message.",
+        "Les comptes qui ne respectent pas les règles peuvent être avertis, suspendus temporairement ou bannis définitivement.",
+      ] },
+    { title: "Mode sombre", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>, items: [
+        "Dans Profil, basculez entre le thème clair et le thème sombre. Votre choix est mémorisé automatiquement.",
+        "Le mode sombre s'applique à toute l'application, sauf la page d'accueil.",
+      ] },
+    { title: "Sécurité et confidentialité", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, items: [
+        "Vos coordonnées ne sont partagées qu'avec les membres que vous contactez vous-même.",
+        "Pour supprimer votre compte : Profil puis Supprimer mon compte. Cette action est définitive et irréversible.",
+      ] },
+    { title: "Assistant Moyo", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 10 4a2 2 0 0 1 2-2z"/><path d="M5 14v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4"/></svg>, items: [
+        "L'icône verte en forme de robot, à côté du bouton Guide, ouvre l'Assistant Moyo.",
+        "Deux options : Besoin d'aide (réponses à vos questions sur l'application) et Signaler un problème. Les signalements sont traités sous 24h.",
+      ] },
+  ];
+
+  return <div data-active-tab={tab} style={{ maxWidth: isWide ? "none" : 500, margin: "0 auto", minHeight: "100vh", display: "flex", flexDirection: isWide ? "row" : "column", background: isWide ? "#EAEDF2" : G.fond, boxShadow: isWide ? "none" : "0 0 60px rgba(0,0,0,0.12)" }}>
     <style>{`
       .moyo-footer-hidden { transform: translateX(-50%) translateY(100%) !important; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1) !important; }
       .moyo-footer-visible { transform: translateX(-50%) translateY(0) !important; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1) !important; }
@@ -4679,69 +4768,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
         </div>
         {/* Accordéon */}
         <div style={{ padding: "8px 0" }}>
-          {[
-            { title: "L'Annuaire", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>, items: [
-              "L'onglet Accueil est l'annuaire : il regroupe les besoins publiés (Je cherche) et les services proposés (Je propose). Basculez entre les deux avec le sélecteur en haut.",
-              `Filtrez par ville et par catégorie : ${BIZ_CATEGORIES.length} secteurs disponibles (${BIZ_CATEGORIES.slice(0, 6).map(c => c.label).join(", ")}…). Choisissez d'abord une catégorie, puis affinez par métier.`,
-              "Appuyez sur une annonce ou une fiche pour voir le détail et contacter directement la personne.",
-              "Les annonces mises en avant apparaissent en tête de liste avec un repère doré.",
-            ]},
-            { title: "Fiche professionnelle", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>, items: [
-              "Chaque professionnel a une fiche : nom ou entreprise, métier, catégorie, ville ou zone d'intervention, description et coordonnées de contact.",
-              "Le badge bleu signale un compte vérifié. La note et le nombre d'avis renseignent sur la réputation du professionnel.",
-              "Depuis une fiche, vous pouvez contacter le professionnel, l'ajouter à vos favoris ou le signaler.",
-            ]},
-            { title: "Publier une annonce", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>, items: [
-              "Appuyez sur « + Publier » dans la barre du bas pour ouvrir le formulaire de publication.",
-              "Choisissez « Je cherche un professionnel » (publier un besoin) ou « Je propose mes services » (publier une offre).",
-              "Sélectionnez une catégorie, ajoutez un titre clair, une description, un budget indicatif et votre ville, puis publiez.",
-              "Votre annonce apparaît aussitôt dans l'annuaire et reste visible par les autres membres jusqu'à ce que vous la retiriez.",
-            ]},
-            { title: "Messagerie", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, items: [
-              "Lorsqu'un client et un professionnel entrent en contact, une conversation s'ouvre dans l'onglet Messages.",
-              "Les échanges sont gratuits et illimités. Chaque conversation affiche son propre badge de messages non lus.",
-              "Répondre, modifier (dans les 15 minutes) ou supprimer un message : faites un appui long sur le message concerné.",
-              "Un point vert indique qu'un membre est en ligne. Avec Premium : envoi de photos et confirmations de lecture (coches bleues = lu).",
-              "Appuyez sur l'avatar en haut de la conversation pour ouvrir la fiche complète de votre interlocuteur.",
-            ]},
-            { title: "Mon profil professionnel", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>, items: [
-              "Renseignez votre catégorie et votre métier à l'inscription, ou modifiez-les depuis Profil puis Modifier mon profil.",
-              "Le champ métier propose des suggestions selon la catégorie choisie ; vous pouvez aussi saisir un métier personnalisé.",
-              "Ajoutez le nom de votre entreprise (facultatif), votre ville ou zone d'intervention, une description et une photo.",
-              "Le bouton visible/invisible permet d'apparaître ou non dans l'annuaire à tout moment.",
-            ]},
-            { title: "Vérification", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>, items: [
-              "Demandez la vérification de votre compte pour obtenir le badge bleu, gage de confiance pour vos clients.",
-              "La vérification est gratuite et traitée sous 24h via WhatsApp.",
-            ]},
-            { title: "Premium & mise en avant - " + PREMIUM_PRICE_FCFA.toLocaleString() + " FCFA / mois", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, items: [
-              "Premium débloque : messages illimités, envoi de photos, confirmations de lecture et la mise en avant de vos annonces.",
-              "Mettre une annonce en avant la place en tête de l'annuaire avec un repère doré, pour gagner en visibilité auprès des clients.",
-              "Paiement via MTN Mobile Money ou Airtel Money (Congo), ou par carte Visa/Mastercard (diaspora).",
-              "Comment payer : appuyez sur « Passer Premium » → choisissez votre moyen de paiement → suivez les instructions → entrez le numéro de transaction reçu par SMS → « J'ai payé ». L'activation se fait sous 15 minutes.",
-            ]},
-            { title: "Favoris", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>, items: [
-              "L'onglet Favoris regroupe les professionnels que vous avez enregistrés.",
-              "Ajoutez ou retirez un favori depuis une fiche, pour retrouver rapidement les professionnels qui vous intéressent.",
-            ]},
-            { title: "Bloquer et signaler", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>, items: [
-              "Depuis une fiche ou une conversation, vous pouvez bloquer un membre (il disparaît de votre vue) ou le signaler à notre équipe.",
-              "La modération automatique détecte et bloque insultes, arnaques et contenus inappropriés avant l'envoi d'un message.",
-              "Les comptes qui ne respectent pas les règles peuvent être avertis, suspendus temporairement ou bannis définitivement.",
-            ]},
-            { title: "Mode sombre", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>, items: [
-              "Dans Profil, basculez entre le thème clair et le thème sombre. Votre choix est mémorisé automatiquement.",
-              "Le mode sombre s'applique à toute l'application, sauf la page d'accueil.",
-            ]},
-            { title: "Sécurité et confidentialité", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, items: [
-              "Vos coordonnées ne sont partagées qu'avec les membres que vous contactez vous-même.",
-              "Pour supprimer votre compte : Profil puis Supprimer mon compte. Cette action est définitive et irréversible.",
-            ]},
-            { title: "Assistant Moyo", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 10 4a2 2 0 0 1 2-2z"/><path d="M5 14v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4"/></svg>, items: [
-              "L'icône verte en forme de robot, à côté du bouton Guide, ouvre l'Assistant Moyo.",
-              "Deux options : Besoin d'aide (réponses à vos questions sur l'application) et Signaler un problème. Les signalements sont traités sous 24h.",
-            ]},
-          ].map((s, i) => (
+          {guideSections.map((s, i) => (
             <div key={i} style={{ borderBottom: `1px solid ${G.gris}` }}>
               <div onClick={() => setOpenGuideSection(openGuideSection === i ? null : i)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", cursor: "pointer", background: openGuideSection === i ? "rgba(212,168,67,0.03)" : "transparent" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -7635,10 +7662,10 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             {PUB_CATS.filter(c => c.id !== "all").map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
           </select>
           <label style={L}>Métier</label>
-          <input list="moyo-metiers-profile" value={form.metier || ""} disabled={!form.category} onChange={e => setForm(f => ({ ...f, metier: e.target.value.slice(0, 60) }))} placeholder={form.category ? "Ex : Maçon, Coiffeuse, Développeur web…" : "Choisissez d'abord une catégorie"} style={{ ...I, background: form.category ? (I as any).background : "#F3F4F6", cursor: form.category ? "text" : "not-allowed" }} />
-          <datalist id="moyo-metiers-profile">
-            {(form.category ? metiersForCategory(form.category) : []).map(m => <option key={m} value={m} />)}
-          </datalist>
+          <select value={form.metier || ""} disabled={!form.category} onChange={e => setForm(f => ({ ...f, metier: e.target.value }))} style={{ ...I, background: form.category ? (I as any).background : "#F3F4F6", cursor: form.category ? "pointer" : "not-allowed" }}>
+            <option value="">{form.category ? "Sélectionne un métier" : "Choisis d'abord une catégorie"}</option>
+            {(form.category ? metiersForCategory(form.category) : []).map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
           <label style={L}>Entreprise <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
           <input value={form.company || ""} onChange={e => setForm(f => ({ ...f, company: e.target.value.slice(0, 60) }))} placeholder="Nom de l'entreprise" style={I} />
         </>}
@@ -7696,7 +7723,6 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
   }
 
   const isWideProfile = window.innerWidth >= 768;
-  const isVisible = profile?.is_visible !== false;
 
   const menuItems = [
     { id: "main", label: "Mon profil", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
@@ -7705,7 +7731,6 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
     { id: "premium", label: "Premium", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, badge: auth.isPremium ? "✓" : null },
     { id: "parrainage", label: "Parrainer un ami", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
     { id: "verification", label: "Vérification", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, badge: profile?.is_verified ? "✓" : null },
-    { id: "visibility", label: isVisible ? "Profil visible" : "Profil invisible", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> },
     { id: "blocklist", label: "Liste noire", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> },
     { id: "darkmode", label: darkMode ? "Mode clair" : "Mode sombre", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> },
     { id: "rating", label: "Noter l'application", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
@@ -7735,7 +7760,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
   };
 
   return (
-    <div style={{ background: G.creme, minHeight: "100%", display: isWideProfile ? "flex" : "block", height: isWideProfile ? "100%" : "auto", paddingBottom: isWideProfile ? 0 : 30 }}>
+    <div style={{ background: G.fond, minHeight: "100%", display: isWideProfile ? "flex" : "block", height: isWideProfile ? "100%" : "auto", paddingBottom: isWideProfile ? 0 : 30 }}>
       <ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
       <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display: "none" }} />
@@ -8040,7 +8065,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           </div>
         </div>
       )}
-      {(!isWideProfile || ["main","premium","parrainage","verification","visibility","blocklist","darkmode","rating","logout","delete"].includes(activeSection)) && <div style={{ background: G.creme, position: "relative" }}>
+      {(!isWideProfile || ["main","premium","parrainage","verification","blocklist","darkmode","rating","logout","delete"].includes(activeSection)) && <div style={{ background: G.creme, position: "relative" }}>
         {(!isWideProfile || activeSection === "main") && <svg viewBox="0 0 500 40" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: 40, marginTop: -1 }}><path d="M0,0 Q125,40 250,40 Q375,40 500,0 L500,0 L0,0 Z" style={{ fill: G.blanc }}/></svg>}
 
         {/* ── ACTIONS (cartes empilées) ── */}
@@ -8263,26 +8288,6 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
 
 
 
-        {/* Numéro WhatsApp (privé) */}
-        {(!isWideProfile || activeSection === "main") && (
-          <div onClick={() => { if (!profile?.phone) setEditing(true); }} style={{ background: G.blanc, borderRadius: 18, border: profile?.phone ? "1.5px solid rgba(37,211,102,0.3)" : "1.5px dashed rgba(212,168,67,0.35)", boxShadow: "0 2px 10px rgba(0,0,0,0.06)", overflow: "hidden", cursor: profile?.phone ? "default" : "pointer" }}>
-            <div style={{ padding: "15px 18px", display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ width: 44, height: 44, borderRadius: "50%", background: profile?.phone ? "rgba(37,211,102,0.12)" : "rgba(212,168,67,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill={profile?.phone ? "#25D366" : G.rouge}><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24z"/></svg>
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: "0.7rem", color: "#888", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 2 }}>Mon numéro WhatsApp</div>
-                {profile?.phone
-                  ? <div style={{ fontSize: "0.87rem", color: "#333", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.phone} <span style={{ fontSize: "0.7rem", color: "#aaa", fontWeight: 500 }}>· privé</span></div>
-                  : <div style={{ fontSize: "0.87rem", color: G.rouge, fontWeight: 700 }}>Ajouter mon numéro</div>}
-              </div>
-              {profile?.phone
-                ? <div onClick={(e) => { e.stopPropagation(); setEditing(true); }} style={{ cursor: "pointer", color: "#bbb", flexShrink: 0, padding: 4 }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
-                : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>}
-            </div>
-          </div>
-        )}
-
         {/* Demande de vérification */}
         {(!isWideProfile || ["verification","main"].includes(activeSection)) && (!profile?.is_verified ? (
           <a href={`https://wa.me/${CONTACT_WHATSAPP}?text=${encodeURIComponent(`Bonjour, je souhaite faire vérifier ma fiche Moyo Business.\n\n👤 Nom : ${profile?.name || auth.name}\n💼 Métier : ${profile?.metier || "-"}\n🏢 Entreprise : ${profile?.company || "-"}\n📧 Email : ${auth.email}\n\nMerci !`)}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
@@ -8310,36 +8315,8 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           </div>
         ))}
 
-        {/* Toggle Visible / Invisible */}
-        {(!isWideProfile || ["visibility","main"].includes(activeSection)) && <div style={{
-          background: G.blanc, borderRadius: 16, padding: "16px 20px",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.06)", border: `1px solid #E8E8E8`,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 42, height: 42, borderRadius: "50%", background: isVisible ? "rgba(39,174,96,0.1)" : "rgba(231,76,60,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {isVisible
-                ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-              }
-            </div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>Profil {isVisible ? "visible" : "invisible"}</div>
-              <div style={{ fontSize: "0.82rem", color: "#888", fontWeight: 400, marginTop: 2 }}>{isVisible ? "Vous apparaissez dans l'Annuaire" : "Vous n'apparaissez plus dans l'Annuaire"}</div>
-            </div>
-          </div>
-          <div onClick={async () => {
-            const newVal = !isVisible;
-            await sb.update(auth.token, "profiles", auth.userId, { is_visible: newVal });
-            setProfile(p => p ? { ...p, is_visible: newVal } : null);
-            setToast({ msg: newVal ? "Profil rendu visible ✅" : "Profil rendu invisible 🔒" });
-          }} style={{ width: 52, height: 28, borderRadius: 50, background: isVisible ? "#27ae60" : "#e74c3c", cursor: "pointer", position: "relative", transition: "background 0.3s", flexShrink: 0 }}>
-            <div style={{ position: "absolute", top: 3, left: isVisible ? 27 : 3, width: 22, height: 22, borderRadius: "50%", background: G.blanc, boxShadow: "0 2px 6px rgba(0,0,0,0.2)", transition: "left 0.3s" }} />
-          </div>
-        </div>}
-
         {/* Statut en ligne (confidentialité) */}
-        {(!isWideProfile || ["visibility","main"].includes(activeSection)) && profile && (() => {
+        {(!isWideProfile || activeSection === "main") && profile && (() => {
           const hidden = !!profile.hide_online_status;
           return (
             <div style={{ background: G.blanc, borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", border: `1px solid #E8E8E8` }}>
@@ -10991,7 +10968,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
   if (!auth.isAdmin) return null;
 
   return (
-    <div style={{ padding: "0 0 80px", minHeight: "100vh", background: G.creme }}>
+    <div style={{ padding: "0 0 80px", minHeight: "100vh", background: G.fond }}>
       {/* Toast */}
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
@@ -16029,6 +16006,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
   const wa = (pro.whatsapp || "").replace(/[^0-9]/g, "");
   const tel = (pro.public_phone || "").replace(/[^0-9+]/g, "");
   const mine = pro.id === auth.userId;
+  const isWideFiche = typeof window !== "undefined" && window.innerWidth >= 768;
 
   // Enregistre une vue de fiche (réutilise profile_views)
   useEffect(() => {
@@ -16056,7 +16034,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
   ].filter(s => s.href);
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 90, background: G.creme, overflowY: "auto" }}>
+    <div style={{ position: "fixed", top: isWideFiche ? 0 : 64, bottom: isWideFiche ? 0 : 71, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: isWideFiche ? "none" : 500, zIndex: 90, background: G.creme, overflowY: "auto", boxSizing: "border-box" }}>
       {/* Header */}
       <div style={{ position: "relative", background: "#08080D", padding: "16px 16px 22px" }}>
         <button onClick={onClose} style={{ position: "absolute", top: 14, left: 14, width: 36, height: 36, borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.12)", color: "#fff", fontSize: 20, cursor: "pointer", zIndex: 2 }}>←</button>
@@ -16307,7 +16285,7 @@ export default function App() {
     if (!document.getElementById("moyo-theme-vars")) {
       const s = document.createElement("style");
       s.id = "moyo-theme-vars";
-      s.textContent = ':root{--c-creme:#F8F9FB;--c-cremeDark:#EEF0F4;--c-blanc:#FFFFFF;--c-gris:#E5E7EB;--c-brun:#1A1A1A;--c-brunLight:#6B7280;--c-profile-bg:#EEF0F4;--c-pill-fg:#1A1A1A;--c-pill-bd:#E5E7EB}:root[data-theme="dark"],[data-theme="dark"]{--c-creme:#08080D;--c-cremeDark:#121218;--c-blanc:#16161D;--c-gris:#26262F;--c-brun:#F3F4F6;--c-brunLight:#9CA3AF;--c-profile-bg:radial-gradient(circle at top,#1B1B22 0%,#121218 45%,#08080D 100%);--c-pill-fg:#FFFFFF;--c-pill-bd:rgba(255,255,255,0.18)}html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #root{background-color:#08080D}';
+      s.textContent = ':root{--c-creme:#F8F9FB;--c-cremeDark:#EEF0F4;--c-blanc:#FFFFFF;--c-gris:#E5E7EB;--c-brun:#1A1A1A;--c-brunLight:#6B7280;--c-fond:#E8E9EE;--c-profile-bg:#EEF0F4;--c-pill-fg:#1A1A1A;--c-pill-bd:#E5E7EB}:root[data-theme="dark"],[data-theme="dark"]{--c-creme:#08080D;--c-cremeDark:#121218;--c-blanc:#16161D;--c-gris:#26262F;--c-brun:#F3F4F6;--c-brunLight:#9CA3AF;--c-fond:#08080D;--c-profile-bg:radial-gradient(circle at top,#1B1B22 0%,#121218 45%,#08080D 100%);--c-pill-fg:#FFFFFF;--c-pill-bd:rgba(255,255,255,0.18)}html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #root{background-color:#08080D}';
       document.head.appendChild(s);
     }
     // ── Police Inter (identité Business) + comportements visuels (survol cartes/boutons) ──
