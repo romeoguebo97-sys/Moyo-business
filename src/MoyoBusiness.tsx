@@ -800,8 +800,8 @@ const GLOBAL_CSS = `
   :root{ --c-creme:#F8F9FB; --c-cremeDark:#EEF0F4; --c-blanc:#FFFFFF; --c-gris:#E5E7EB; --c-brun:#1A1A1A; --c-brunLight:#6B7280; --c-fond:#E8E9EE; }
   :root[data-theme="dark"], [data-theme="dark"]{ --c-creme:#08080D; --c-cremeDark:#121218; --c-blanc:#16161D; --c-gris:#26262F; --c-brun:#F3F4F6; --c-brunLight:#9CA3AF; --c-fond:#08080D; }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
-  html{overflow-x:hidden;width:100%;max-width:100vw;background-color:var(--c-fond);-webkit-text-size-adjust:100%;text-size-adjust:100%}
-  body{overflow-x:hidden;width:100%;max-width:100vw;min-height:100vh;-webkit-text-size-adjust:100%;text-size-adjust:100%;background-color:var(--c-fond)}
+  html{overflow-x:hidden;width:100%;max-width:100vw;background-color:var(--c-fond);-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none}
+  body{overflow-x:hidden;width:100%;max-width:100vw;min-height:100vh;-webkit-text-size-adjust:100%;text-size-adjust:100%;background-color:var(--c-fond);overscroll-behavior:none}
   /* PWA iOS 18 : forcer touch-action:auto sur les champs pour que le clavier natif apparaisse */
   input,textarea,select{touch-action:auto !important}
   html{background-color:var(--c-fond)}
@@ -1194,26 +1194,25 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
   const fmt = (n: number | null) => n === null ? "…" : n.toLocaleString("fr-FR");
 
   const highlights = [
-    { t: "Mise en relation personnalisée", d: "Notre équipe vous présente des profils compatibles", svg: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></> },
-    { t: "Messages illimités", d: "Discutez sans aucune limite", svg: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /> },
-    { t: "Voir qui s'intéresse à vous", d: "Découvrez les clients intéressés par vos services", svg: <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /> },
-    { t: "Publier des statuts", d: "Partagez vos moments", svg: <><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z" /></> },
+    { t: "Accès prioritaire aux marchés", d: "Recevez les nouvelles opportunités en premier.", svg: <><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" /><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" /><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" /><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" /></> },
+    { t: "Visibilité prioritaire", d: "Apparaissez en tête des résultats de recherche.", svg: <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></> },
+    { t: "Profil Professionnel Vérifié", d: "Renforcez la confiance de vos futurs clients.", svg: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 11 14 15 10" /></> },
+    { t: "Messages illimités", d: "Échangez librement avec vos prospects.", svg: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /> },
   ];
 
   const avantages = [
-    { icon: "match", titre: "Mise en relation personnalisée", desc: "Notre équipe vous présente des professionnels adaptés à vos besoins" },
-    { icon: "msg", titre: "Messages illimités", desc: "Discutez avec tous vos contacts, sans aucune limite" },
-    { icon: "eye", titre: "Voir qui s'intéresse à vous", desc: "Découvrez les clients intéressés par votre profil" },
-    { icon: "visitors", titre: "Voir qui a visité votre profil", desc: "Accédez à la liste complète de vos visites" },
-    { icon: "photo", titre: "Envoi de photos", desc: "Partage des photos dans tes conversations" },
-    { icon: "status", titre: "Publier des statuts", desc: "Partage jusqu'à 2 photos visibles 24h" },
-    { icon: "star2", titre: "Profil mis en avant", desc: "Apparais en premier dans l'annuaire" },
-    { icon: "check2", titre: "Messages lus", desc: "Vois quand tes messages ont été lus" },
-    { icon: "filter", titre: "Filtres avancés", desc: "Filtre par ville et catégorie" },
-    { icon: "phone", titre: "Partage tes coordonnées", desc: "Envoie ton numéro ou email librement" },
-    { icon: "referral", titre: "Parrainer & gagner", desc: "+7 jours offerts pour chaque ami abonné" },
-    { icon: "verified", titre: "Profil vérifié", desc: "Badge de confiance visible sur ton profil" },
-    { icon: "support", titre: "Support prioritaire", desc: "Assistance rapide 7j/7" },
+    { icon: "rocket", titre: "Accès prioritaire aux marchés", desc: "Recevez les nouvelles opportunités en premier." },
+    { icon: "eye", titre: "Visibilité prioritaire", desc: "Apparaissez en tête des résultats de recherche." },
+    { icon: "shieldcheck", titre: "Profil Professionnel Vérifié", desc: "Renforcez la confiance de vos futurs clients." },
+    { icon: "star2", titre: "Profil mis en avant", desc: "Soyez recommandé plus souvent aux utilisateurs." },
+    { icon: "msg", titre: "Messages illimités", desc: "Échangez librement avec vos prospects." },
+    { icon: "briefcase", titre: "Publication de réalisations", desc: "Présentez vos chantiers, produits ou services." },
+    { icon: "photo", titre: "Photos illimitées", desc: "Ajoutez davantage d'images à votre vitrine." },
+    { icon: "chart", titre: "Statistiques avancées", desc: "Suivez les vues et les contacts reçus." },
+    { icon: "filter", titre: "Filtres avancés", desc: "Recherche par ville, catégorie et métier." },
+    { icon: "medal", titre: "Badge Premium", desc: "Distinguez-vous des autres professionnels." },
+    { icon: "phone", titre: "Partage de coordonnées", desc: "Téléphone, WhatsApp et email visibles." },
+    { icon: "headset", titre: "Support prioritaire", desc: "Assistance rapide en cas de besoin." },
   ];
   const getIcon = (id: string) => {
     const svgs: Record<string, React.ReactElement> = {
@@ -4723,7 +4722,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
             </div>
           </div>
         </div>
-        <div style={{ flex: 1, overflowY: "auto", paddingBottom: isFullscreen ? 0 : 71, paddingTop: 64, transition: "padding-bottom 0.35s cubic-bezier(0.4,0,0.2,1)" }}>{children}</div>
+        <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain", paddingBottom: isFullscreen ? 0 : 71, paddingTop: 64, transition: "padding-bottom 0.35s cubic-bezier(0.4,0,0.2,1)" }}>{children}</div>
         {/* Footer mobile */}
         <div className={isFullscreen ? "moyo-footer-hidden" : "moyo-footer-visible"} style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 500, background: G.blanc, borderTop: `1px solid #eee`, display: "flex", justifyContent: "space-around", alignItems: "flex-end", padding: "7px 4px 13px", zIndex: 50, visibility: inConv ? "hidden" : "visible", pointerEvents: inConv ? "none" : "auto" }}>
           {tabs.map(t => {
@@ -4764,7 +4763,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
         l'écran de chat (la flèche "descendre" prend sa place). L'Assistant reste accessible
         depuis le bouton dédié dans le header/menu Découvrir. */}
     {FEATURE_ASSISTANT && !isWide && !inConv && <BotFloat onOpen={() => setShowBot(true)} G={G} />}
-    {showGuide && <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999, display: "flex", alignItems: "flex-start", justifyContent: "center", overflowY: "auto", padding: "20px 12px" }}>
+    {showGuide && <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999, display: "flex", alignItems: "flex-start", justifyContent: "center", overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", padding: "20px 12px" }}>
       <div style={{ background: G.blanc, borderRadius: 20, width: "100%", maxWidth: 480, margin: "0 auto", overflow: "hidden" }}>
         {/* Header */}
         <div style={{ background: `linear-gradient(135deg,${G.rouge},${G.rougeDark})`, padding: "24px 20px", position: "relative" }}>
@@ -16042,13 +16041,16 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
   ].filter(s => s.href);
 
   return (
-    <div style={{ position: "fixed", top: isWideFiche ? 0 : 64, bottom: isWideFiche ? 0 : 88, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: isWideFiche ? "none" : 500, zIndex: 90, background: G.creme, overflowY: "auto", boxSizing: "border-box" }}>
+    <div style={{ position: "fixed", top: isWideFiche ? 0 : 64, bottom: isWideFiche ? 0 : 88, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: isWideFiche ? "none" : 500, zIndex: 90, background: G.creme, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", boxSizing: "border-box" }}>
       {/* Header */}
       <div style={{ position: "relative", background: `linear-gradient(rgba(8,8,13,0.82), rgba(8,8,13,0.90)), url(${FICHE_HERO_BG}) center/cover no-repeat`, padding: "16px 16px 22px" }}>
         <button onClick={onClose} aria-label="Retour" style={{ position: "absolute", top: 14, left: 14, width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.16)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.25)" }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        {pro.is_sponsored && <div style={{ position: "absolute", top: 16, right: 16, background: G.or, color: "#111", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 50 }}>★ SPONSORISÉ</div>}
+        {!mine && <button onClick={onToggleFav} aria-label={isFav ? "Retirer des favoris" : "Ajouter aux favoris"} style={{ position: "absolute", top: 14, right: 14, width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.16)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.25)" }}>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill={isFav ? G.or : "none"} stroke={isFav ? G.or : "#fff"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>}
+        {pro.is_sponsored && <div style={{ position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)", background: G.or, color: "#111", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 50, whiteSpace: "nowrap" }}>★ SPONSORISÉ</div>}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 20 }}>
           {pro.photo_url
             ? <img src={pro.photo_url} alt="" style={{ width: 96, height: 96, borderRadius: 20, objectFit: "cover", border: `2px solid ${G.or}` }} />
@@ -16071,11 +16073,10 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
 
       {/* Actions */}
       {!mine && (
-        <div style={{ padding: "16px", display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <Btn variant="primary" onClick={contactPro} style={{ flex: 1, minWidth: 120 }}>Contacter</Btn>
-          {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, minWidth: 100, textDecoration: "none" }}><div style={{ background: "#25D366", color: "#fff", borderRadius: 12, padding: "11px", textAlign: "center", fontWeight: 700, fontSize: "0.88rem" }}>WhatsApp</div></a>}
-          {tel && <a href={`tel:${tel}`} style={{ flex: 1, minWidth: 90, textDecoration: "none" }}><div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, color: "#111", borderRadius: 12, padding: "11px", textAlign: "center", fontWeight: 700, fontSize: "0.88rem" }}>Appeler</div></a>}
-          <button onClick={onToggleFav} aria-label={isFav ? "Retirer des favoris" : "Ajouter aux favoris"} style={{ flex: "0 0 auto", minWidth: 52, background: isFav ? "rgba(212,168,67,0.1)" : G.blanc, border: `1.5px solid ${isFav ? G.rouge : G.gris}`, color: isFav ? G.rouge : "#888", borderRadius: 12, padding: "11px 16px", fontWeight: 700, fontSize: "1.1rem", cursor: "pointer" }}>{isFav ? "♥" : "♡"}</button>
+        <div style={{ padding: "16px", display: "flex", gap: 8 }}>
+          <button className="moyo-btn-primary" onClick={contactPro} style={{ flex: 1, minWidth: 0, background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", boxSizing: "border-box", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>Message</button>
+          {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: "#25D366", color: "#fff", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>WhatsApp</div></a>}
+          {tel && <a href={`tel:${tel}`} style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, color: "#111", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>Appeler</div></a>}
         </div>
       )}
 
@@ -16138,6 +16139,7 @@ function Annuaire({ auth, accountType, myCategory, onGoMessages }: { auth: Auth;
   const [openFiche, setOpenFiche] = useState<Profile | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [favs, setFavs] = useState<Set<string>>(new Set());
+  const [repView, setRepView] = useState<"all" | "fav">("all");
 
   // Pour un pro, la catégorie est verrouillée sur la sienne (onglet « Sous-traitants »).
   const effectiveCat = isPro ? (myCategory || "all") : cat;
@@ -16190,11 +16192,14 @@ function Annuaire({ auth, accountType, myCategory, onGoMessages }: { auth: Auth;
     return arr;
   }, [pros, q, quartier]);
 
+  // Vue active : tous les professionnels, ou seulement les favoris enregistrés (mêmes filtres conservés).
+  const displayList = repView === "fav" ? list.filter(p => favs.has(p.id)) : list;
+
   return (
     <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", paddingBottom: 90 }}>
       <div style={{ position: "sticky", top: 0, zIndex: 20, background: G.creme, padding: "14px 16px 8px" }}>
         {/* En-tête : Répertoire (client) ou Sous-traitants (pro, catégorie verrouillée) */}
-        {isPro ? (
+        {isPro && (
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <div style={{ minWidth: 0, flex: 1 }}>
               <h2 style={{ fontSize: "1.3rem", fontWeight: 900, color: "#1A1A1A", margin: 0, letterSpacing: "-0.4px" }}>Sous-traitants</h2>
@@ -16205,9 +16210,20 @@ function Annuaire({ auth, accountType, myCategory, onGoMessages }: { auth: Auth;
               {effectiveCat === "all" ? "Toutes" : (PUB_CATS.find(c => c.id === effectiveCat)?.label || effectiveCat)}
             </span>
           </div>
-        ) : (
-          <h2 style={{ fontSize: "1.3rem", fontWeight: 900, color: "#1A1A1A", margin: "0 0 12px", letterSpacing: "-0.4px" }}>Répertoire</h2>
         )}
+
+        {/* Sélecteur horizontal : Répertoire | Favoris */}
+        <div style={{ display: "flex", alignItems: "center", marginBottom: 14 }}>
+          <button onClick={() => setRepView("all")} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: "2px 0", color: repView === "all" ? G.or : "#9AA0A6", fontWeight: repView === "all" ? 800 : 600, fontSize: "0.98rem", transition: "color 0.15s" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            {isPro ? "Sous-traitants" : "Répertoire"}
+          </button>
+          <div style={{ width: 1, height: 22, background: G.gris, flexShrink: 0 }} />
+          <button onClick={() => setRepView("fav")} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: "2px 0", color: repView === "fav" ? G.or : "#9AA0A6", fontWeight: repView === "fav" ? 800 : 600, fontSize: "0.98rem", transition: "color 0.15s" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill={repView === "fav" ? G.or : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            Favoris
+          </button>
+        </div>
 
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           <div style={{ flex: 1 }}><Input value={q} onChange={e => setQ(e.target.value)} placeholder="🔎  Coiffeur, maçon, restaurant…" /></div>
@@ -16265,19 +16281,19 @@ function Annuaire({ auth, accountType, myCategory, onGoMessages }: { auth: Auth;
       </div>
 
       <div style={{ padding: "8px 16px", fontSize: "0.78rem", color: "#777", display: "flex", justifyContent: "space-between" }}>
-        <span><b style={{ color: "#111" }}>{list.length}</b> professionnel(s)</span>
+        <span><b style={{ color: "#111" }}>{displayList.length}</b> professionnel(s)</span>
         <span>{city === "all" ? "Tout le Congo" : city}</span>
       </div>
 
       <div style={{ padding: "4px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
         {loading && <p style={{ textAlign: "center", color: "#999", padding: 30 }}>Chargement…</p>}
-        {!loading && list.length === 0 && (
+        {!loading && displayList.length === 0 && (
           <div style={{ textAlign: "center", padding: "50px 20px", color: "#999" }}>
-            <p style={{ fontWeight: 700, color: "#444", marginBottom: 6 }}>Aucun professionnel trouvé</p>
-            <p style={{ fontSize: "0.85rem" }}>Essayez une autre catégorie ou une autre ville.</p>
+            <p style={{ fontWeight: 700, color: "#444", marginBottom: 6 }}>{repView === "fav" ? "Aucun favori pour le moment" : "Aucun professionnel trouvé"}</p>
+            <p style={{ fontSize: "0.85rem" }}>{repView === "fav" ? "Appuyez sur le ♡ d'un professionnel pour l'enregistrer ici." : "Essayez une autre catégorie ou une autre ville."}</p>
           </div>
         )}
-        {!loading && list.map(pro => <ProCard key={pro.id} pro={pro} onOpen={() => setOpenFiche(pro)} isFav={favs.has(pro.id)} onToggleFav={() => toggleFav(pro.id)} />)}
+        {!loading && displayList.map(pro => <ProCard key={pro.id} pro={pro} onOpen={() => setOpenFiche(pro)} isFav={favs.has(pro.id)} onToggleFav={() => toggleFav(pro.id)} />)}
       </div>
 
       {openFiche && <ProFiche auth={auth} pro={openFiche} onClose={() => setOpenFiche(null)} onGoMessages={onGoMessages} onToast={m => setToast(m)} isFav={favs.has(openFiche.id)} onToggleFav={() => toggleFav(openFiche.id)} />}
