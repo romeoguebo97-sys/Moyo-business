@@ -503,6 +503,32 @@ const buildStatusPublicUrl = (path: string, bucket = "statuses"): string => {
   return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${encodedPath}?v=${Date.now()}`;
 };
 
+// ── Filet de sécurité : capte toute erreur de rendu et l'affiche au lieu d'un écran blanc ──
+class ErrorBoundary extends React.Component<{ children: React.ReactNode; onBack?: () => void }, { error: Error | null }> {
+  constructor(props: any) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error, info: any) { try { console.error("[Moyo] Erreur de rendu :", error, info); } catch {} }
+  render() {
+    const e = this.state.error;
+    if (e) {
+      return (
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "#FBF7EF", fontFamily: "system-ui, -apple-system, sans-serif", boxSizing: "border-box" }}>
+          <div style={{ maxWidth: 580, width: "100%", background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 6px 24px rgba(0,0,0,0.1)", border: "1px solid #eee" }}>
+            <div style={{ fontSize: "1.1rem", fontWeight: 800, color: "#C0392B", marginBottom: 8 }}>⚠️ Une erreur est survenue dans cet écran</div>
+            <div style={{ fontSize: "0.85rem", color: "#555", marginBottom: 14, lineHeight: 1.5 }}>L'application a été protégée pour éviter l'écran blanc. Voici le détail technique (à transmettre au support) :</div>
+            <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", background: "#1e1e1e", color: "#ff8a80", padding: 14, borderRadius: 10, fontSize: "0.72rem", lineHeight: 1.45, maxHeight: 280, overflow: "auto", margin: 0 }}>{String(e?.name || "Error")}: {String(e?.message || e)}{e?.stack ? "\n\n" + e.stack : ""}</pre>
+            <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
+              <button onClick={() => { this.setState({ error: null }); this.props.onBack?.(); }} style={{ background: "#D4A843", color: "#fff", border: "none", borderRadius: 10, padding: "10px 18px", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>← Retour</button>
+              <button onClick={() => { try { location.reload(); } catch {} }} style={{ background: "#fff", color: "#333", border: "1px solid #ccc", borderRadius: 10, padding: "10px 18px", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>Recharger la page</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children as any;
+  }
+}
+
 const resolveStatusImageUrl = async (token: string, url?: string | null): Promise<string | null> => {
   if (!url) return null;
   if (url.startsWith("data:") || url.startsWith("blob:")) return url;
@@ -2686,14 +2712,16 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
       } catch { /* upload non bloquant */ }
     }
     try {
-      // Mettre à jour le profil avec toutes les infos + photo
-      await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
+      // Mettre à jour le profil avec toutes les infos + photo.
+      // On demande la ligne mise à jour (return=representation) pour VÉRIFIER que la mise à jour
+      // a réellement été appliquée — une RLS qui bloque renvoie 200 avec 0 ligne, d'où ce contrôle.
+      const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=id,is_complete,name,photo_url`, {
         method: "PATCH",
         headers: {
           "apikey": SUPABASE_KEY,
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
-          "Prefer": "return=minimal"
+          "Prefer": "return=representation"
         },
         body: JSON.stringify({
           name: displayName,
@@ -2713,6 +2741,18 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
           ...((() => { const ref = new URLSearchParams(window.location.search).get("ref"); return ref ? { referred_by: ref } : {}; })()),
         }),
       });
+      const patchBody = await patchRes.json().catch(() => null);
+      const updatedRow = Array.isArray(patchBody) ? patchBody[0] : patchBody;
+      // Échec si : code HTTP non-2xx (ex. colonne absente → 400) OU aucune ligne renvoyée (RLS) OU is_complete non posé.
+      if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
+        const detail = !patchRes.ok
+          ? (patchBody && typeof patchBody === "object" ? JSON.stringify(patchBody) : String(patchBody || ""))
+          : "Aucune ligne modifiée — vérifiez les droits (RLS) en écriture sur la table « profiles ».";
+        console.error("[Moyo][Signup] Échec finalisation profil :", patchRes.status, detail);
+        setLoading(false);
+        setErrorMsg(`La finalisation de votre profil n'a pas abouti (code ${patchRes.status}). Votre compte n'est pas encore complet — réessayez. Détail technique : ${String(detail).slice(0, 240)}`);
+        return; // On NE prétend PAS que le compte est créé et on GARDE la session pour permettre un nouvel essai.
+      }
       // Mettre à jour le display_name dans Supabase Auth
       try {
         await fetch(`${SUPABASE_URL}/auth/v1/user`, {
@@ -9029,7 +9069,7 @@ function AdminPinGate({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () =
     } catch { setPinError("Erreur réseau. Réessayez."); }
     setPinLoading(false);
   };
-  if (pinVerified) return <Admin auth={auth} onBack={() => { setPinVerified(false); onBack(); }} onBadgeCount={onBadgeCount} />;
+  if (pinVerified) return <ErrorBoundary onBack={() => { setPinVerified(false); onBack(); }}><Admin auth={auth} onBack={() => { setPinVerified(false); onBack(); }} onBadgeCount={onBadgeCount} /></ErrorBoundary>;
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ background: G.blanc, borderRadius: 22, width: "100%", maxWidth: 320, overflow: "hidden", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
