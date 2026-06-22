@@ -154,6 +154,11 @@ let POLL_SUPPORT_MS = 6000;       // Messages support
 const FREE_LIMITS = { statusBoosts: 2 }; // valeurs par défaut, écrasées par app_settings
 const STATUS_LIMIT = 2;
 const LIFETIME_PREMIUM_UNTIL = "2099-12-31T23:59:59.000Z";
+// MODE LANCEMENT : quand true, l'app est 100% gratuite — aucun verrou de paiement, toute l'UI liée au paiement disparaît.
+// Indépendant des autres réglages. Piloté par app_settings.free_launch_mode.
+let FREE_LAUNCH_MODE = false;
+// Premium « effectif » : vrai si l'utilisateur a réellement payé OU si le mode lancement gratuit est actif.
+const effectivePremium = (raw: boolean | null | undefined): boolean => !!raw || FREE_LAUNCH_MODE;
 let PREMIUM_30_DAYS_MS = 31 * 24 * 60 * 60 * 1000; // valeur par défaut, écrasée par app_settings
 let PREMIUM_PRICE_FCFA = 3500;
 let PREMIUM_PRICE_WEEK_FCFA = 1200;
@@ -223,12 +228,13 @@ function formatWhatsApp(num: string): string {
 // Déduplique une liste de matchs par couple (paire non ordonnée), en gardant le plus récent (created_at).
 
 // Charger les settings dynamiques depuis Supabase au démarrage
-fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(limit_likes_free,limit_status_boosts,premium_duration_days,premium_price_fcfa,premium_price_week_fcfa,premium_price_2month_fcfa,premium_days_week,premium_days_2month,premium_price_eur,eur_to_fcfa_rate,likes_notification_delay_hours,maintenance_mode,maintenance_message,poll_badges_ms,poll_admin_badge_ms,poll_stats_ms,poll_broadcast_ms,poll_support_ms,pay_mtn_enabled,pay_airtel_enabled,pay_cb_enabled,feature_statuses,feature_gift_premium,feature_assistant,custom_banned_words,contact_banned_words,pay_mtn_number,pay_mtn_responsable,pay_airtel_number,pay_airtel_responsable,contact_email,contact_whatsapp,contact_address,social_facebook,social_instagram,social_tiktok,social_youtube,landing_members_count,landing_title_start,landing_title_highlight,landing_title_end,landing_slogan,premium_stat_couples,premium_stat_members,landing_stat_members,landing_stat_cities,auto_mod_contact_reply)&select=key,value`, {
+fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(limit_likes_free,limit_status_boosts,premium_duration_days,premium_price_fcfa,premium_price_week_fcfa,premium_price_2month_fcfa,premium_days_week,premium_days_2month,premium_price_eur,eur_to_fcfa_rate,likes_notification_delay_hours,maintenance_mode,maintenance_message,poll_badges_ms,poll_admin_badge_ms,poll_stats_ms,poll_broadcast_ms,poll_support_ms,pay_mtn_enabled,pay_airtel_enabled,pay_cb_enabled,feature_statuses,feature_gift_premium,feature_assistant,custom_banned_words,contact_banned_words,pay_mtn_number,pay_mtn_responsable,pay_airtel_number,pay_airtel_responsable,contact_email,contact_whatsapp,contact_address,social_facebook,social_instagram,social_tiktok,social_youtube,landing_members_count,landing_title_start,landing_title_highlight,landing_title_end,landing_slogan,premium_stat_couples,premium_stat_members,landing_stat_members,landing_stat_cities,auto_mod_contact_reply,free_launch_mode)&select=key,value`, {
   headers: { "apikey": SUPABASE_KEY },
 }).then(r => r.json()).then((data: { key: string; value: string }[]) => {
   if (!Array.isArray(data)) return;
   const map: Record<string, string> = {};
   data.forEach(d => { map[d.key] = d.value; });
+  if (map["free_launch_mode"] !== undefined) FREE_LAUNCH_MODE = map["free_launch_mode"] === "true";
   if (map["pay_mtn_enabled"] !== undefined) PAY_MTN_ENABLED = map["pay_mtn_enabled"] !== "false";
   if (map["pay_airtel_enabled"] !== undefined) PAY_AIRTEL_ENABLED = map["pay_airtel_enabled"] !== "false";
   if (map["pay_cb_enabled"] !== undefined) PAY_CB_ENABLED = map["pay_cb_enabled"] !== "false";
@@ -2449,7 +2455,7 @@ function Login({ onNav, onAuth }: { onNav: (p: string) => void; onAuth: (a: Auth
         userId: res.user.id,
         name: profiles[0].name || "Utilisateur",
         email: res.user.email || "",
-        isPremium: profiles[0].is_premium || false,
+        isPremium: effectivePremium(profiles[0].is_premium),
         isAdmin: profiles[0].is_admin || false,
         adminLevel: (profiles[0] as any).admin_level || undefined,
         refreshToken: res.refresh_token || undefined,
@@ -3456,6 +3462,7 @@ function AdminDesktopPage() {
     customBannedWords: "",
     contactBannedWords: "",
     autoModContactReply: AUTO_MOD_CONTACT_REPLY,
+    freeLaunchMode: "false",
   });
   const [editingConfig, setEditingConfig] = React.useState<string | null>(null);
   const [editingConfigValue, setEditingConfigValue] = React.useState("");
@@ -3475,6 +3482,7 @@ function AdminDesktopPage() {
       "custom_banned_words",
       "contact_banned_words",
       "auto_mod_contact_reply",
+      "free_launch_mode",
     ];
     fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(${allKeys.join(",")})&select=key,value`, {
       headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` },
@@ -3505,7 +3513,9 @@ function AdminDesktopPage() {
         customBannedWords: map["custom_banned_words"] || c.customBannedWords,
         contactBannedWords: map["contact_banned_words"] || c.contactBannedWords,
         autoModContactReply: map["auto_mod_contact_reply"] || c.autoModContactReply,
+        freeLaunchMode: map["free_launch_mode"] || c.freeLaunchMode,
       }));
+      if (map["free_launch_mode"] !== undefined) FREE_LAUNCH_MODE = map["free_launch_mode"] === "true";
     }).catch(() => {});
   }, [auth]);
 
@@ -3697,6 +3707,25 @@ function AdminDesktopPage() {
                     setEditingConfig(null);
                   }} />
               ))}
+            </OffCanvasSection>}
+            {configTab === "tarifs" && <OffCanvasSection title="Mode lancement (application gratuite)">
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14, padding: "14px 16px", background: appConfig.freeLaunchMode === "true" ? "rgba(22,163,74,0.08)" : G.creme, borderRadius: 12, border: `1.5px solid ${appConfig.freeLaunchMode === "true" ? "rgba(22,163,74,0.35)" : G.gris}` }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "0.9rem", fontWeight: 800, color: appConfig.freeLaunchMode === "true" ? G.vert : G.brun }}>
+                    {appConfig.freeLaunchMode === "true" ? "🎉 Application 100% gratuite — ACTIVÉ" : "Application 100% gratuite"}
+                  </div>
+                  <div style={{ fontSize: "0.76rem", color: G.brunLight, marginTop: 4, lineHeight: 1.5 }}>
+                    Quand c'est activé, tout le monde a accès à toutes les fonctionnalités sans payer, et tout l'affichage lié au paiement (bandeau Premium, badge, onglet) disparaît. Désactivez-le pour réactiver les paiements. Indépendant des autres réglages. Les utilisateurs déjà connectés doivent recharger l'app pour voir le changement.
+                  </div>
+                </div>
+                <SwitchBtn on={appConfig.freeLaunchMode === "true"} onToggle={async () => {
+                  if (!auth) return;
+                  const v = appConfig.freeLaunchMode !== "true" ? "true" : "false";
+                  setAppConfig(c => ({ ...c, freeLaunchMode: v }));
+                  FREE_LAUNCH_MODE = v === "true";
+                  await saveSetting("free_launch_mode", v, auth.token);
+                }} />
+              </div>
             </OffCanvasSection>}
             {configTab === "tarifs" && <OffCanvasSection title="Prix & Abonnement">
               {([
@@ -4753,7 +4782,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
           </div>
           <div>
             <div style={{ fontWeight: 700, fontSize: "0.83rem", color: G.brun }}>{auth.name}</div>
-            <div style={{ fontSize: "0.62rem", color: G.or, fontWeight: 600, marginTop: 1 }}>{auth.isPremium ? "★ Premium actif" : "Gratuit"}</div>
+            {!FREE_LAUNCH_MODE && <div style={{ fontSize: "0.62rem", color: G.or, fontWeight: 600, marginTop: 1 }}>{auth.isPremium ? "★ Premium actif" : "Gratuit"}</div>}
           </div>
         </div>
       </div>
@@ -7791,7 +7820,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
     { id: "main", label: "Mon profil", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
     { id: "edit", label: "Modifier mon profil", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
     { id: "photo", label: "Modifier ma photo", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> },
-    { id: "premium", label: "Premium", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, badge: auth.isPremium ? "✓" : null },
+    ...(FREE_LAUNCH_MODE ? [] : [{ id: "premium", label: "Premium", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, badge: auth.isPremium ? "✓" : null }]),
     { id: "parrainage", label: "Parrainer un ami", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
     { id: "verification", label: "Vérification", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, badge: profile?.is_verified ? "✓" : null },
     { id: "blocklist", label: "Liste noire", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> },
@@ -7907,15 +7936,15 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
 
         {/* Photo ronde */}
         <div style={{ position: "relative", display: "inline-block", marginBottom: 20 }}>
-          <div style={{ width: 120, height: 120, borderRadius: "50%", background: profile?.is_premium ? `conic-gradient(${G.or} 0% 100%, ${G.gris} 100%)` : `conic-gradient(${G.rouge} 0% 100%, ${G.gris} 100%)`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: profile?.is_premium ? `0 8px 32px rgba(212,168,67,0.35)` : `0 8px 32px rgba(212,168,67,0.25)` }}>
+          <div style={{ width: 120, height: 120, borderRadius: "50%", background: `conic-gradient(${G.or} 0% 100%, ${G.gris} 100%)`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: profile?.is_premium ? `0 8px 32px rgba(212,168,67,0.35)` : `0 8px 32px rgba(212,168,67,0.25)` }}>
             <div style={{ width: 108, height: 108, borderRadius: "50%", overflow: "hidden", background: G.gris, border: `3px solid ${G.blanc}` }}>
               <Avatar url={profile?.photo_url} gender={profile?.gender} size={108} premium={profile?.is_premium} />
             </div>
           </div>
-          {profile?.is_premium ? (
+          {FREE_LAUNCH_MODE ? null : profile?.is_premium ? (
             <div style={{ position: "absolute", bottom: -8, left: "50%", transform: "translateX(-50%)", background: `linear-gradient(135deg,${G.or},#B8860B)`, borderRadius: 50, padding: "4px 14px", fontSize: "0.68rem", fontWeight: 700, color: "#111", whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(212,168,67,0.4)" }}>Premium</div>
           ) : (
-            <div style={{ position: "absolute", bottom: -8, left: "50%", transform: "translateX(-50%)", background: `linear-gradient(135deg,${G.rouge},${G.rougeDark})`, borderRadius: 50, padding: "4px 14px", fontSize: "0.68rem", fontWeight: 700, color: "#fff", whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(212,168,67,0.35)" }}>Gratuit</div>
+            <div style={{ position: "absolute", bottom: -8, left: "50%", transform: "translateX(-50%)", background: `linear-gradient(135deg,#E74C3C,#C0392B)`, borderRadius: 50, padding: "4px 14px", fontSize: "0.68rem", fontWeight: 700, color: "#fff", whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(192,57,43,0.4)" }}>Gratuit</div>
           )}
         </div>
 
@@ -8082,6 +8111,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
 
         {/* CTA Premium - rouge si gratuit, doré si actif, rouge si expiré */}
         {(!isWideProfile || ["premium","main"].includes(activeSection)) && (() => {
+          if (FREE_LAUNCH_MODE) return null; // Mode lancement gratuit : aucun bandeau de paiement.
           const stored = localStorage.getItem(`moyo_premium_until_${auth.userId}`);
           const daysLeft = stored ? Math.floor((new Date(stored).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : -1;
           const isLifetime = stored && new Date(stored).getFullYear() >= 2090;
@@ -8117,6 +8147,9 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             </div>
           );
           const isExpired = !auth.isPremium && stored && daysLeft <= 0;
+          // Met en avant le forfait le moins cher (dynamique) : « à partir de X FCFA ».
+          const premiumPrices = [PREMIUM_PRICE_WEEK_FCFA, PREMIUM_PRICE_FCFA, PREMIUM_PRICE_2MONTH_FCFA].filter(n => n > 0);
+          const minPremiumPrice = premiumPrices.length ? Math.min(...premiumPrices) : PREMIUM_PRICE_FCFA;
           return (
             <div onClick={() => onShowPremium("")} style={{ background: `linear-gradient(135deg,${G.rouge} 0%,${G.rougeDark} 100%)`, borderRadius: 18, padding: "18px 20px", cursor: "pointer", boxShadow: "0 8px 28px rgba(212,168,67,0.35)", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "transform 0.15s, box-shadow 0.15s" }}>
               <div>
@@ -8133,7 +8166,11 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                   {isExpired ? "Réabonnez-vous pour retrouver tous vos avantages" : "Messages illimités · Contacts illimités · Voir qui s'intéresse à vous"}
                 </div>
               </div>
-              <div style={{ fontSize: "1.4rem", fontWeight: 900, color: "#fff", marginLeft: 12, flexShrink: 0, textAlign: "right", textShadow: "0 1px 3px rgba(0,0,0,0.25)", lineHeight: 1.1 }}>{PREMIUM_PRICE_FCFA.toLocaleString()}<br/><span style={{ fontSize: "0.66rem", fontWeight: 700, color: "rgba(255,255,255,0.92)" }}>FCFA/mois</span></div>
+              <div style={{ marginLeft: 12, flexShrink: 0, textAlign: "right" }}>
+                <div style={{ fontSize: "0.58rem", fontWeight: 700, color: "rgba(255,255,255,0.85)", textTransform: "uppercase", letterSpacing: "0.4px" }}>À partir de</div>
+                <div style={{ fontSize: "1.4rem", fontWeight: 900, color: "#fff", textShadow: "0 1px 3px rgba(0,0,0,0.25)", lineHeight: 1.05 }}>{minPremiumPrice.toLocaleString()}</div>
+                <div style={{ fontSize: "0.62rem", fontWeight: 700, color: "rgba(255,255,255,0.92)" }}>FCFA</div>
+              </div>
             </div>
           );
         })()}
@@ -17017,8 +17054,9 @@ export default function App() {
               } else {
                 const p = profiles[0];
                 const newAdminLevel = (p as any).admin_level || undefined;
-                if (p.is_premium !== a.isPremium || (p.is_admin || false) !== a.isAdmin || newAdminLevel !== a.adminLevel) {
-                  const updated = { ...a, isPremium: p.is_premium, isAdmin: p.is_admin || false, adminLevel: newAdminLevel };
+                const effPrem = effectivePremium(p.is_premium);
+                if (effPrem !== a.isPremium || (p.is_admin || false) !== a.isAdmin || newAdminLevel !== a.adminLevel) {
+                  const updated = { ...a, isPremium: effPrem, isAdmin: p.is_admin || false, adminLevel: newAdminLevel };
                   authRef.current = updated;
                   setAuth(updated);
                   try { localStorage.setItem("moyo_session", JSON.stringify(updated)); } catch {}
@@ -17256,9 +17294,10 @@ export default function App() {
         // Mettre à jour Premium/isAdmin/adminLevel si changé
         const p = profiles[0];
         const newAdminLevel = (p as any).admin_level || undefined;
-        if (p.is_premium !== auth.isPremium || (p.is_admin || false) !== auth.isAdmin || newAdminLevel !== auth.adminLevel) {
+        const effPrem = effectivePremium(p.is_premium);
+        if (effPrem !== auth.isPremium || (p.is_admin || false) !== auth.isAdmin || newAdminLevel !== auth.adminLevel) {
           console.log("[Moyo][Session] validateSession - mise à jour Premium/isAdmin/adminLevel");
-          const updated = { ...auth, isPremium: p.is_premium, isAdmin: p.is_admin || false, adminLevel: newAdminLevel };
+          const updated = { ...auth, isPremium: effPrem, isAdmin: p.is_admin || false, adminLevel: newAdminLevel };
           authRef.current = updated;
           setAuth(updated);
           try { localStorage.setItem("moyo_session", JSON.stringify(updated)); } catch {}
@@ -17305,8 +17344,9 @@ export default function App() {
             } else {
               const p = profiles[0];
               const cur = authRef.current || auth;
-              if (p.is_premium !== cur.isPremium || (p.is_admin || false) !== cur.isAdmin) {
-                const updated = { ...cur, isPremium: p.is_premium, isAdmin: p.is_admin || false };
+              const effPrem = effectivePremium(p.is_premium);
+              if (effPrem !== cur.isPremium || (p.is_admin || false) !== cur.isAdmin) {
+                const updated = { ...cur, isPremium: effPrem, isAdmin: p.is_admin || false };
                 authRef.current = updated;
                 setAuth(updated);
                 try { localStorage.setItem("moyo_session", JSON.stringify(updated)); } catch {}
@@ -17521,7 +17561,7 @@ export default function App() {
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [auth?.userId, userGender]);
-  const showPremium = (r = "") => setPremiumModal(r || "Passe Premium pour débloquer toutes les fonctionnalités !");
+  const showPremium = (r = "") => { if (FREE_LAUNCH_MODE) return; setPremiumModal(r || "Passe Premium pour débloquer toutes les fonctionnalités !"); };
 
   const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
