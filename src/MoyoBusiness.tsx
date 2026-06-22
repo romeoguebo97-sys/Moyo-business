@@ -10258,6 +10258,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
 
   // ── Statuts officiels Moyo (publiés depuis l'onglet Marketing) ──
   const [officialStatuses, setOfficialStatuses] = useState<(StatusPost & { _views?: number; _replies?: number })[]>([]);
+  const [pendingDelReview, setPendingDelReview] = useState<any | null>(null);
   const [confirmDeleteStatus, setConfirmDeleteStatus] = useState<StatusPost | null>(null);
   
   const [mktShowAll, setMktShowAll] = useState(false);
