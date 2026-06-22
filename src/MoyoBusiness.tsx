@@ -143,7 +143,7 @@ const getModerationMessage = (type: "insult" | "scam" | "sexual"): string => {
 const MSG_BG_STYLE: React.CSSProperties = {
   position: "relative",
 };
-const SUPER_ADMIN_ID = "3952df97-4ba6-49b3-8bb4-8a2a2880f6ff";
+const SUPER_ADMIN_ID = "1d7a2e08-4454-43ea-8db0-4d1aeba8e69d";
 const REFERRAL_BONUS_DAYS = 7;
 // Intervalles de polling — modifiables via app_settings
 let POLL_BADGES_MS = 8000;        // Fallback badges (messages/likes/matchs/vues)
@@ -4463,7 +4463,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
   );
 }
 
-function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceived, viewsReceived, auth, accountType, adminBadgeCount, showAdminConfig, setShowAdminConfig, inConv, onPublish }: { children: React.ReactNode; tab: string; setTab: (t: string) => void; unreadCount: number; notifCount: number; likesReceived: number; viewsReceived: number; auth: Auth; accountType?: string; adminBadgeCount?: number; showAdminConfig: boolean; setShowAdminConfig: (v: boolean) => void; inConv: boolean; onPublish: () => void; }) {
+function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceived, viewsReceived, auth, accountType, adminBadgeCount, showAdminConfig, setShowAdminConfig, inConv, onPublish, assistantEnabled = true }: { children: React.ReactNode; tab: string; setTab: (t: string) => void; unreadCount: number; notifCount: number; likesReceived: number; viewsReceived: number; auth: Auth; accountType?: string; adminBadgeCount?: number; showAdminConfig: boolean; setShowAdminConfig: (v: boolean) => void; inConv: boolean; onPublish: () => void; assistantEnabled?: boolean; }) {
   const [showGuide, setShowGuide] = useState(false);
   const [openGuideSection, setOpenGuideSection] = useState<number | null>(null);
   const [showBot, setShowBot] = useState(false);
@@ -4779,7 +4779,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
     {/* Bot flottant — masqué quand une conversation est ouverte pour ne pas surcharger
         l'écran de chat (la flèche "descendre" prend sa place). L'Assistant reste accessible
         depuis le bouton dédié dans le header/menu Découvrir. */}
-    {FEATURE_ASSISTANT && !isWide && !inConv && <BotFloat onOpen={() => setShowBot(true)} G={G} />}
+    {FEATURE_ASSISTANT && assistantEnabled && !isWide && !inConv && <BotFloat onOpen={() => setShowBot(true)} G={G} />}
     {showGuide && <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999, display: "flex", alignItems: "flex-start", justifyContent: "center", overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", padding: "20px 12px" }}>
       <div style={{ background: G.blanc, borderRadius: 20, width: "100%", maxWidth: 480, margin: "0 auto", overflow: "hidden" }}>
         {/* Header */}
@@ -6137,7 +6137,7 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.65rem", color: "#bbb", marginTop: 4 }}>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-        <span>Statuts visibles uniquement par vos matchs</span>
+        <span>Statuts visibles uniquement par vos contacts</span>
       </div>
     </div>
     <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0" }}>
@@ -7349,7 +7349,7 @@ function CropModal({ src, onConfirm, onCancel }: { src: string; onConfirm: (blob
 
 
 
-function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpenAdmin, adminBadgeCount }: { auth: Auth; onLogout: () => void; onShowPremium: (r: string) => void; darkMode?: boolean; onToggleDark?: () => void; onOpenAdmin?: () => void; adminBadgeCount?: number }) {
+function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpenAdmin, adminBadgeCount, assistantEnabled = true, onToggleAssistant }: { auth: Auth; onLogout: () => void; onShowPremium: (r: string) => void; darkMode?: boolean; onToggleDark?: () => void; onOpenAdmin?: () => void; adminBadgeCount?: number; assistantEnabled?: boolean; onToggleAssistant?: () => void }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [notifStatus, setNotifStatus] = useState<"default" | "granted" | "denied" | "unsupported">(() => {
     if (typeof window === "undefined" || !("Notification" in window)) return "unsupported";
@@ -8171,7 +8171,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                   {isExpired ? "Réabonnez-vous pour retrouver tous vos avantages" : "Messages illimités · Contacts illimités · Voir qui s'intéresse à vous"}
                 </div>
               </div>
-              <div style={{ fontSize: "1.2rem", fontWeight: 800, color: G.or, marginLeft: 12, flexShrink: 0 }}>{PREMIUM_PRICE_FCFA.toLocaleString()}<br/><span style={{ fontSize: "0.65rem", fontWeight: 600 }}>FCFA/mois</span></div>
+              <div style={{ fontSize: "1.4rem", fontWeight: 900, color: "#fff", marginLeft: 12, flexShrink: 0, textAlign: "right", textShadow: "0 1px 3px rgba(0,0,0,0.25)", lineHeight: 1.1 }}>{PREMIUM_PRICE_FCFA.toLocaleString()}<br/><span style={{ fontSize: "0.66rem", fontWeight: 700, color: "rgba(255,255,255,0.92)" }}>FCFA/mois</span></div>
             </div>
           );
         })()}
@@ -8365,6 +8365,22 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           );
         })()}
 
+
+        {/* Assistant flottant (chatbot) — activable/désactivable par l'utilisateur */}
+        {(!isWideProfile || ["darkmode","main"].includes(activeSection)) && <div style={{ background: G.blanc, borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", border: `1px solid #E8E8E8` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 42, height: 42, borderRadius: "50%", background: assistantEnabled ? "rgba(39,174,96,0.12)" : "rgba(150,150,150,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={assistantEnabled ? "#27ae60" : "#999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 10 4a2 2 0 0 1 2-2z"/><path d="M5 14v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4"/><circle cx="9" cy="11" r="1" fill={assistantEnabled ? "#27ae60" : "#999"}/><circle cx="15" cy="11" r="1" fill={assistantEnabled ? "#27ae60" : "#999"}/></svg>
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>Assistant flottant</div>
+              <div style={{ fontSize: "0.82rem", color: "#888", marginTop: 2 }}>{assistantEnabled ? "Visible sur vos écrans" : "Masqué pour vous"}</div>
+            </div>
+          </div>
+          <div onClick={onToggleAssistant} style={{ width: 52, height: 28, borderRadius: 50, background: assistantEnabled ? "#27ae60" : G.gris, cursor: "pointer", position: "relative", transition: "background 0.3s", flexShrink: 0 }}>
+            <div style={{ position: "absolute", top: 3, left: assistantEnabled ? 27 : 3, width: 22, height: 22, borderRadius: "50%", background: G.blanc, boxShadow: "0 2px 6px rgba(0,0,0,0.2)", transition: "left 0.3s" }} />
+          </div>
+        </div>}
 
         {/* Mode sombre */}
         {(!isWideProfile || ["darkmode","main"].includes(activeSection)) && <div style={{ background: G.blanc, borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", border: `1px solid #E8E8E8` }}>
@@ -16782,6 +16798,19 @@ export default function App() {
   const [tab, setTab] = useState("publications");
   const [publishNonce, setPublishNonce] = useState(0);
   const [auth, setAuth] = useState<Auth | null>(null);
+  // ── Assistant flottant : préférence par utilisateur (activé par défaut) ──
+  const [assistantEnabled, setAssistantEnabled] = useState(true);
+  useEffect(() => {
+    if (!auth) return;
+    try { setAssistantEnabled(localStorage.getItem(`moyo_assistant_${auth.userId}`) !== "0"); } catch {}
+  }, [auth?.userId]);
+  const toggleAssistant = () => {
+    setAssistantEnabled(prev => {
+      const v = !prev;
+      try { if (auth) localStorage.setItem(`moyo_assistant_${auth.userId}`, v ? "1" : "0"); } catch {}
+      return v;
+    });
+  };
   const [unreadCount, setUnreadCount] = useState(0);
   const lastUnreadRef = useRef<number | null>(null);
   const [notifCount, setNotifCount] = useState(0);
@@ -17618,13 +17647,13 @@ export default function App() {
       }
       if (t === "likes") { setLikesReceived(0); try { localStorage.setItem(`moyo_likes_seen_${auth!.userId}`, new Date().toISOString()); } catch {} }
       if (t === "visitors") { setViewsReceived(0); try { localStorage.setItem(`moyo_visitors_seen_${auth!.userId}`, new Date().toISOString()); } catch {} }
-    }} unreadCount={unreadCount} notifCount={notifCount} likesReceived={likesReceived} viewsReceived={viewsReceived} auth={auth} accountType={meType} adminBadgeCount={adminBadgeCount} showAdminConfig={showAdminConfig} setShowAdminConfig={setShowAdminConfig} inConv={inConv} onPublish={() => { setTab("publier"); }}>
+    }} unreadCount={unreadCount} notifCount={notifCount} likesReceived={likesReceived} viewsReceived={viewsReceived} auth={auth} accountType={meType} adminBadgeCount={adminBadgeCount} showAdminConfig={showAdminConfig} setShowAdminConfig={setShowAdminConfig} inConv={inConv} onPublish={() => { setTab("publier"); }} assistantEnabled={assistantEnabled}>
       <div key={tab} className="page-anim" style={{ width: "100%", height: "100%" }}>
       {tab === "publications" && <Publications auth={auth} accountType={meType} publishNonce={publishNonce} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "publier" && <PublierHub auth={auth} accountType={meType} onGoFeed={() => setTab("publications")} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "discover" && <Annuaire auth={auth} accountType={meType} myCategory={meCategory} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "messages" && <Messages auth={auth} onUnreadCount={setUnreadCount} onShowPremium={showPremium} initialPartnerId={openConvPartnerId} onConvOpen={setInConv} />}
-      {tab === "profile" && <Profile auth={auth} onLogout={handleLogout} onShowPremium={showPremium} darkMode={darkMode} onToggleDark={() => { const v = !darkMode; setDarkMode(v); localStorage.setItem("moyo_dark", v ? "1" : "0"); }} onOpenAdmin={auth.isAdmin ? () => openAdminPanel(() => setTab("admin")) : undefined} adminBadgeCount={adminBadgeCount} />}
+      {tab === "profile" && <Profile auth={auth} onLogout={handleLogout} onShowPremium={showPremium} darkMode={darkMode} onToggleDark={() => { const v = !darkMode; setDarkMode(v); localStorage.setItem("moyo_dark", v ? "1" : "0"); }} onOpenAdmin={auth.isAdmin ? () => openAdminPanel(() => setTab("admin")) : undefined} adminBadgeCount={adminBadgeCount} assistantEnabled={assistantEnabled} onToggleAssistant={toggleAssistant} />}
       {tab === "admin" && <AdminPinGate auth={auth} onBack={() => setTab("publications")} onBadgeCount={setAdminBadgeCount} />}
       </div>
     </AppShell>
