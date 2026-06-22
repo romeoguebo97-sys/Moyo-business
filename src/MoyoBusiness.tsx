@@ -7437,7 +7437,6 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
   const [blockedUsers, setBlockedUsers] = useState<Array<{ id: string; blocked_id: string; profile?: Profile }>>([]);
   const [showBlocked, setShowBlocked] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [previewMode, setPreviewMode] = useState<"card" | "list">("card");
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -8040,94 +8039,17 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
         </div>
       </div>}{/* fin ZONE BLANCHE */}
 
-      {/* ── MODAL APERÇU PROFIL ── */}
+      {/* ── APERÇU PROFIL : la vraie fiche pro (ProFiche), identique à ce que voient les clients ── */}
       {showPreview && profile && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 400, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-          <div style={{ background: "#EEEEF2", borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 500, maxHeight: "82vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            {/* Header */}
-            <div style={{ background: G.blanc, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${G.gris}`, flexShrink: 0 }}>
-              <div style={{ fontWeight: 700, fontSize: "0.92rem", color: G.brun }}>Aperçu de mon profil</div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <div style={{ display: "flex", background: G.gris, borderRadius: 50, padding: 3, gap: 2 }}>
-                  {(["card","list"] as const).map(m => (
-                    <div key={m} onClick={() => setPreviewMode(m)} style={{ padding: "4px 12px", borderRadius: 50, fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", background: previewMode === m ? G.blanc : "transparent", color: previewMode === m ? G.rouge : "#888", boxShadow: previewMode === m ? "0 2px 6px rgba(0,0,0,0.1)" : "none", transition: "all 0.2s" }}>
-                      {m === "card" ? "Carte" : "Liste"}
-                    </div>
-                  ))}
-                </div>
-                <div onClick={() => setShowPreview(false)} style={{ cursor: "pointer", color: "#aaa", fontSize: "1.3rem", lineHeight: 1 }}>✕</div>
-              </div>
-            </div>
-
-            {/* Contenu aperçu */}
-            <div style={{ overflowY: "auto", flex: 1, padding: "14px 16px 8px" }}>
-              {previewMode === "card" ? (
-                <div style={{ background: G.blanc, borderRadius: 18, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", overflow: "hidden" }}>
-                  <div style={{ height: 220, background: "linear-gradient(160deg,#E8C5A0,#C47A4A)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                    {profile.photo_url
-                      ? <img src={profile.photo_url} alt={profile.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" />
-                      : <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    }
-                  </div>
-                  <div style={{ padding: "12px 14px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "1.1rem", fontWeight: 700, color: "#111", marginBottom: 6 }}>
-                      {profile.company || profile.name}
-                      {profile.is_verified && <VerifiedBadge size={16} />}
-                    </div>
-                    {profile.account_type === "pro" ? (
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
-                        {profile.metier && <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "#333" }}>{profile.metier}</span>}
-                        {profile.category && <span style={{ background: "rgba(212,168,67,0.15)", color: "#8B6914", borderRadius: 50, padding: "2px 9px", fontSize: "0.68rem", fontWeight: 700 }}>{PUB_CATS.find(c => c.id === profile.category)?.label || profile.category}</span>}
-                        <span style={{ fontSize: "0.75rem", color: "#555" }}>📍 {profile.city}{profile.zone ? " · " + profile.zone : ""}</span>
-                      </div>
-                    ) : (
-                      <div style={{ marginBottom: 4 }}><span style={{ fontSize: "0.78rem", color: "#555" }}>📍 {profile.city}</span></div>
-                    )}
-                    {profile.bio && <p style={{ fontSize: "0.82rem", color: "#555", lineHeight: 1.4 }}>{profile.bio}</p>}
-                    {profile.account_type === "pro" && (
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, paddingTop: 10, marginTop: 8, borderTop: `1px solid ${G.gris}` }}>
-                        <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#333" }}><span style={{ color: G.or }}>★</span> {profile.rating_count ? `${(profile.rating_avg || 0).toFixed(1)} (${profile.rating_count})` : "Nouveau"}</span>
-                        <span style={{ background: G.rouge, color: "#fff", borderRadius: 50, padding: "7px 16px", fontSize: "0.78rem", fontWeight: 700, opacity: 0.9 }}>Demander un devis</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div style={{ background: G.blanc, borderRadius: 14, padding: "12px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", gap: 12, alignItems: "center" }}>
-                  <div style={{ width: 56, height: 56, borderRadius: 12, overflow: "hidden", flexShrink: 0, background: "linear-gradient(160deg,#E8C5A0,#C47A4A)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {profile.photo_url
-                      ? <img src={profile.photo_url} alt={profile.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" />
-                      : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    }
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: "0.92rem", display: "flex", alignItems: "center", gap: 5 }}>
-                      {profile.company || profile.name}
-                      {profile.is_verified && <VerifiedBadge size={14} />}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2, flexWrap: "wrap" }}>
-                      {profile.account_type === "pro" ? <>
-                        {profile.metier && <span style={{ fontSize: "0.75rem", color: "#333", fontWeight: 600 }}>{profile.metier}</span>}
-                        {profile.category && <span style={{ fontSize: "0.7rem", color: "#8B6914", fontWeight: 700 }}>· {PUB_CATS.find(c => c.id === profile.category)?.label || profile.category}</span>}
-                        <span style={{ fontSize: "0.72rem", color: "#555" }}>· {profile.city}</span>
-                      </> : <span style={{ fontSize: "0.75rem", color: "#555" }}>{profile.city}</span>}
-                    </div>
-                    {profile.bio && <div style={{ fontSize: "0.75rem", color: "#555", marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{profile.bio}</div>}
-                  </div>
-                  <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(212,168,67,0.06)", border: `1.5px solid rgba(212,168,67,0.2)`, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.4, flexShrink: 0 }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(212,168,67,0.4)" stroke={G.rouge} strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                  </div>
-                </div>
-              )}
-              <p style={{ textAlign: "center", fontSize: "0.78rem", color: "#555", fontWeight: 600, marginTop: 12, marginBottom: 4, fontStyle: "italic" }}>C'est ainsi que les autres voient votre profil</p>
-            </div>
-
-            {/* Bouton modifier */}
-            <div style={{ padding: "12px 16px 24px", background: "#EEEEF2", flexShrink: 0 }}>
-              <Btn variant="primary" onClick={() => { setShowPreview(false); setEditing(true); }} style={{ width: "100%" }}>✏️ Modifier mon profil</Btn>
-            </div>
-          </div>
-        </div>
+        <ProFiche
+          auth={auth}
+          pro={profile as Profile}
+          onClose={() => setShowPreview(false)}
+          onGoMessages={() => {}}
+          onToast={(m) => setToast({ msg: m })}
+          isFav={false}
+          onToggleFav={() => {}}
+        />
       )}
       {(!isWideProfile || ["main","premium","parrainage","verification","blocklist","darkmode","rating","logout","delete"].includes(activeSection)) && <div style={{ background: G.creme, position: "relative" }}>
         {(!isWideProfile || activeSection === "main") && <svg viewBox="0 0 500 40" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: 40, marginTop: -1 }}><path d="M0,0 Q125,40 250,40 Q375,40 500,0 L500,0 L0,0 Z" style={{ fill: G.blanc }}/></svg>}
@@ -8379,31 +8301,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           </div>
         ))}
 
-        {/* Statut en ligne (confidentialité) */}
-        {(!isWideProfile || activeSection === "main") && profile && (() => {
-          const hidden = !!profile.hide_online_status;
-          return (
-            <div style={{ background: G.blanc, borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", border: `1px solid #E8E8E8` }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div style={{ width: 42, height: 42, borderRadius: "50%", background: !hidden ? "rgba(39,174,96,0.1)" : "rgba(150,150,150,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={!hidden ? "#27ae60" : "#999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill={!hidden ? "#27ae60" : "#999"}/></svg>
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>Statut en ligne</div>
-                  <div style={{ fontSize: "0.82rem", color: "#888", marginTop: 2 }}>{!hidden ? "Visible par les autres" : "Masqué — personne ne le voit"}</div>
-                </div>
-              </div>
-              <div onClick={async () => {
-                const newHidden = !hidden;
-                await sb.update(auth.token, "profiles", auth.userId, { hide_online_status: newHidden });
-                setProfile(p => p ? { ...p, hide_online_status: newHidden } : null);
-                setToast({ msg: newHidden ? "Statut en ligne masqué 🔒" : "Statut en ligne visible ✅" });
-              }} style={{ width: 52, height: 28, borderRadius: 50, background: !hidden ? "#27ae60" : G.gris, cursor: "pointer", position: "relative", transition: "background 0.3s", flexShrink: 0 }}>
-                <div style={{ position: "absolute", top: 3, left: !hidden ? 27 : 3, width: 22, height: 22, borderRadius: "50%", background: G.blanc, boxShadow: "0 2px 6px rgba(0,0,0,0.2)", transition: "left 0.3s" }} />
-              </div>
-            </div>
-          );
-        })()}
+        {/* Statut en ligne : toujours visible sur un site pro — le contrôle utilisateur a été retiré volontairement. */}
 
 
         {/* Assistant flottant (chatbot) — activable/désactivable par l'utilisateur */}
