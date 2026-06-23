@@ -157,6 +157,12 @@ const LIFETIME_PREMIUM_UNTIL = "2099-12-31T23:59:59.000Z";
 // MODE LANCEMENT : quand true, l'app est 100% gratuite — aucun verrou de paiement, toute l'UI liée au paiement disparaît.
 // Indépendant des autres réglages. Piloté par app_settings.free_launch_mode.
 let FREE_LAUNCH_MODE = false;
+// Quand true, les comptes CLIENT peuvent partager/demander des coordonnées dans le chat sans Premium
+// (le numéro du pro est de toute façon public sur sa fiche). N'affecte pas les comptes pro. Piloté par app_settings.client_contact_free.
+let CLIENT_CONTACT_FREE = false;
+// Quand true, un compte PRO doit être Premium pour contacter un client OU lui répondre.
+// Activé par défaut (c'est la règle voulue). Piloté par app_settings.pro_premium_for_client.
+let PRO_PREMIUM_FOR_CLIENT = true;
 // Premium « effectif » : vrai si l'utilisateur a réellement payé OU si le mode lancement gratuit est actif.
 const effectivePremium = (raw: boolean | null | undefined): boolean => !!raw || FREE_LAUNCH_MODE;
 let PREMIUM_30_DAYS_MS = 31 * 24 * 60 * 60 * 1000; // valeur par défaut, écrasée par app_settings
@@ -228,13 +234,15 @@ function formatWhatsApp(num: string): string {
 // Déduplique une liste de matchs par couple (paire non ordonnée), en gardant le plus récent (created_at).
 
 // Charger les settings dynamiques depuis Supabase au démarrage
-fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(limit_likes_free,limit_status_boosts,premium_duration_days,premium_price_fcfa,premium_price_week_fcfa,premium_price_2month_fcfa,premium_days_week,premium_days_2month,premium_price_eur,eur_to_fcfa_rate,likes_notification_delay_hours,maintenance_mode,maintenance_message,poll_badges_ms,poll_admin_badge_ms,poll_stats_ms,poll_broadcast_ms,poll_support_ms,pay_mtn_enabled,pay_airtel_enabled,pay_cb_enabled,feature_statuses,feature_gift_premium,feature_assistant,custom_banned_words,contact_banned_words,pay_mtn_number,pay_mtn_responsable,pay_airtel_number,pay_airtel_responsable,contact_email,contact_whatsapp,contact_address,social_facebook,social_instagram,social_tiktok,social_youtube,landing_members_count,landing_title_start,landing_title_highlight,landing_title_end,landing_slogan,premium_stat_couples,premium_stat_members,landing_stat_members,landing_stat_cities,auto_mod_contact_reply,free_launch_mode)&select=key,value`, {
+fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(limit_likes_free,limit_status_boosts,premium_duration_days,premium_price_fcfa,premium_price_week_fcfa,premium_price_2month_fcfa,premium_days_week,premium_days_2month,premium_price_eur,eur_to_fcfa_rate,likes_notification_delay_hours,maintenance_mode,maintenance_message,poll_badges_ms,poll_admin_badge_ms,poll_stats_ms,poll_broadcast_ms,poll_support_ms,pay_mtn_enabled,pay_airtel_enabled,pay_cb_enabled,feature_statuses,feature_assistant,custom_banned_words,contact_banned_words,pay_mtn_number,pay_mtn_responsable,pay_airtel_number,pay_airtel_responsable,contact_email,contact_whatsapp,contact_address,social_facebook,social_instagram,social_tiktok,social_youtube,landing_members_count,landing_title_start,landing_title_highlight,landing_title_end,landing_slogan,premium_stat_couples,premium_stat_members,landing_stat_members,landing_stat_cities,auto_mod_contact_reply,free_launch_mode,client_contact_free,pro_premium_for_client)&select=key,value`, {
   headers: { "apikey": SUPABASE_KEY },
 }).then(r => r.json()).then((data: { key: string; value: string }[]) => {
   if (!Array.isArray(data)) return;
   const map: Record<string, string> = {};
   data.forEach(d => { map[d.key] = d.value; });
   if (map["free_launch_mode"] !== undefined) FREE_LAUNCH_MODE = map["free_launch_mode"] === "true";
+  if (map["client_contact_free"] !== undefined) CLIENT_CONTACT_FREE = map["client_contact_free"] === "true";
+  if (map["pro_premium_for_client"] !== undefined) PRO_PREMIUM_FOR_CLIENT = map["pro_premium_for_client"] === "true";
   if (map["pay_mtn_enabled"] !== undefined) PAY_MTN_ENABLED = map["pay_mtn_enabled"] !== "false";
   if (map["pay_airtel_enabled"] !== undefined) PAY_AIRTEL_ENABLED = map["pay_airtel_enabled"] !== "false";
   if (map["pay_cb_enabled"] !== undefined) PAY_CB_ENABLED = map["pay_cb_enabled"] !== "false";
@@ -3455,7 +3463,6 @@ function AdminDesktopPage() {
     likesNotifDelayHours: "24",
     premiumDurationDays: "31", premiumPriceWeekFcfa: "1200", premiumPrice2monthFcfa: "5900", premiumDaysWeek: "7", premiumDays2month: "62",
     featureStatuses: "true",
-    featureGiftPremium: "true",
     featureAssistant: "true",
     maintenanceMode: "false",
     maintenanceMessage: "Moyo est en maintenance. Nous revenons très vite ! 🔧",
@@ -3463,6 +3470,8 @@ function AdminDesktopPage() {
     contactBannedWords: "",
     autoModContactReply: AUTO_MOD_CONTACT_REPLY,
     freeLaunchMode: "false",
+    clientContactFree: "false",
+    proPremiumForClient: "true",
   });
   const [editingConfig, setEditingConfig] = React.useState<string | null>(null);
   const [editingConfigValue, setEditingConfigValue] = React.useState("");
@@ -3477,12 +3486,14 @@ function AdminDesktopPage() {
       "modal_premium_default",
       "limit_likes_free","limit_status_boosts","limit_photo_size_mb",
       "premium_price_fcfa","premium_price_week_fcfa","premium_price_2month_fcfa","premium_days_week","premium_days_2month","premium_duration_days",
-      "feature_statuses","feature_gift_premium","feature_assistant",
+      "feature_statuses","feature_assistant",
       "maintenance_mode","maintenance_message",
       "custom_banned_words",
       "contact_banned_words",
       "auto_mod_contact_reply",
       "free_launch_mode",
+      "client_contact_free",
+      "pro_premium_for_client",
     ];
     fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(${allKeys.join(",")})&select=key,value`, {
       headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` },
@@ -3506,7 +3517,6 @@ function AdminDesktopPage() {
         premiumDurationDays: map["premium_duration_days"] || c.premiumDurationDays,
         likesNotifDelayHours: map["likes_notification_delay_hours"] || c.likesNotifDelayHours,
         featureStatuses: map["feature_statuses"] || c.featureStatuses,
-        featureGiftPremium: map["feature_gift_premium"] || c.featureGiftPremium,
         featureAssistant: map["feature_assistant"] || c.featureAssistant,
         maintenanceMode: map["maintenance_mode"] || c.maintenanceMode,
         maintenanceMessage: map["maintenance_message"] || c.maintenanceMessage,
@@ -3514,8 +3524,12 @@ function AdminDesktopPage() {
         contactBannedWords: map["contact_banned_words"] || c.contactBannedWords,
         autoModContactReply: map["auto_mod_contact_reply"] || c.autoModContactReply,
         freeLaunchMode: map["free_launch_mode"] || c.freeLaunchMode,
+        clientContactFree: map["client_contact_free"] || c.clientContactFree,
+        proPremiumForClient: map["pro_premium_for_client"] || c.proPremiumForClient,
       }));
       if (map["free_launch_mode"] !== undefined) FREE_LAUNCH_MODE = map["free_launch_mode"] === "true";
+      if (map["client_contact_free"] !== undefined) CLIENT_CONTACT_FREE = map["client_contact_free"] === "true";
+      if (map["pro_premium_for_client"] !== undefined) PRO_PREMIUM_FOR_CLIENT = map["pro_premium_for_client"] === "true";
     }).catch(() => {});
   }, [auth]);
 
@@ -3724,6 +3738,44 @@ function AdminDesktopPage() {
                   setAppConfig(c => ({ ...c, freeLaunchMode: v }));
                   FREE_LAUNCH_MODE = v === "true";
                   await saveSetting("free_launch_mode", v, auth.token);
+                }} />
+              </div>
+            </OffCanvasSection>}
+            {configTab === "tarifs" && <OffCanvasSection title="Contact gratuit pour les clients">
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14, padding: "14px 16px", background: appConfig.clientContactFree === "true" ? "rgba(22,163,74,0.08)" : G.creme, borderRadius: 12, border: `1.5px solid ${appConfig.clientContactFree === "true" ? "rgba(22,163,74,0.35)" : G.gris}` }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "0.9rem", fontWeight: 800, color: appConfig.clientContactFree === "true" ? G.vert : G.brun }}>
+                    {appConfig.clientContactFree === "true" ? "✅ Clients : partage de coordonnées libre" : "Clients : partage de coordonnées libre"}
+                  </div>
+                  <div style={{ fontSize: "0.76rem", color: G.brunLight, marginTop: 4, lineHeight: 1.5 }}>
+                    Quand c'est activé, les comptes <b>client</b> peuvent échanger un numéro/WhatsApp dans le chat sans passer Premium (le numéro du pro est déjà public sur sa fiche). N'affecte pas les comptes pro, qui restent soumis à la règle. Indépendant des autres réglages.
+                  </div>
+                </div>
+                <SwitchBtn on={appConfig.clientContactFree === "true"} onToggle={async () => {
+                  if (!auth) return;
+                  const v = appConfig.clientContactFree !== "true" ? "true" : "false";
+                  setAppConfig(c => ({ ...c, clientContactFree: v }));
+                  CLIENT_CONTACT_FREE = v === "true";
+                  await saveSetting("client_contact_free", v, auth.token);
+                }} />
+              </div>
+            </OffCanvasSection>}
+            {configTab === "tarifs" && <OffCanvasSection title="Pro Premium pour échanger avec un client">
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14, padding: "14px 16px", background: appConfig.proPremiumForClient === "true" ? "rgba(22,163,74,0.08)" : G.creme, borderRadius: 12, border: `1.5px solid ${appConfig.proPremiumForClient === "true" ? "rgba(22,163,74,0.35)" : G.gris}` }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "0.9rem", fontWeight: 800, color: appConfig.proPremiumForClient === "true" ? G.vert : G.brun }}>
+                    {appConfig.proPremiumForClient === "true" ? "✅ Pro Premium requis pour les clients" : "Pro Premium requis pour les clients"}
+                  </div>
+                  <div style={{ fontSize: "0.76rem", color: G.brunLight, marginTop: 4, lineHeight: 1.5 }}>
+                    Quand c'est activé, un compte <b>pro</b> doit être Premium pour <b>contacter un client</b> (répondre à un besoin) <b>et pour lui répondre</b> si le client a écrit en premier. N'affecte pas les comptes client. Désactivez-le pour rendre ces échanges gratuits.
+                  </div>
+                </div>
+                <SwitchBtn on={appConfig.proPremiumForClient === "true"} onToggle={async () => {
+                  if (!auth) return;
+                  const v = appConfig.proPremiumForClient !== "true" ? "true" : "false";
+                  setAppConfig(c => ({ ...c, proPremiumForClient: v }));
+                  PRO_PREMIUM_FOR_CLIENT = v === "true";
+                  await saveSetting("pro_premium_for_client", v, auth.token);
                 }} />
               </div>
             </OffCanvasSection>}
@@ -4379,21 +4431,21 @@ function SiteInfoConfig({ auth, group }: { auth: Auth; group: "contacts" | "soci
 
 function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void }) {
   const [modalTexts, setModalTexts] = React.useState({ signupSuccess: "Ton compte est prêt ! Connecte-toi maintenant.", premiumDefault: "Passe Premium pour débloquer toutes les fonctionnalités de Moyo !" });
-  const [appConfig, setAppConfig] = React.useState({ limitLikes: "5",  limitStatusBoosts: "2", limitPhotoSizeMb: "5",  premiumPriceFcfa: "3500", premiumPriceEur: "10", eurToFcfaRate: "655.957", premiumDurationDays: "31", premiumPriceWeekFcfa: "1200", premiumPrice2monthFcfa: "5900", premiumDaysWeek: "7", premiumDays2month: "62", likesNotifDelayHours: "24", featureStatuses: "true", featureGiftPremium: "true", featureAssistant: "true", maintenanceMode: "false", maintenanceMessage: "Moyo est en maintenance. Nous revenons très vite ! 🔧", customBannedWords: "", contactBannedWords: "", autoModContactReply: AUTO_MOD_CONTACT_REPLY });
+  const [appConfig, setAppConfig] = React.useState({ limitLikes: "5",  limitStatusBoosts: "2", limitPhotoSizeMb: "5",  premiumPriceFcfa: "3500", premiumPriceEur: "10", eurToFcfaRate: "655.957", premiumDurationDays: "31", premiumPriceWeekFcfa: "1200", premiumPrice2monthFcfa: "5900", premiumDaysWeek: "7", premiumDays2month: "62", likesNotifDelayHours: "24", featureStatuses: "true", featureAssistant: "true", maintenanceMode: "false", maintenanceMessage: "Moyo est en maintenance. Nous revenons très vite ! 🔧", customBannedWords: "", contactBannedWords: "", autoModContactReply: AUTO_MOD_CONTACT_REPLY });
   const [editingModal, setEditingModal] = React.useState<string | null>(null);
   const [editingValue, setEditingValue] = React.useState("");
   const [editingConfig, setEditingConfig] = React.useState<string | null>(null);
   const [editingConfigValue, setEditingConfigValue] = React.useState("");
 
   React.useEffect(() => {
-    const allKeys = ["modal_signup_success","modal_premium_default","limit_likes_free","limit_status_boosts","limit_photo_size_mb","premium_price_fcfa","premium_price_week_fcfa","premium_price_2month_fcfa","premium_days_week","premium_days_2month","premium_duration_days","feature_statuses","feature_gift_premium","feature_assistant","maintenance_mode","maintenance_message","custom_banned_words","contact_banned_words","auto_mod_contact_reply","poll_badges_ms","poll_admin_badge_ms","poll_stats_ms","poll_broadcast_ms","poll_support_ms"];
+    const allKeys = ["modal_signup_success","modal_premium_default","limit_likes_free","limit_status_boosts","limit_photo_size_mb","premium_price_fcfa","premium_price_week_fcfa","premium_price_2month_fcfa","premium_days_week","premium_days_2month","premium_duration_days","feature_statuses","feature_assistant","maintenance_mode","maintenance_message","custom_banned_words","contact_banned_words","auto_mod_contact_reply","poll_badges_ms","poll_admin_badge_ms","poll_stats_ms","poll_broadcast_ms","poll_support_ms"];
     fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(${allKeys.join(",")})&select=key,value`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` } })
       .then(r => r.json()).then(data => {
         if (!Array.isArray(data)) return;
         const map: Record<string, string> = {};
         data.forEach((d: { key: string; value: string }) => { map[d.key] = d.value; });
         setModalTexts(t => ({ signupSuccess: map["modal_signup_success"] || t.signupSuccess, premiumDefault: map["modal_premium_default"] || t.premiumDefault }));
-        setAppConfig(c => ({ limitLikes: map["limit_likes_free"] || c.limitLikes,  limitStatusBoosts: map["limit_status_boosts"] || c.limitStatusBoosts, limitPhotoSizeMb: map["limit_photo_size_mb"] || c.limitPhotoSizeMb,  premiumPriceFcfa: map["premium_price_fcfa"] || c.premiumPriceFcfa, premiumPriceWeekFcfa: map["premium_price_week_fcfa"] || c.premiumPriceWeekFcfa, premiumPrice2monthFcfa: map["premium_price_2month_fcfa"] || c.premiumPrice2monthFcfa, premiumDaysWeek: map["premium_days_week"] || c.premiumDaysWeek, premiumDays2month: map["premium_days_2month"] || c.premiumDays2month, premiumPriceEur: map["premium_price_eur"] || c.premiumPriceEur, eurToFcfaRate: map["eur_to_fcfa_rate"] || c.eurToFcfaRate, premiumDurationDays: map["premium_duration_days"] || c.premiumDurationDays, likesNotifDelayHours: map["likes_notification_delay_hours"] || c.likesNotifDelayHours, featureStatuses: map["feature_statuses"] || c.featureStatuses, featureGiftPremium: map["feature_gift_premium"] || c.featureGiftPremium, featureAssistant: map["feature_assistant"] || c.featureAssistant, maintenanceMode: map["maintenance_mode"] || c.maintenanceMode, maintenanceMessage: map["maintenance_message"] || c.maintenanceMessage, customBannedWords: map["custom_banned_words"] || c.customBannedWords, contactBannedWords: map["contact_banned_words"] || c.contactBannedWords, autoModContactReply: map["auto_mod_contact_reply"] || c.autoModContactReply }));
+        setAppConfig(c => ({ limitLikes: map["limit_likes_free"] || c.limitLikes,  limitStatusBoosts: map["limit_status_boosts"] || c.limitStatusBoosts, limitPhotoSizeMb: map["limit_photo_size_mb"] || c.limitPhotoSizeMb,  premiumPriceFcfa: map["premium_price_fcfa"] || c.premiumPriceFcfa, premiumPriceWeekFcfa: map["premium_price_week_fcfa"] || c.premiumPriceWeekFcfa, premiumPrice2monthFcfa: map["premium_price_2month_fcfa"] || c.premiumPrice2monthFcfa, premiumDaysWeek: map["premium_days_week"] || c.premiumDaysWeek, premiumDays2month: map["premium_days_2month"] || c.premiumDays2month, premiumPriceEur: map["premium_price_eur"] || c.premiumPriceEur, eurToFcfaRate: map["eur_to_fcfa_rate"] || c.eurToFcfaRate, premiumDurationDays: map["premium_duration_days"] || c.premiumDurationDays, likesNotifDelayHours: map["likes_notification_delay_hours"] || c.likesNotifDelayHours, featureStatuses: map["feature_statuses"] || c.featureStatuses, featureAssistant: map["feature_assistant"] || c.featureAssistant, maintenanceMode: map["maintenance_mode"] || c.maintenanceMode, maintenanceMessage: map["maintenance_message"] || c.maintenanceMessage, customBannedWords: map["custom_banned_words"] || c.customBannedWords, contactBannedWords: map["contact_banned_words"] || c.contactBannedWords, autoModContactReply: map["auto_mod_contact_reply"] || c.autoModContactReply }));
         if (map["custom_banned_words"] !== undefined) buildCustomBannedRegex(map["custom_banned_words"]);
         if (map["contact_banned_words"] !== undefined) buildContactBannedRegex(map["contact_banned_words"]);
       }).catch(() => {});
@@ -4664,7 +4716,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
         ] },
     { title: "Messagerie", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, items: [
         "Lorsqu'un client et un professionnel entrent en contact, une conversation s'ouvre dans l'onglet Messages.",
-        "Les échanges sont gratuits et illimités. Chaque conversation affiche son propre badge de messages non lus.",
+        "Les conversations sont illimitées ; chaque conversation affiche son propre badge de messages non lus.",
         "Répondre, modifier (dans les 15 minutes) ou supprimer un message : faites un appui long sur le message concerné.",
         "Un point vert indique qu'un membre est en ligne. Avec Premium : envoi de photos et confirmations de lecture (coches bleues = lu).",
         "Appuyez sur l'avatar en haut de la conversation pour ouvrir la fiche complète de votre interlocuteur.",
@@ -4683,17 +4735,25 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
         "Demandez la vérification de votre compte pour obtenir le badge bleu, gage de confiance pour vos clients.",
         "La vérification est gratuite et traitée sous 24h via WhatsApp.",
       ] }] : []),
-    { title: "Premium - " + PREMIUM_PRICE_FCFA.toLocaleString() + " FCFA / mois", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, items: isProAccount ? [
-        "Premium débloque : messages illimités, envoi de photos, confirmations de lecture et la mise en avant de vos offres.",
-        "Mettre une offre en avant la place en tête de l'annuaire avec un repère doré, pour gagner en visibilité auprès des clients.",
-        "Paiement via MTN Mobile Money ou Airtel Money (Congo), ou par carte Visa/Mastercard (diaspora).",
-        "Comment payer : appuyez sur « Passer Premium » → choisissez votre moyen de paiement → suivez les instructions → entrez le numéro de transaction reçu par SMS → « J'ai payé ». L'activation se fait sous 15 minutes.",
+    (FREE_LAUNCH_MODE ? { title: "Tout est gratuit 🎉", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>, items: isProAccount ? [
+        "Pour le lancement, Moyo Business est 100% gratuit : toutes les fonctionnalités sont débloquées pour tout le monde, sans abonnement ni paiement.",
+        "Contactez les clients, répondez à leurs demandes, partagez vos coordonnées dans le chat et envoyez vos photos — tout est offert pendant cette période.",
+        "Profitez-en pour publier vos services et soigner votre fiche : vous prenez de l'avance avant l'ouverture des offres payantes.",
       ] : [
-        "Premium débloque : messages illimités, envoi de photos, confirmations de lecture et la mise en avant de vos besoins.",
-        "Mettre un besoin en avant le place en tête de l'annuaire avec un repère doré, pour attirer plus vite les bons professionnels.",
-        "Paiement via MTN Mobile Money ou Airtel Money (Congo), ou par carte Visa/Mastercard (diaspora).",
-        "Comment payer : appuyez sur « Passer Premium » → choisissez votre moyen de paiement → suivez les instructions → entrez le numéro de transaction reçu par SMS → « J'ai payé ». L'activation se fait sous 15 minutes.",
-      ] },
+        "Pour le lancement, Moyo Business est 100% gratuit : toutes les fonctionnalités sont débloquées pour tout le monde, sans abonnement ni paiement.",
+        "Contactez les professionnels, partagez vos coordonnées dans le chat et envoyez des photos — tout est offert pendant cette période.",
+        "Profitez-en pour publier vos besoins et trouver les bons professionnels près de chez vous.",
+      ] } : { title: "Premium & mise en avant", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, items: isProAccount ? [
+        "Premium est l'abonnement des professionnels. Il vous permet de contacter les clients et de répondre à leurs demandes, d'échanger vos coordonnées dans le chat, d'envoyer des photos de vos réalisations et d'afficher les confirmations de lecture.",
+        "La mise en avant est différente du Premium : c'est un achat ponctuel. Boostez une annonce pour la placer en tête de l'annuaire, ou sponsorisez votre fiche pour apparaître en tête du répertoire — vous choisissez la durée et payez une seule fois.",
+        "Tous les paiements se font via MTN Mobile Money ou Airtel Money (Congo), ou par carte Visa/Mastercard (diaspora).",
+        "Comment payer : ouvrez l'offre → choisissez votre moyen de paiement → envoyez le montant au numéro indiqué → entrez la référence de transaction reçue par SMS → « J'ai payé ». L'activation se fait après vérification, généralement sous 15 minutes.",
+      ] : [
+        "Avec Premium, vous pouvez échanger vos coordonnées dans le chat, envoyer des photos et afficher les confirmations de lecture.",
+        "La mise en avant est différente du Premium : c'est un achat ponctuel. Boostez votre besoin pour le placer en tête de l'annuaire et attirer plus vite les bons professionnels — vous choisissez la durée et payez une seule fois.",
+        "Tous les paiements se font via MTN Mobile Money ou Airtel Money (Congo), ou par carte Visa/Mastercard (diaspora).",
+        "Comment payer : ouvrez l'offre → choisissez votre moyen de paiement → envoyez le montant au numéro indiqué → entrez la référence de transaction reçue par SMS → « J'ai payé ». L'activation se fait après vérification, généralement sous 15 minutes.",
+      ] }),
     { title: "Favoris", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>, items: [
         "L'onglet Favoris regroupe les professionnels que vous avez enregistrés.",
         "Ajoutez ou retirez un favori depuis une fiche, pour retrouver rapidement les professionnels qui vous intéressent.",
@@ -4916,8 +4976,8 @@ const premiumConversionSlides = [
   },
   {
     id: 2,
-    title: "Voir qui s'intéresse à vous",
-    description: "Gagne du temps en voyant les personnes déjà intéressées par ton profil.",
+    title: "Contactez les clients",
+    description: "Avec Premium, échangez avec les clients qui publient des besoins et décrochez des missions.",
     buttonText: "Passer à Premium",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -5220,7 +5280,7 @@ const ReplyBanner = React.memo(function ReplyBanner({ replyTo, partnerName, myId
 
 type ReportRowLike = { id?: string; reason: string; reporter_id: string; reported_id: string | null; status?: string; created_at?: string };
 
-function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConvOpen }: { auth: Auth; onUnreadCount: (n: number) => void; onShowPremium: (r: string) => void; initialPartnerId?: string | null; onConvOpen?: (open: boolean) => void }) {
+function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPartnerId, onConvOpen }: { auth: Auth; accountType?: string; onUnreadCount: (n: number) => void; onShowPremium: (r: string) => void; initialPartnerId?: string | null; onConvOpen?: (open: boolean) => void }) {
   const [convs, setConvs] = useState<Match[]>([]);
   const [open, setOpen] = useState<Match | null>(null);
   useEffect(() => { onConvOpen?.(open !== null); }, [open]);
@@ -6001,6 +6061,11 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
 
   const send = useCallback(async () => {
     if (!text.trim() || !open) return;
+    // Un pro doit être Premium pour échanger avec un client (initiation ou réponse).
+    if (PRO_PREMIUM_FOR_CLIENT && accountType === "pro" && open.partner?.account_type === "client" && !auth.isPremium) {
+      onShowPremium("Passez Premium pour échanger avec les clients et décrocher des missions.");
+      return;
+    }
     try { (navigator as any).vibrate?.(12); } catch {}
     // ── Mode édition : on met à jour le message existant au lieu d'en créer un nouveau ──
     if (editingMsg && editingMsg.id) {
@@ -6044,7 +6109,7 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
       }
       return;
     }
-    if (!auth.isPremium && hasContactInfo(text)) {
+    if (!auth.isPremium && hasContactInfo(text) && !(CLIENT_CONTACT_FREE && accountType === "client")) {
       // ── Signalement automatique : tentative de partage/demande de contact par un compte gratuit ──
       try {
         await sb.insert(auth.token, "reports", {
@@ -6075,7 +6140,7 @@ function Messages({ auth, onUnreadCount, onShowPremium, initialPartnerId, onConv
       setMsgs(m => [...m, row]); setMsgCount(c => c + 1); setText(""); setReplyTo(null);
     }
     // Tout autre échec (réseau, etc.) : on ne fait rien, le champ reste rempli pour réessayer
-  }, [auth, open, text, replyTo, msgCount, onShowPremium, editingMsg]);
+  }, [auth, open, text, replyTo, msgCount, onShowPremium, editingMsg, accountType]);
 
   // Étape 1 : sélection d'une photo → ouvre l'écran d'aperçu (aucun envoi immédiat)
   const onPickImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -8152,18 +8217,18 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           const minPremiumPrice = premiumPrices.length ? Math.min(...premiumPrices) : PREMIUM_PRICE_FCFA;
           return (
             <div onClick={() => onShowPremium("")} style={{ background: `linear-gradient(135deg,${G.rouge} 0%,${G.rougeDark} 100%)`, borderRadius: 18, padding: "18px 20px", cursor: "pointer", boxShadow: "0 8px 28px rgba(212,168,67,0.35)", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "transform 0.15s, box-shadow 0.15s" }}>
-              <div>
+              <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                   {isExpired
                     ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ stroke: "#fff" }} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     : <svg width="16" height="16" viewBox="0 0 24 24" fill={G.or} stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   }
                   <span style={{ fontSize: "1rem", fontWeight: 700, color: "#fff" }}>
-                    {isExpired ? "Votre Premium a expiré - Renouveler" : "Passer à Moyo Premium"}
+                    {isExpired ? "Votre Premium a expiré - Renouveler" : "Passez à Premium"}
                   </span>
                 </div>
                 <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.75)" }}>
-                  {isExpired ? "Réabonnez-vous pour retrouver tous vos avantages" : "Messages illimités · Contacts illimités · Voir qui s'intéresse à vous"}
+                  {isExpired ? "Réabonnez-vous pour retrouver tous vos avantages" : "Contactez les clients · Partagez vos coordonnées · Envoyez des photos"}
                 </div>
               </div>
               <div style={{ marginLeft: 12, flexShrink: 0, textAlign: "right" }}>
@@ -8762,7 +8827,7 @@ function UserWarningModal({ warning, onAcknowledge }: {
   );
 }
 
-type PaymentRequest = { id: string; user_id: string; operator: string; tx_ref: string; amount: number; status: string; created_at: string; approved_at?: string; gift_for?: string; gift_for_name?: string; archived?: boolean; currency?: string; profile?: { name: string; photo_url?: string | null; gender?: string } };
+type PaymentRequest = { id: string; user_id: string; operator: string; tx_ref: string; amount: number; status: string; created_at: string; approved_at?: string; gift_for?: string; gift_for_name?: string; archived?: boolean; currency?: string; kind?: string | null; target_id?: string | null; duration_days?: number | null; profile?: { name: string; photo_url?: string | null; gender?: string } };
 function getPremiumCountdown(approvedAt?: string, amount?: number): { label: string; color: string; expired: boolean } {
   if (!approvedAt) return { label: "", color: "#888", expired: false };
   const ms = typeof amount === "number" ? premiumMsForAmount(amount) : PREMIUM_30_DAYS_MS;
@@ -8797,6 +8862,8 @@ function PaymentCard({ p, isPending, isApproved, isRejected, onActivate, onRejec
               }
               {p.operator === "Carte" || p.operator === "Stripe" ? "Carte bancaire" : p.operator}
               {p.gift_for && <span style={{ background: "rgba(212,168,67,0.15)", color: "#B8860B", borderRadius: 50, padding: "2px 8px", fontSize: "0.65rem", fontWeight: 700 }}>Cadeau pour {p.gift_for_name || "un contact"}</span>}
+              {p.kind === "boost" && <span style={{ background: "rgba(212,168,67,0.15)", color: "#8B6914", borderRadius: 50, padding: "2px 8px", fontSize: "0.65rem", fontWeight: 800 }}>🚀 Mise en avant {p.duration_days ? `${p.duration_days} j` : ""}</span>}
+              {p.kind === "sponsor" && <span style={{ background: "rgba(212,168,67,0.15)", color: "#8B6914", borderRadius: 50, padding: "2px 8px", fontSize: "0.65rem", fontWeight: 800 }}>★ Sponsor fiche {p.duration_days ? `${p.duration_days} j` : ""}</span>}
             </div>
             <div style={{ fontSize: "0.7rem", color: "#888" }}>{new Date(p.created_at).toLocaleString("fr-FR")} · {formatMoney(p.amount, paymentCurrency(p))}</div>
             <div style={{ fontSize: "0.62rem", color: "#bbb", fontFamily: "monospace", marginTop: 2 }}>{p.user_id}</div>
@@ -9446,7 +9513,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
   const loadPayments = async () => {
     setPaymentsLoading(true);
     try {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/payment_requests?select=id,user_id,operator,tx_ref,amount,status,created_at,approved_at,gift_for,gift_for_name,archived,currency&status=neq.deleted&archived=eq.false&order=created_at.desc&limit=100`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` } });
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/payment_requests?select=id,user_id,operator,tx_ref,amount,status,created_at,approved_at,gift_for,gift_for_name,archived,currency,kind,target_id,duration_days&status=neq.deleted&archived=eq.false&order=created_at.desc&limit=100`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` } });
       const data = await r.json().catch(() => []);
       if (Array.isArray(data)) {
         setPayments(data);
@@ -9456,6 +9523,23 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     setPaymentsLoading(false);
   };
   const activatePayment = async (p: PaymentRequest) => {
+    // ── Mise en avant (annonce) ou sponsorisation (fiche) : on accorde l'avantage ciblé, pas le Premium ──
+    if (p.kind === "boost" || p.kind === "sponsor") {
+      const days = p.duration_days || 1;
+      const until = new Date(Date.now() + days * 86400000).toISOString();
+      try {
+        if (p.kind === "boost" && p.target_id) {
+          await fetch(`${SUPABASE_URL}/rest/v1/publications?id=eq.${p.target_id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` }, body: JSON.stringify({ is_boosted: true, boosted_until: until }) });
+        } else if (p.kind === "sponsor" && p.target_id) {
+          await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${p.target_id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` }, body: JSON.stringify({ is_sponsored: true, sponsored_until: until }) });
+        }
+        await fetch(`${SUPABASE_URL}/rest/v1/payment_requests?id=eq.${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` }, body: JSON.stringify({ status: "approved", approved_at: new Date().toISOString() }) });
+        logAdminAction(auth.token, auth.userId, auth.name, `${p.kind === "boost" ? "Mise en avant annonce" : "Sponsorisation fiche"} activée (${days} j) - réf: ${p.tx_ref}`, p.user_id);
+        await fetch(`${SUPABASE_URL}/rest/v1/user_warnings`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=representation" }, body: JSON.stringify({ user_id: p.user_id, admin_id: auth.userId, reason: p.kind === "boost" ? `🚀 Votre annonce est maintenant mise en avant pendant ${days} jour${days > 1 ? "s" : ""} ! Elle apparaît en tête des résultats.` : `★ Votre fiche est maintenant sponsorisée pendant ${days} jour${days > 1 ? "s" : ""} ! Elle apparaît en tête du répertoire.`, warning_number: 0, acknowledged: false }) });
+      } catch {}
+      loadPayments();
+      return;
+    }
     const premiumUntil = new Date(Date.now() + premiumMsForAmount(p.amount)).toISOString();
     const targetId = p.gift_for || p.user_id;
     await adminAction(targetId, { is_premium: true, premium_until: premiumUntil }, `Premium activé.`);
@@ -15954,21 +16038,40 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
   ];
   const [tier, setTier] = useState(TIERS[0]);
   const [operator, setOperator] = useState<"MTN" | "Airtel">("MTN");
+  const [txRef, setTxRef] = useState("");
   const [paying, setPaying] = useState(false);
+  const [sent, setSent] = useState(false);
+  const payNumber = operator === "MTN" ? PAY_MTN_NUMBER : PAY_AIRTEL_NUMBER;
+  const payResp = operator === "MTN" ? PAY_MTN_RESPONSABLE : PAY_AIRTEL_RESPONSABLE;
 
-  async function pay() {
+  async function submit() {
+    if (!txRef.trim()) return;
     setPaying(true);
     try {
+      // On crée UNIQUEMENT une demande en attente. La mise en avant n'est accordée qu'après validation admin du paiement.
       await sb.insert(auth.token, "payment_requests", {
         user_id: auth.userId, operator, amount: tier.price, currency: "XAF",
-        tx_ref: `BOOST-${(pub.id || "").slice(0, 8)}-${Date.now()}`, status: "pending",
+        tx_ref: txRef.trim(), status: "pending",
+        kind: "boost", target_id: pub.id, duration_days: tier.days,
       }, auth.refreshToken);
-      // ⚠️ EN PRODUCTION : activer is_boosted côté serveur (edge function) après confirmation du paiement.
-      const until = new Date(Date.now() + tier.days * 86400000).toISOString();
-      await sb.update(auth.token, "publications", pub.id, { is_boosted: true, boosted_until: until }, auth.refreshToken);
-      onBoosted();
+      setSent(true);
     } catch { setPaying(false); }
   }
+
+  if (sent) return (
+    <Sheet title="Demande envoyée" onClose={onClose}>
+      <div style={{ textAlign: "center", padding: "10px 4px 6px" }}>
+        <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(39,174,96,0.12)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>Paiement en cours de vérification</div>
+        <div style={{ fontSize: "0.86rem", color: "#666", lineHeight: 1.55, marginBottom: 20 }}>
+          Dès que votre paiement de <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> est confirmé, votre annonce passera en tête des résultats pendant <b>{tier.days} jour{tier.days > 1 ? "s" : ""}</b>. Activation généralement sous 15 minutes.
+        </div>
+        <Btn variant="gold" onClick={onClose} style={{ width: "100%" }}>Terminé</Btn>
+      </div>
+    </Sheet>
+  );
 
   return (
     <Sheet title="Mettre en avant" onClose={onClose}>
@@ -15989,14 +16092,96 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
           </button>
         ))}
       </div>
-      <Btn variant="gold" onClick={pay} loading={paying} style={{ width: "100%", marginTop: 8 }}>Payer {tier.price.toLocaleString("fr-FR")} FCFA avec Mobile Money</Btn>
+      <div style={{ background: G.creme, border: `1px solid ${G.gris}`, borderRadius: 12, padding: "13px 15px", margin: "12px 0", fontSize: "0.84rem", color: "#444", lineHeight: 1.6 }}>
+        Envoyez <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> au numéro <b>{operator === "MTN" ? "MTN MoMo" : "Airtel Money"}</b> :
+        <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, margin: "4px 0 2px", letterSpacing: 0.5 }}>{payNumber}</div>
+        {payResp && <div style={{ fontSize: "0.76rem", color: "#888" }}>Au nom de : {payResp}</div>}
+      </div>
+      <div style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, marginBottom: 6 }}>Référence de la transaction reçue par SMS</div>
+      <input value={txRef} onChange={e => setTxRef(e.target.value)} placeholder="Ex : PP260523.2232.A52074" style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${txRef ? G.or : G.gris}`, borderRadius: 12, padding: "13px 14px", fontSize: "0.9rem", fontWeight: 600, fontFamily: "inherit", outline: "none", marginBottom: 14 }} />
+      <Btn variant="gold" onClick={submit} disabled={!txRef.trim()} loading={paying} style={{ width: "100%" }}>J'ai payé — envoyer la demande</Btn>
+      <div style={{ fontSize: "0.74rem", color: "#999", textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>Votre annonce sera mise en avant après vérification du paiement (généralement sous 15 min).</div>
+    </Sheet>
+  );
+}
+
+function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: string; onClose: () => void }) {
+  const TIERS = [
+    { price: 2000, days: 7, label: "Sponsor 7 jours", sub: "En tête du répertoire 1 semaine" },
+    { price: 5000, days: 30, label: "Sponsor 30 jours", sub: "Le plus choisi" },
+    { price: 9000, days: 62, label: "Sponsor 2 mois", sub: "Visibilité maximale" },
+  ];
+  const [tier, setTier] = useState(TIERS[1]);
+  const [operator, setOperator] = useState<"MTN" | "Airtel">("MTN");
+  const [txRef, setTxRef] = useState("");
+  const [paying, setPaying] = useState(false);
+  const [sent, setSent] = useState(false);
+  const payNumber = operator === "MTN" ? PAY_MTN_NUMBER : PAY_AIRTEL_NUMBER;
+  const payResp = operator === "MTN" ? PAY_MTN_RESPONSABLE : PAY_AIRTEL_RESPONSABLE;
+
+  async function submit() {
+    if (!txRef.trim()) return;
+    setPaying(true);
+    try {
+      await sb.insert(auth.token, "payment_requests", {
+        user_id: auth.userId, operator, amount: tier.price, currency: "XAF",
+        tx_ref: txRef.trim(), status: "pending",
+        kind: "sponsor", target_id: profileId, duration_days: tier.days,
+      }, auth.refreshToken);
+      setSent(true);
+    } catch { setPaying(false); }
+  }
+
+  if (sent) return (
+    <Sheet title="Demande envoyée" onClose={onClose}>
+      <div style={{ textAlign: "center", padding: "10px 4px 6px" }}>
+        <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(39,174,96,0.12)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>Paiement en cours de vérification</div>
+        <div style={{ fontSize: "0.86rem", color: "#666", lineHeight: 1.55, marginBottom: 20 }}>
+          Dès que votre paiement de <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> est confirmé, votre fiche sera sponsorisée et apparaîtra en tête du répertoire pendant <b>{tier.days} jours</b>. Activation généralement sous 15 minutes.
+        </div>
+        <Btn variant="gold" onClick={onClose} style={{ width: "100%" }}>Terminé</Btn>
+      </div>
+    </Sheet>
+  );
+
+  return (
+    <Sheet title="Sponsoriser ma fiche" onClose={onClose}>
+      <div style={{ background: "rgba(212,168,67,0.1)", border: `1px solid ${G.or}`, borderRadius: 12, padding: 14, marginBottom: 18, fontSize: 13, color: "#6b5414", lineHeight: 1.5 }}>
+        ★ Votre fiche passe <b>en tête du répertoire</b> et reçoit le badge « Sponsorisé », pour beaucoup plus de visibilité auprès des clients.
+      </div>
+      {TIERS.map(t => (
+        <div key={t.price} onClick={() => setTier(t)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: `1.5px solid ${tier.price === t.price ? G.or : G.gris}`, background: tier.price === t.price ? "rgba(212,168,67,0.06)" : G.blanc, borderRadius: 13, padding: "14px 15px", cursor: "pointer", marginBottom: 11 }}>
+          <div><b style={{ fontSize: 15 }}>{t.label}</b><br /><small style={{ color: "#999" }}>{t.sub}</small></div>
+          <b style={{ fontSize: 16, color: tier.price === t.price ? "#8B6914" : "#111" }}>{t.price.toLocaleString("fr-FR")} FCFA</b>
+        </div>
+      ))}
+      <div style={{ display: "flex", gap: 9, margin: "16px 0 6px" }}>
+        {(["MTN", "Airtel"] as const).map(o => (
+          <button key={o} onClick={() => setOperator(o)} style={{ flex: 1, border: `1.5px solid ${operator === o ? "#111" : G.gris}`, background: G.blanc, borderRadius: 10, padding: 11, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+            <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", marginRight: 5, background: o === "MTN" ? "#FFCC00" : "#E30613" }} />
+            {o === "MTN" ? "MTN MoMo" : "Airtel Money"}
+          </button>
+        ))}
+      </div>
+      <div style={{ background: G.creme, border: `1px solid ${G.gris}`, borderRadius: 12, padding: "13px 15px", margin: "12px 0", fontSize: "0.84rem", color: "#444", lineHeight: 1.6 }}>
+        Envoyez <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> au numéro <b>{operator === "MTN" ? "MTN MoMo" : "Airtel Money"}</b> :
+        <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, margin: "4px 0 2px", letterSpacing: 0.5 }}>{payNumber}</div>
+        {payResp && <div style={{ fontSize: "0.76rem", color: "#888" }}>Au nom de : {payResp}</div>}
+      </div>
+      <div style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, marginBottom: 6 }}>Référence de la transaction reçue par SMS</div>
+      <input value={txRef} onChange={e => setTxRef(e.target.value)} placeholder="Ex : PP260523.2232.A52074" style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${txRef ? G.or : G.gris}`, borderRadius: 12, padding: "13px 14px", fontSize: "0.9rem", fontWeight: 600, fontFamily: "inherit", outline: "none", marginBottom: 14 }} />
+      <Btn variant="gold" onClick={submit} disabled={!txRef.trim()} loading={paying} style={{ width: "100%" }}>J'ai payé — envoyer la demande</Btn>
+      <div style={{ fontSize: "0.74rem", color: "#999", textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>Votre fiche sera sponsorisée après vérification du paiement (généralement sous 15 min).</div>
     </Sheet>
   );
 }
 
 const SEARCH_HINTS = BUSINESS_METIERS_FLAT.slice(0, 24);
 
-function Publications({ auth, accountType, onGoMessages, publishNonce }: { auth: Auth; accountType?: string; onGoMessages: (partnerId: string) => void; publishNonce?: number }) {
+function Publications({ auth, accountType, onGoMessages, onShowPremium, publishNonce }: { auth: Auth; accountType?: string; onGoMessages: (partnerId: string) => void; onShowPremium?: (r: string) => void; publishNonce?: number }) {
   const type: "cherche" | "propose" = accountType === "client" ? "propose" : "cherche";
   const [cat, setCat] = useState("all");
   const [metier, setMetier] = useState("");
@@ -16057,6 +16242,11 @@ function Publications({ auth, accountType, onGoMessages, publishNonce }: { auth:
   async function contact(pub: Publication) {
     const other = pub.user_id;
     if (other === auth.userId) return;
+    // Un pro doit être Premium pour contacter un client. Une annonce de type "cherche" est un besoin posté par un client.
+    if (PRO_PREMIUM_FOR_CLIENT && accountType === "pro" && pub.type !== "propose" && !auth.isPremium) {
+      onShowPremium?.("Passez Premium pour contacter les clients et décrocher des missions.");
+      return;
+    }
     try {
       const [a, b] = await Promise.all([
         sb.query<{ id: string }>(auth.token, "matches", `?user1=eq.${auth.userId}&user2=eq.${other}&select=id&limit=1`, auth.refreshToken),
@@ -16453,6 +16643,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
   const tel = (pro.public_phone || "").replace(/[^0-9+]/g, "");
   const mine = pro.id === auth.userId;
   const isWideFiche = typeof window !== "undefined" && window.innerWidth >= 768;
+  const [sponsorOpen, setSponsorOpen] = useState(false);
 
   // Enregistre une vue de fiche (réutilise profile_views)
   useEffect(() => {
@@ -16511,6 +16702,13 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
       </div>
 
       {/* Actions */}
+      {mine && pro.account_type === "pro" && (
+        <div style={{ padding: "16px 16px 0" }}>
+          <button onClick={() => { if (!pro.is_sponsored) setSponsorOpen(true); }} disabled={!!pro.is_sponsored} style={{ width: "100%", background: pro.is_sponsored ? G.gris : `linear-gradient(135deg,${G.or},#B8860B)`, color: pro.is_sponsored ? "#888" : "#fff", border: "none", borderRadius: 12, padding: "14px", fontWeight: 800, fontSize: "0.92rem", cursor: pro.is_sponsored ? "default" : "pointer", boxShadow: pro.is_sponsored ? "none" : "0 6px 18px rgba(212,168,67,0.35)" }}>
+            {pro.is_sponsored ? "★ Fiche déjà sponsorisée ✓" : "★ Sponsoriser ma fiche (apparaître en tête)"}
+          </button>
+        </div>
+      )}
       {!mine && (
         <div style={{ padding: "16px", display: "flex", gap: 8 }}>
           <button className="moyo-btn-primary" onClick={contactPro} style={{ flex: 1, minWidth: 0, background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", boxSizing: "border-box", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>Message</button>
@@ -16518,6 +16716,8 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
           {tel && <a href={`tel:${tel}`} style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, color: "#111", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>Appeler</div></a>}
         </div>
       )}
+
+      {sponsorOpen && <SponsorModal auth={auth} profileId={pro.id} onClose={() => setSponsorOpen(false)} />}
 
       <div style={{ padding: "4px 16px 40px" }}>
         {/* Description */}
@@ -17628,10 +17828,10 @@ export default function App() {
       if (t === "visitors") { setViewsReceived(0); try { localStorage.setItem(`moyo_visitors_seen_${auth!.userId}`, new Date().toISOString()); } catch {} }
     }} unreadCount={unreadCount} notifCount={notifCount} likesReceived={likesReceived} viewsReceived={viewsReceived} auth={auth} accountType={meType} adminBadgeCount={adminBadgeCount} showAdminConfig={showAdminConfig} setShowAdminConfig={setShowAdminConfig} inConv={inConv} onPublish={() => { setTab("publier"); }} assistantEnabled={assistantEnabled}>
       <div key={tab} className="page-anim" style={{ width: "100%", height: "100%" }}>
-      {tab === "publications" && <Publications auth={auth} accountType={meType} publishNonce={publishNonce} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
+      {tab === "publications" && <Publications auth={auth} accountType={meType} onShowPremium={showPremium} publishNonce={publishNonce} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "publier" && <PublierHub auth={auth} accountType={meType} onGoFeed={() => setTab("publications")} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "discover" && <Annuaire auth={auth} accountType={meType} myCategory={meCategory} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
-      {tab === "messages" && <Messages auth={auth} onUnreadCount={setUnreadCount} onShowPremium={showPremium} initialPartnerId={openConvPartnerId} onConvOpen={setInConv} />}
+      {tab === "messages" && <Messages auth={auth} accountType={meType} onUnreadCount={setUnreadCount} onShowPremium={showPremium} initialPartnerId={openConvPartnerId} onConvOpen={setInConv} />}
       {tab === "profile" && <Profile auth={auth} onLogout={handleLogout} onShowPremium={showPremium} darkMode={darkMode} onToggleDark={() => { const v = !darkMode; setDarkMode(v); localStorage.setItem("moyo_dark", v ? "1" : "0"); }} onOpenAdmin={auth.isAdmin ? () => openAdminPanel(() => setTab("admin")) : undefined} adminBadgeCount={adminBadgeCount} assistantEnabled={assistantEnabled} onToggleAssistant={toggleAssistant} />}
       {tab === "admin" && <AdminPinGate auth={auth} onBack={() => setTab("publications")} onBadgeCount={setAdminBadgeCount} />}
       </div>
@@ -17646,7 +17846,7 @@ export default function App() {
           </div>
           <div style={{ fontWeight: 900, fontSize: "1.25rem", color: G.brun, marginBottom: 8 }}>Paiement réussi 🎉</div>
           <div style={{ fontSize: "0.9rem", color: "#666", lineHeight: 1.55, marginBottom: 22 }}>
-            Ton abonnement <strong style={{ color: "#B8860B" }}>Premium</strong> est désormais actif ! Tu peux profiter des likes et messages illimités, voir qui t'a liké, et bien plus encore.
+            Ton abonnement <strong style={{ color: "#B8860B" }}>Premium</strong> est désormais actif ! Tu peux maintenant contacter les clients, partager tes coordonnées dans le chat, envoyer des photos et bien plus encore.
           </div>
           <button onClick={() => setPremiumSuccess(false)} style={{ width: "100%", background: "linear-gradient(135deg,#D4A843,#B8860B)", color: "#fff", border: "none", borderRadius: 50, padding: "14px", fontSize: "0.95rem", fontWeight: 800, cursor: "pointer", boxShadow: "0 4px 14px rgba(184,134,11,0.35)" }}>
             Découvrir Moyo Premium
