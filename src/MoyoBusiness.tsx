@@ -190,7 +190,14 @@ const formatMoney = (amount: number, currency: string) => currency === "EUR" ? `
 let PAY_MTN_ENABLED = true;
 let PAY_AIRTEL_ENABLED = true;
 let PAY_CB_ENABLED = true;
-// Bloquer les likes entre profils de même genre (app hétéro). Piloté depuis Config admin.
+// Prix de la mise en avant (pilotés depuis Config admin > Tarifs).
+// Boost d'annonce (3 paliers) et Sponsorisation de fiche (3 paliers).
+let BOOST_PRICE_1 = 500;   // 24 h
+let BOOST_PRICE_2 = 1000;  // 3 jours
+let BOOST_PRICE_3 = 2000;  // 7 jours
+let SPONSOR_PRICE_1 = 2000; // 7 jours
+let SPONSOR_PRICE_2 = 5000; // 30 jours
+let SPONSOR_PRICE_3 = 9000; // 2 mois
 
 // Interrupteurs globaux de fonctionnalités (pilotés depuis Config > Général & Règles > Fonctionnalités)
 let FEATURE_STATUSES = true;
@@ -234,7 +241,7 @@ function formatWhatsApp(num: string): string {
 // Déduplique une liste de matchs par couple (paire non ordonnée), en gardant le plus récent (created_at).
 
 // Charger les settings dynamiques depuis Supabase au démarrage
-fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(limit_likes_free,limit_status_boosts,premium_duration_days,premium_price_fcfa,premium_price_week_fcfa,premium_price_2month_fcfa,premium_days_week,premium_days_2month,premium_price_eur,eur_to_fcfa_rate,likes_notification_delay_hours,maintenance_mode,maintenance_message,poll_badges_ms,poll_admin_badge_ms,poll_stats_ms,poll_broadcast_ms,poll_support_ms,pay_mtn_enabled,pay_airtel_enabled,pay_cb_enabled,feature_statuses,feature_assistant,custom_banned_words,contact_banned_words,pay_mtn_number,pay_mtn_responsable,pay_airtel_number,pay_airtel_responsable,contact_email,contact_whatsapp,contact_address,social_facebook,social_instagram,social_tiktok,social_youtube,landing_members_count,landing_title_start,landing_title_highlight,landing_title_end,landing_slogan,premium_stat_couples,premium_stat_members,landing_stat_members,landing_stat_cities,auto_mod_contact_reply,free_launch_mode,client_contact_free,pro_premium_for_client)&select=key,value`, {
+fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(limit_likes_free,limit_status_boosts,premium_duration_days,premium_price_fcfa,premium_price_week_fcfa,premium_price_2month_fcfa,premium_days_week,premium_days_2month,premium_price_eur,eur_to_fcfa_rate,likes_notification_delay_hours,maintenance_mode,maintenance_message,poll_badges_ms,poll_admin_badge_ms,poll_stats_ms,poll_broadcast_ms,poll_support_ms,pay_mtn_enabled,pay_airtel_enabled,pay_cb_enabled,feature_statuses,feature_assistant,custom_banned_words,contact_banned_words,pay_mtn_number,pay_mtn_responsable,pay_airtel_number,pay_airtel_responsable,contact_email,contact_whatsapp,contact_address,social_facebook,social_instagram,social_tiktok,social_youtube,landing_members_count,landing_title_start,landing_title_highlight,landing_title_end,landing_slogan,premium_stat_couples,premium_stat_members,landing_stat_members,landing_stat_cities,auto_mod_contact_reply,free_launch_mode,client_contact_free,pro_premium_for_client,boost_price_1,boost_price_2,boost_price_3,sponsor_price_1,sponsor_price_2,sponsor_price_3)&select=key,value`, {
   headers: { "apikey": SUPABASE_KEY },
 }).then(r => r.json()).then((data: { key: string; value: string }[]) => {
   if (!Array.isArray(data)) return;
@@ -243,6 +250,12 @@ fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(limit_likes_free,limit_statu
   if (map["free_launch_mode"] !== undefined) FREE_LAUNCH_MODE = map["free_launch_mode"] === "true";
   if (map["client_contact_free"] !== undefined) CLIENT_CONTACT_FREE = map["client_contact_free"] === "true";
   if (map["pro_premium_for_client"] !== undefined) PRO_PREMIUM_FOR_CLIENT = map["pro_premium_for_client"] === "true";
+  if (map["boost_price_1"]) BOOST_PRICE_1 = parseInt(map["boost_price_1"]) || 500;
+  if (map["boost_price_2"]) BOOST_PRICE_2 = parseInt(map["boost_price_2"]) || 1000;
+  if (map["boost_price_3"]) BOOST_PRICE_3 = parseInt(map["boost_price_3"]) || 2000;
+  if (map["sponsor_price_1"]) SPONSOR_PRICE_1 = parseInt(map["sponsor_price_1"]) || 2000;
+  if (map["sponsor_price_2"]) SPONSOR_PRICE_2 = parseInt(map["sponsor_price_2"]) || 5000;
+  if (map["sponsor_price_3"]) SPONSOR_PRICE_3 = parseInt(map["sponsor_price_3"]) || 9000;
   if (map["pay_mtn_enabled"] !== undefined) PAY_MTN_ENABLED = map["pay_mtn_enabled"] !== "false";
   if (map["pay_airtel_enabled"] !== undefined) PAY_AIRTEL_ENABLED = map["pay_airtel_enabled"] !== "false";
   if (map["pay_cb_enabled"] !== undefined) PAY_CB_ENABLED = map["pay_cb_enabled"] !== "false";
@@ -1621,6 +1634,13 @@ const METIER_SUGGESTIONS: { label: string; keys: string[] }[] = [
 function Landing({ onNav }: { onNav: (p: string) => void }) {
   const [tab, setTab] = React.useState<"besoins" | "profils">("besoins");
   const [activeCat, setActiveCat] = React.useState("BTP");
+  // Choix d'authentification avant d'accéder à un besoin / un pro (se connecter ou créer un compte)
+  const [authChoice, setAuthChoice] = React.useState<{ kind: "pub" | "pro"; id: string; label?: string } | null>(null);
+  const goAuth = (dest: "login" | "signup") => {
+    if (authChoice) { try { localStorage.setItem("moyo_pending_target", JSON.stringify({ kind: authChoice.kind, id: authChoice.id })); } catch {} }
+    setAuthChoice(null);
+    onNav(dest);
+  };
   const [lq, setLq] = React.useState("");
   const [sugOpen, setSugOpen] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -1681,8 +1701,8 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
       const termPub = term ? `&or=(title.ilike.*${v}*,description.ilike.*${v}*,category.ilike.*${v}*)` : "";
       try {
         const [pros, pubs] = await Promise.all([
-          sb.query<any>(SUPABASE_KEY, "profiles", `?account_type=eq.pro&is_visible=neq.false${termPro}${cityP}&select=id,name,company,metier,city,category,is_verified&limit=24`),
-          sb.query<any>(SUPABASE_KEY, "publications", `?status=eq.active${termPub}${cityP}&order=created_at.desc&select=id,type,title,description,category,city,location,budget&limit=24`),
+          sb.query<any>(SUPABASE_KEY, "profiles", `?account_type=eq.pro&is_visible=neq.false${termPro}${cityP}&select=id,name,company,metier,city,category,is_verified,photo_url&limit=24`),
+          sb.query<any>(SUPABASE_KEY, "publications", `?status=eq.active${termPub}${cityP}&order=created_at.desc&select=id,user_id,type,title,description,category,city,location,budget&limit=24`),
         ]);
         setLres({ pros: pros || [], pubs: pubs || [] });
       } catch { setLres({ pros: [], pubs: [] }); }
@@ -1690,6 +1710,33 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
     }, 350);
     return () => clearTimeout(h);
   }, [lq, lcity]);
+
+  // ── Besoins & professionnels RÉELS du secteur sélectionné (remplace les données de démo) ──
+  const [secBesoins, setSecBesoins] = React.useState<any[]>([]);
+  const [secPros, setSecPros] = React.useState<any[]>([]);
+  React.useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const c = encodeURIComponent(activeCat);
+        const [pubs, pros] = await Promise.all([
+          sb.query<any>(SUPABASE_KEY, "publications", `?status=eq.active&type=eq.cherche&category=eq.${c}&order=created_at.desc&select=id,title,description,category,city,location,budget,created_at&limit=24`),
+          sb.query<any>(SUPABASE_KEY, "profiles", `?account_type=eq.pro&is_visible=neq.false&category=eq.${c}&select=id,name,company,metier,city,zone,category,is_verified,is_sponsored,photo_url,rating_avg,rating_count&order=is_sponsored.desc&limit=24`),
+        ]);
+        if (!alive) return;
+        setSecBesoins(pubs || []);
+        setSecPros(pros || []);
+      } catch { if (alive) { setSecBesoins([]); setSecPros([]); } }
+    })();
+    return () => { alive = false; };
+  }, [activeCat]);
+  const relAgo = (iso?: string) => {
+    if (!iso) return "";
+    const diff = (Date.now() - new Date(iso).getTime()) / 60000;
+    if (diff < 60) return `Il y a ${Math.max(1, Math.floor(diff))} min`;
+    if (diff < 1440) return `Il y a ${Math.floor(diff / 60)} h`;
+    return `Il y a ${Math.floor(diff / 1440)} j`;
+  };
 
   // Bandeau « Explorer par secteur » : dérivé de la SOURCE UNIQUE
   // (BUSINESS_CATEGORIES_SORTED) → reste toujours synchronisé avec la taxonomie.
@@ -1747,55 +1794,28 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
     dragRef.current.active = false;
     resumeSoon();
   };
-  const BESOINS = [
-    { cat: "BTP", date: "Il y a 2 h", title: "Cherche maçon pour construction d'une dalle", desc: "Maçon expérimenté pour couler une dalle de 60 m² à Poto-Poto. Matériaux fournis.", loc: "Poto-Poto, Brazzaville", prix: "300 000 FCFA", ini: "JM", name: "Jean-Marie K." },
-    { cat: "BTP", date: "Il y a 5 h", title: "Plombier urgence - fuite eau appartement", desc: "Fuite importante dans la salle de bain. Intervention urgente souhaitée aujourd'hui.", loc: "Bacongo, Brazzaville", prix: "50 000 FCFA", ini: "SN", name: "Sophie N." },
-    { cat: "BTP", date: "Hier", title: "Électricien pour installation villa", desc: "Villa neuve R+1 à câbler entièrement. Tableau, prises, éclairage. Devis demandé.", loc: "Moungali, Brazzaville", prix: "750 000 FCFA", ini: "PL", name: "Patrick L." },
-    { cat: "Transport", date: "Il y a 1 h", title: "Chauffeur avec camionnette - déménagement", desc: "Déménagement Moungali → Talangaï ce samedi. 2 pièces, quelques meubles lourds.", loc: "Moungali, Brazzaville", prix: "40 000 FCFA", ini: "AK", name: "Alain K." },
-    { cat: "Transport", date: "Il y a 4 h", title: "Livraison quotidienne de marchandises", desc: "Boutique cherche transporteur fiable pour livraisons quotidiennes en ville.", loc: "Centre-ville, Brazzaville", prix: "À négocier", ini: "FM", name: "Fatou M." },
-    { cat: "Artisanat", date: "Il y a 3 h", title: "Couturière pour tenues traditionnelles", desc: "Confection de 5 tenues (homme/femme) pour un mariage. Tissus fournis.", loc: "Bacongo, Brazzaville", prix: "120 000 FCFA", ini: "RN", name: "Régine N." },
-    { cat: "Artisanat", date: "Hier", title: "Menuisier pour meubles sur mesure", desc: "Fabrication d'une bibliothèque et d'un bureau en bois massif.", loc: "Talangaï, Brazzaville", prix: "250 000 FCFA", ini: "JP", name: "Jean-Paul O." },
-    { cat: "Commerce", date: "Il y a 6 h", title: "Recrutement vendeur(se) boutique", desc: "Boutique de prêt-à-porter recrute un vendeur sérieux, expérience souhaitée. Temps plein.", loc: "Poto-Poto, Brazzaville", prix: "120 000 FCFA/mois", ini: "DK", name: "David K." },
-    { cat: "Services", date: "Hier", title: "Secrétaire bilingue - PME", desc: "PME cherche secrétaire FR/EN, maîtrise Word/Excel. CDD 6 mois renouvelable.", loc: "Centre-ville, Brazzaville", prix: "180 000 FCFA/mois", ini: "CM", name: "Carine M." },
-    { cat: "Commerce", date: "Il y a 2 h", title: "Grossiste produits alimentaires", desc: "Recherche fournisseur régulier en riz, huile et sucre pour revente.", loc: "Marché Total, Brazzaville", prix: "À discuter", ini: "BG", name: "Blaise G." },
-    { cat: "Commerce", date: "Il y a 5 h", title: "Distributeur de produits cosmétiques", desc: "Cherche partenaire pour distribution de cosmétiques dans le Pool.", loc: "Pointe-Noire", prix: "À négocier", ini: "SL", name: "Sandra L." },
-    { cat: "Restauration", date: "Il y a 3 h", title: "Traiteur pour événement 100 personnes", desc: "Mariage le mois prochain, menu congolais + boissons. Devis demandé.", loc: "Mfilou, Brazzaville", prix: "600 000 FCFA", ini: "PM", name: "Prisca M." },
-    { cat: "Restauration", date: "Hier", title: "Cuisinier pour restaurant", desc: "Restaurant cherche cuisinier expérimenté en cuisine africaine et européenne.", loc: "Centre-ville, Brazzaville", prix: "150 000 FCFA/mois", ini: "HT", name: "Hervé T." },
-    { cat: "Agriculture & Élevage", date: "Il y a 4 h", title: "Main d'œuvre pour plantation de manioc", desc: "Besoin de 5 ouvriers agricoles pour défrichage et plantation, 2 semaines.", loc: "Kinkala, Pool", prix: "5 000 FCFA/jour", ini: "GN", name: "Gaston N." },
-    { cat: "Agriculture & Élevage", date: "Hier", title: "Fournisseur de poussins et aliments", desc: "Éleveur cherche fournisseur fiable en poussins d'un jour et provende.", loc: "Brazzaville", prix: "À négocier", ini: "EM", name: "Esther M." },
-    { cat: "Immobilier", date: "Il y a 2 h", title: "Recherche villa 3 chambres à louer", desc: "Famille cherche villa avec cour, quartier calme, bail longue durée.", loc: "Mpila, Brazzaville", prix: "250 000 FCFA/mois", ini: "OB", name: "Olga B." },
-    { cat: "Immobilier", date: "Hier", title: "Agent pour gestion locative", desc: "Propriétaire cherche agent pour gérer 4 appartements (loyers, entretien).", loc: "Pointe-Noire", prix: "Commission", ini: "RK", name: "Rodrigue K." },
-    { cat: "Services", date: "Il y a 1 h", title: "Développeur web pour site vitrine", desc: "PME cherche dev pour site vitrine 5 pages + formulaire de contact. Devis bienvenu.", loc: "Centre-ville, Brazzaville", prix: "250 000 FCFA", ini: "AM", name: "Amina M." },
-    { cat: "Services", date: "Il y a 5 h", title: "Community manager pour boutique", desc: "Gestion des pages Facebook/Instagram, création de visuels, 3 posts/semaine.", loc: "Brazzaville", prix: "80 000 FCFA/mois", ini: "YK", name: "Yann K." },
-    { cat: "Services", date: "Il y a 3 h", title: "Comptable pour clôture annuelle", desc: "TPE cherche comptable pour bilan et déclarations fiscales. Mission ponctuelle.", loc: "Centre-ville, Brazzaville", prix: "300 000 FCFA", ini: "LN", name: "Léon N." },
-    { cat: "Droit & Administration", date: "Hier", title: "Consultant création d'entreprise", desc: "Accompagnement pour immatriculation et business plan d'une jeune entreprise.", loc: "Brazzaville", prix: "À discuter", ini: "FK", name: "Francine K." },
-  ];
-  const PROFILS = [
-    { ini: "ET", name: "Étienne T.", metier: "Maçon - 12 ans d'exp.", ville: "Poto-Poto", verif: "Vérifié", cat: "BTP" },
-    { ini: "RB", name: "Roger B.", metier: "Plombier", ville: "Bacongo", verif: "", cat: "BTP" },
-    { ini: "MK", name: "Marie-Claire K.", metier: "Entreprise BTP", ville: "Moungali", verif: "Entreprise vérifiée", cat: "BTP" },
-    { ini: "BE", name: "Bernard E.", metier: "Électricien - 8 ans", ville: "Ouenzé", verif: "Certifié", cat: "BTP" },
-    { ini: "RG", name: "Roger G.", metier: "Transporteur - camionnette", ville: "Bacongo", verif: "Vérifié", cat: "Transport" },
-    { ini: "AD", name: "André D.", metier: "Chauffeur poids lourd", ville: "Pointe-Noire", verif: "", cat: "Transport" },
-    { ini: "CM", name: "Clarisse M.", metier: "Couturière sur mesure", ville: "Talangaï", verif: "Vérifiée", cat: "Artisanat" },
-    { ini: "JO", name: "Joseph O.", metier: "Menuisier ébéniste", ville: "Mfilou", verif: "", cat: "Artisanat" },
-    { ini: "AC", name: "Agence Carrière+", metier: "Cabinet de recrutement", ville: "Brazzaville", verif: "Entreprise vérifiée", cat: "Services" },
-    { ini: "PN", name: "Pauline N.", metier: "Assistante RH", ville: "Centre-ville", verif: "", cat: "Services" },
-    { ini: "BG", name: "Boutique Géant", metier: "Grossiste alimentaire", ville: "Marché Total", verif: "Entreprise vérifiée", cat: "Commerce" },
-    { ini: "SL", name: "Sandra L.", metier: "Distributrice cosmétiques", ville: "Pointe-Noire", verif: "", cat: "Commerce" },
-    { ini: "PM", name: "Prisca M.", metier: "Traiteur événementiel", ville: "Mfilou", verif: "Vérifiée", cat: "Restauration" },
-    { ini: "CH", name: "Chef Hervé", metier: "Cuisinier", ville: "Centre-ville", verif: "", cat: "Restauration" },
-    { ini: "EM", name: "Esther M.", metier: "Éleveuse avicole", ville: "Brazzaville", verif: "Vérifiée", cat: "Agriculture & Élevage" },
-    { ini: "GN", name: "Gaston N.", metier: "Maraîcher", ville: "Kinkala", verif: "", cat: "Agriculture & Élevage" },
-    { ini: "RK", name: "Rodrigue K.", metier: "Agent immobilier", ville: "Pointe-Noire", verif: "Vérifié", cat: "Immobilier" },
-    { ini: "IC", name: "Immo Congo", metier: "Agence immobilière", ville: "Brazzaville", verif: "Entreprise vérifiée", cat: "Immobilier" },
-    { ini: "BN", name: "Bernard N.", metier: "Développeur web", ville: "Moungali", verif: "Certifié", cat: "Services" },
-    { ini: "YK", name: "Yann K.", metier: "Community manager", ville: "Brazzaville", verif: "", cat: "Services" },
-    { ini: "LN", name: "Léon N.", metier: "Comptable agréé", ville: "Centre-ville", verif: "Vérifié", cat: "Services" },
-    { ini: "FK", name: "Francine K.", metier: "Consultante en gestion", ville: "Brazzaville", verif: "", cat: "Finance & Assurance" },
-  ];
-  const besoinsList = BESOINS.filter(b => b.cat === activeCat);
-  const profilsList = PROFILS.filter(p => p.cat === activeCat);
+  const besoinsList = secBesoins.map(p => ({
+    id: p.id,
+    cat: (CATS.find(c => c.id === p.category)?.label) || p.category || "Annonce",
+    date: relAgo(p.created_at),
+    title: p.title || "",
+    desc: p.description || "",
+    loc: p.location || p.city || "",
+    prix: p.budget ? `${Number(p.budget).toLocaleString("fr-FR")} FCFA` : "À négocier",
+    ini: ((CATS.find(c => c.id === p.category)?.label) || "?").slice(0, 2).toUpperCase(),
+    name: "Client",
+  }));
+  const profilsList = secPros.map(p => ({
+    id: p.id,
+    photo: p.photo_url || "",
+    ini: ((p.company || p.name || "?")).slice(0, 2).toUpperCase(),
+    name: p.company || p.name || "Professionnel",
+    metier: p.metier || "",
+    ville: [p.city, p.zone].filter(Boolean).join(" · "),
+    verif: p.is_verified ? (p.company ? "Entreprise vérifiée" : "Vérifié") : "",
+    rating: p.rating_count ? `${(p.rating_avg || 0).toFixed(1)} (${p.rating_count})` : "Nouveau",
+    cat: p.category,
+  }));
 
   return (
     <div className="mb-root">
@@ -2085,11 +2105,14 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
               <div className="mb-pgrid">
                 {lres.pros.map((pr: any, i: number) => (
                   <div key={i} className="mb-pcard">
-                    <div className="mb-pav">{(pr.company || pr.name || "?").slice(0, 2).toUpperCase()}</div>
+                    {pr.photo_url
+                      ? <img src={pr.photo_url} alt={pr.name} className="mb-pav" style={{ objectFit: "cover", padding: 0 }} loading="lazy" />
+                      : <div className="mb-pav">{(pr.company || pr.name || "?").slice(0, 2).toUpperCase()}</div>}
                     <div className="mb-pname">{pr.company || pr.name || "Professionnel"}</div>
                     <div className="mb-pmet">{pr.metier || pr.category || ""}</div>
                     {pr.city && <div className="mb-pville"><svg width="11" height="11" style={{ color: "#6B7280", verticalAlign: "-1px" }}><use href="#mbi-pin"/></svg> {pr.city}</div>}
                     {pr.is_verified && <div className="mb-pverif"><svg width="10" height="10" style={{ color: "#4A7C28" }}><use href="#mbi-check"/></svg> Vérifié</div>}
+                    <button className="mb-bbtn" style={{ width: "100%", marginTop: 10 }} onClick={() => setAuthChoice({ kind: "pro", id: pr.id, label: pr.company || pr.name })}>Contacter ce professionnel</button>
                   </div>
                 ))}
               </div>
@@ -2110,7 +2133,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
                     </div>
                     <div className="mb-bfoot">
                       <div className="mb-aw"><div className="mb-av">{(b.category || "?").slice(0, 2).toUpperCase()}</div><span className="mb-an">{b.type === "propose" ? "Service proposé" : "Besoin"}</span></div>
-                      <button className="mb-bbtn" onClick={() => onNav("signup")}>Contacter</button>
+                      <button className="mb-bbtn" onClick={() => setAuthChoice({ kind: b.type === "propose" ? "pro" : "pub", id: b.type === "propose" ? (b.user_id || b.id) : b.id, label: b.title })}>Contacter</button>
                     </div>
                   </div>
                 ))}
@@ -2157,7 +2180,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
                 </div>
                 <div className="mb-bfoot">
                   <div className="mb-aw"><div className="mb-av">{b.ini}</div><span className="mb-an">{b.name}</span></div>
-                  <button className="mb-bbtn" onClick={() => onNav("signup")}>Je suis intéressé</button>
+                  <button className="mb-bbtn" onClick={() => setAuthChoice({ kind: "pub", id: b.id, label: b.title })}>Je suis intéressé</button>
                 </div>
               </div>
             ))}
@@ -2167,11 +2190,15 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
             {profilsList.length === 0 && <p style={{ gridColumn: "1 / -1", textAlign: "center", color: "#999", padding: "30px 0", fontSize: "0.9rem" }}>Aucun professionnel dans ce secteur pour le moment.</p>}
             {profilsList.map((p, i) => (
               <div key={i} className="mb-pcard">
-                <div className="mb-pav">{p.ini}</div>
+                {p.photo
+                  ? <img src={p.photo} alt={p.name} className="mb-pav" style={{ objectFit: "cover", padding: 0 }} loading="lazy" />
+                  : <div className="mb-pav">{p.ini}</div>}
                 <div className="mb-pname">{p.name}</div>
                 <div className="mb-pmet">{p.metier}</div>
-                <div className="mb-pville"><svg width="11" height="11" style={{ color: "#6B7280", verticalAlign: "-1px" }}><use href="#mbi-pin"/></svg> {p.ville}</div>
+                {p.ville && <div className="mb-pville"><svg width="11" height="11" style={{ color: "#6B7280", verticalAlign: "-1px" }}><use href="#mbi-pin"/></svg> {p.ville}</div>}
+                <div style={{ fontSize: "0.74rem", color: "#8B6914", fontWeight: 700, margin: "4px 0 2px" }}>★ {p.rating}</div>
                 {p.verif && <div className="mb-pverif"><svg width="10" height="10" style={{ color: "#4A7C28" }}><use href="#mbi-check"/></svg> {p.verif}</div>}
+                <button className="mb-bbtn" style={{ width: "100%", marginTop: 10 }} onClick={() => setAuthChoice({ kind: "pro", id: p.id, label: p.name })}>Contacter ce professionnel</button>
               </div>
             ))}
           </div>
@@ -2188,6 +2215,29 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
           <button className="mb-btn-o" onClick={() => onNav("login")}>Me connecter</button>
         </div>
       </section>
+
+      {authChoice && (
+        <div onClick={() => setAuthChoice(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 380, padding: "26px 22px", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", textAlign: "center" }}>
+            <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(212,168,67,0.14)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div style={{ fontSize: "1.1rem", fontWeight: 800, color: G.brun, marginBottom: 6 }}>
+              {authChoice.kind === "pro" ? "Contacter ce professionnel" : "Répondre à ce besoin"}
+            </div>
+            <div style={{ fontSize: "0.86rem", color: "#666", lineHeight: 1.5, marginBottom: 22 }}>
+              {authChoice.label ? <><b>{authChoice.label}</b><br/></> : null}
+              Connectez-vous ou créez un compte gratuit pour {authChoice.kind === "pro" ? "le contacter" : "y répondre"}.
+            </div>
+            <button onClick={() => goAuth("signup")} style={{ width: "100%", background: `linear-gradient(135deg,${G.or},#B8860B)`, color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: "0.95rem", fontWeight: 800, cursor: "pointer", marginBottom: 10, boxShadow: "0 6px 18px rgba(212,168,67,0.35)" }}>
+              Créer mon compte gratuitement
+            </button>
+            <button onClick={() => goAuth("login")} style={{ width: "100%", background: "#fff", color: G.brun, border: `1.5px solid ${G.gris}`, borderRadius: 12, padding: "13px", fontSize: "0.92rem", fontWeight: 700, cursor: "pointer" }}>
+              J'ai déjà un compte — Se connecter
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -3462,6 +3512,8 @@ function AdminDesktopPage() {
     eurToFcfaRate: "655.957",
     likesNotifDelayHours: "24",
     premiumDurationDays: "31", premiumPriceWeekFcfa: "1200", premiumPrice2monthFcfa: "5900", premiumDaysWeek: "7", premiumDays2month: "62",
+    boostPrice1: "500", boostPrice2: "1000", boostPrice3: "2000",
+    sponsorPrice1: "2000", sponsorPrice2: "5000", sponsorPrice3: "9000",
     featureStatuses: "true",
     featureAssistant: "true",
     maintenanceMode: "false",
@@ -3486,6 +3538,7 @@ function AdminDesktopPage() {
       "modal_premium_default",
       "limit_likes_free","limit_status_boosts","limit_photo_size_mb",
       "premium_price_fcfa","premium_price_week_fcfa","premium_price_2month_fcfa","premium_days_week","premium_days_2month","premium_duration_days",
+      "boost_price_1","boost_price_2","boost_price_3","sponsor_price_1","sponsor_price_2","sponsor_price_3",
       "feature_statuses","feature_assistant",
       "maintenance_mode","maintenance_message",
       "custom_banned_words",
@@ -3512,6 +3565,8 @@ function AdminDesktopPage() {
         limitPhotoSizeMb: map["limit_photo_size_mb"] || c.limitPhotoSizeMb,
         
         premiumPriceFcfa: map["premium_price_fcfa"] || c.premiumPriceFcfa, premiumPriceWeekFcfa: map["premium_price_week_fcfa"] || c.premiumPriceWeekFcfa, premiumPrice2monthFcfa: map["premium_price_2month_fcfa"] || c.premiumPrice2monthFcfa, premiumDaysWeek: map["premium_days_week"] || c.premiumDaysWeek, premiumDays2month: map["premium_days_2month"] || c.premiumDays2month,
+        boostPrice1: map["boost_price_1"] || c.boostPrice1, boostPrice2: map["boost_price_2"] || c.boostPrice2, boostPrice3: map["boost_price_3"] || c.boostPrice3,
+        sponsorPrice1: map["sponsor_price_1"] || c.sponsorPrice1, sponsorPrice2: map["sponsor_price_2"] || c.sponsorPrice2, sponsorPrice3: map["sponsor_price_3"] || c.sponsorPrice3,
         premiumPriceEur: map["premium_price_eur"] || c.premiumPriceEur,
         eurToFcfaRate: map["eur_to_fcfa_rate"] || c.eurToFcfaRate,
         premiumDurationDays: map["premium_duration_days"] || c.premiumDurationDays,
@@ -3693,7 +3748,6 @@ function AdminDesktopPage() {
             </OffCanvasSection>}
             {configTab === "tarifs" && <OffCanvasSection title="Limites & Quotas">
               {([
-                ["limit_likes_free", "limitLikes" as keyof typeof appConfig, "Intérêts gratuits/jour", appConfig.limitLikes, "number"],
                 ["limit_photo_size_mb", "limitPhotoSizeMb" as keyof typeof appConfig, "Taille max photo (Mo)", appConfig.limitPhotoSizeMb, "number"],
               ] as [string, keyof typeof appConfig, string, string, string][]).map(([key, ck, label, value, type]) => (
                 <EditableRow key={key} label={label} value={value} open={editingConfig === key} type={type as "text"|"number"}
@@ -3789,7 +3843,12 @@ function AdminDesktopPage() {
                 ["premium_duration_days", "premiumDurationDays" as keyof typeof appConfig, "Durée 1 mois (jours)", appConfig.premiumDurationDays],
                 ["premium_days_week", "premiumDaysWeek" as keyof typeof appConfig, "Durée 1 semaine (jours)", appConfig.premiumDaysWeek],
                 ["premium_days_2month", "premiumDays2month" as keyof typeof appConfig, "Durée 2 mois (jours)", appConfig.premiumDays2month],
-                ["likes_notification_delay_hours", "likesNotifDelayHours" as keyof typeof appConfig, "Notif likes après (heures)", appConfig.likesNotifDelayHours],
+                ["boost_price_1", "boostPrice1" as keyof typeof appConfig, "Boost annonce 24 h (FCFA)", appConfig.boostPrice1],
+                ["boost_price_2", "boostPrice2" as keyof typeof appConfig, "Boost annonce 3 jours (FCFA)", appConfig.boostPrice2],
+                ["boost_price_3", "boostPrice3" as keyof typeof appConfig, "Boost annonce 7 jours (FCFA)", appConfig.boostPrice3],
+                ["sponsor_price_1", "sponsorPrice1" as keyof typeof appConfig, "Sponsor fiche 7 jours (FCFA)", appConfig.sponsorPrice1],
+                ["sponsor_price_2", "sponsorPrice2" as keyof typeof appConfig, "Sponsor fiche 30 jours (FCFA)", appConfig.sponsorPrice2],
+                ["sponsor_price_3", "sponsorPrice3" as keyof typeof appConfig, "Sponsor fiche 2 mois (FCFA)", appConfig.sponsorPrice3],
               ] as [string, keyof typeof appConfig, string, string][]).map(([key, ck, label, value]) => (
                 <EditableRow key={key} label={label} value={key === "premium_price_eur" ? value + " €" : value} open={editingConfig === key} type="number"
                   onOpen={() => { setEditingConfig(editingConfig === key ? null : key); setEditingConfigValue(value); }}
@@ -3802,6 +3861,8 @@ function AdminDesktopPage() {
                     if (key === "premium_price_eur") PREMIUM_PRICE_EUR = parseFloat(editingConfigValue) || 10;
                     if (key === "eur_to_fcfa_rate") EUR_TO_FCFA = parseFloat(editingConfigValue) || 655.957;
                     if (key === "premium_duration_days") PREMIUM_30_DAYS_MS = (parseInt(editingConfigValue) || 31) * 24 * 60 * 60 * 1000;
+                    if (key === "boost_price_1") BOOST_PRICE_1 = parseInt(editingConfigValue) || 500; if (key === "boost_price_2") BOOST_PRICE_2 = parseInt(editingConfigValue) || 1000; if (key === "boost_price_3") BOOST_PRICE_3 = parseInt(editingConfigValue) || 2000;
+                    if (key === "sponsor_price_1") SPONSOR_PRICE_1 = parseInt(editingConfigValue) || 2000; if (key === "sponsor_price_2") SPONSOR_PRICE_2 = parseInt(editingConfigValue) || 5000; if (key === "sponsor_price_3") SPONSOR_PRICE_3 = parseInt(editingConfigValue) || 9000;
                     setEditingConfig(null);
                   }} />
               ))}
@@ -3824,17 +3885,6 @@ function AdminDesktopPage() {
             </OffCanvasSection>}
             {configTab === "equipe" && <OffCanvasSection title="Notifications admin">
               <AdminNotifPrefs auth={auth!} />
-            </OffCanvasSection>}
-            {configTab === "equipe" && <OffCanvasSection title="Relance notifications">
-              <EditableRow label="Notif likes après (heures)" value={appConfig.likesNotifDelayHours} type="number" open={editingConfig === "likes_notification_delay_hours"}
-                onOpen={() => { setEditingConfig(editingConfig === "likes_notification_delay_hours" ? null : "likes_notification_delay_hours"); setEditingConfigValue(appConfig.likesNotifDelayHours); }}
-                editValue={editingConfigValue} onEdit={setEditingConfigValue}
-                onSave={async () => {
-                  if (!auth) return;
-                  await fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.likes_notification_delay_hours`, { method: "PATCH", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=minimal" }, body: JSON.stringify({ value: editingConfigValue }) });
-                  setAppConfig(c => ({ ...c, likesNotifDelayHours: editingConfigValue }));
-                  setEditingConfig(null);
-                }} />
             </OffCanvasSection>}
             {configTab === "tarifs" && <OffCanvasSection title="Moyens de paiement">
               <PaymentMethodsConfig auth={auth!} />
@@ -4120,7 +4170,8 @@ function PaymentMethodsConfig({ auth }: { auth: Auth }) {
     if (which === "cb") PAY_CB_ENABLED = v;
     const key = which === "mtn" ? "pay_mtn_enabled" : which === "airtel" ? "pay_airtel_enabled" : "pay_cb_enabled";
     try {
-      await fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.${key}`, { method: "PATCH", headers: { ...H, "Content-Type": "application/json", "Prefer": "return=minimal" }, body: JSON.stringify({ value: String(v) }) });
+      // saveSetting insère la ligne si elle n'existe pas encore (un simple PATCH ne créerait rien et la coupure ne se propagerait pas).
+      await saveSetting(key, String(v), auth.token);
     } catch {}
   };
 
@@ -4431,21 +4482,21 @@ function SiteInfoConfig({ auth, group }: { auth: Auth; group: "contacts" | "soci
 
 function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void }) {
   const [modalTexts, setModalTexts] = React.useState({ signupSuccess: "Ton compte est prêt ! Connecte-toi maintenant.", premiumDefault: "Passe Premium pour débloquer toutes les fonctionnalités de Moyo !" });
-  const [appConfig, setAppConfig] = React.useState({ limitLikes: "5",  limitStatusBoosts: "2", limitPhotoSizeMb: "5",  premiumPriceFcfa: "3500", premiumPriceEur: "10", eurToFcfaRate: "655.957", premiumDurationDays: "31", premiumPriceWeekFcfa: "1200", premiumPrice2monthFcfa: "5900", premiumDaysWeek: "7", premiumDays2month: "62", likesNotifDelayHours: "24", featureStatuses: "true", featureAssistant: "true", maintenanceMode: "false", maintenanceMessage: "Moyo est en maintenance. Nous revenons très vite ! 🔧", customBannedWords: "", contactBannedWords: "", autoModContactReply: AUTO_MOD_CONTACT_REPLY });
+  const [appConfig, setAppConfig] = React.useState({ limitLikes: "5",  limitStatusBoosts: "2", limitPhotoSizeMb: "5",  premiumPriceFcfa: "3500", premiumPriceEur: "10", eurToFcfaRate: "655.957", premiumDurationDays: "31", premiumPriceWeekFcfa: "1200", premiumPrice2monthFcfa: "5900", premiumDaysWeek: "7", premiumDays2month: "62", boostPrice1: "500", boostPrice2: "1000", boostPrice3: "2000", sponsorPrice1: "2000", sponsorPrice2: "5000", sponsorPrice3: "9000", likesNotifDelayHours: "24", featureStatuses: "true", featureAssistant: "true", maintenanceMode: "false", maintenanceMessage: "Moyo est en maintenance. Nous revenons très vite ! 🔧", customBannedWords: "", contactBannedWords: "", autoModContactReply: AUTO_MOD_CONTACT_REPLY });
   const [editingModal, setEditingModal] = React.useState<string | null>(null);
   const [editingValue, setEditingValue] = React.useState("");
   const [editingConfig, setEditingConfig] = React.useState<string | null>(null);
   const [editingConfigValue, setEditingConfigValue] = React.useState("");
 
   React.useEffect(() => {
-    const allKeys = ["modal_signup_success","modal_premium_default","limit_likes_free","limit_status_boosts","limit_photo_size_mb","premium_price_fcfa","premium_price_week_fcfa","premium_price_2month_fcfa","premium_days_week","premium_days_2month","premium_duration_days","feature_statuses","feature_assistant","maintenance_mode","maintenance_message","custom_banned_words","contact_banned_words","auto_mod_contact_reply","poll_badges_ms","poll_admin_badge_ms","poll_stats_ms","poll_broadcast_ms","poll_support_ms"];
+    const allKeys = ["modal_signup_success","modal_premium_default","limit_likes_free","limit_status_boosts","limit_photo_size_mb","premium_price_fcfa","premium_price_week_fcfa","premium_price_2month_fcfa","premium_days_week","premium_days_2month","premium_duration_days","boost_price_1","boost_price_2","boost_price_3","sponsor_price_1","sponsor_price_2","sponsor_price_3","feature_statuses","feature_assistant","maintenance_mode","maintenance_message","custom_banned_words","contact_banned_words","auto_mod_contact_reply","poll_badges_ms","poll_admin_badge_ms","poll_stats_ms","poll_broadcast_ms","poll_support_ms"];
     fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(${allKeys.join(",")})&select=key,value`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` } })
       .then(r => r.json()).then(data => {
         if (!Array.isArray(data)) return;
         const map: Record<string, string> = {};
         data.forEach((d: { key: string; value: string }) => { map[d.key] = d.value; });
         setModalTexts(t => ({ signupSuccess: map["modal_signup_success"] || t.signupSuccess, premiumDefault: map["modal_premium_default"] || t.premiumDefault }));
-        setAppConfig(c => ({ limitLikes: map["limit_likes_free"] || c.limitLikes,  limitStatusBoosts: map["limit_status_boosts"] || c.limitStatusBoosts, limitPhotoSizeMb: map["limit_photo_size_mb"] || c.limitPhotoSizeMb,  premiumPriceFcfa: map["premium_price_fcfa"] || c.premiumPriceFcfa, premiumPriceWeekFcfa: map["premium_price_week_fcfa"] || c.premiumPriceWeekFcfa, premiumPrice2monthFcfa: map["premium_price_2month_fcfa"] || c.premiumPrice2monthFcfa, premiumDaysWeek: map["premium_days_week"] || c.premiumDaysWeek, premiumDays2month: map["premium_days_2month"] || c.premiumDays2month, premiumPriceEur: map["premium_price_eur"] || c.premiumPriceEur, eurToFcfaRate: map["eur_to_fcfa_rate"] || c.eurToFcfaRate, premiumDurationDays: map["premium_duration_days"] || c.premiumDurationDays, likesNotifDelayHours: map["likes_notification_delay_hours"] || c.likesNotifDelayHours, featureStatuses: map["feature_statuses"] || c.featureStatuses, featureAssistant: map["feature_assistant"] || c.featureAssistant, maintenanceMode: map["maintenance_mode"] || c.maintenanceMode, maintenanceMessage: map["maintenance_message"] || c.maintenanceMessage, customBannedWords: map["custom_banned_words"] || c.customBannedWords, contactBannedWords: map["contact_banned_words"] || c.contactBannedWords, autoModContactReply: map["auto_mod_contact_reply"] || c.autoModContactReply }));
+        setAppConfig(c => ({ limitLikes: map["limit_likes_free"] || c.limitLikes,  limitStatusBoosts: map["limit_status_boosts"] || c.limitStatusBoosts, limitPhotoSizeMb: map["limit_photo_size_mb"] || c.limitPhotoSizeMb,  premiumPriceFcfa: map["premium_price_fcfa"] || c.premiumPriceFcfa, premiumPriceWeekFcfa: map["premium_price_week_fcfa"] || c.premiumPriceWeekFcfa, premiumPrice2monthFcfa: map["premium_price_2month_fcfa"] || c.premiumPrice2monthFcfa, premiumDaysWeek: map["premium_days_week"] || c.premiumDaysWeek, premiumDays2month: map["premium_days_2month"] || c.premiumDays2month, boostPrice1: map["boost_price_1"] || c.boostPrice1, boostPrice2: map["boost_price_2"] || c.boostPrice2, boostPrice3: map["boost_price_3"] || c.boostPrice3, sponsorPrice1: map["sponsor_price_1"] || c.sponsorPrice1, sponsorPrice2: map["sponsor_price_2"] || c.sponsorPrice2, sponsorPrice3: map["sponsor_price_3"] || c.sponsorPrice3, premiumPriceEur: map["premium_price_eur"] || c.premiumPriceEur, eurToFcfaRate: map["eur_to_fcfa_rate"] || c.eurToFcfaRate, premiumDurationDays: map["premium_duration_days"] || c.premiumDurationDays, likesNotifDelayHours: map["likes_notification_delay_hours"] || c.likesNotifDelayHours, featureStatuses: map["feature_statuses"] || c.featureStatuses, featureAssistant: map["feature_assistant"] || c.featureAssistant, maintenanceMode: map["maintenance_mode"] || c.maintenanceMode, maintenanceMessage: map["maintenance_message"] || c.maintenanceMessage, customBannedWords: map["custom_banned_words"] || c.customBannedWords, contactBannedWords: map["contact_banned_words"] || c.contactBannedWords, autoModContactReply: map["auto_mod_contact_reply"] || c.autoModContactReply }));
         if (map["custom_banned_words"] !== undefined) buildCustomBannedRegex(map["custom_banned_words"]);
         if (map["contact_banned_words"] !== undefined) buildContactBannedRegex(map["contact_banned_words"]);
       }).catch(() => {});
@@ -4472,7 +4523,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
         <SiteInfoConfig auth={auth} group="landing" />
       </OffCanvasSection>
       <OffCanvasSection title="Limites & Quotas">
-        {([["limit_likes_free","limitLikes" as keyof typeof appConfig,"Intérêts gratuits/jour",appConfig.limitLikes,"number"],["limit_photo_size_mb","limitPhotoSizeMb" as keyof typeof appConfig,"Taille max photo (Mo)",appConfig.limitPhotoSizeMb,"number"]] as [string, keyof typeof appConfig, string, string, string][]).map(([key,ck,label,value,type]) => (
+        {([["limit_photo_size_mb","limitPhotoSizeMb" as keyof typeof appConfig,"Taille max photo (Mo)",appConfig.limitPhotoSizeMb,"number"]] as [string, keyof typeof appConfig, string, string, string][]).map(([key,ck,label,value,type]) => (
           <EditableRow key={key} label={label} value={value} type={type as "text"|"number"} open={editingConfig === key} onOpen={() => { setEditingConfig(editingConfig === key ? null : key); setEditingConfigValue(value); }} editValue={editingConfigValue} onEdit={setEditingConfigValue} onSave={async () => { await patch(key, editingConfigValue); setAppConfig(c => ({ ...c, [ck]: editingConfigValue })); setEditingConfig(null); }} />
         ))}
         {([["limit_status_boosts","limitStatusBoosts" as keyof typeof appConfig,"Boosts statut/mois",appConfig.limitStatusBoosts]] as [string, keyof typeof appConfig, string, string][]).map(([key,ck,label,value]) => (
@@ -4480,8 +4531,8 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
         ))}
       </OffCanvasSection>
       <OffCanvasSection title="Prix & Abonnement">
-        {([["premium_price_fcfa","premiumPriceFcfa" as keyof typeof appConfig,"Prix 1 mois (FCFA)",appConfig.premiumPriceFcfa],["premium_price_week_fcfa","premiumPriceWeekFcfa" as keyof typeof appConfig,"Prix 1 semaine (FCFA)",appConfig.premiumPriceWeekFcfa],["premium_price_2month_fcfa","premiumPrice2monthFcfa" as keyof typeof appConfig,"Prix 2 mois (FCFA)",appConfig.premiumPrice2monthFcfa],["premium_price_eur","premiumPriceEur" as keyof typeof appConfig,"Prix Premium Diaspora (€)",appConfig.premiumPriceEur],["eur_to_fcfa_rate","eurToFcfaRate" as keyof typeof appConfig,"Taux 1 € en FCFA",appConfig.eurToFcfaRate],["premium_duration_days","premiumDurationDays" as keyof typeof appConfig,"Durée 1 mois (jours)",appConfig.premiumDurationDays],["premium_days_week","premiumDaysWeek" as keyof typeof appConfig,"Durée 1 semaine (jours)",appConfig.premiumDaysWeek],["premium_days_2month","premiumDays2month" as keyof typeof appConfig,"Durée 2 mois (jours)",appConfig.premiumDays2month],["likes_notification_delay_hours","likesNotifDelayHours" as keyof typeof appConfig,"Notif likes après (heures)",appConfig.likesNotifDelayHours]] as [string, keyof typeof appConfig, string, string][]).map(([key,ck,label,value]) => (
-          <EditableRow key={key} label={label} value={key === "premium_price_eur" ? value + " €" : value} type="number" open={editingConfig === key} onOpen={() => { setEditingConfig(editingConfig === key ? null : key); setEditingConfigValue(value); }} editValue={editingConfigValue} onEdit={setEditingConfigValue} onSave={async () => { await patch(key, editingConfigValue); setAppConfig(c => ({ ...c, [ck]: editingConfigValue })); if (key === "premium_price_fcfa") PREMIUM_PRICE_FCFA = parseInt(editingConfigValue) || 3500; if (key === "premium_price_week_fcfa") PREMIUM_PRICE_WEEK_FCFA = parseInt(editingConfigValue) || 1200; if (key === "premium_price_2month_fcfa") PREMIUM_PRICE_2MONTH_FCFA = parseInt(editingConfigValue) || 5900; if (key === "premium_days_week") PREMIUM_DAYS_WEEK = parseInt(editingConfigValue) || 7; if (key === "premium_days_2month") PREMIUM_DAYS_2MONTH = parseInt(editingConfigValue) || 62; if (key === "premium_price_eur") PREMIUM_PRICE_EUR = parseFloat(editingConfigValue) || 10; if (key === "eur_to_fcfa_rate") EUR_TO_FCFA = parseFloat(editingConfigValue) || 655.957; if (key === "premium_duration_days") PREMIUM_30_DAYS_MS = (parseInt(editingConfigValue) || 31) * 24 * 60 * 60 * 1000; setEditingConfig(null); }} />
+        {([["premium_price_fcfa","premiumPriceFcfa" as keyof typeof appConfig,"Prix 1 mois (FCFA)",appConfig.premiumPriceFcfa],["premium_price_week_fcfa","premiumPriceWeekFcfa" as keyof typeof appConfig,"Prix 1 semaine (FCFA)",appConfig.premiumPriceWeekFcfa],["premium_price_2month_fcfa","premiumPrice2monthFcfa" as keyof typeof appConfig,"Prix 2 mois (FCFA)",appConfig.premiumPrice2monthFcfa],["premium_price_eur","premiumPriceEur" as keyof typeof appConfig,"Prix Premium Diaspora (€)",appConfig.premiumPriceEur],["eur_to_fcfa_rate","eurToFcfaRate" as keyof typeof appConfig,"Taux 1 € en FCFA",appConfig.eurToFcfaRate],["premium_duration_days","premiumDurationDays" as keyof typeof appConfig,"Durée 1 mois (jours)",appConfig.premiumDurationDays],["premium_days_week","premiumDaysWeek" as keyof typeof appConfig,"Durée 1 semaine (jours)",appConfig.premiumDaysWeek],["premium_days_2month","premiumDays2month" as keyof typeof appConfig,"Durée 2 mois (jours)",appConfig.premiumDays2month],["boost_price_1","boostPrice1" as keyof typeof appConfig,"Boost annonce 24 h (FCFA)",appConfig.boostPrice1],["boost_price_2","boostPrice2" as keyof typeof appConfig,"Boost annonce 3 jours (FCFA)",appConfig.boostPrice2],["boost_price_3","boostPrice3" as keyof typeof appConfig,"Boost annonce 7 jours (FCFA)",appConfig.boostPrice3],["sponsor_price_1","sponsorPrice1" as keyof typeof appConfig,"Sponsor fiche 7 jours (FCFA)",appConfig.sponsorPrice1],["sponsor_price_2","sponsorPrice2" as keyof typeof appConfig,"Sponsor fiche 30 jours (FCFA)",appConfig.sponsorPrice2],["sponsor_price_3","sponsorPrice3" as keyof typeof appConfig,"Sponsor fiche 2 mois (FCFA)",appConfig.sponsorPrice3]] as [string, keyof typeof appConfig, string, string][]).map(([key,ck,label,value]) => (
+          <EditableRow key={key} label={label} value={key === "premium_price_eur" ? value + " €" : value} type="number" open={editingConfig === key} onOpen={() => { setEditingConfig(editingConfig === key ? null : key); setEditingConfigValue(value); }} editValue={editingConfigValue} onEdit={setEditingConfigValue} onSave={async () => { await patch(key, editingConfigValue); setAppConfig(c => ({ ...c, [ck]: editingConfigValue })); if (key === "premium_price_fcfa") PREMIUM_PRICE_FCFA = parseInt(editingConfigValue) || 3500; if (key === "premium_price_week_fcfa") PREMIUM_PRICE_WEEK_FCFA = parseInt(editingConfigValue) || 1200; if (key === "premium_price_2month_fcfa") PREMIUM_PRICE_2MONTH_FCFA = parseInt(editingConfigValue) || 5900; if (key === "premium_days_week") PREMIUM_DAYS_WEEK = parseInt(editingConfigValue) || 7; if (key === "premium_days_2month") PREMIUM_DAYS_2MONTH = parseInt(editingConfigValue) || 62; if (key === "premium_price_eur") PREMIUM_PRICE_EUR = parseFloat(editingConfigValue) || 10; if (key === "eur_to_fcfa_rate") EUR_TO_FCFA = parseFloat(editingConfigValue) || 655.957; if (key === "premium_duration_days") PREMIUM_30_DAYS_MS = (parseInt(editingConfigValue) || 31) * 24 * 60 * 60 * 1000; if (key === "boost_price_1") BOOST_PRICE_1 = parseInt(editingConfigValue) || 500; if (key === "boost_price_2") BOOST_PRICE_2 = parseInt(editingConfigValue) || 1000; if (key === "boost_price_3") BOOST_PRICE_3 = parseInt(editingConfigValue) || 2000; if (key === "sponsor_price_1") SPONSOR_PRICE_1 = parseInt(editingConfigValue) || 2000; if (key === "sponsor_price_2") SPONSOR_PRICE_2 = parseInt(editingConfigValue) || 5000; if (key === "sponsor_price_3") SPONSOR_PRICE_3 = parseInt(editingConfigValue) || 9000; setEditingConfig(null); }} />
         ))}
       </OffCanvasSection>
       <OffCanvasSection title="Fonctionnalités">
@@ -10475,7 +10526,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
       };
 
       const [rTotalUsers, rMatches, rMessages, rTotalReports,
-             rPremium, rVerified, rBanned, rMale, rFemale, rTodayUsers] = await Promise.all([
+             rPremium, rVerified, rBanned, rPros, rClients, rTodayUsers] = await Promise.all([
         fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id`, { headers: countHeader }),
         fetch(`${SUPABASE_URL}/rest/v1/matches?select=id`, { headers: countHeader }),
         fetch(`${SUPABASE_URL}/rest/v1/messages?select=id`, { headers: countHeader }),
@@ -10483,8 +10534,8 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
         fetch(`${SUPABASE_URL}/rest/v1/profiles?is_premium=eq.true&select=id`, { headers: countHeader }),
         fetch(`${SUPABASE_URL}/rest/v1/profiles?is_verified=eq.true&select=id`, { headers: countHeader }),
         fetch(`${SUPABASE_URL}/rest/v1/profiles?is_banned=eq.true&select=id`, { headers: countHeader }),
-        fetch(`${SUPABASE_URL}/rest/v1/profiles?gender=eq.Homme&select=id`, { headers: countHeader }),
-        fetch(`${SUPABASE_URL}/rest/v1/profiles?gender=eq.Femme&select=id`, { headers: countHeader }),
+        fetch(`${SUPABASE_URL}/rest/v1/profiles?account_type=eq.pro&select=id`, { headers: countHeader }),
+        fetch(`${SUPABASE_URL}/rest/v1/profiles?account_type=eq.client&select=id`, { headers: countHeader }),
         fetch(`${SUPABASE_URL}/rest/v1/profiles?created_at=gte.${todayIso}&select=id`, { headers: countHeader }),
       ]);
 
@@ -10509,8 +10560,8 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
         premiumUsers: parseCount(rPremium),
         verifiedUsers: parseCount(rVerified),
         bannedUsers: parseCount(rBanned),
-        maleCount: parseCount(rMale),
-        femaleCount: parseCount(rFemale),
+        maleCount: parseCount(rPros),
+        femaleCount: parseCount(rClients),
         topCities,
         recentUsers,
       });
@@ -12605,29 +12656,33 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <div data-admgrid="row">
               {/* Ratio Genre */}
               <div style={{ background: G.blanc, borderRadius: 16, padding: "16px", marginBottom: 14, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                <h3 style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, marginBottom: 12 }}>Ratio Homme / Femme</h3>
-                {stats.users > 0 ? (
+                <h3 style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, marginBottom: 12 }}>Répartition Pros / Clients</h3>
+                {(stats.maleCount + stats.femaleCount) > 0 ? (() => {
+                  const base = stats.maleCount + stats.femaleCount;
+                  const proPct = Math.round(stats.maleCount / base * 100);
+                  return (
                   <>
                     <div style={{ display: "flex", gap: 10, marginBottom: 8 }}>
                       <div style={{ flex: 1, textAlign: "center" }}>
-                        <div style={{ fontSize: "1.3rem", fontWeight: 800, color: "#1a6ef5" }}>{stats.maleCount}</div>
-                        <div style={{ fontSize: "0.7rem", color: "#555" }}>Hommes</div>
+                        <div style={{ fontSize: "1.3rem", fontWeight: 800, color: "#B8860B" }}>{stats.maleCount}</div>
+                        <div style={{ fontSize: "0.7rem", color: "#555" }}>Professionnels</div>
                       </div>
                       <div style={{ flex: 1, textAlign: "center" }}>
-                        <div style={{ fontSize: "1.3rem", fontWeight: 800, color: "#e91e8c" }}>{stats.femaleCount}</div>
-                        <div style={{ fontSize: "0.7rem", color: "#555" }}>Femmes</div>
+                        <div style={{ fontSize: "1.3rem", fontWeight: 800, color: "#1a6ef5" }}>{stats.femaleCount}</div>
+                        <div style={{ fontSize: "0.7rem", color: "#555" }}>Clients</div>
                       </div>
                     </div>
                     <div style={{ height: 10, borderRadius: 50, background: "#f0f0f0", overflow: "hidden", display: "flex" }}>
-                      <div style={{ width: `${Math.round(stats.maleCount / stats.users * 100)}%`, background: "#1a6ef5", borderRadius: "50px 0 0 50px", transition: "width 0.5s" }} />
-                      <div style={{ flex: 1, background: "#e91e8c", borderRadius: "0 50px 50px 0" }} />
+                      <div style={{ width: `${proPct}%`, background: "#D4A843", borderRadius: "50px 0 0 50px", transition: "width 0.5s" }} />
+                      <div style={{ flex: 1, background: "#1a6ef5", borderRadius: "0 50px 50px 0" }} />
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, fontSize: "0.68rem", color: "#888" }}>
-                      <span>{Math.round(stats.maleCount / stats.users * 100)}% H</span>
-                      <span>{Math.round(stats.femaleCount / stats.users * 100)}% F</span>
+                      <span>{proPct}% pros</span>
+                      <span>{100 - proPct}% clients</span>
                     </div>
                   </>
-                ) : <p style={{ fontSize: "0.82rem", color: "#aaa" }}>Données insuffisantes</p>}
+                  );
+                })() : <p style={{ fontSize: "0.82rem", color: "#aaa" }}>Données insuffisantes</p>}
               </div>
 
               {/* Top villes */}
@@ -16032,12 +16087,12 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
 
 function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Publication; onClose: () => void; onBoosted: () => void }) {
   const TIERS = [
-    { price: 500, days: 1, label: "Boost 24 h", sub: "En tête pendant 1 jour" },
-    { price: 1000, days: 3, label: "Boost 3 jours", sub: "Le plus choisi" },
-    { price: 2000, days: 7, label: "Boost 7 jours", sub: "Visibilité maximale" },
+    { price: BOOST_PRICE_1, days: 1, label: "Boost 24 h", sub: "En tête pendant 1 jour" },
+    { price: BOOST_PRICE_2, days: 3, label: "Boost 3 jours", sub: "Le plus choisi" },
+    { price: BOOST_PRICE_3, days: 7, label: "Boost 7 jours", sub: "Visibilité maximale" },
   ];
   const [tier, setTier] = useState(TIERS[0]);
-  const [operator, setOperator] = useState<"MTN" | "Airtel">("MTN");
+  const [operator, setOperator] = useState<"MTN" | "Airtel">(PAY_MTN_ENABLED ? "MTN" : "Airtel");
   const [txRef, setTxRef] = useState("");
   const [paying, setPaying] = useState(false);
   const [sent, setSent] = useState(false);
@@ -16085,12 +16140,15 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
         </div>
       ))}
       <div style={{ display: "flex", gap: 9, margin: "16px 0 6px" }}>
-        {(["MTN", "Airtel"] as const).map(o => (
-          <button key={o} onClick={() => setOperator(o)} style={{ flex: 1, border: `1.5px solid ${operator === o ? "#111" : G.gris}`, background: G.blanc, borderRadius: 10, padding: 11, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+        {(["MTN", "Airtel"] as const).map(o => {
+          const okOp = o === "MTN" ? PAY_MTN_ENABLED : PAY_AIRTEL_ENABLED;
+          return (
+          <button key={o} disabled={!okOp} onClick={() => okOp && setOperator(o)} style={{ flex: 1, border: `1.5px solid ${operator === o && okOp ? "#111" : G.gris}`, background: okOp ? G.blanc : "#ececec", borderRadius: 10, padding: 11, fontSize: 12, fontWeight: 700, cursor: okOp ? "pointer" : "not-allowed", opacity: okOp ? 1 : 0.6 }}>
             <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", marginRight: 5, background: o === "MTN" ? "#FFCC00" : "#E30613" }} />
-            {o === "MTN" ? "MTN MoMo" : "Airtel Money"}
+            {o === "MTN" ? "MTN MoMo" : "Airtel Money"}{!okOp && <span style={{ fontSize: "0.6rem", fontWeight: 700 }}> (indispo)</span>}
           </button>
-        ))}
+          );
+        })}
       </div>
       <div style={{ background: G.creme, border: `1px solid ${G.gris}`, borderRadius: 12, padding: "13px 15px", margin: "12px 0", fontSize: "0.84rem", color: "#444", lineHeight: 1.6 }}>
         Envoyez <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> au numéro <b>{operator === "MTN" ? "MTN MoMo" : "Airtel Money"}</b> :
@@ -16107,12 +16165,12 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
 
 function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: string; onClose: () => void }) {
   const TIERS = [
-    { price: 2000, days: 7, label: "Sponsor 7 jours", sub: "En tête du répertoire 1 semaine" },
-    { price: 5000, days: 30, label: "Sponsor 30 jours", sub: "Le plus choisi" },
-    { price: 9000, days: 62, label: "Sponsor 2 mois", sub: "Visibilité maximale" },
+    { price: SPONSOR_PRICE_1, days: 7, label: "Sponsor 7 jours", sub: "En tête du répertoire 1 semaine" },
+    { price: SPONSOR_PRICE_2, days: 30, label: "Sponsor 30 jours", sub: "Le plus choisi" },
+    { price: SPONSOR_PRICE_3, days: 62, label: "Sponsor 2 mois", sub: "Visibilité maximale" },
   ];
   const [tier, setTier] = useState(TIERS[1]);
-  const [operator, setOperator] = useState<"MTN" | "Airtel">("MTN");
+  const [operator, setOperator] = useState<"MTN" | "Airtel">(PAY_MTN_ENABLED ? "MTN" : "Airtel");
   const [txRef, setTxRef] = useState("");
   const [paying, setPaying] = useState(false);
   const [sent, setSent] = useState(false);
@@ -16159,12 +16217,15 @@ function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: str
         </div>
       ))}
       <div style={{ display: "flex", gap: 9, margin: "16px 0 6px" }}>
-        {(["MTN", "Airtel"] as const).map(o => (
-          <button key={o} onClick={() => setOperator(o)} style={{ flex: 1, border: `1.5px solid ${operator === o ? "#111" : G.gris}`, background: G.blanc, borderRadius: 10, padding: 11, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+        {(["MTN", "Airtel"] as const).map(o => {
+          const okOp = o === "MTN" ? PAY_MTN_ENABLED : PAY_AIRTEL_ENABLED;
+          return (
+          <button key={o} disabled={!okOp} onClick={() => okOp && setOperator(o)} style={{ flex: 1, border: `1.5px solid ${operator === o && okOp ? "#111" : G.gris}`, background: okOp ? G.blanc : "#ececec", borderRadius: 10, padding: 11, fontSize: 12, fontWeight: 700, cursor: okOp ? "pointer" : "not-allowed", opacity: okOp ? 1 : 0.6 }}>
             <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", marginRight: 5, background: o === "MTN" ? "#FFCC00" : "#E30613" }} />
-            {o === "MTN" ? "MTN MoMo" : "Airtel Money"}
+            {o === "MTN" ? "MTN MoMo" : "Airtel Money"}{!okOp && <span style={{ fontSize: "0.6rem", fontWeight: 700 }}> (indispo)</span>}
           </button>
-        ))}
+          );
+        })}
       </div>
       <div style={{ background: G.creme, border: `1px solid ${G.gris}`, borderRadius: 12, padding: "13px 15px", margin: "12px 0", fontSize: "0.84rem", color: "#444", lineHeight: 1.6 }}>
         Envoyez <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> au numéro <b>{operator === "MTN" ? "MTN MoMo" : "Airtel Money"}</b> :
@@ -16766,7 +16827,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
   );
 }
 
-function Annuaire({ auth, accountType, myCategory, onGoMessages }: { auth: Auth; accountType?: string; myCategory?: string; onGoMessages: (partnerId: string) => void }) {
+function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, onGoMessages }: { auth: Auth; accountType?: string; myCategory?: string; initialProId?: string | null; onProConsumed?: () => void; onGoMessages: (partnerId: string) => void }) {
   const isPro = accountType === "pro";
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("all");
@@ -16776,6 +16837,20 @@ function Annuaire({ auth, accountType, myCategory, onGoMessages }: { auth: Auth;
   const [pros, setPros] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [openFiche, setOpenFiche] = useState<Profile | null>(null);
+  // Ouvre automatiquement la fiche d'un pro ciblé depuis la landing (après connexion/inscription).
+  React.useEffect(() => {
+    if (!initialProId) return;
+    let alive = true;
+    (async () => {
+      try {
+        const rows = await sb.query<Profile>(auth.token, "profiles", `?id=eq.${initialProId}&limit=1`);
+        if (alive && rows && rows[0]) setOpenFiche(rows[0]);
+      } catch {}
+      finally { onProConsumed?.(); }
+    })();
+    return () => { alive = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialProId]);
   const [toast, setToast] = useState<string | null>(null);
   const [favs, setFavs] = useState<Set<string>>(new Set());
   const [repView, setRepView] = useState<"all" | "fav">("all");
@@ -17012,6 +17087,7 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstall, setShowInstall] = useState(false);
   const [openConvPartnerId, setOpenConvPartnerId] = useState<string | null>(null);
+  const [pendingProId, setPendingProId] = useState<string | null>(null);
   const [inConv, setInConv] = useState(false);
   const [adminBadgeCount, setAdminBadgeCount] = useState(0);
   const [sessionLoaded, setSessionLoaded] = useState(false);
@@ -17283,7 +17359,16 @@ export default function App() {
 
   const handleAuth = (a: Auth) => {
     authRef.current = a;
-    setAuth(a); setPage("app"); setTab("publications");
+    setAuth(a); setPage("app");
+    // Redirection vers la cible choisie sur la landing (besoin ou pro) avant connexion.
+    let target: { kind?: string; id?: string } | null = null;
+    try { const t = localStorage.getItem("moyo_pending_target"); if (t) target = JSON.parse(t); localStorage.removeItem("moyo_pending_target"); } catch {}
+    if (target && target.kind === "pro" && target.id) {
+      setPendingProId(target.id);
+      setTab("discover");
+    } else {
+      setTab("publications");
+    }
     try { localStorage.setItem("moyo_session", JSON.stringify(a)); } catch {}
     // (La demande de notifications push est gérée par un useEffect dédié,
     //  pour couvrir aussi les sessions restaurées et pas seulement le login.)
@@ -17830,7 +17915,7 @@ export default function App() {
       <div key={tab} className="page-anim" style={{ width: "100%", height: "100%" }}>
       {tab === "publications" && <Publications auth={auth} accountType={meType} onShowPremium={showPremium} publishNonce={publishNonce} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "publier" && <PublierHub auth={auth} accountType={meType} onGoFeed={() => setTab("publications")} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
-      {tab === "discover" && <Annuaire auth={auth} accountType={meType} myCategory={meCategory} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
+      {tab === "discover" && <Annuaire auth={auth} accountType={meType} myCategory={meCategory} initialProId={pendingProId} onProConsumed={() => setPendingProId(null)} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "messages" && <Messages auth={auth} accountType={meType} onUnreadCount={setUnreadCount} onShowPremium={showPremium} initialPartnerId={openConvPartnerId} onConvOpen={setInConv} />}
       {tab === "profile" && <Profile auth={auth} onLogout={handleLogout} onShowPremium={showPremium} darkMode={darkMode} onToggleDark={() => { const v = !darkMode; setDarkMode(v); localStorage.setItem("moyo_dark", v ? "1" : "0"); }} onOpenAdmin={auth.isAdmin ? () => openAdminPanel(() => setTab("admin")) : undefined} adminBadgeCount={adminBadgeCount} assistantEnabled={assistantEnabled} onToggleAssistant={toggleAssistant} />}
       {tab === "admin" && <AdminPinGate auth={auth} onBack={() => setTab("publications")} onBadgeCount={setAdminBadgeCount} />}
