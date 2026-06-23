@@ -1224,6 +1224,7 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
   const [txRef, setTxRef] = useState("");
   const [txSent, setTxSent] = useState(false);
   const [txLoading, setTxLoading] = useState(false);
+  const [txError, setTxError] = useState("");
   const [showAllAdv, setShowAllAdv] = useState(false);
   const [stats, setStats] = useState<{ connections: number | null; premium: number | null }>({ connections: null, premium: null });
   const [manualStats, setManualStats] = useState<{ connections: string; members: string }>({ connections: PREMIUM_STAT_CONNECTIONS, members: PREMIUM_STAT_MEMBERS });
@@ -1398,10 +1399,21 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
   const tel = `tel:${OP.ussd.replace(/#/g, "%23")}`;
   const submit = async () => {
     setTxLoading(true);
+    setTxError("");
     try {
-      await fetch(`${SUPABASE_URL}/rest/v1/payment_requests`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${token}`, "Prefer": "return=representation" }, body: JSON.stringify({ user_id: userId, operator: OP.operator, tx_ref: txRef.trim(), amount: planAmount, status: "pending" }) });
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/payment_requests`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${token}`, "Prefer": "return=representation" }, body: JSON.stringify({ user_id: userId, operator: OP.operator, tx_ref: txRef.trim(), amount: planAmount, status: "pending" }) });
+      const body = await r.json().catch(() => null);
+      const row = Array.isArray(body) ? body[0] : body;
+      if (!r.ok || !row?.id) {
+        // L'enregistrement a échoué (colonne manquante, droits, réseau…) : surtout NE PAS afficher un faux succès.
+        setTxError(row?.message || row?.code || "Échec de l'envoi. Votre demande n'a pas été enregistrée. Réessayez, et si le problème persiste contactez l'assistance.");
+        setTxLoading(false);
+        return;
+      }
       setTxSent(true);
-    } catch { setTxSent(true); }
+    } catch (e: any) {
+      setTxError("Échec de l'envoi (réseau) : " + (e?.message || "réessayez") + ". Votre demande n'a pas été enregistrée.");
+    }
     setTxLoading(false);
   };
   const numBadge = (n: string) => <div style={{ width: 26, height: 26, borderRadius: "50%", background: OP.numBg, color: OP.numColor, fontWeight: 800, fontSize: "0.85rem", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{n}</div>;
@@ -1463,6 +1475,9 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
 
         {!txSent && (
           <div style={{ padding: "14px 16px", background: G.blanc, borderTop: "1px solid #eee", flexShrink: 0 }}>
+            {txError && (
+              <div style={{ background: "rgba(231,76,60,0.08)", border: "1.5px solid #e74c3c", borderRadius: 12, padding: "10px 12px", marginBottom: 10, fontSize: "0.8rem", color: "#c0392b", lineHeight: 1.5 }}>{txError}</div>
+            )}
             <button disabled={!txRef.trim() || txLoading} onClick={submit} style={{ width: "100%", background: !txRef.trim() || txLoading ? "#d2d2d2" : OP.main, color: !txRef.trim() || txLoading ? "#888" : OP.onColor, border: "none", borderRadius: 50, padding: "15px", fontSize: "0.95rem", fontWeight: 800, cursor: !txRef.trim() ? "not-allowed" : "pointer" }}>
               {txLoading ? "Envoi en cours…" : "✓ J'ai payé - Envoyer mon numéro ID"}
             </button>
@@ -9554,13 +9569,18 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
   const loadPayments = async () => {
     setPaymentsLoading(true);
     try {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/payment_requests?select=id,user_id,operator,tx_ref,amount,status,created_at,approved_at,gift_for,gift_for_name,archived,currency,kind,target_id,duration_days&status=neq.deleted&archived=eq.false&order=created_at.desc&limit=100`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` } });
-      const data = await r.json().catch(() => []);
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/payment_requests?select=id,user_id,operator,tx_ref,amount,status,created_at,approved_at,gift_for,gift_for_name,archived,currency,kind,target_id,duration_days&status=neq.deleted&or=(archived.is.null,archived.eq.false)&order=created_at.desc&limit=100`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` } });
+      const data = await r.json().catch(() => null);
       if (Array.isArray(data)) {
         setPayments(data);
         setPendingPaymentsCount(data.filter((p: PaymentRequest) => p.status === "pending").length);
+      } else {
+        // Supabase a renvoyé une erreur (colonne manquante, droits…) au lieu d'une liste : la rendre visible.
+        showToast("Erreur chargement des demandes : " + (data?.message || data?.code || "réponse inattendue de la base"), "error");
       }
-    } catch {}
+    } catch (e: any) {
+      showToast("Erreur réseau lors du chargement des demandes : " + (e?.message || "inconnue"), "error");
+    }
     setPaymentsLoading(false);
   };
   const activatePayment = async (p: PaymentRequest) => {
@@ -9793,7 +9813,9 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
       } else {
         setReviewsStats({ total: 0, avg: 0 });
       }
-    } catch {}
+    } catch (e: any) {
+      showToast("Erreur chargement des avis : " + (e?.message || "colonne manquante ou droits insuffisants"), "error");
+    }
     setReviewsLoading(false);
   };
 
@@ -10426,13 +10448,26 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
   const archiveConversation = async (userId: string, messageIds: string[]) => {
     setArchivingConv(userId);
     try {
-      await Promise.all(messageIds.filter(Boolean).map(id =>
+      const ids = messageIds.filter(Boolean);
+      const results = await Promise.all(ids.map(id =>
         fetch(`${SUPABASE_URL}/rest/v1/reports?id=eq.${id}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=minimal" },
+          headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=representation" },
           body: JSON.stringify({ status: "archived" }),
         })
       ));
+      // Vérifier qu'au moins une ligne a réellement basculé (sinon : 400 contrainte CHECK ou no-op RLS avalé en silence)
+      let okCount = 0; let firstErr = "";
+      for (const r of results) {
+        const body = await r.json().catch(() => null);
+        if (r.ok && Array.isArray(body) && body.length > 0) okCount++;
+        else if (!firstErr) firstErr = (Array.isArray(body) ? body[0]?.message : body?.message) || `HTTP ${r.status}`;
+      }
+      if (okCount === 0) {
+        showToast("Archivage refusé par la base : " + (firstErr || "aucune ligne modifiée") + ". (Vérifie la contrainte reports_status_check et la policy UPDATE.)", "error");
+        setArchivingConv(null);
+        return;
+      }
       setReports(prev => prev.map(r => messageIds.includes(r.id || "") ? { ...r, status: "archived" } : r));
       showToast("Conversation archivée.", "success");
       loadStats();
@@ -10935,16 +10970,23 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
           "Content-Type": "application/json",
           "apikey": SUPABASE_KEY,
           "Authorization": `Bearer ${auth.token}`,
+          "Prefer": "return=representation",
         },
       });
+      const deleted = await r.json().catch(() => null);
       if (!r.ok && r.status !== 204) {
-        const err = await r.json().catch(() => null);
-        const errMsg = err?.message || err?.code || `HTTP ${r.status}`;
+        const errMsg = deleted?.message || deleted?.code || `HTTP ${r.status}`;
         if (r.status === 403 || r.status === 401) {
           showToast(`Bloqué par RLS. Exécute ce SQL dans Supabase :\nCREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authenticated USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));`, "error");
         } else {
           showToast(`Erreur suppression : ${errMsg}`, "error");
         }
+        setReportActionLoading(null);
+        return;
+      }
+      // No-op RLS : statut 200/204 mais AUCUNE ligne réellement supprimée (policy DELETE manquante).
+      if (Array.isArray(deleted) && deleted.length === 0) {
+        showToast(`Suppression sans effet : 0 ligne supprimée (policy DELETE manquante côté Supabase).\nCREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authenticated USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));`, "error");
         setReportActionLoading(null);
         return;
       }
@@ -10966,8 +11008,13 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
       onConfirm: async () => {
         setConfirmModal(null);
         try {
-          const r = await fetch(`${SUPABASE_URL}/rest/v1/reports?id=eq.${id}`, { method: "DELETE", headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=minimal" } });
-          if (!r.ok && r.status !== 204) { showToast(`Erreur suppression (${r.status}).`, "error"); return; }
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/reports?id=eq.${id}`, { method: "DELETE", headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=representation" } });
+          const deleted = await r.json().catch(() => null);
+          if (!r.ok && r.status !== 204) { showToast(`Erreur suppression (${r.status}) : ${deleted?.message || deleted?.code || ""}`, "error"); return; }
+          if (Array.isArray(deleted) && deleted.length === 0) {
+            showToast(`Suppression sans effet : 0 ligne supprimée (policy DELETE manquante sur reports côté Supabase).`, "error");
+            return;
+          }
           setReports(prev => prev.filter(rep => rep.id !== id));
           showToast("Archive supprimée.", "success");
         } catch { showToast("Erreur réseau.", "error"); }
@@ -10985,21 +11032,21 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     setReportActionLoading("bulk");
     try {
       // Supabase : DELETE avec filtre IN sur les IDs archivés uniquement
-      const inList = archivedIds.map(id => `"${id}"`).join(",");
       const r = await fetch(
-        `${SUPABASE_URL}/rest/v1/reports?id=in.(${archivedIds.join(",")})&status=in.(reviewed,rejected,banned)`,
+        `${SUPABASE_URL}/rest/v1/reports?id=in.(${archivedIds.join(",")})&status=in.(reviewed,rejected,banned,archived)`,
         {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
             "apikey": SUPABASE_KEY,
             "Authorization": `Bearer ${auth.token}`,
+            "Prefer": "return=representation",
           },
         }
       );
+      const deletedRows = await r.json().catch(() => null);
       if (!r.ok && r.status !== 204) {
-        const err = await r.json().catch(() => null);
-        const errMsg = err?.message || err?.code || `HTTP ${r.status}`;
+        const errMsg = deletedRows?.message || deletedRows?.code || `HTTP ${r.status}`;
         if (r.status === 403 || r.status === 401) {
           showToast(`Bloqué par RLS. Exécute ce SQL dans Supabase :
 CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authenticated USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));`, "error");
@@ -11009,9 +11056,16 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
         setReportActionLoading(null);
         return;
       }
-      // Suppression locale immédiate - ne touche qu'aux archivés
-      setReports(prev => prev.filter(rep => !ARCHIVED_STATUSES.includes(rep.status)));
-      showToast(`${archivedIds.length} archive${archivedIds.length > 1 ? "s" : ""} supprimée${archivedIds.length > 1 ? "s" : ""} définitivement.`, "success");
+      // Suppression locale immédiate - ne retire que les lignes réellement supprimées en base
+      if (Array.isArray(deletedRows) && deletedRows.length === 0) {
+        showToast(`Suppression sans effet : 0 ligne supprimée (policy DELETE manquante sur reports côté Supabase).`, "error");
+        setReportActionLoading(null);
+        return;
+      }
+      const deletedIds = new Set((Array.isArray(deletedRows) ? deletedRows : []).map((d: { id: string }) => d.id));
+      setReports(prev => prev.filter(rep => !deletedIds.has(rep.id || "")));
+      const nDel = deletedIds.size || archivedIds.length;
+      showToast(`${nDel} archive${nDel > 1 ? "s" : ""} supprimée${nDel > 1 ? "s" : ""} définitivement.`, "success");
     } catch (e: any) {
       showToast("Erreur réseau : " + (e?.message || "inconnue"), "error");
     }
@@ -16099,6 +16153,7 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
     { price: BOOST_PRICE_3, days: 7, label: "Boost 7 jours", sub: "Visibilité maximale" },
   ];
   const [tier, setTier] = useState(TIERS[0]);
+  const [err, setErr] = useState("");
   const [operator, setOperator] = useState<"MTN" | "Airtel">(PAY_MTN_ENABLED ? "MTN" : "Airtel");
   const [txRef, setTxRef] = useState("");
   const [paying, setPaying] = useState(false);
@@ -16109,15 +16164,25 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
   async function submit() {
     if (!txRef.trim()) return;
     setPaying(true);
+    setErr("");
     try {
       // On crée UNIQUEMENT une demande en attente. La mise en avant n'est accordée qu'après validation admin du paiement.
-      await sb.insert(auth.token, "payment_requests", {
+      const rows = await sb.insert<any>(auth.token, "payment_requests", {
         user_id: auth.userId, operator, amount: tier.price, currency: "XAF",
         tx_ref: txRef.trim(), status: "pending",
         kind: "boost", target_id: pub.id, duration_days: tier.days,
       }, auth.refreshToken);
+      if (!rows?.[0]?.id) {
+        // L'INSERT a échoué (colonne manquante, droits…) : surtout ne pas afficher un faux « Demande envoyée ».
+        setErr((rows?.[0] as any)?.message || "Votre demande n'a pas pu être enregistrée. Réessayez, et si le problème persiste contactez l'assistance.");
+        setPaying(false);
+        return;
+      }
       setSent(true);
-    } catch { setPaying(false); }
+    } catch (e: any) {
+      setErr("Échec de l'envoi : " + (e?.message || "réseau") + ". Réessayez.");
+      setPaying(false);
+    }
   }
 
   if (sent) return (
@@ -16164,6 +16229,7 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
       </div>
       <div style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, marginBottom: 6 }}>Référence de la transaction reçue par SMS</div>
       <input value={txRef} onChange={e => setTxRef(e.target.value)} placeholder="Ex : PP260523.2232.A52074" style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${txRef ? G.or : G.gris}`, borderRadius: 12, padding: "13px 14px", fontSize: "0.9rem", fontWeight: 600, fontFamily: "inherit", outline: "none", marginBottom: 14 }} />
+      {err && <div style={{ background: "rgba(231,76,60,0.08)", border: "1.5px solid #e74c3c", borderRadius: 12, padding: "10px 12px", marginBottom: 10, fontSize: "0.8rem", color: "#c0392b", lineHeight: 1.5 }}>{err}</div>}
       <Btn variant="gold" onClick={submit} disabled={!txRef.trim()} loading={paying} style={{ width: "100%" }}>J'ai payé — envoyer la demande</Btn>
       <div style={{ fontSize: "0.74rem", color: "#999", textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>Votre annonce sera mise en avant après vérification du paiement (généralement sous 15 min).</div>
     </Sheet>
@@ -16177,6 +16243,7 @@ function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: str
     { price: SPONSOR_PRICE_3, days: 62, label: "Sponsor 2 mois", sub: "Visibilité maximale" },
   ];
   const [tier, setTier] = useState(TIERS[1]);
+  const [err, setErr] = useState("");
   const [operator, setOperator] = useState<"MTN" | "Airtel">(PAY_MTN_ENABLED ? "MTN" : "Airtel");
   const [txRef, setTxRef] = useState("");
   const [paying, setPaying] = useState(false);
@@ -16187,14 +16254,23 @@ function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: str
   async function submit() {
     if (!txRef.trim()) return;
     setPaying(true);
+    setErr("");
     try {
-      await sb.insert(auth.token, "payment_requests", {
+      const rows = await sb.insert<any>(auth.token, "payment_requests", {
         user_id: auth.userId, operator, amount: tier.price, currency: "XAF",
         tx_ref: txRef.trim(), status: "pending",
         kind: "sponsor", target_id: profileId, duration_days: tier.days,
       }, auth.refreshToken);
+      if (!rows?.[0]?.id) {
+        setErr((rows?.[0] as any)?.message || "Votre demande n'a pas pu être enregistrée. Réessayez, et si le problème persiste contactez l'assistance.");
+        setPaying(false);
+        return;
+      }
       setSent(true);
-    } catch { setPaying(false); }
+    } catch (e: any) {
+      setErr("Échec de l'envoi : " + (e?.message || "réseau") + ". Réessayez.");
+      setPaying(false);
+    }
   }
 
   if (sent) return (
@@ -16241,6 +16317,7 @@ function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: str
       </div>
       <div style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, marginBottom: 6 }}>Référence de la transaction reçue par SMS</div>
       <input value={txRef} onChange={e => setTxRef(e.target.value)} placeholder="Ex : PP260523.2232.A52074" style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${txRef ? G.or : G.gris}`, borderRadius: 12, padding: "13px 14px", fontSize: "0.9rem", fontWeight: 600, fontFamily: "inherit", outline: "none", marginBottom: 14 }} />
+      {err && <div style={{ background: "rgba(231,76,60,0.08)", border: "1.5px solid #e74c3c", borderRadius: 12, padding: "10px 12px", marginBottom: 10, fontSize: "0.8rem", color: "#c0392b", lineHeight: 1.5 }}>{err}</div>}
       <Btn variant="gold" onClick={submit} disabled={!txRef.trim()} loading={paying} style={{ width: "100%" }}>J'ai payé — envoyer la demande</Btn>
       <div style={{ fontSize: "0.74rem", color: "#999", textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>Votre fiche sera sponsorisée après vérification du paiement (généralement sous 15 min).</div>
     </Sheet>
@@ -17758,7 +17835,7 @@ export default function App() {
         const [rPending, rUnreadReviews, rPendingPayments] = await Promise.all([
           fetch(`${SUPABASE_URL}/rest/v1/reports?select=id&status=eq.pending`, { headers: h }),
           fetch(`${SUPABASE_URL}/rest/v1/app_ratings?select=id&is_read=eq.false`, { headers: h }),
-          fetch(`${SUPABASE_URL}/rest/v1/payment_requests?select=id&status=eq.pending`, { headers: h }),
+          fetch(`${SUPABASE_URL}/rest/v1/payment_requests?select=id&status=eq.pending&archived=eq.false`, { headers: h }),
         ]);
         const parseCount = (r: Response) => { const h2 = r.headers.get("content-range"); return h2 ? parseInt(h2.split("/")[1]) || 0 : 0; };
         const newCount = parseCount(rPending) + parseCount(rUnreadReviews) + parseCount(rPendingPayments);
