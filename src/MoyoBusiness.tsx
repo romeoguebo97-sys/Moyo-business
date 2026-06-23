@@ -2265,7 +2265,7 @@ function About({ onBack }: { onBack: () => void }) {
             <strong>Moyo Business</strong> (Moyo signifie "cœur" en swahili) est la première plateforme qui connecte les besoins aux compétences au Congo. Notre mission est simple : permettre à chacun de trouver rapidement le bon professionnel, le bon client ou le bon partenaire, au pays comme dans la diaspora.
           </p>
           <p style={{ fontSize: "0.88rem", lineHeight: 1.8, color: "#555", marginTop: 10 }}>
-            Nous croyons que chaque Congolais mérite de trouver l'amour dans un espace sûr, respectueux et adapté à notre culture et nos valeurs.
+            Nous croyons que chaque Congolais mérite de trouver les bons professionnels et de développer son activité dans un espace sûr, fiable et adapté à notre culture et nos réalités locales.
           </p>
         </div>
 
@@ -2501,7 +2501,7 @@ function Login({ onNav, onAuth }: { onNav: (p: string) => void; onAuth: (a: Auth
       onAuth({
         token: res.access_token,
         userId: res.user.id,
-        name: profiles[0].name || "Utilisateur",
+        name: profiles[0].name || "Membre",
         email: res.user.email || "",
         isPremium: effectivePremium(profiles[0].is_premium),
         isAdmin: profiles[0].is_admin || false,
@@ -6317,7 +6317,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
     </div>
     <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0" }}>
       {loading ? <div style={{ textAlign: "center", padding: 40 }}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{animation:"pulse 1s ease-in-out infinite"}}><circle cx="12" cy="12" r="10"/></svg></div> : convs.length === 0
-        ? <div style={{ textAlign: "center", padding: "40px 16px", color: "#888" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", margin: "0 auto 10px" }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p style={{ fontSize: "0.82rem" }}>Fais des matchs pour commencer à discuter !</p></div>
+        ? <div style={{ textAlign: "center", padding: "40px 16px", color: "#888" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", margin: "0 auto 10px" }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p style={{ fontSize: "0.82rem" }}>Contactez des professionnels pour démarrer une conversation !</p></div>
         : (() => {
             // ── Tri par date du dernier message (plus récent en haut) ──
             const formatConvTime = (dateStr?: string): string => {
@@ -7093,8 +7093,8 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
       {confirmUnmatchPartner && open.partner && (
         <ConfirmModal
           preset="delete"
-          title={`Annuler le match avec ${open.partner.name} ?`}
-          message="La conversation, les messages et les likes mutuels seront supprimés. Cette action est irréversible et la personne n'est pas notifiée."
+          title={`Mettre fin à la conversation avec ${open.partner.name} ?`}
+          message="La conversation et les messages seront supprimés. Cette action est irréversible et la personne n'est pas notifiée."
           confirmLabel="Annuler la mise en relation"
           cancelLabel="Retour"
           loading={partnerActionLoading}
@@ -7121,7 +7121,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
               <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#E0D5CC" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontWeight: 700, fontSize: "1rem", color: "#bbb", marginBottom: 6 }}>Sélectionne une conversation</div>
-                <div style={{ fontSize: "0.78rem", color: "#ccc" }}>Clique sur un match pour démarrer</div>
+                <div style={{ fontSize: "0.78rem", color: "#ccc" }}>Cliquez sur une conversation pour démarrer</div>
               </div>
             </div>
           ) : null}
@@ -7679,7 +7679,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
   const handleUnblock = async (blockId: string) => {
     await sb.delete(auth.token, "blocks", `?id=eq.${blockId}`);
     setBlockedUsers(prev => prev.filter(b => b.id !== blockId));
-    setToast({ msg: "Utilisateur débloqué" });
+    setToast({ msg: "Membre débloqué" });
   };
   const saveProfile = async () => {
     const isPro = (form.account_type ?? profile?.account_type) === "pro";
@@ -8727,7 +8727,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                   {b.profile?.photo_url ? <img src={b.profile.photo_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" /> : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem" }}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>{b.profile?.name || "Utilisateur"}</div>
+                  <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>{b.profile?.name || "Membre"}</div>
                   <div style={{ fontSize: "0.75rem", color: "#888" }}>{b.profile?.city || "-"}</div>
                 </div>
                 <div onClick={() => handleUnblock(b.id)} style={{ background: "rgba(212,168,67,0.08)", border: `1px solid rgba(212,168,67,0.2)`, borderRadius: 50, padding: "6px 14px", fontSize: "0.75rem", fontWeight: 700, color: G.rouge, cursor: "pointer" }}>Débloquer</div>
@@ -8756,7 +8756,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                     {b.profile?.photo_url ? <img src={b.profile.photo_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" /> : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem" }}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>{b.profile?.name || "Utilisateur"}</div>
+                    <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>{b.profile?.name || "Membre"}</div>
                     <div style={{ fontSize: "0.75rem", color: "#888" }}>{b.profile?.city || "-"}</div>
                   </div>
                   <div onClick={() => handleUnblock(b.id)} style={{ background: "rgba(212,168,67,0.08)", border: `1px solid rgba(212,168,67,0.2)`, borderRadius: 50, padding: "6px 14px", fontSize: "0.75rem", fontWeight: 700, color: G.rouge, cursor: "pointer", flexShrink: 0 }}>Débloquer</div>
@@ -9399,7 +9399,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
   const [proposals, setProposals] = useState<MatchProposal[]>([]);
   const [proposalsLoading, setProposalsLoading] = useState(false);
   const [usersViewMode, setUsersViewMode] = useState<"grid" | "list">("grid");
-  const [usersSort, setUsersSort] = useState<"created_at.desc" | "created_at.asc" | "name.asc" | "name.desc" | "last_seen.desc" | "age.asc" | "age.desc" | "online" | "premium" | "lifetime" | "admin" | "verified" | "banned" | "male" | "female">("created_at.desc");
+  const [usersSort, setUsersSort] = useState<"created_at.desc" | "created_at.asc" | "name.asc" | "name.desc" | "last_seen.desc" | "age.asc" | "age.desc" | "online" | "premium" | "lifetime" | "admin" | "verified" | "banned">("created_at.desc");
   const [adminViewedProfile, setAdminViewedProfile] = useState<Profile | null>(null);
   const openAdminProfile = async (userId: string) => {
     try {
@@ -9616,7 +9616,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     await fetch(`${SUPABASE_URL}/rest/v1/user_warnings`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=representation" }, body: JSON.stringify({ user_id: targetId, admin_id: auth.userId, reason: p.gift_for ? `🎁 Vous avez reçu 1 mois de Premium en cadeau offert par ${giftSenderName || "un membre Moyo"} ! Actualisez l'application pour profiter de toutes les fonctionnalités Premium 🌟` : "Votre abonnement Premium est maintenant actif ! Actualisez l'application pour profiter de toutes les fonctionnalités Premium 🌟", warning_number: 0, acknowledged: false }) });
     // Si cadeau, notifier aussi l'acheteur
     if (p.gift_for) {
-      await fetch(`${SUPABASE_URL}/rest/v1/user_warnings`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=representation" }, body: JSON.stringify({ user_id: p.user_id, admin_id: auth.userId, reason: `Votre cadeau Premium pour ${p.gift_for_name || "votre match"} a bien été activé !`, warning_number: 0, acknowledged: false }) });
+      await fetch(`${SUPABASE_URL}/rest/v1/user_warnings`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=representation" }, body: JSON.stringify({ user_id: p.user_id, admin_id: auth.userId, reason: `Votre cadeau Premium pour ${p.gift_for_name || "votre contact"} a bien été activé !`, warning_number: 0, acknowledged: false }) });
     }
     loadPayments();
   };
@@ -9627,7 +9627,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     loadPayments();
   };
   // Archiver = ranger dans l'onglet Archivage. Le statut (approved/rejected) et le Premium restent INCHANGÉS,
-  // pour que le chiffre d'affaires reste exact. Le retrait de Premium se fait depuis l'onglet Utilisateurs.
+  // pour que le chiffre d'affaires reste exact. Le retrait de Premium se fait depuis l'onglet Membres.
   const archivePayment = async (p: PaymentRequest) => {
     await fetch(`${SUPABASE_URL}/rest/v1/payment_requests?id=eq.${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` }, body: JSON.stringify({ archived: true }) });
     logAdminAction(auth.token, auth.userId, auth.name, `Paiement archivé - réf: ${p.tx_ref}`, p.user_id);
@@ -9755,7 +9755,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     const reset = financeResetAt ? new Date(financeResetAt).getTime() : 0;
     const rows = financeRows.filter(r => new Date(r.approved_at || r.created_at).getTime() >= reset);
     const esc = (v: any) => { const str = String(v ?? ""); return /[",;\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str; };
-    const header = ["Date", "Utilisateur", "Type", "Operateur", "Devise", "Reference", "Montant", "Exclu_du_CA"];
+    const header = ["Date", "Membre", "Type", "Operateur", "Devise", "Reference", "Montant", "Exclu_du_CA"];
     const lines = rows.map(r => [
       new Date(r.approved_at || r.created_at).toLocaleDateString("fr-FR"),
       financeNames[r.user_id] || r.user_id,
@@ -9996,7 +9996,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
   const [broadcastLoading, setBroadcastLoading] = useState(false);
   const [broadcastExpiresAt, setBroadcastExpiresAt] = useState("");
   const [broadcastResult, setBroadcastResult] = useState<{ ok: boolean; message: string } | null>(null);
-  const [broadcastTarget, setBroadcastTarget] = useState<"all" | "femmes" | "hommes" | "premium" | "gratuit">("all");
+  const [broadcastTarget, setBroadcastTarget] = useState<"all" | "premium" | "gratuit">("all");
   const [broadcastPlan, setBroadcastPlan] = useState<"all" | "premium" | "gratuit">("all");
   const [broadcastList, setBroadcastList] = useState<{ id: string; message: string; target?: string; created_at?: string; expires_at?: string }[]>([]);
   const [broadcastDeleting, setBroadcastDeleting] = useState<string | null>(null);
@@ -10173,8 +10173,8 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
   const CAMP_TARGETS: { key: string; label: string; badge?: string }[] = [
     { key: "all", label: "Tous les utilisateurs gratuits", badge: "Recommandé" },
     { key: "nouveaux", label: "Nouveaux inscrits (moins de 30 jours)" },
-    { key: "inactifs", label: "Utilisateurs inactifs depuis 30 jours" },
-    { key: "actifs", label: "Utilisateurs actifs cette semaine" },
+    { key: "inactifs", label: "Membres inactifs depuis 30 jours" },
+    { key: "actifs", label: "Membres actifs cette semaine" },
     { key: "verifies", label: "Comptes vérifiés" },
   ];
   const [campTarget, setCampTarget] = useState("all");
@@ -10201,7 +10201,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
   };
     const [mktTab, setMktTab] = useState<"statuts" | "event">("statuts");
   const campTargetLabel = (t: string) => CAMP_TARGETS.find(x => x.key === t)?.label || "Tous les utilisateurs gratuits";
-  const campName = (t: string) => ({ all: "Premium pour tous", femmes: "Premium spécial femmes", hommes: "Premium spécial hommes", nouveaux: "Bienvenue nouveaux inscrits", inactifs: "Campagne de réengagement", actifs: "Premium membres actifs", verifies: "Premium comptes vérifiés" } as Record<string, string>)[t] || "Campagne Premium";
+  const campName = (t: string) => ({ all: "Premium pour tous", nouveaux: "Bienvenue nouveaux inscrits", inactifs: "Campagne de réengagement", actifs: "Premium membres actifs", verifies: "Premium comptes vérifiés" } as Record<string, string>)[t] || "Campagne Premium";
   useEffect(() => {
     if (activeTab !== "marketing" || mktTab !== "event") return;
     let cancelled = false;
@@ -10457,8 +10457,6 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
       case "admin":     return list.sort((a, b) => Number(!!b.is_admin) - Number(!!a.is_admin));
       case "verified":  return list.sort((a, b) => Number(!!b.is_verified) - Number(!!a.is_verified));
       case "banned":    return list.sort((a, b) => Number(!!b.is_banned) - Number(!!a.is_banned));
-      case "male":      return list.sort((a, b) => (a.gender === "Homme" ? -1 : 1));
-      case "female":    return list.sort((a, b) => (a.gender === "Femme" ? -1 : 1));
       default:          return list;
     }
   }, [users, usersSort]);
@@ -10532,7 +10530,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
       // ── Charger un échantillon de profils pour top villes + derniers inscrits ──
       const [recentProfilesRes, reps] = await Promise.all([
         sb.query<AdminProfile>(auth.token, "profiles", "?select=id,name,age,city,gender,is_premium,is_admin,is_verified,is_banned,created_at,last_seen&order=created_at.desc&limit=500"),
-        sb.query<ReportRow>(auth.token, "reports", "?select=id,reason,reporter_id,reported_id,status,created_at&order=created_at.desc&limit=50"),
+        sb.query<ReportRow>(auth.token, "reports", "?select=id,reason,reporter_id,reported_id,status,created_at&order=created_at.desc&limit=200"),
       ]);
 
       // Top villes (sur l'échantillon de 500 derniers inscrits)
@@ -11279,7 +11277,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             </div>
             <div style={{ padding: "16px 20px 24px" }}>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-                {viewPaymentProfile.gender && <span style={{ background: G.creme, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600, color: "#555" }}>{viewPaymentProfile.gender}</span>}
+                {viewPaymentProfile.city && <span style={{ background: G.creme, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600, color: "#555" }}>{viewPaymentProfile.city}</span>}
                 {viewPaymentProfile.religion && <span style={{ background: "rgba(212,168,67,0.12)", borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600, color: "#555" }}>{viewPaymentProfile.religion}</span>}
                 {viewPaymentProfile.profession && <span style={{ background: G.creme, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600, color: "#555" }}>{viewPaymentProfile.profession}</span>}
                 {viewPaymentProfile.hobbies && <span style={{ background: "rgba(26,92,58,0.07)", borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600, color: "#2a5a3a" }}>{viewPaymentProfile.hobbies}</span>}
@@ -11339,7 +11337,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e67e22" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               </div>
               <div style={{ fontWeight: 800, fontSize: "1rem", color: G.brun }}>📢 Diffusion générale</div>
-              <div style={{ fontSize: "0.75rem", color: "#888", marginTop: 4 }}>Destinataires : {broadcastTarget === "all" ? "tous les utilisateurs" : broadcastTarget === "femmes" ? "les femmes" : broadcastTarget === "hommes" ? "les hommes" : broadcastTarget === "premium" ? "les membres Premium" : "les membres gratuits"}</div>
+              <div style={{ fontSize: "0.75rem", color: "#888", marginTop: 4 }}>Destinataires : {broadcastTarget === "all" ? "tous les membres" : broadcastTarget === "premium" ? "les membres Premium" : "les membres gratuits"}</div>
             </div>
             <div style={{ padding: "16px 20px 20px" }}>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
@@ -11939,10 +11937,6 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <div style={{ background: G.creme, borderRadius: 12, padding: "12px 14px", marginBottom: 16 }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
-                    <span style={{ color: "#888" }}>Genre</span>
-                    <span style={{ fontWeight: 600, color: G.brun }}>{reportProfilePreview.gender}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
                     <span style={{ color: "#888" }}>Ville</span>
                     <span style={{ fontWeight: 600, color: G.brun }}>{reportProfilePreview.city}</span>
                   </div>
@@ -12019,7 +12013,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     ["Messages", "Volume total de messages échangés."],
                     ["Signalements", "Nombre de signalements reçus toutes sources confondues."],
                     ["Nouveaux membres", "Inscriptions du jour en cours."],
-                    ["Premium actifs", "Utilisateurs ayant un abonnement Premium actif."],
+                    ["Premium actifs", "Membres ayant un abonnement Premium actif."],
                     ["Profils vérifiés", "Comptes ayant obtenu le badge de vérification."],
                     ["Profils bannis", "Comptes actuellement bannis de la plateforme."],
                   ] as [string, string][]).map(([label, desc]) => (
@@ -12031,11 +12025,11 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 </div>
               </div>
 
-              {/* Section 3 - Utilisateurs */}
+              {/* Section 3 - Membres */}
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ stroke: G.brun }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                  <span style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun }}>Onglet Utilisateurs</span>
+                  <span style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun }}>Onglet Membres</span>
                 </div>
                 <div style={{ background: "#FFF8F0", borderRadius: 10, padding: "9px 12px", marginBottom: 8, display: "flex", gap: 8, alignItems: "flex-start" }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -12044,7 +12038,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                   {([
                     ["Vue grille / Vue liste", "Basculez entre la vue grille (cartes détaillées) et la vue liste (lignes compactes) via les icônes en haut à droite. La vue liste affiche 500 utilisateurs par page avec numérotation, la vue grille en affiche 20."],
-                    ["Tri", "15 options de tri disponibles : Plus récents/anciens, A→Z/Z→A, Dernière connexion, En ligne d'abord, Âge croissant/décroissant, Premium d'abord, ♾️ À vie d'abord, Admin d'abord, Vérifiés d'abord, Bannis d'abord, Hommes/Femmes d'abord. Les tris par statut (Premium, Admin, etc.) s'appliquent instantanément sans rechargement."],
+                    ["Tri", "15 options de tri disponibles : Plus récents/anciens, A→Z/Z→A, Dernière connexion, En ligne d'abord, Âge croissant/décroissant, Premium d'abord, ♾️ À vie d'abord, Admin d'abord, Vérifiés d'abord, Bannis d'abord. Les tris par statut (Premium, Admin, etc.) s'appliquent instantanément sans rechargement."],
                     ["Voir le profil complet", "Cliquez sur la silhouette/avatar d'un utilisateur pour ouvrir sa fiche complète : photo, bio, religion, profession, centres d'intérêt, date d'inscription."],
                     ["Profils incomplets", "Cochez 'Afficher uniquement les profils incomplets (...)' pour filtrer les comptes dont l'inscription n'a pas été terminée (nom affiché comme '...'). Ces profils n'ont pas finalisé leur inscription."],
                     ["Sélection multiple", "Cochez les cases à gauche de chaque profil pour les sélectionner. Utilisez 'Tout sélectionner' pour sélectionner d'un coup tous les profils affichés. Idéal combiné avec le filtre 'Incomplets'."],
@@ -12148,7 +12142,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                  <span style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun }}>Onglet Matchs</span>
+                  <span style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun }}>Onglet Mises en relation</span>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                   {([
@@ -12229,7 +12223,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {([
-                    ["Bouton ✉ Message", "Dans l'onglet Utilisateurs, chaque carte possède un bouton bleu '✉ Message' dans la section Modération. Il permet d'envoyer un message privé directement à cet utilisateur."],
+                    ["Bouton ✉ Message", "Dans l'onglet Membres, chaque carte possède un bouton bleu '✉ Message' dans la section Modération. Il permet d'envoyer un message privé directement à cet utilisateur."],
                     ["Raccourcis disponibles", "La modale propose des messages pré-rédigés : expiration Premium, activation Premium, vérification en cours, profil vérifié, promotion -50%, signalement. Cliquez dessus pour pré-remplir le champ, puis modifiez si besoin."],
                     ["Champ libre", "Vous pouvez aussi rédiger un message entièrement personnalisé dans le champ texte."],
                     ["Réception côté utilisateur", "Le message apparaît sous forme de modal bleu 'Information Moyo' à la prochaine connexion de l'utilisateur. Il doit cliquer 'OK, J'AI COMPRIS' pour continuer."],
@@ -12251,7 +12245,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {([
-                    ["Accès", "Dans l'onglet Utilisateurs, le bouton orange '📢 Diffusion générale' se trouve au-dessus de la liste des utilisateurs."],
+                    ["Accès", "Dans l'onglet Membres, le bouton orange '📢 Diffusion générale' se trouve au-dessus de la liste des utilisateurs."],
                     ["Fonctionnement", "Un seul message est enregistré en base. À leur prochaine connexion, tous les utilisateurs qui n'ont pas encore vu ce message reçoivent le modal bleu 'Information Moyo'."],
                     ["Raccourcis disponibles", "Maintenance, mise à jour, incident résolu, promotions, rappels de bienveillance, sécurité. Cliquez pour pré-remplir, modifiez si besoin."],
                     ["À utiliser pour", "Annonces de maintenance, nouvelles fonctionnalités, promotions temporaires, rappels communautaires importants."],
@@ -12295,7 +12289,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     ["Expiration automatique", "À l'échéance des 31 jours, le statut Premium de l'utilisateur repasse automatiquement à gratuit dès sa prochaine connexion. Le compteur affiche 'Expiré'."],
                     ["Rejeter & notifier", "Marque la demande comme rejetée ET envoie un modal à l'utilisateur l'informant que sa preuve de paiement n'a pas pu être vérifiée."],
                     ["Bouton ↩", "Réinitialise la vérification pour recommencer la saisie si vous avez fait une erreur de frappe."],
-                    ["Bouton archiver 🗑", "Sur une demande traitée, la corbeille range le paiement dans le sous-onglet Archivage. Le Premium de l'utilisateur N'EST PAS modifié et le chiffre d'affaires reste inchangé. Pour retirer un Premium accordé par erreur, utilisez '- Premium' dans l'onglet Utilisateurs. La suppression définitive se fait depuis Archivage."],
+                    ["Bouton archiver 🗑", "Sur une demande traitée, la corbeille range le paiement dans le sous-onglet Archivage. Le Premium de l'utilisateur N'EST PAS modifié et le chiffre d'affaires reste inchangé. Pour retirer un Premium accordé par erreur, utilisez '- Premium' dans l'onglet Membres. La suppression définitive se fait depuis Archivage."],
                     ["Statuts des demandes", "En attente (Demandes) = à traiter. Approuvé ✓ / Rejeté ✕ (Traitées) = déjà traité. Archivé (Archivage) = rangé. Expiré = durée écoulée."],
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
@@ -12344,7 +12338,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     ["Création du PIN", "Lors de l'attribution du statut admin à un utilisateur (bouton '+ Admin'), un PIN à 4 chiffres est demandé. Ce PIN est communiqué à la personne par un canal sécurisé (SMS, WhatsApp)."],
                     ["Bouton 🔑 PIN", "Visible sur les cartes des admins existants (sauf la vôtre). Permet de réinitialiser le PIN d'un admin à tout moment."],
                     ["Retrait du statut admin", "Le bouton '- Admin' retire les droits admin ET supprime le PIN de la personne. Elle ne peut plus accéder au panel."],
-                    ["PIN oublié", "Seul l'administrateur principal peut réinitialiser un PIN via le bouton 🔑 PIN dans l'onglet Utilisateurs. Pour votre propre PIN, modifiez-le directement dans Supabase."],
+                    ["PIN oublié", "Seul l'administrateur principal peut réinitialiser un PIN via le bouton 🔑 PIN dans l'onglet Membres. Pour votre propre PIN, modifiez-le directement dans Supabase."],
                     ["Sécurité renforcée", "Le PIN est vérifié en temps réel dans Supabase à chaque tentative d'accès. Un mauvais PIN affiche un message d'erreur et vide le champ."],
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
@@ -12441,9 +12435,8 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {([
                     ["Accès", "Le bouton burger ☰ se trouve à droite du bouton 'Aide' dans la barre du haut. ⚠️ Il est désormais réservé au Super Admin : les admins simples ne le voient pas."],
-                    ["Règles - Switch même genre", "Vert = bloqué (Homme→Homme et Femme→Femme interdits). Rouge = ouvert (tous peuvent liker tous). Sauvegarde instantanée."],
-                    ["Textes des modals", "6 modals personnalisables : message même genre Homme/Femme, titre et sous-titre de la mise en relation, message Premium, message intérêts épuisés. Cliquer sur un modal pour éditer."],
-                    ["Limites & Quotas", "Intérêts gratuits/jour, messages gratuits/mise en relation, taille max des photos, message de bienvenue après mise en relation. Modifier sans redéployer."],
+                    ["Textes des modals", "Modals personnalisables : message de bienvenue à l'inscription et message Premium. Cliquer sur un modal pour éditer."],
+                    ["Limites & Quotas", "Taille max des photos et autres limites techniques. Modifier sans redéployer."],
                     ["Prix & Abonnement", "Prix Premium en FCFA et durée en jours. ⚠️ Le prix modifie les boutons de paiement. La durée s'applique aux nouveaux abonnements uniquement."],
                     ["Fonctionnalités on/off", "Activer/désactiver réellement les Statuts et l'Assistant IA dans toute l'app. Switch vert = actif, rouge = désactivé. La modification prend effet au prochain chargement de l'app."],
                     ["🔔 Notifications admin", "Pour chaque admin, choisir les notifications push qu'il reçoit : Signalements, Mises en relation, Paiements. Ex : activer 'Paiements' pour la personne qui gère les paiements → elle est prévenue à chaque nouveau paiement, même app fermée."],
@@ -12542,7 +12535,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
         <div className="admin-tabs" style={{ display: "flex", gap: 0, borderTop: `1px solid ${G.gris}`, overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}>
           {([
             ["stats", "Statistiques", IcoStats],
-            ["users", "Utilisateurs", IcoUsers],
+            ["users", "Membres", IcoUsers],
             ["reports", "Signalements", IcoAlert],
             ["messagerie", "Messagerie", () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={activeTab === "messagerie" ? G.rouge : "#999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>],
             ["marketing", "Marketing", () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={activeTab === "marketing" ? "#E67E22" : "#999"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>],
@@ -12608,11 +12601,40 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             </div>
           ) : (
             <>
+              {(() => {
+                const items = [
+                  { n: pendingCount, label: "Signalements en attente", tab: "reports", color: "#e67e22" },
+                  { n: messagingPendingCount, label: "Messages de support", tab: "messagerie", color: G.rouge },
+                  { n: unreadReviewsCount, label: "Avis non lus", tab: "reviews", color: "#B8860B" },
+                  { n: pendingPaymentsCount, label: "Paiements à valider", tab: "payments", color: "#27ae60" },
+                ].filter(it => it.n > 0);
+                const total = items.reduce((s, it) => s + it.n, 0);
+                if (total === 0) return null;
+                return (
+                  <div style={{ background: G.blanc, borderRadius: 16, padding: "14px 16px", marginBottom: 16, boxShadow: "0 2px 10px rgba(0,0,0,0.06)", border: `1.5px solid ${G.rouge}` }}>
+                    <div style={{ fontWeight: 800, fontSize: "0.9rem", color: G.brun, marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ background: G.rouge, color: "#fff", borderRadius: 50, minWidth: 22, height: 22, padding: "0 6px", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem" }}>{total}</span>
+                      À traiter
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      {items.map(it => (
+                        <div key={it.tab} onClick={() => { setActiveTab(it.tab as any); if (it.tab === "reviews") loadReviews(); }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 10, background: G.creme, cursor: "pointer" }}>
+                          <span style={{ fontSize: "0.84rem", fontWeight: 600, color: "#333" }}>{it.label}</span>
+                          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ background: it.color, color: "#fff", borderRadius: 50, minWidth: 20, height: 20, padding: "0 6px", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", fontWeight: 800 }}>{it.n}</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
               {/* Grille stats principales */}
               <div data-admgrid="main" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10, marginBottom: 16 }}>
                 {([
                   ["Membres total", stats.users, G.rouge, <IcoUsers key="u"/>],
-                  ["Mises en relation", stats.matches, "#8e44ad", <svg key="m" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>],
+                  ["Mises en relation", stats.matches, "#8e44ad", <svg key="m" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>],
                   ["Messages", stats.messages, "#2980b9", <svg key="ms" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>],
                   ["Signalements", stats.reports, "#e67e22", <IcoAlert key="a"/>],
                 ] as [string, number, string, React.ReactNode][]).map(([label, value, color, icon]) => (
@@ -12706,8 +12728,8 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   <h3 style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, marginBottom: 12 }}>Derniers inscrits</h3>
                   {stats.recentUsers.map(u => (
                     <div key={u.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${G.gris}` }}>
-                      <div style={{ width: 36, height: 36, borderRadius: "50%", background: u.gender === "Femme" ? "rgba(233,30,140,0.1)" : "rgba(26,110,245,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={u.gender === "Femme" ? "#e91e8c" : "#1a6ef5"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(212,168,67,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 600, fontSize: "0.85rem", display: "flex", alignItems: "center", gap: 5, color: G.brun }}>
@@ -12744,7 +12766,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   }
                   <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "40px 16px 14px", background: "linear-gradient(transparent, rgba(0,0,0,0.75))" }}>
                     <div style={{ color: "#fff", fontWeight: 800, fontSize: "1.3rem" }}>{adminViewedProfile.name}, {adminViewedProfile.age} ans</div>
-                    <div style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.8rem", marginTop: 3 }}>{adminViewedProfile.city} · {adminViewedProfile.gender}</div>
+                    <div style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.8rem", marginTop: 3 }}>{adminViewedProfile.city}</div>
                   </div>
                   <div onClick={() => setAdminViewedProfile(null)} style={{ position: "absolute", top: 12, right: 12, width: 34, height: 34, borderRadius: "50%", background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -12809,8 +12831,6 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <option value="admin">⚙️ Admin d'abord</option>
               <option value="verified">✓ Vérifiés d'abord</option>
               <option value="banned">⛔ Bannis d'abord</option>
-              <option value="male">👨 Hommes d'abord</option>
-              <option value="female">👩 Femmes d'abord</option>
             </select>
             {/* Toggle grille / liste */}
             <div style={{ display: "flex", borderRadius: 10, border: `2px solid ${G.gris}`, overflow: "hidden", flexShrink: 0 }}>
@@ -12904,8 +12924,8 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           </div>
                         )}
                         {/* Avatar */}
-                        <div onClick={() => openAdminProfile(u.id)} style={{ width: 34, height: 34, borderRadius: "50%", background: u.gender === "Femme" ? "rgba(233,30,140,0.1)" : "rgba(26,110,245,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer", position: "relative" }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={u.gender === "Femme" ? "#e91e8c" : "#1a6ef5"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <div onClick={() => openAdminProfile(u.id)} style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(212,168,67,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer", position: "relative" }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                           {onlineStatus && <div style={{ position: "absolute", bottom: 0, right: 0 }}>{onlineStatus}</div>}
                         </div>
                         {/* Infos */}
@@ -12914,7 +12934,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                             {u.name} {isSelf && <span style={{ fontSize: "0.60rem", color: G.vert, fontWeight: 700 }}>(Vous)</span>}
                             {u.name === "..." && <span style={{ fontSize: "0.60rem", color: "#e74c3c", fontWeight: 700, marginLeft: 3 }}>Incomplet</span>}
                           </div>
-                          <div style={{ fontSize: "0.67rem", color: "#888" }}>{u.age} ans · {u.city} · {u.gender}</div>
+                          <div style={{ fontSize: "0.67rem", color: "#888" }}>{u.age} ans · {u.city}</div>
                         </div>
                         {/* Badges statuts */}
                         <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>
@@ -12979,8 +12999,8 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           {selectedUsers.has(u.id) && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
                         </div>
                       )}
-                      <div onClick={() => openAdminProfile(u.id)} style={{ width: 42, height: 42, borderRadius: "50%", background: u.gender === "Femme" ? "rgba(233,30,140,0.1)" : "rgba(26,110,245,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={u.gender === "Femme" ? "#e91e8c" : "#1a6ef5"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      <div onClick={() => openAdminProfile(u.id)} style={{ width: 42, height: 42, borderRadius: "50%", background: "rgba(212,168,67,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 700, fontSize: "0.95rem", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 5, color: G.brun }}>
@@ -13003,7 +13023,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           })()}
                         </div>
                         <div style={{ fontSize: "0.75rem", color: "#888", marginTop: 2 }}>
-                          {u.age} ans · {u.city} · {u.gender}
+                          {u.age} ans · {u.city}
                           {u.created_at && <span> · inscrit le {formatDate(u.created_at)}</span>}
                         </div>
                         {/* Badges statuts */}
@@ -13049,7 +13069,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         {auth.userId === SUPER_ADMIN_ID && !isSelf && (() => {
                           const isSuperAdmin = (u as any).admin_level === "superadmin";
                           if (isSuperAdmin) {
-                            // Utilisateur déjà Super Admin → seulement "- Super Admin"
+                            // Membre déjà Super Admin → seulement "- Super Admin"
                             return (
                               <ActionBtn label="- Super Admin" color="#888" disabled={isLoading}
                                 onClick={() => confirm(`Retirer le statut Super Admin de ${u.name} ?`, async () => {
@@ -13059,7 +13079,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                                 })} />
                             );
                           }
-                          // Utilisateur pas Super Admin → boutons + Admin / - Admin / PIN / + Super Admin
+                          // Membre pas Super Admin → boutons + Admin / - Admin / PIN / + Super Admin
                           return <>
                             {!u.is_admin
                               ? <ActionBtn label="+ Admin" color={G.rouge} disabled={isLoading}
@@ -14266,7 +14286,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         <div><div style={{ fontWeight: 800, fontSize: "1.02rem" }}>Premium offert {campDays} jours</div><div style={{ fontSize: "0.74rem", opacity: 0.85 }}>{campName(campTarget)}</div></div>
                       </div>
                     </div>
-                    {[["Cible", campTargetLabel(campTarget)], ["Durée", `${campDays} jours`], ["Date de fin", campEndDate ? fmtDate(new Date(campEndDate).toISOString()) : "—"], ["Utilisateurs concernés", campCountLoading ? "…" : campCount === null ? "—" : `${campCount.toLocaleString("fr-FR")} utilisateurs`]].map(([k, v], i) => (
+                    {[["Cible", campTargetLabel(campTarget)], ["Durée", `${campDays} jours`], ["Date de fin", campEndDate ? fmtDate(new Date(campEndDate).toISOString()) : "—"], ["Membres concernés", campCountLoading ? "…" : campCount === null ? "—" : `${campCount.toLocaleString("fr-FR")} utilisateurs`]].map(([k, v], i) => (
                       <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 10, padding: "9px 0", borderBottom: i < 3 ? `1px solid ${G.creme}` : "none" }}>
                         <span style={{ fontSize: "0.78rem", color: "#999" }}>{k}</span>
                         <span style={{ fontSize: "0.8rem", fontWeight: 700, color: G.brun, textAlign: "right" }}>{v}</span>
@@ -14469,7 +14489,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                             </div>
                             <div>
-                              <div style={{ fontWeight: 700, fontSize: "0.83rem", color: G.brun }}>{r.profile?.name || "Utilisateur"}</div>
+                              <div style={{ fontWeight: 700, fontSize: "0.83rem", color: G.brun }}>{r.profile?.name || "Membre"}</div>
                               <div style={{ fontSize: "0.7rem", color: "#aaa" }}>{r.profile?.city || "-"} · {new Date(r.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}</div>
                             </div>
                           </div>
@@ -14555,10 +14575,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <textarea value={surveyEditor.intro_message} onChange={e => setSurveyEditor((s: any) => ({ ...s, intro_message: e.target.value }))} rows={2} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.84rem", outline: "none", boxSizing: "border-box", resize: "vertical", fontFamily: "inherit", marginBottom: 14 }} />
               <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: "#333", marginBottom: 6 }}>Destinataires</label>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
-                <select value={(surveyEditor.target || "all|all").split("|")[0]} onChange={e => setSurveyEditor((s: any) => ({ ...s, target: `${e.target.value}|${(s.target || "all|all").split("|")[1]}` }))} style={{ padding: "10px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.82rem", background: G.blanc }}>
-                  <option value="all">Tous les genres</option><option value="hommes">Hommes</option><option value="femmes">Femmes</option>
-                </select>
-                <select value={(surveyEditor.target || "all|all").split("|")[1]} onChange={e => setSurveyEditor((s: any) => ({ ...s, target: `${(s.target || "all|all").split("|")[0]}|${e.target.value}` }))} style={{ padding: "10px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.82rem", background: G.blanc }}>
+                <select value={(surveyEditor.target || "all|all").split("|")[1]} onChange={e => setSurveyEditor((s: any) => ({ ...s, target: `all|${e.target.value}` }))} style={{ padding: "10px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.82rem", background: G.blanc }}>
                   <option value="all">Tous les comptes</option><option value="premium">Premium</option><option value="gratuit">Gratuits</option>
                 </select>
               </div>
@@ -14856,7 +14873,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                       <div style={{ width: 40, height: 40, borderRadius: "50%", background: last.gift_for ? "rgba(212,168,67,0.15)" : "rgba(142,68,173,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1.1rem" }}>{last.gift_for ? "🎁" : "⭐"}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: "0.68rem", color: "#999", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Dernier paiement</div>
-                        <div style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{financeNames[last.user_id] || "Utilisateur"}{last.gift_for ? ` → cadeau pour ${last.gift_for_name || "un membre"}` : ""}</div>
+                        <div style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{financeNames[last.user_id] || "Membre"}{last.gift_for ? ` → cadeau pour ${last.gift_for_name || "un membre"}` : ""}</div>
                         <div style={{ fontSize: "0.7rem", color: "#aaa" }}>{new Date(last.approved_at || last.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</div>
                       </div>
                       <div style={{ fontWeight: 800, fontSize: "1rem", color: "#8e44ad", flexShrink: 0 }}>{formatMoney(last.amount || 0, paymentCurrency(last))}</div>
@@ -14948,7 +14965,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         <div key={uid} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: i < topUsers.length - 1 ? `1px solid ${G.gris}` : "none" }}>
                           <div style={{ width: 26, height: 26, borderRadius: "50%", background: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : G.creme, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.72rem", color: i < 3 ? "#333" : "#888", flexShrink: 0 }}>{i + 1}</div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 700, fontSize: "0.82rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{financeNames[uid] || "Utilisateur"}</div>
+                            <div style={{ fontWeight: 700, fontSize: "0.82rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{financeNames[uid] || "Membre"}</div>
                             <div style={{ fontSize: "0.68rem", color: "#999" }}>{v.count} achat{v.count > 1 ? "s" : ""}</div>
                           </div>
                           <div style={{ fontWeight: 800, fontSize: "0.85rem", color: "#8e44ad", flexShrink: 0 }}>{formatMoney(v.sum, cur)}</div>
@@ -15448,7 +15465,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     </div>
                     <div style={{ fontSize: "0.8rem", color: "#555", lineHeight: 1.4 }}>{log.action}</div>
                     {log.target_user_id && (
-                      <div style={{ fontSize: "0.68rem", color: "#aaa", marginTop: 3, fontFamily: "monospace" }}>Utilisateur : {log.target_user_id.slice(0, 16)}…</div>
+                      <div style={{ fontSize: "0.68rem", color: "#aaa", marginTop: 3, fontFamily: "monospace" }}>Membre : {log.target_user_id.slice(0, 16)}…</div>
                     )}
                   </div>
                   {auth.userId === SUPER_ADMIN_ID && !logSelectMode && (
@@ -15777,7 +15794,7 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: 
             <div onClick={onViewProfile} style={{ display: "flex", alignItems: "center", gap: 8, cursor: onViewProfile ? "pointer" : "default", minWidth: 0, flexShrink: 1 }}>
               <Avatar url={pub.author?.photo_url} size={40} />
               <div style={{ lineHeight: 1.25, minWidth: 0 }}>
-                <div style={{ fontSize: 13.5, fontWeight: 800, color: "#1A1A1A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pub.author?.name || "Utilisateur"}</div>
+                <div style={{ fontSize: 13.5, fontWeight: 800, color: "#1A1A1A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pub.author?.name || "Membre"}</div>
                 <div style={{ fontSize: 11.5, color: "#9AA0A6" }}>{pub.author?.profession || (isProp ? "Professionnel" : "Client")}</div>
               </div>
             </div>
@@ -15791,7 +15808,7 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: 
             <div onClick={onViewProfile} style={{ display: "flex", alignItems: "center", gap: 9, cursor: onViewProfile ? "pointer" : "default", minWidth: 0, marginBottom: 12 }}>
               <Avatar url={pub.author?.photo_url} size={40} />
               <div style={{ lineHeight: 1.25, minWidth: 0 }}>
-                <div style={{ fontSize: 13.5, fontWeight: 800, color: "#1A1A1A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pub.author?.name || "Utilisateur"}</div>
+                <div style={{ fontSize: 13.5, fontWeight: 800, color: "#1A1A1A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pub.author?.name || "Membre"}</div>
                 <div style={{ fontSize: 11.5, color: "#9AA0A6" }}>{pub.author?.profession || (isProp ? "Professionnel" : "Client")}</div>
               </div>
             </div>
