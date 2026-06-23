@@ -1329,17 +1329,7 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
           </div>
         </div>
         <div style={{ textAlign: "center", fontSize: "1.1rem", fontWeight: 800, color: "#1a1a2e", lineHeight: 1.18, marginBottom: 6, padding: "0 6px" }}>{title}</div>
-        <div style={{ textAlign: "center", fontSize: "0.84rem", color: "#8a8a8a", lineHeight: 1.4, marginBottom: 10, padding: "0 10px" }}>Cette fonctionnalité est réservée aux membres Premium.</div>
-        <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
-          <div style={{ flex: 1, background: "#FBF6EA", borderRadius: 14, padding: "10px 12px", display: "flex", alignItems: "center", gap: 9 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill={gold} stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
-            <div style={{ lineHeight: 1.25 }}><span style={{ fontWeight: 800, color: "#3a2e10" }}>{manualStats.connections.trim() ? manualStats.connections : fmt(stats.connections)}</span> <span style={{ fontSize: "0.74rem", color: "#7a6a3a" }}>mises en relation cette semaine</span></div>
-          </div>
-          <div style={{ flex: 1, background: "#FBF6EA", borderRadius: 14, padding: "10px 12px", display: "flex", alignItems: "center", gap: 9 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill={gold} stroke="none"><path d="M2 18h20l-2.5-9-4.5 4-3-7-3 7-4.5-4z" /></svg>
-            <div style={{ lineHeight: 1.25 }}><span style={{ fontWeight: 800, color: "#3a2e10" }}>{manualStats.members.trim() ? manualStats.members : fmt(stats.premium)}</span> <span style={{ fontSize: "0.74rem", color: "#7a6a3a" }}>membres Premium actifs</span></div>
-          </div>
-        </div>
+        <div style={{ textAlign: "center", fontSize: "0.84rem", color: "#8a8a8a", lineHeight: 1.4, marginBottom: 14, padding: "0 10px" }}>Cette fonctionnalité est réservée aux membres Premium.</div>
         <div style={{ background: G.blanc, borderRadius: 18, padding: "3px 14px", boxShadow: "0 2px 10px rgba(0,0,0,0.04)", marginBottom: 14 }}>
           {(showAllAdv ? avantages : highlights).map((a: any, i: number) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 11, padding: "7px 0", borderBottom: i < (showAllAdv ? avantages.length : highlights.length) - 1 ? "1px solid #f0ede6" : "none" }}>
@@ -16242,6 +16232,19 @@ function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: str
 
 const SEARCH_HINTS = BUSINESS_METIERS_FLAT.slice(0, 24);
 
+// Incrémente le compteur de vues/réponses d'une annonce via une fonction SQL sécurisée (RPC),
+// car un visiteur ne peut pas modifier directement l'annonce d'un autre (RLS).
+async function incrementPubStat(token: string, pubId: string, kind: "view" | "response") {
+  if (!pubId) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/rpc/${kind === "view" ? "increment_pub_views" : "increment_pub_responses"}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ pub_id: pubId }),
+    });
+  } catch {}
+}
+
 function Publications({ auth, accountType, onGoMessages, onShowPremium, publishNonce }: { auth: Auth; accountType?: string; onGoMessages: (partnerId: string) => void; onShowPremium?: (r: string) => void; publishNonce?: number }) {
   const type: "cherche" | "propose" = accountType === "client" ? "propose" : "cherche";
   const [cat, setCat] = useState("all");
@@ -16316,12 +16319,16 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
       if (!a.length && !b.length) {
         await sb.insert(auth.token, "matches", { user1: auth.userId, user2: other }, auth.refreshToken);
       }
+      // Le contact compte comme une réponse (et une vue) sur l'annonce.
+      incrementPubStat(auth.token, (pub as any).id, "response");
+      incrementPubStat(auth.token, (pub as any).id, "view");
       onGoMessages(other);
     } catch { setToast("Connexion impossible, réessayez."); }
   }
 
   async function openAuthor(pub: Publication) {
     const id = pub.user_id;
+    if (id !== auth.userId) incrementPubStat(auth.token, (pub as any).id, "view");
     try {
       const rows = await sb.query<Profile>(auth.token, "profiles", `?id=eq.${id}&select=*&limit=1`, auth.refreshToken);
       if (rows && rows[0]) setOpenFiche(rows[0]);
