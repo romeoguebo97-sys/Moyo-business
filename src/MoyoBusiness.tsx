@@ -4874,6 +4874,9 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
       .moyo-content-wide .page-anim > * { max-width: 1120px !important; margin-left: auto !important; margin-right: auto !important; }
       .moyo-content-wide .dgrid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; align-items: start; }
       .moyo-content-wide .dspan { grid-column: 1 / -1; }
+      .moyo-content-wide .page-anim > .dfull { max-width: none !important; margin: 0 !important; height: 100% !important; }
+      .moyo-content-wide:has(.dfull) { padding: 0 !important; overflow: hidden !important; }
+      .moyo-content-wide:has(.dfull) .page-anim { height: 100%; }
     `}</style>
 
     {/* ── SIDEBAR (desktop/tablette) ── */}
@@ -7149,7 +7152,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
     </div>
   );
 
-  return <div style={{ padding: 0, display: "flex", flexDirection: isWideMsg ? "row" : "column", height: isWideMsg ? "100%" : "calc(100dvh - 116px)", overflow: isWideMsg ? undefined : "hidden" }}>
+  return <div className="dfull" style={{ padding: 0, display: "flex", flexDirection: isWideMsg ? "row" : "column", height: isWideMsg ? "100%" : "calc(100dvh - 116px)", overflow: isWideMsg ? undefined : "hidden" }}>
     {isWideMsg ? (
       <>
         {/* ── COLONNE GAUCHE : liste conversations ── */}
@@ -17034,7 +17037,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
   ].filter(s => s.href);
 
   return (
-    <div style={{ position: "fixed", top: isWideFiche ? 0 : 64, bottom: isWideFiche ? 0 : 88, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: isWideFiche ? "none" : 500, zIndex: 90, background: G.creme, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", boxSizing: "border-box" }}>
+    <div style={{ position: "fixed", top: isWideFiche ? 0 : 64, bottom: isWideFiche ? 0 : 88, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: isWideFiche ? 560 : 500, zIndex: 90, background: G.creme, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", boxSizing: "border-box", boxShadow: isWideFiche ? "0 0 60px rgba(0,0,0,0.18)" : undefined }}>
       {/* Header */}
       <div style={{ position: "relative", background: `linear-gradient(rgba(8,8,13,0.82), rgba(8,8,13,0.90)), url(${FICHE_HERO_BG}) center/cover no-repeat`, padding: "16px 16px 22px" }}>
         <button onClick={onClose} aria-label="Retour" style={{ position: "absolute", top: 14, left: 14, width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.16)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.25)" }}>
