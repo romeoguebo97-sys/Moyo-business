@@ -16027,16 +16027,16 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: 
         <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, padding: "5px 10px", borderRadius: 7, background: isProp ? "rgba(22,163,74,0.12)" : "rgba(212,168,67,0.18)", color: isProp ? "#16A34A" : "#8B6914" }}>{pub.category}</span>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
           {pub.is_boosted && <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: G.or, color: "#fff", fontSize: 10.5, fontWeight: 800, padding: "4px 9px", borderRadius: 7, letterSpacing: 0.3 }}>★ EN AVANT</span>}
-          <span style={{ fontSize: 11.5, color: "#9AA0A6" }}>{timeAgo(pub.created_at)}</span>
+          <span style={{ fontSize: 11.5, color: G.brunLight }}>{timeAgo(pub.created_at)}</span>
         </div>
       </div>
-      <div style={{ fontSize: 16, fontWeight: 800, color: "#1A1A1A", marginBottom: 5, lineHeight: 1.3 }}>{pub.title}</div>
-      <div style={{ fontSize: 13.5, color: "#6B7280", lineHeight: 1.5, marginBottom: 13, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{pub.description}</div>
+      <div style={{ fontSize: 16, fontWeight: 800, color: G.brun, marginBottom: 5, lineHeight: 1.3 }}>{pub.title}</div>
+      <div style={{ fontSize: 13.5, color: G.brunLight, lineHeight: 1.5, marginBottom: 13, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{pub.description}</div>
       <div style={{ borderTop: `1px solid ${G.gris}`, margin: "0 -16px 12px", padding: "12px 16px 0" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13, color: "#6B7280", fontWeight: 600 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13, color: G.brunLight, fontWeight: 600 }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><PinIcon color="#9AA0A6" /> {pub.location || pub.city}</span>
           <span style={{ width: 1, height: 16, background: G.gris }} />
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "#1A1A1A" }}><TagIcon color="#1A1A1A" /> {priceTxt}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: G.brun }}><TagIcon color="#1A1A1A" /> {priceTxt}</span>
         </div>
       </div>
       </div>
@@ -16046,8 +16046,8 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: 
             <div onClick={onViewProfile} style={{ display: "flex", alignItems: "center", gap: 8, cursor: onViewProfile ? "pointer" : "default", minWidth: 0, flexShrink: 1 }}>
               <Avatar url={pub.author?.photo_url} size={40} />
               <div style={{ lineHeight: 1.25, minWidth: 0 }}>
-                <div style={{ fontSize: 13.5, fontWeight: 800, color: "#1A1A1A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pub.author?.name || "Membre"}</div>
-                <div style={{ fontSize: 11.5, color: "#9AA0A6" }}>{pub.author?.profession || (isProp ? "Professionnel" : "Client")}</div>
+                <div style={{ fontSize: 13.5, fontWeight: 800, color: G.brun, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pub.author?.name || "Membre"}</div>
+                <div style={{ fontSize: 11.5, color: G.brunLight }}>{pub.author?.profession || (isProp ? "Professionnel" : "Client")}</div>
               </div>
             </div>
             <div style={{ flex: 1 }} />
@@ -16060,8 +16060,8 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: 
             <div onClick={onViewProfile} style={{ display: "flex", alignItems: "center", gap: 9, cursor: onViewProfile ? "pointer" : "default", minWidth: 0, marginBottom: 12 }}>
               <Avatar url={pub.author?.photo_url} size={40} />
               <div style={{ lineHeight: 1.25, minWidth: 0 }}>
-                <div style={{ fontSize: 13.5, fontWeight: 800, color: "#1A1A1A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pub.author?.name || "Membre"}</div>
-                <div style={{ fontSize: 11.5, color: "#9AA0A6" }}>{pub.author?.profession || (isProp ? "Professionnel" : "Client")}</div>
+                <div style={{ fontSize: 13.5, fontWeight: 800, color: G.brun, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pub.author?.name || "Membre"}</div>
+                <div style={{ fontSize: 11.5, color: G.brunLight }}>{pub.author?.profession || (isProp ? "Professionnel" : "Client")}</div>
               </div>
             </div>
             <div style={{ display: "flex", gap: 9 }}>
@@ -16664,8 +16664,8 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
               </div>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "#9AA0A6", textTransform: "uppercase", letterSpacing: "0.4px" }}>Catégorie</div>
-                <div style={{ fontSize: "0.92rem", fontWeight: 800, color: "#1A1A1A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{cat === "all" ? "Toutes" : (PUB_CATS.find(c => c.id === cat)?.label || cat)}</div>
+                <div style={{ fontSize: "0.68rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: "0.4px" }}>Catégorie</div>
+                <div style={{ fontSize: "0.92rem", fontWeight: 800, color: G.brun, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{cat === "all" ? "Toutes" : (PUB_CATS.find(c => c.id === cat)?.label || cat)}</div>
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
               <select value={cat} onChange={e => setCat(e.target.value)} aria-label="Catégorie" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
@@ -16679,7 +16679,7 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
               </div>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "#9AA0A6", textTransform: "uppercase", letterSpacing: "0.4px" }}>Métier</div>
+                <div style={{ fontSize: "0.68rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: "0.4px" }}>Métier</div>
                 <div style={{ fontSize: "0.92rem", fontWeight: 800, color: metier ? "#1A1A1A" : "#9AA0A6", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metier || "Tous"}</div>
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
@@ -16694,7 +16694,7 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
             <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", display: "flex" }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             </span>
-            <select value={city} onChange={e => setCity(e.target.value)} style={{ width: "100%", appearance: "none", WebkitAppearance: "none", MozAppearance: "none", border: `1px solid ${G.gris}`, background: G.blanc, color: "#1A1A1A", borderRadius: 14, padding: "15px 42px 15px 46px", fontSize: "0.95rem", fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", boxSizing: "border-box" }}>
+            <select value={city} onChange={e => setCity(e.target.value)} style={{ width: "100%", appearance: "none", WebkitAppearance: "none", MozAppearance: "none", border: `1px solid ${G.gris}`, background: G.blanc, color: G.brun, borderRadius: 14, padding: "15px 42px 15px 46px", fontSize: "0.95rem", fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", boxSizing: "border-box" }}>
               <option value="">Toutes les villes</option>
               {PUB_VILLES.map(v => <option key={v} value={v}>{v}</option>)}
             </select>
@@ -16719,44 +16719,44 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
       {q.trim() ? (
         /* ===== Résultats de recherche globale (annonces + professionnels) ===== */
         <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
-          {searching && <p style={{ textAlign: "center", color: "#999", padding: 22 }}>Recherche…</p>}
+          {searching && <p style={{ textAlign: "center", color: G.brunLight, padding: 22 }}>Recherche…</p>}
           {!searching && results && results.pros.length === 0 && results.pubs.length === 0 && (
-            <div style={{ textAlign: "center", padding: "44px 20px", color: "#999" }}>
-              <p style={{ fontWeight: 700, color: "#444", marginBottom: 6 }}>Aucun résultat pour « {q.trim()} »</p>
+            <div style={{ textAlign: "center", padding: "44px 20px", color: G.brunLight }}>
+              <p style={{ fontWeight: 700, color: G.brun, marginBottom: 6 }}>Aucun résultat pour « {q.trim()} »</p>
               <p style={{ fontSize: "0.85rem" }}>Essayez un autre mot-clé ou un métier.</p>
             </div>
           )}
           {!searching && results && results.pros.length > 0 && (
             <>
-              <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#999", textTransform: "uppercase", letterSpacing: "0.5px" }}>Professionnels ({results.pros.length})</div>
+              <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: "0.5px" }}>Professionnels ({results.pros.length})</div>
               {results.pros.map(pr => <ProCard key={pr.id} pro={pr} onOpen={() => setOpenFiche(pr)} isFav={false} onToggleFav={() => {}} />)}
             </>
           )}
           {!searching && results && results.pubs.length > 0 && (
             <>
-              <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#999", textTransform: "uppercase", letterSpacing: "0.5px", marginTop: 4 }}>Annonces ({results.pubs.length})</div>
+              <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: "0.5px", marginTop: 4 }}>Annonces ({results.pubs.length})</div>
               {results.pubs.map(pub => <PubCard key={pub.id} pub={pub} me={auth.userId} onContact={() => contact(pub)} onBoost={() => setBoostTarget(pub)} />)}
             </>
           )}
         </div>
       ) : (
         <>
-          <div style={{ padding: "12px 16px 4px", fontSize: "0.86rem", color: "#6B7280", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span><b style={{ color: "#1A1A1A", fontWeight: 800 }}>{list.length}</b> {type === "cherche" ? (list.length > 1 ? "besoins publiés" : "besoin publié") : (list.length > 1 ? "services proposés" : "service proposé")}</span>
+          <div style={{ padding: "12px 16px 4px", fontSize: "0.86rem", color: G.brunLight, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span><b style={{ color: G.brun, fontWeight: 800 }}>{list.length}</b> {type === "cherche" ? (list.length > 1 ? "besoins publiés" : "besoin publié") : (list.length > 1 ? "services proposés" : "service proposé")}</span>
             <span>{city || "Tout le pays"}</span>
           </div>
           <div className="dgrid" style={{ padding: "6px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
-            {loading && <p className="dspan" style={{ textAlign: "center", color: "#999", padding: 30 }}>Chargement…</p>}
+            {loading && <p className="dspan" style={{ textAlign: "center", color: G.brunLight, padding: 30 }}>Chargement…</p>}
             {!loading && list.map(pub => (
               <PubCard key={pub.id} pub={pub} me={auth.userId} onContact={() => contact(pub)} onBoost={() => setBoostTarget(pub)} onViewProfile={() => openAuthor(pub)} />
             ))}
             {!loading && (
-              <div className="dspan" style={{ textAlign: "center", padding: "34px 20px 12px", color: "#9AA0A6" }}>
+              <div className="dspan" style={{ textAlign: "center", padding: "34px 20px 12px", color: G.brunLight }}>
                 <svg width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="#D7D9DE" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 16px", display: "block" }}>
                   <rect x="4" y="3" width="13" height="17" rx="2"/><path d="M8 3v-.5A1.5 1.5 0 0 1 9.5 1h2A1.5 1.5 0 0 1 13 2.5V3"/><line x1="8" y1="8" x2="13" y2="8"/><line x1="8" y1="11.5" x2="11" y2="11.5"/><circle cx="16.5" cy="16.5" r="4"/><line x1="19.4" y1="19.4" x2="22" y2="22"/>
                 </svg>
-                <div style={{ fontSize: "1rem", fontWeight: 800, color: "#1A1A1A", marginBottom: 5 }}>{list.length === 0 ? (type === "cherche" ? "Aucun besoin publié pour le moment" : "Aucun service proposé pour le moment") : (type === "cherche" ? "Aucun autre besoin publié pour le moment" : "Aucun autre service pour le moment")}</div>
-                <div style={{ fontSize: "0.88rem", color: "#6B7280" }}>{type === "cherche" ? "Soyez le premier à publier votre besoin" : "Proposez vos services dès maintenant"}</div>
+                <div style={{ fontSize: "1rem", fontWeight: 800, color: G.brun, marginBottom: 5 }}>{list.length === 0 ? (type === "cherche" ? "Aucun besoin publié pour le moment" : "Aucun service proposé pour le moment") : (type === "cherche" ? "Aucun autre besoin publié pour le moment" : "Aucun autre service pour le moment")}</div>
+                <div style={{ fontSize: "0.88rem", color: G.brunLight }}>{type === "cherche" ? "Soyez le premier à publier votre besoin" : "Proposez vos services dès maintenant"}</div>
               </div>
             )}
           </div>
@@ -17241,8 +17241,8 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
         {isPro && (
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <h2 style={{ fontSize: "1.3rem", fontWeight: 900, color: "#1A1A1A", margin: 0, letterSpacing: "-0.4px" }}>Sous-traitants</h2>
-              <p style={{ fontSize: "0.8rem", color: "#6B7280", margin: "2px 0 0" }}>Les professionnels de votre catégorie</p>
+              <h2 style={{ fontSize: "1.3rem", fontWeight: 900, color: G.brun, margin: 0, letterSpacing: "-0.4px" }}>Sous-traitants</h2>
+              <p style={{ fontSize: "0.8rem", color: G.brunLight, margin: "2px 0 0" }}>Les professionnels de votre catégorie</p>
             </div>
             <span style={{ flexShrink: 0, display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(212,168,67,0.16)", color: "#8B6914", borderRadius: 50, padding: "7px 13px", fontSize: "0.82rem", fontWeight: 800 }}>
               {effectiveCat !== "all" && catIcon(effectiveCat, "#8B6914", 15)}
@@ -17266,14 +17266,14 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
 
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           <div style={{ flex: 1 }}><Input value={q} onChange={e => setQ(e.target.value)} placeholder="🔎  Coiffeur, maçon, restaurant…" /></div>
-          <select value={city} onChange={e => setCity(e.target.value)} style={{ borderRadius: 12, border: `2px solid ${G.gris}`, padding: "0 8px", fontSize: 13, background: G.blanc, color: "#111", marginBottom: 18 }}>
+          <select value={city} onChange={e => setCity(e.target.value)} style={{ borderRadius: 12, border: `2px solid ${G.gris}`, padding: "0 8px", fontSize: 13, background: G.blanc, color: G.brun, marginBottom: 18 }}>
             <option value="all">Toutes villes</option>
             {PUB_VILLES.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
         </div>
         {metierSug.length > 0 && (
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", marginTop: -4, marginBottom: 12 }}>
-            <span style={{ fontSize: "0.72rem", color: "#9AA0A6", fontWeight: 600 }}>Vous cherchez :</span>
+            <span style={{ fontSize: "0.72rem", color: G.brunLight, fontWeight: 600 }}>Vous cherchez :</span>
             {metierSug.map(m => <button key={m} onClick={() => setQ(m)} style={{ border: `1px solid ${G.gris}`, background: G.blanc, color: G.brun, borderRadius: 50, padding: "5px 12px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>{m}</button>)}
           </div>
         )}
@@ -17286,8 +17286,8 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
               </div>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: "0.64rem", fontWeight: 700, color: "#9AA0A6", textTransform: "uppercase", letterSpacing: "0.4px" }}>Catégorie</div>
-                <div style={{ fontSize: "0.86rem", fontWeight: 800, color: "#1A1A1A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{cat === "all" ? "Toutes" : (PUB_CATS.find(c => c.id === cat)?.label || cat)}</div>
+                <div style={{ fontSize: "0.64rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: "0.4px" }}>Catégorie</div>
+                <div style={{ fontSize: "0.86rem", fontWeight: 800, color: G.brun, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{cat === "all" ? "Toutes" : (PUB_CATS.find(c => c.id === cat)?.label || cat)}</div>
               </div>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
               <select value={cat} onChange={e => setCat(e.target.value)} aria-label="Catégorie" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer" }}>
@@ -17301,7 +17301,7 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: "0.64rem", fontWeight: 700, color: "#9AA0A6", textTransform: "uppercase", letterSpacing: "0.4px" }}>Métier</div>
+              <div style={{ fontSize: "0.64rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: "0.4px" }}>Métier</div>
               <div style={{ fontSize: "0.86rem", fontWeight: 800, color: metier ? "#1A1A1A" : "#9AA0A6", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metier || "Tous"}</div>
             </div>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
@@ -17325,16 +17325,16 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
         )}
       </div>
 
-      <div style={{ padding: "8px 16px", fontSize: "0.78rem", color: "#777", display: "flex", justifyContent: "space-between" }}>
-        <span><b style={{ color: "#111" }}>{displayList.length}</b> professionnel(s)</span>
+      <div style={{ padding: "8px 16px", fontSize: "0.78rem", color: G.brunLight, display: "flex", justifyContent: "space-between" }}>
+        <span><b style={{ color: G.brun }}>{displayList.length}</b> professionnel(s)</span>
         <span>{city === "all" ? "Tout le Congo" : city}</span>
       </div>
 
       <div className="dgrid" style={{ padding: "4px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
-        {loading && <p className="dspan" style={{ textAlign: "center", color: "#999", padding: 30 }}>Chargement…</p>}
+        {loading && <p className="dspan" style={{ textAlign: "center", color: G.brunLight, padding: 30 }}>Chargement…</p>}
         {!loading && displayList.length === 0 && (
-          <div className="dspan" style={{ textAlign: "center", padding: "50px 20px", color: "#999" }}>
-            <p style={{ fontWeight: 700, color: "#444", marginBottom: 6 }}>{repView === "fav" ? "Aucun favori pour le moment" : "Aucun professionnel trouvé"}</p>
+          <div className="dspan" style={{ textAlign: "center", padding: "50px 20px", color: G.brunLight }}>
+            <p style={{ fontWeight: 700, color: G.brun, marginBottom: 6 }}>{repView === "fav" ? "Aucun favori pour le moment" : "Aucun professionnel trouvé"}</p>
             <p style={{ fontSize: "0.85rem" }}>{repView === "fav" ? "Appuyez sur le ♡ d'un professionnel pour l'enregistrer ici." : "Essayez une autre catégorie ou une autre ville."}</p>
           </div>
         )}
