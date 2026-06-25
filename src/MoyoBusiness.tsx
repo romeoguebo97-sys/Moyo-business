@@ -1826,12 +1826,12 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
     <div className="mb-root">
       <style>{`
         .mb-root {
-          --nuit:#08080D; --or:#D4A843; --creme:#F8F9FB; --vert:#16A34A;
+          --nuit:#0e1326; --or:#D4A843; --creme:#F8F9FB; --vert:#16A34A;
           --gris:#6B7280; --gris-clair:#E5E7EB; --blanc:#FFFFFF;
           font-family:'Inter',-apple-system,system-ui,sans-serif; color:var(--nuit); background:var(--creme);
         }
         .mb-root *{box-sizing:border-box;}
-        .mb-nav{position:sticky;top:0;z-index:80;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(8,8,13,0.96);backdrop-filter:blur(8px);border-bottom:1px solid rgba(212,168,67,0.15);}
+        .mb-nav{position:sticky;top:0;z-index:80;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(14,19,38,0.96);backdrop-filter:blur(8px);border-bottom:1px solid rgba(212,168,67,0.15);}
         .mb-logo{display:flex;align-items:center;gap:10px;cursor:pointer;}
         .mb-logo-ic{width:34px;height:34px;background:var(--or);border-radius:8px;display:flex;align-items:center;justify-content:center;}
         .mb-logo-tx{font-size:18px;font-weight:900;color:#fff;letter-spacing:-0.3px;}
@@ -1858,7 +1858,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         /* Couche image : Pont du 15 Août, légèrement floutée (overscan pour masquer le halo de flou) */
         .mb-hero::before{content:'';position:absolute;inset:0;z-index:0;background:url('${HERO_BG}') top center/112% auto no-repeat;filter:blur(2px);transform:scale(1.02);will-change:transform;}
         /* Couche voile premium : veil bleu-nuit #050816 (~80-90%) + radial sombre centré + glows discrets or/vert + vignettage */
-        .mb-hero::after{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 140% 110% at 50% 42%,transparent 55%,rgba(5,8,22,0.50) 100%),radial-gradient(ellipse 90% 45% at 50% 80%,rgba(5,8,22,0.40),transparent 80%),linear-gradient(180deg,rgba(5,8,22,0.40) 0%,rgba(5,8,22,0.42) 26%,rgba(5,8,22,0.58) 45%,rgba(5,8,22,0.78) 60%,rgba(5,8,22,0.92) 74%,rgba(5,8,22,0.99) 100%);}
+        .mb-hero::after{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 140% 110% at 50% 42%,transparent 55%,rgba(14,19,38,0.50) 100%),radial-gradient(ellipse 90% 45% at 50% 80%,rgba(14,19,38,0.40),transparent 80%),linear-gradient(180deg,rgba(14,19,38,0.40) 0%,rgba(14,19,38,0.42) 26%,rgba(14,19,38,0.58) 45%,rgba(14,19,38,0.78) 60%,rgba(14,19,38,0.92) 74%,rgba(14,19,38,0.99) 100%);}
         .mb-hero>*{position:relative;z-index:1;}
         .mb-badge{display:flex;align-items:center;gap:6px;background:rgba(212,168,67,0.12);border:1px solid rgba(212,168,67,0.3);color:var(--or);font-size:12px;font-weight:700;padding:6px 14px;border-radius:100px;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:26px;}
         .mb-h1{font-size:clamp(34px,5vw,62px);font-weight:900;color:#fff;text-align:center;line-height:1.08;letter-spacing:-1.5px;max-width:720px;margin-bottom:26px;}
@@ -1992,7 +1992,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
       {/* NAV */}
       <header className="mb-nav">
         <div className="mb-logo" onClick={() => onNav("landing")}>
-          <div className="mb-logo-ic"><svg width="20" height="20" style={{ color: "#08080D" }}><use href="#mbi-biz"/></svg></div>
+          <div className="mb-logo-ic"><svg width="20" height="20" style={{ color: "#0e1326" }}><use href="#mbi-biz"/></svg></div>
           <span className="mb-logo-tx">Moyo <span>Business</span></span>
         </div>
         <div className="mb-nav-r">
@@ -4862,7 +4862,10 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
       .moyo-sidebar-bottom:hover { background: ${G.creme}; }
       .moyo-main-area { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; overflow: hidden; }
       .moyo-topbar-wide { padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; background: ${G.blanc}; border-bottom: 1px solid ${G.gris}; flex-shrink: 0; }
-      .moyo-content-wide { flex: 1; overflow-y: auto; padding-bottom: 0; }
+      .moyo-content-wide { flex: 1; overflow-y: auto; padding: 26px 30px 72px; }
+      .moyo-content-wide > * { max-width: 1100px !important; margin-left: auto !important; margin-right: auto !important; }
+      .moyo-content-wide .dgrid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; align-items: start; }
+      .moyo-content-wide .dspan { grid-column: 1 / -1; }
     `}</style>
 
     {/* ── SIDEBAR (desktop/tablette) ── */}
@@ -4916,6 +4919,13 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
     {/* ── ZONE PRINCIPALE ── */}
     {isWide ? (
       <div className="moyo-main-area">
+        <div className="moyo-topbar-wide">
+          <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, letterSpacing: "-0.2px" }}>{tabs.find(t => t.id === tab)?.label || "Moyo Business"}</div>
+          <div onClick={() => setShowGuide(true)} style={{ fontSize: "0.82rem", fontWeight: 700, color: "#1A1A1A", background: G.blanc, borderRadius: 12, padding: "9px 16px", cursor: "pointer", border: `1.5px solid ${G.gris}`, display: "flex", alignItems: "center", gap: 7 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Guide
+          </div>
+        </div>
         <div className="moyo-content-wide">{children}</div>
       </div>
     ) : (
@@ -15827,12 +15837,68 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
+// Visualiseur plein écran des photos d'une annonce : flèches, swipe tactile,
+// clavier (←/→/Échap), compteur et bande de miniatures pour switcher.
+function PhotoLightbox({ photos, index, onClose, onIndex }: { photos: string[]; index: number; onClose: () => void; onIndex: (i: number) => void }) {
+  const n = photos.length;
+  const go = (d: number) => onIndex((index + d + n) % n);
+  const touchX = useRef<number | null>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowRight" && n > 1) go(1);
+      else if (e.key === "ArrowLeft" && n > 1) go(-1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }); // pas de deps : on relie à chaque rendu pour garder l'index à jour
+  const circBtn: React.CSSProperties = { position: "fixed", width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.14)", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2 };
+  return (
+    <div onClick={onClose}
+      onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+      onTouchEnd={(e) => { if (touchX.current == null) return; const dx = e.changedTouches[0].clientX - touchX.current; if (Math.abs(dx) > 45 && n > 1) go(dx < 0 ? 1 : -1); touchX.current = null; }}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.93)", zIndex: 100000, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <button onClick={(e) => { e.stopPropagation(); onClose(); }} aria-label="Fermer" style={{ ...circBtn, top: 16, right: 16, width: 44, height: 44 }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      {n > 1 && <div style={{ position: "fixed", top: 24, left: "50%", transform: "translateX(-50%)", color: "#fff", fontSize: 14, fontWeight: 700, background: "rgba(255,255,255,0.14)", padding: "5px 14px", borderRadius: 20, zIndex: 2 }}>{index + 1} / {n}</div>}
+      <img src={photos[index]} alt="" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "92vw", maxHeight: "80vh", objectFit: "contain", borderRadius: 10, boxShadow: "0 12px 60px rgba(0,0,0,0.55)" }} />
+      {n > 1 && (
+        <>
+          <button onClick={(e) => { e.stopPropagation(); go(-1); }} aria-label="Précédent" style={{ ...circBtn, left: 14, top: "50%", transform: "translateY(-50%)" }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); go(1); }} aria-label="Suivant" style={{ ...circBtn, right: 14, top: "50%", transform: "translateY(-50%)" }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <div onClick={(e) => e.stopPropagation()} style={{ position: "fixed", bottom: 18, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 8, maxWidth: "92vw", overflowX: "auto", padding: 6, zIndex: 2 }}>
+            {photos.map((u, i) => <img key={i} src={u} alt="" onClick={() => onIndex(i)} style={{ width: 54, height: 54, objectFit: "cover", borderRadius: 8, cursor: "pointer", border: i === index ? "2px solid #fff" : "2px solid rgba(255,255,255,0.25)", opacity: i === index ? 1 : 0.55, flexShrink: 0 }} />)}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: Publication; me: string; onContact: () => void; onBoost: () => void; onViewProfile?: () => void; onOpen?: () => void }) {
   const isProp = pub.type === "propose";
   const mine = pub.user_id === me;
   const priceTxt = isProp ? (pub.budget ? "À partir de " + fmtFCFA(pub.budget) : "Tarif à discuter") : "Budget : " + fmtFCFA(pub.budget);
+  const photos = pub.photos || [];
+  const [lightbox, setLightbox] = useState<number | null>(null);
   return (
     <div style={{ background: G.blanc, border: `1.5px solid ${pub.is_boosted ? G.or : G.gris}`, borderRadius: 16, padding: 16, position: "relative", boxShadow: pub.is_boosted ? "0 6px 20px rgba(212,168,67,0.18)" : "0 2px 8px rgba(0,0,0,0.04)" }}>
+      {photos.length > 0 && (
+        <div onClick={(e) => { e.stopPropagation(); setLightbox(0); }} style={{ margin: "-16px -16px 14px", position: "relative", cursor: "pointer" }}>
+          <img src={photos[0]} alt="" loading="lazy" style={{ width: "100%", height: 184, objectFit: "cover", borderRadius: "15px 15px 0 0", display: "block" }} />
+          {photos.length > 1 && (
+            <span style={{ position: "absolute", right: 10, bottom: 10, background: "rgba(0,0,0,0.62)", color: "#fff", fontSize: 12, fontWeight: 700, padding: "4px 10px", borderRadius: 20, display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              {photos.length}
+            </span>
+          )}
+        </div>
+      )}
       <div onClick={onOpen} style={{ cursor: onOpen ? "pointer" : "default" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
         <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, padding: "5px 10px", borderRadius: 7, background: isProp ? "rgba(22,163,74,0.12)" : "rgba(212,168,67,0.18)", color: isProp ? "#16A34A" : "#8B6914" }}>{pub.category}</span>
@@ -15888,6 +15954,7 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: 
           </>
         )}
       </div>
+      {lightbox !== null && photos.length > 0 && <PhotoLightbox photos={photos} index={lightbox} onClose={() => setLightbox(null)} onIndex={setLightbox} />}
     </div>
   );
 }
@@ -16533,13 +16600,13 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
             <span><b style={{ color: "#1A1A1A", fontWeight: 800 }}>{list.length}</b> {type === "cherche" ? (list.length > 1 ? "besoins publiés" : "besoin publié") : (list.length > 1 ? "services proposés" : "service proposé")}</span>
             <span>{city}</span>
           </div>
-          <div style={{ padding: "6px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
-            {loading && <p style={{ textAlign: "center", color: "#999", padding: 30 }}>Chargement…</p>}
+          <div className="dgrid" style={{ padding: "6px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
+            {loading && <p className="dspan" style={{ textAlign: "center", color: "#999", padding: 30 }}>Chargement…</p>}
             {!loading && list.map(pub => (
               <PubCard key={pub.id} pub={pub} me={auth.userId} onContact={() => contact(pub)} onBoost={() => setBoostTarget(pub)} onViewProfile={() => openAuthor(pub)} />
             ))}
             {!loading && (
-              <div style={{ textAlign: "center", padding: "34px 20px 12px", color: "#9AA0A6" }}>
+              <div className="dspan" style={{ textAlign: "center", padding: "34px 20px 12px", color: "#9AA0A6" }}>
                 <svg width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="#D7D9DE" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 16px", display: "block" }}>
                   <rect x="4" y="3" width="13" height="17" rx="2"/><path d="M8 3v-.5A1.5 1.5 0 0 1 9.5 1h2A1.5 1.5 0 0 1 13 2.5V3"/><line x1="8" y1="8" x2="13" y2="8"/><line x1="8" y1="11.5" x2="11" y2="11.5"/><circle cx="16.5" cy="16.5" r="4"/><line x1="19.4" y1="19.4" x2="22" y2="22"/>
                 </svg>
@@ -16707,10 +16774,10 @@ function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: ()
         </button>
         <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Mes publications</h3>
       </div>
-      <div style={{ padding: "14px 16px 96px", display: "flex", flexDirection: "column", gap: 14 }}>
-        {loading && <p style={{ textAlign: "center", color: "#999", padding: 22 }}>Chargement…</p>}
+      <div className="dgrid" style={{ padding: "14px 16px 96px", display: "flex", flexDirection: "column", gap: 14 }}>
+        {loading && <p className="dspan" style={{ textAlign: "center", color: "#999", padding: 22 }}>Chargement…</p>}
         {!loading && pubs.length === 0 && (
-          <div style={{ textAlign: "center", padding: "48px 20px", color: "#999" }}>
+          <div className="dspan" style={{ textAlign: "center", padding: "48px 20px", color: "#999" }}>
             <p style={{ fontWeight: 700, color: "#444", marginBottom: 6 }}>Aucune publication pour le moment</p>
             <p style={{ fontSize: "0.85rem" }}>Vos annonces publiées apparaîtront ici.</p>
           </div>
@@ -17109,10 +17176,10 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
         <span>{city === "all" ? "Tout le Congo" : city}</span>
       </div>
 
-      <div style={{ padding: "4px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
-        {loading && <p style={{ textAlign: "center", color: "#999", padding: 30 }}>Chargement…</p>}
+      <div className="dgrid" style={{ padding: "4px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
+        {loading && <p className="dspan" style={{ textAlign: "center", color: "#999", padding: 30 }}>Chargement…</p>}
         {!loading && displayList.length === 0 && (
-          <div style={{ textAlign: "center", padding: "50px 20px", color: "#999" }}>
+          <div className="dspan" style={{ textAlign: "center", padding: "50px 20px", color: "#999" }}>
             <p style={{ fontWeight: 700, color: "#444", marginBottom: 6 }}>{repView === "fav" ? "Aucun favori pour le moment" : "Aucun professionnel trouvé"}</p>
             <p style={{ fontSize: "0.85rem" }}>{repView === "fav" ? "Appuyez sur le ♡ d'un professionnel pour l'enregistrer ici." : "Essayez une autre catégorie ou une autre ville."}</p>
           </div>
