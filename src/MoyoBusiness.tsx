@@ -1723,6 +1723,22 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
     return () => clearTimeout(h);
   }, [lq, lcity]);
 
+  // Défilement automatique vers les résultats quand l'utilisateur lance une recherche
+  // (clic « Rechercher » ou Entrée), une fois les résultats prêts.
+  const resultsRef = React.useRef<HTMLElement | null>(null);
+  const scrollWanted = React.useRef(false);
+  const scrollToResults = () => { requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })); };
+  const triggerSearch = () => {
+    setSugOpen(false); setCityOpen(false);
+    (document.activeElement as HTMLElement | null)?.blur?.();
+    if (!lq.trim() && !lcity.trim()) return;
+    if (!lsearching && lres) scrollToResults();
+    else scrollWanted.current = true;
+  };
+  React.useEffect(() => {
+    if (scrollWanted.current && !lsearching && lres) { scrollWanted.current = false; scrollToResults(); }
+  }, [lres, lsearching]);
+
   // ── Besoins & professionnels RÉELS du secteur sélectionné (remplace les données de démo) ──
   const [secBesoins, setSecBesoins] = React.useState<any[]>([]);
   const [secPros, setSecPros] = React.useState<any[]>([]);
@@ -2041,6 +2057,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
               onChange={e => { setLq(e.target.value); setSugOpen(true); setCityOpen(false); }}
               onFocus={() => { setSugOpen(true); setCityOpen(false); }}
               onBlur={() => setSugOpen(false)}
+              onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); triggerSearch(); } }}
               autoComplete="off"
             />
             {sugOpen && suggestions.length > 0 && (
@@ -2067,7 +2084,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
               {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
-          <button className="mb-search-go" onClick={() => { setSugOpen(false); setCityOpen(false); (document.activeElement as HTMLElement | null)?.blur?.(); }}>
+          <button className="mb-search-go" onClick={triggerSearch}>
             Rechercher
             <svg width="17" height="17"><use href="#mbi-search"/></svg>
           </button>
@@ -2104,7 +2121,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
       </section>
 
       {(lq.trim() || lcity.trim()) && (
-        <section className="mb-sec" style={{ background: "#fff" }}>
+        <section ref={resultsRef} className="mb-sec" style={{ background: "#fff" }}>
           <p className="mb-sec-lbl">Résultats</p>
           <h2 className="mb-sec-title">« {[lq.trim(), lcity.trim()].filter(Boolean).join(" · ")} »</h2>
           {lsearching && <p style={{ textAlign: "center", color: "#999", padding: "16px 0" }}>Recherche…</p>}
@@ -5002,7 +5019,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
           <div onClick={() => setShowGuide(false)} style={{ position: "absolute", top: 14, right: 16, cursor: "pointer", opacity: 0.8 }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </div>
-          <div style={{ fontSize: "1.6rem", color: "#fff", fontWeight: 800 }}>Guide <span style={{ color: G.or }}>Moyo</span></div>
+          <div style={{ fontSize: "1.6rem", color: "#fff", fontWeight: 800 }}>Guide <span style={{ color: G.brun }}>Moyo</span></div>
           <div style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.82rem", marginTop: 4 }}>Tout ce que vous devez savoir</div>
         </div>
         {/* Accordéon */}
@@ -6507,7 +6524,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
   </div>;
 
   if (open) return (
-    <div style={{ padding: 0, display: "flex", height: "100%", width: "100%", overflow: "hidden" }}>
+    <div className="dfull" style={{ padding: 0, display: "flex", height: "100%", width: "100%", overflow: "hidden" }}>
       {/* Colonne gauche liste (desktop) */}
       {isWideMsg && (
         <div style={{ width: 300, minWidth: 300, borderRight: `1px solid ${G.gris}`, background: G.blanc, display: "flex", flexDirection: "column", height: "100%" }}>
