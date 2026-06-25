@@ -2784,44 +2784,50 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
       // Mettre à jour le profil avec toutes les infos + photo.
       // On demande la ligne mise à jour (return=representation) pour VÉRIFIER que la mise à jour
       // a réellement été appliquée — une RLS qui bloque renvoie 200 avec 0 ligne, d'où ce contrôle.
-      const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=id,is_complete,name,photo_url`, {
-        method: "PATCH",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-          "Prefer": "return=representation"
-        },
-        body: JSON.stringify({
-          name: displayName,
-          city: form.city,
-          account_type: form.account_type,
-          bio: form.bio.trim(),
-          phone: form.phone.trim() || null,
-          photo_url: finalPhotoUrl,
-          is_complete: true,
-          ...(isProAcc ? {
-            metier: form.metier.trim() || null,
-            profession: form.metier.trim() || null,
-            company: form.company.trim() || null,
-            category: form.category || null,
-            whatsapp: form.whatsapp.trim() || null,
-          } : {}),
-          ...((() => { const ref = new URLSearchParams(window.location.search).get("ref"); return ref ? { referred_by: ref } : {}; })()),
-        }),
-      });
-      const patchBody = await patchRes.json().catch(() => null);
-      const updatedRow = Array.isArray(patchBody) ? patchBody[0] : patchBody;
-      // Échec si : code HTTP non-2xx (ex. colonne absente → 400) OU aucune ligne renvoyée (RLS) OU is_complete non posé.
-      if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
-        const detail = !patchRes.ok
-          ? (patchBody && typeof patchBody === "object" ? JSON.stringify(patchBody) : String(patchBody || ""))
-          : "Aucune ligne modifiée — vérifiez les droits (RLS) en écriture sur la table « profiles ».";
-        console.error("[Moyo][Signup] Échec finalisation profil :", patchRes.status, detail);
-        setLoading(false);
-        setErrorMsg(`La finalisation de votre profil n'a pas abouti (code ${patchRes.status}). Votre compte n'est pas encore complet — réessayez. Détail technique : ${String(detail).slice(0, 240)}`);
-        return; // On NE prétend PAS que le compte est créé et on GARDE la session pour permettre un nouvel essai.
-      }
+      const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?on_conflict=id&select=id,is_complete,name,photo_url`, {
+  method: "POST",
+  headers: {
+    "apikey": SUPABASE_KEY,
+    "Authorization": `Bearer ${token}`,
+    "Content-Type": "application/json",
+    "Prefer": "resolution=merge-duplicates,return=representation"
+  },
+  body: JSON.stringify({
+    id: userId,
+    name: displayName,
+    city: form.city,
+    account_type: form.account_type,
+    bio: form.bio.trim(),
+    phone: form.phone.trim() || null,
+    photo_url: finalPhotoUrl,
+    is_complete: true,
+    ...(isProAcc ? {
+      metier: form.metier.trim() || null,
+      profession: form.metier.trim() || null,
+      company: form.company.trim() || null,
+      category: form.category || null,
+      whatsapp: form.whatsapp.trim() || null,
+    } : {}),
+    ...((() => { 
+      const ref = new URLSearchParams(window.location.search).get("ref"); 
+      return ref ? { referred_by: ref } : {}; 
+    })()),
+  }),
+});
+
+const patchBody = await patchRes.json().catch(() => null);
+const updatedRow = Array.isArray(patchBody) ? patchBody[0] : patchBody;
+
+if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
+  const detail = !patchRes.ok
+    ? (patchBody && typeof patchBody === "object" ? JSON.stringify(patchBody) : String(patchBody || ""))
+    : "Aucune ligne créée ou modifiée — vérifiez les droits RLS en écriture sur la table « profiles ».";
+
+  console.error("[Moyo][Signup] Échec finalisation profil :", patchRes.status, detail);
+  setLoading(false);
+  setErrorMsg(`La finalisation de votre profil n'a pas abouti (code ${patchRes.status}). Votre compte n'est pas encore complet — réessayez. Détail technique : ${String(detail).slice(0, 240)}`);
+  return;
+}
       // Mettre à jour le display_name dans Supabase Auth
       try {
         await fetch(`${SUPABASE_URL}/auth/v1/user`, {
