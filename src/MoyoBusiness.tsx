@@ -1670,6 +1670,13 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
       }
       // si le métier lui-même commence par la saisie, on le privilégie
       if (mbNorm(m.label).startsWith(q)) score = Math.max(score, 3.5);
+      // tolérance aux fautes de frappe (Levenshtein) en dernier recours
+      if (score < 0) {
+        const thr = q.length <= 4 ? 1 : 2;
+        let best = 99;
+        for (const t of hay) for (const w of t.split(/[^a-z0-9]+/)) { if (w) best = Math.min(best, lev(w, q)); }
+        if (best <= thr) score = 1.5 - best * 0.3;
+      }
       if (score >= 0) scored.push({ label: m.label, score });
     }
     scored.sort((a, b) => b.score - a.score || a.label.localeCompare(b.label));
@@ -4862,8 +4869,9 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
       .moyo-sidebar-bottom:hover { background: ${G.creme}; }
       .moyo-main-area { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; overflow: hidden; }
       .moyo-topbar-wide { padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; background: ${G.blanc}; border-bottom: 1px solid ${G.gris}; flex-shrink: 0; }
-      .moyo-content-wide { flex: 1; overflow-y: auto; padding: 26px 30px 72px; }
-      .moyo-content-wide > * { max-width: 1100px !important; margin-left: auto !important; margin-right: auto !important; }
+      .moyo-content-wide { flex: 1; overflow-y: auto; padding: 24px 28px 72px; }
+      .moyo-content-wide .page-anim { width: 100%; }
+      .moyo-content-wide .page-anim > * { max-width: 1120px !important; margin-left: auto !important; margin-right: auto !important; }
       .moyo-content-wide .dgrid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; align-items: start; }
       .moyo-content-wide .dspan { grid-column: 1 / -1; }
     `}</style>
@@ -15607,7 +15615,7 @@ const BUSINESS_CATEGORIES: BusinessCategory[] = [
     "Conducteur d'engins", "Conducteur de travaux", "Couvreur", "Électricien bâtiment", "Étancheur",
     "Façadier", "Ferrailleur", "Géomètre", "Ingénieur BTP", "Maçon", "Marbrier", "Menuisier",
     "Peintre bâtiment", "Plombier", "Serrurier", "Serrurerie", "Soudeur", "Staffeur",
-    "Technicien bâtiment", "Topographe", "Vitrier",
+    "Technicien bâtiment", "Topographe", "Vitrier", "Carrière", "Sable et gravier",
   ] },
   { id: "Commerce", name: "Commerce", icon: "🛍️", order: 2, metiers: [
     "Boutique cadeaux", "Boutique cosmétique", "Boutique décoration", "Boutique de chaussures",
@@ -15618,15 +15626,20 @@ const BUSINESS_CATEGORIES: BusinessCategory[] = [
   ] },
   { id: "Services", name: "Services", icon: "💼", order: 3, metiers: [
     "Agent de saisie", "Aide à domicile", "Assistant administratif", "Baby-sitter", "Blanchisserie",
-    "Community manager", "Comptable", "Consultant marketing", "Cybercafé", "Dame de ménage",
-    "Développeur web", "Désinfection", "Entretien espaces verts", "Femme de ménage", "Garde d'enfants",
-    "Graphiste", "Homme de ménage", "Informaticien", "Interprète", "Jardinier", "Juriste",
+    "Community manager", "Comptable", "Consultant marketing", "Dame de ménage",
+    "Désinfection", "Entretien espaces verts", "Femme de ménage", "Garde d'enfants",
+    "Graphiste", "Homme de ménage", "Interprète", "Jardinier", "Juriste",
     "Nettoyage professionnel", "Nounou", "Paysagiste", "Photocopie & bureautique", "Pressing",
-    "Rédacteur", "Réparateur informatique", "Réparateur téléphone", "Repassage",
-    "Secrétaire indépendant", "Service de livraison", "Traducteur",
+    "Rédacteur", "Repassage", "Secrétaire indépendant", "Service de livraison", "Traducteur",
+  ] },
+  { id: "Technologie & Numérique", name: "Technologie & Numérique", icon: "💻", order: 3.5, metiers: [
+    "Administrateur réseau", "Création de site web", "Cybercafé", "Cybersécurité",
+    "Développeur logiciel", "Développeur mobile", "Développeur web", "E-commerce",
+    "Hébergement web", "Informaticien", "Maintenance informatique", "Réparateur informatique",
+    "Réparateur téléphone", "Technicien réseau",
   ] },
   { id: "Transport", name: "Transport", icon: "🚚", order: 4, metiers: [
-    "Agence de voyage", "Chauffeur poids lourd", "Chauffeur privé", "Coursier", "Déménageur",
+    "Chauffeur poids lourd", "Chauffeur privé", "Coursier", "Déménageur",
     "Livreur", "Location de bus", "Location de camion", "Location de véhicule", "Logisticien",
     "Taxi", "Transport scolaire", "Transport fluvial", "Transport interurbain", "Transporteur",
   ] },
@@ -15639,7 +15652,11 @@ const BUSINESS_CATEGORIES: BusinessCategory[] = [
   { id: "Agriculture & Élevage", name: "Agriculture & Élevage", icon: "🌱", order: 6, metiers: [
     "Agriculteur", "Agronome", "Aviculteur", "Éleveur", "Éleveur de bovins", "Éleveur de chèvres",
     "Éleveur de porcs", "Éleveur de volailles", "Fournisseur d'intrants agricoles", "Horticulteur",
-    "Maraîcher", "Pépiniériste", "Pisciculteur", "Producteur de fruits", "Producteur de légumes",
+    "Maraîcher", "Mareyeur", "Pépiniériste", "Pêcheur", "Pisciculteur", "Producteur de fruits", "Producteur de légumes",
+  ] },
+  { id: "Vétérinaire & Animaux", name: "Vétérinaire & Animaux", icon: "🐾", order: 6.5, metiers: [
+    "Animalerie", "Aquariophilie", "Clinique vétérinaire", "Éducateur canin", "Pension pour animaux",
+    "Toilettage", "Vente d'aliments pour animaux", "Vente d'animaux", "Vétérinaire",
   ] },
   { id: "Immobilier", name: "Immobilier", icon: "🏠", order: 7, metiers: [
     "Agent immobilier", "Architecte d'intérieur", "Constructeur", "Courtier immobilier",
@@ -15647,17 +15664,36 @@ const BUSINESS_CATEGORIES: BusinessCategory[] = [
     "Promoteur immobilier", "Syndic", "Vente de terrains",
   ] },
   { id: "Santé", name: "Santé", icon: "🩺", order: 8, metiers: [
-    "Ambulancier", "Centre médical", "Clinique privée", "Dentiste", "Herboriste", "Infirmier",
-    "Kinésithérapeute", "Laboratoire d'analyses", "Médecin", "Nutritionniste", "Opticien",
-    "Pharmacien", "Psychologue", "Sage-femme", "Tradipraticien",
+    "Ambulancier", "Anesthésiste", "Cardiologue", "Centre de vaccination", "Centre médical",
+    "Chirurgien", "Clinique privée", "Dentiste", "Dermatologue", "Gynécologue", "Herboriste",
+    "Imagerie médicale", "Infirmier", "Kinésithérapeute", "Laboratoire d'analyses", "Médecin",
+    "Neurologue", "Nutritionniste", "Ophtalmologue", "Opticien", "ORL", "Orthopédiste",
+    "Orthophoniste", "Pédiatre", "Pharmacien", "Podologue", "Psychologue", "Radiologue",
+    "Sage-femme", "Tradipraticien", "Urologue",
+  ] },
+  { id: "Services funéraires", name: "Services funéraires", icon: "🕊️", order: 8.5, metiers: [
+    "Chambre funéraire", "Fabrication de cercueils", "Fleurs de deuil", "Location de matériel funéraire",
+    "Marbrerie funéraire", "Morgue", "Organisation d'obsèques", "Pompes funèbres",
+    "Sonorisation de veillée", "Thanatopracteur", "Transport funéraire", "Vente de cercueils",
   ] },
   { id: "Beauté", name: "Beauté", icon: "💇", order: 9, metiers: [
     "Barbier", "Coiffeur", "Coiffeuse", "Esthéticienne", "Institut de beauté", "Maquilleur",
     "Massage", "Parfumerie", "Prothésiste ongulaire", "Salon de coiffure", "Soins du visage", "Spa",
   ] },
+  { id: "Mode", name: "Mode", icon: "👗", order: 9.5, metiers: [
+    "Atelier de couture", "Broderie", "Confection sur mesure", "Conseiller en image", "Costumier",
+    "Couturier", "Couturière", "Créateur d'accessoires", "Créateur de mode", "Designer textile",
+    "Mannequin", "Maroquinier", "Modéliste", "Modiste", "Patronnier", "Retoucherie", "Styliste",
+    "Tailleur", "Teinturier", "Vente de tissus & pagne",
+  ] },
   { id: "Restauration", name: "Restauration", icon: "🍽️", order: 10, metiers: [
     "Bar", "Boulanger", "Café", "Cuisinier à domicile", "Fast-food", "Glacier", "Pâtissier",
     "Restaurant", "Service traiteur événementiel", "Traiteur",
+  ] },
+  { id: "Tourisme & Hôtellerie", name: "Tourisme & Hôtellerie", icon: "🏨", order: 10.5, metiers: [
+    "Agence de tourisme", "Agence de voyage", "Auberge", "Camping", "Excursions & safaris",
+    "Gîte", "Guide touristique", "Hôtel", "Location de vacances", "Lodge", "Maison d'hôtes",
+    "Résidence meublée",
   ] },
   { id: "Éducation & Formation", name: "Éducation & Formation", icon: "🎓", order: 11, metiers: [
     "Centre de formation", "Coach scolaire", "École privée", "Formateur professionnel",
@@ -15703,6 +15739,11 @@ const BUSINESS_CATEGORIES: BusinessCategory[] = [
     "Conditionnement", "Emballage", "Fabrication industrielle", "Maintenance industrielle",
     "Menuiserie industrielle", "Métallurgie", "Production alimentaire", "Usinage",
   ] },
+  { id: "Environnement & Assainissement", name: "Environnement & Assainissement", icon: "♻️", order: 18.5, metiers: [
+    "Assainissement", "Curage de canalisations", "Dératisation", "Forage d'eau",
+    "Gestion des déchets", "Ramassage d'ordures", "Recyclage", "Traitement des eaux",
+    "Vidange de fosses septiques",
+  ] },
   { id: "Sécurité", name: "Sécurité", icon: "🛡️", order: 19, metiers: [
     "Agent de sécurité", "Contrôle d'accès", "Installation vidéosurveillance",
     "Sécurité événementielle", "Sécurité incendie", "Société de gardiennage",
@@ -15713,8 +15754,8 @@ const BUSINESS_CATEGORIES: BusinessCategory[] = [
     "Yoga",
   ] },
   { id: "Artisanat", name: "Artisanat", icon: "🧵", order: 21, metiers: [
-    "Artisan d'art", "Bijoutier", "Cordonnier", "Couturier", "Décorateur", "Ébéniste",
-    "Fabricant de meubles", "Sculpteur", "Styliste", "Tapissier",
+    "Artisan d'art", "Bijoutier", "Cordonnier", "Décorateur", "Ébéniste",
+    "Fabricant de meubles", "Sculpteur", "Tapissier",
   ] },
 ];
 
@@ -15748,6 +15789,62 @@ const BUSINESS_CATEGORIES_SORTED: BusinessCategory[] = [...BUSINESS_CATEGORIES]
 // et les suggestions globales.
 const BUSINESS_METIERS_FLAT: string[] = sortMetiers(BUSINESS_CATEGORIES_SORTED.flatMap(c => c.metiers));
 
+// Distance de Levenshtein (tolérance aux fautes de frappe).
+function lev(a: string, b: string): number {
+  const m = a.length, n = b.length;
+  if (!m) return n; if (!n) return m;
+  let prev = Array.from({ length: n + 1 }, (_, i) => i);
+  let cur = new Array(n + 1).fill(0);
+  for (let i = 1; i <= m; i++) {
+    cur[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+    }
+    const tmp = prev; prev = cur; cur = tmp;
+  }
+  return prev[n];
+}
+
+// Correspondance souple : insensible aux accents/casse, partielle, et tolérante
+// aux fautes. C'est TOUJOURS un sur-ensemble de includes() — rien n'est perdu.
+function softMatch(haystack: string, query: string): boolean {
+  const q = mbNorm(query);
+  if (!q) return true;
+  const h = mbNorm(haystack);
+  if (h.includes(q)) return true;
+  const thr = q.length <= 4 ? 1 : 2;
+  for (const w of h.split(/[^a-z0-9]+/)) {
+    if (!w) continue;
+    if (w.startsWith(q) || q.startsWith(w)) return true;
+    if (Math.abs(w.length - q.length) <= thr && lev(w, q) <= thr) return true;
+  }
+  return false;
+}
+
+// Métiers les plus proches d'une saisie (suggestions « Vous cherchez »).
+function fuzzyMetiers(query: string, limit = 4): string[] {
+  const q = mbNorm(query);
+  if (q.length < 2) return [];
+  const scored: { label: string; score: number }[] = [];
+  for (const m of BUSINESS_METIERS_FLAT) {
+    const h = mbNorm(m);
+    let score = -1;
+    if (h === q) score = 100;
+    else if (h.startsWith(q)) score = 80;
+    else if (h.includes(q)) score = 60;
+    else {
+      const thr = q.length <= 4 ? 1 : 2;
+      let best = 99;
+      for (const w of h.split(/[^a-z0-9]+/)) { if (w) best = Math.min(best, lev(w, q)); }
+      if (best <= thr) score = 40 - best * 5;
+    }
+    if (score >= 0) scored.push({ label: m, score });
+  }
+  scored.sort((a, b) => b.score - a.score || a.label.localeCompare(b.label));
+  return scored.slice(0, limit).map(s => s.label);
+}
+
 // Métiers d'une catégorie donnée (déjà triés) ; si aucune catégorie, on renvoie tous les métiers.
 const metiersForCategory = (catId?: string | null): string[] => {
   if (!catId) return BUSINESS_METIERS_FLAT;
@@ -15764,13 +15861,18 @@ function catIcon(id: string, color: string, size = 16) {
     case "BTP": return <svg {...p}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/></svg>;
     case "Commerce": return <svg {...p}><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>;
     case "Services": return <svg {...p}><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>;
+    case "Technologie & Numérique": return <svg {...p}><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>;
     case "Transport": return <svg {...p}><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M14 9h4l4 4v4a1 1 0 0 1-1 1h-1"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>;
     case "Automobile & Moto": return <svg {...p}><path d="M5 13l2-5a2 2 0 0 1 1.9-1.4h6.2A2 2 0 0 1 17 8l2 5"/><path d="M5 13h14a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1"/><path d="M5 13a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h1"/><circle cx="8" cy="18" r="2"/><circle cx="16" cy="18" r="2"/></svg>;
     case "Agriculture & Élevage": return <svg {...p}><path d="M12 21c0-5 2-9 8-11-1 6-4 9-8 11Z"/><path d="M12 21c0-5-2-9-8-11 1 6 4 9 8 11Z"/><path d="M12 21V9"/></svg>;
+    case "Vétérinaire & Animaux": return <svg {...p}><circle cx="4.5" cy="10" r="1.6"/><circle cx="9" cy="6.5" r="1.6"/><circle cx="15" cy="6.5" r="1.6"/><circle cx="19.5" cy="10" r="1.6"/><path d="M8.5 14.5c0-1.9 1.6-3 3.5-3s3.5 1.1 3.5 3c0 1.5-.9 2.4-1.9 3.1-.8.5-1.1 1.2-1.6 1.2s-.8-.7-1.6-1.2c-1-.7-1.9-1.6-1.9-3.1z"/></svg>;
     case "Immobilier": return <svg {...p}><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/></svg>;
     case "Santé": return <svg {...p}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
+    case "Services funéraires": return <svg {...p}><path d="M12 11c1.66 0 3-1.5 3-3.5C15 5.5 12 2 12 2S9 5.5 9 7.5c0 2 1.34 3.5 3 3.5z"/><path d="M12 11v9"/><path d="M8 20h8"/></svg>;
     case "Beauté": return <svg {...p}><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/></svg>;
+    case "Mode": return <svg {...p}><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>;
     case "Restauration": return <svg {...p}><path d="M3 2v7c0 1.1.9 2 2 2a2 2 0 0 0 2-2V2"/><path d="M5 2v20"/><path d="M19 15V2a4 4 0 0 0-3 4v7h3Zm0 0v7"/></svg>;
+    case "Tourisme & Hôtellerie": return <svg {...p}><path d="M2 17V7"/><path d="M2 11h15a3 3 0 0 1 3 3v3"/><path d="M2 17h20"/><circle cx="6" cy="9" r="1.5"/></svg>;
     case "Éducation & Formation": return <svg {...p}><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/></svg>;
     case "Événementiel": return <svg {...p}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
     case "Médias, Communication & Publicité": return <svg {...p}><path d="M3 11l15-6v14L3 13Z"/><path d="M3 11v2a2 2 0 0 0 2 2h1"/><path d="M11 18l-1 3"/><path d="M18 8a3 3 0 0 1 0 6"/></svg>;
@@ -15779,6 +15881,7 @@ function catIcon(id: string, color: string, size = 16) {
     case "Droit & Administration": return <svg {...p}><path d="M12 3v18"/><path d="M5 7h14"/><path d="M7 7l-3 6a3 3 0 0 0 6 0Z"/><path d="M17 7l-3 6a3 3 0 0 0 6 0Z"/><path d="M8 21h8"/></svg>;
     case "Énergie & Carburants": return <svg {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
     case "Industrie & Production": return <svg {...p}><path d="M2 20h20"/><path d="M4 20V9l5 4V9l5 4V5l5 3v12"/></svg>;
+    case "Environnement & Assainissement": return <svg {...p}><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>;
     case "Sécurité": return <svg {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>;
     case "Sports & Bien-être": return <svg {...p}><path d="M6.5 6.5 17.5 17.5"/><path d="M21 21l-1-1"/><path d="M3 3l1 1"/><path d="M18 22l4-4"/><path d="M2 6l4-4"/><path d="M3 10l7-7"/><path d="M14 21l7-7"/></svg>;
     case "Artisanat": return <svg {...p}><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>;
@@ -15963,6 +16066,26 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
   const [type, setType] = useState<"cherche" | "propose">(editPub?.type || presetType || "cherche");
   const [cat, setCat] = useState(editPub?.category || "BTP");
   const [metier, setMetier] = useState<string>(() => editPub?.metier || metiersForCategory(editPub?.category || "BTP")[0] || "");
+  const [lockedCat, setLockedCat] = useState<string | null>(null);
+  useEffect(() => {
+    if (editPub) return;
+    let alive = true;
+    (async () => {
+      try {
+        const rows = await sb.query<any>(auth.token, "profiles", `?id=eq.${auth.userId}&select=account_type,category&limit=1`, auth.refreshToken);
+        if (alive && rows && rows[0] && rows[0].account_type === "pro" && rows[0].category) setLockedCat(rows[0].category);
+      } catch {}
+    })();
+    return () => { alive = false; };
+  }, []);
+  const categoryLocked = type === "propose" && !!lockedCat;
+  useEffect(() => {
+    if (categoryLocked && lockedCat && cat !== lockedCat) {
+      setCat(lockedCat);
+      const ms = metiersForCategory(lockedCat);
+      if (!ms.includes(metier)) setMetier(ms[0] || "");
+    }
+  }, [categoryLocked, lockedCat]);
   const [title, setTitle] = useState(editPub?.title || "");
   const [desc, setDesc] = useState(editPub?.description || "");
   const [budget, setBudget] = useState(editPub?.budget ? String(editPub.budget) : "");
@@ -16096,13 +16219,14 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
       )}
 
       {lbl("Catégorie")}
-      <div style={{ position: "relative", marginBottom: 18 }}>
-        {iconLeft(catIcon(cat, G.or, 22))}
-        <select value={cat} onChange={e => setCat(e.target.value)} style={fieldSel}>
+      <div style={{ position: "relative", marginBottom: categoryLocked ? 6 : 18 }}>
+        {iconLeft(catIcon(categoryLocked && lockedCat ? lockedCat : cat, G.or, 22))}
+        <select value={categoryLocked && lockedCat ? lockedCat : cat} onChange={e => setCat(e.target.value)} disabled={categoryLocked} style={{ ...fieldSel, ...(categoryLocked ? { background: "#F0F0F2", color: "#888", cursor: "not-allowed" } : {}) }}>
           {PUB_CATS.filter(c => c.id !== "all").map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
         </select>
         {chevronRight}
       </div>
+      {categoryLocked && <div style={{ fontSize: "0.78rem", color: "#9AA0A6", marginBottom: 16, display: "flex", alignItems: "center", gap: 6, lineHeight: 1.4 }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Catégorie de votre compte — seul le métier est modifiable.</div>}
 
       {lbl("Métier")}
       <div style={{ position: "relative", marginBottom: 18 }}>
@@ -16515,7 +16639,7 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
           {/* Deux sélecteurs : Catégorie + Métier */}
           <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
             {/* Catégorie */}
-            <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", gap: 10, borderRadius: 16, padding: "12px 12px", border: `1px solid ${G.gris}`, background: G.blanc, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+            <div style={{ position: "relative", flex: 1, minWidth: 0, overflow: "hidden", display: "flex", alignItems: "center", gap: 10, borderRadius: 16, padding: "12px 12px", border: `1px solid ${G.gris}`, background: G.blanc, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
               <div style={{ width: 38, height: 38, flexShrink: 0, borderRadius: "50%", background: "rgba(212,168,67,0.14)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
               </div>
@@ -16530,7 +16654,7 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
               </select>
             </div>
             {/* Métier */}
-            <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", gap: 10, borderRadius: 16, padding: "12px 12px", border: `1px solid ${G.gris}`, background: G.blanc, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+            <div style={{ position: "relative", flex: 1, minWidth: 0, overflow: "hidden", display: "flex", alignItems: "center", gap: 10, borderRadius: 16, padding: "12px 12px", border: `1px solid ${G.gris}`, background: G.blanc, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
               <div style={{ width: 38, height: 38, flexShrink: 0, borderRadius: "50%", background: "rgba(212,168,67,0.14)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
               </div>
@@ -16551,6 +16675,7 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             </span>
             <select value={city} onChange={e => setCity(e.target.value)} style={{ width: "100%", appearance: "none", WebkitAppearance: "none", MozAppearance: "none", border: `1px solid ${G.gris}`, background: G.blanc, color: "#1A1A1A", borderRadius: 14, padding: "15px 42px 15px 46px", fontSize: "0.95rem", fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", boxSizing: "border-box" }}>
+              <option value="">Toutes les villes</option>
               {PUB_VILLES.map(v => <option key={v} value={v}>{v}</option>)}
             </select>
             <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", display: "flex" }}>
@@ -16598,7 +16723,7 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
         <>
           <div style={{ padding: "12px 16px 4px", fontSize: "0.86rem", color: "#6B7280", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span><b style={{ color: "#1A1A1A", fontWeight: 800 }}>{list.length}</b> {type === "cherche" ? (list.length > 1 ? "besoins publiés" : "besoin publié") : (list.length > 1 ? "services proposés" : "service proposé")}</span>
-            <span>{city}</span>
+            <span>{city || "Tout le pays"}</span>
           </div>
           <div className="dgrid" style={{ padding: "6px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
             {loading && <p className="dspan" style={{ textAlign: "center", color: "#999", padding: 30 }}>Chargement…</p>}
@@ -16934,7 +17059,9 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
             <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.1)", color: "#fff", borderRadius: 50, padding: "3px 11px", fontSize: "0.72rem", fontWeight: 600 }}><PinIcon color="#fff" size={12} /> {pro.city}{pro.zone ? " · " + pro.zone : ""}</span>
           </div>
           <div style={{ marginTop: 10, fontSize: "0.86rem", fontWeight: 700, color: "#fff" }}>
-            <span style={{ color: G.or }}>★</span> {pro.rating_count ? `${(pro.rating_avg || 0).toFixed(1)} · ${pro.rating_count} avis` : "Nouveau professionnel"}
+            {pro.account_type === "pro"
+              ? <><span style={{ color: G.or }}>★</span> {pro.rating_count ? `${(pro.rating_avg || 0).toFixed(1)} · ${pro.rating_count} avis` : "Nouveau professionnel"}</>
+              : <span style={{ background: "rgba(255,255,255,0.16)", color: "#fff", borderRadius: 50, padding: "3px 12px", fontSize: "0.74rem", fontWeight: 700 }}>Client</span>}
           </div>
         </div>
       </div>
@@ -17078,13 +17205,14 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
       const qa = quartier.toLowerCase();
       arr = arr.filter(p => (`${p.zone || ""} ${p.city || ""}`).toLowerCase().includes(qa));
     }
-    const t = q.trim().toLowerCase();
-    if (t) arr = arr.filter(p => (`${p.company || ""} ${p.name || ""} ${p.metier || ""} ${p.category || ""}`).toLowerCase().includes(t));
+    const t = q.trim();
+    if (t) arr = arr.filter(p => softMatch(`${p.company || ""} ${p.name || ""} ${p.metier || ""} ${p.category || ""}`, t));
     return arr;
   }, [pros, q, quartier]);
 
   // Vue active : tous les professionnels, ou seulement les favoris enregistrés (mêmes filtres conservés).
   const displayList = repView === "fav" ? list.filter(p => favs.has(p.id)) : list;
+  const metierSug = q.trim().length >= 2 ? fuzzyMetiers(q).filter(m => mbNorm(m) !== mbNorm(q)).slice(0, 4) : [];
 
   return (
     <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", paddingBottom: 90 }}>
@@ -17123,6 +17251,12 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
             {PUB_VILLES.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
         </div>
+        {metierSug.length > 0 && (
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", marginTop: -4, marginBottom: 12 }}>
+            <span style={{ fontSize: "0.72rem", color: "#9AA0A6", fontWeight: 600 }}>Vous cherchez :</span>
+            {metierSug.map(m => <button key={m} onClick={() => setQ(m)} style={{ border: `1px solid ${G.gris}`, background: G.blanc, color: G.brun, borderRadius: 50, padding: "5px 12px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>{m}</button>)}
+          </div>
+        )}
 
         {/* Catégorie (client uniquement) + Métier */}
         <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
