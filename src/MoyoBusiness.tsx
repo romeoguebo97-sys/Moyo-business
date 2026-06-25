@@ -2705,15 +2705,18 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
         sessionStorage.setItem("moyo_signup_uid", finalUserId);
       }
       setStep(3);
-    } catch (err) {
-      // Même en cas d'erreur réseau, si on a le userId de signUp on continue
-      if (authRes?.user?.id) {
-        setTempUserId(authRes.user.id);
-        sessionStorage.setItem("moyo_signup_uid", authRes.user.id);
-      }
-      setStep(3);
-    }
-    setLoading(false);
+} catch (err) {
+  console.error("[Moyo][Signup] Erreur création compte :", err);
+  setErrorMsg("Impossible de créer le compte. Vérifiez l’email, le mot de passe ou réessayez avec une autre adresse.");
+  setTempToken("");
+  setTempUserId("");
+  sessionStorage.removeItem("moyo_signup_token");
+  sessionStorage.removeItem("moyo_signup_uid");
+  setLoading(false);
+  return;
+}
+
+setLoading(false);
   };
 
   // Étape 2 → upload photo en arrière-plan pendant que l'utilisateur remplit l'étape 3
