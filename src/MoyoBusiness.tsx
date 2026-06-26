@@ -340,7 +340,7 @@ const EXPENSE_CAT_COLORS: Record<string, string> = {
 };
 
 const G = {
-  rouge: "#D4A843", rougeDark: "#C29735", or: "#D4A843",
+  rouge: "#D4A843", rougeDark: "#C29735", or: "#D4A843", orText: "var(--c-goldText)",
   vert: "#16A34A",
   creme: "var(--c-creme)", cremeDark: "var(--c-cremeDark)",
   brun: "var(--c-brun)", brunLight: "var(--c-brunLight)", blanc: "var(--c-blanc)", gris: "var(--c-gris)",
@@ -546,7 +546,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode; onBack?
             <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", background: "#1e1e1e", color: "#ff8a80", padding: 14, borderRadius: 10, fontSize: "0.72rem", lineHeight: 1.45, maxHeight: 280, overflow: "auto", margin: 0 }}>{String(e?.name || "Error")}: {String(e?.message || e)}{e?.stack ? "\n\n" + e.stack : ""}</pre>
             <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
               <button onClick={() => { this.setState({ error: null }); this.props.onBack?.(); }} style={{ background: "#D4A843", color: "#fff", border: "none", borderRadius: 10, padding: "10px 18px", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>← Retour</button>
-              <button onClick={() => { try { location.reload(); } catch {} }} style={{ background: "#fff", color: "#333", border: "1px solid #ccc", borderRadius: 10, padding: "10px 18px", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>Recharger la page</button>
+              <button onClick={() => { try { location.reload(); } catch {} }} style={{ background: "#fff", color: G.brun, border: "1px solid #ccc", borderRadius: 10, padding: "10px 18px", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>Recharger la page</button>
             </div>
           </div>
         </div>
@@ -867,8 +867,8 @@ const sb = {
 };
 
 const GLOBAL_CSS = `
-  :root{ --c-creme:#F8F9FB; --c-cremeDark:#EEF0F4; --c-blanc:#FFFFFF; --c-gris:#E5E7EB; --c-brun:#1A1A1A; --c-brunLight:#6B7280; --c-fond:#E8E9EE; }
-  :root[data-theme="dark"], [data-theme="dark"]{ --c-creme:#08080D; --c-cremeDark:#121218; --c-blanc:#16161D; --c-gris:#26262F; --c-brun:#F3F4F6; --c-brunLight:#9CA3AF; --c-fond:#08080D; }
+  :root{ --c-creme:#F8F9FB; --c-cremeDark:#EEF0F4; --c-blanc:#FFFFFF; --c-gris:#E5E7EB; --c-brun:#1A1A1A; --c-brunLight:#6B7280; --c-fond:#E8E9EE; --c-goldText:var(--c-goldText); }
+  :root[data-theme="dark"], [data-theme="dark"]{ --c-creme:#08080D; --c-cremeDark:#121218; --c-blanc:#16161D; --c-gris:#26262F; --c-brun:#F3F4F6; --c-brunLight:#9CA3AF; --c-fond:#08080D; --c-goldText:#EAC25A; }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
   html{overflow-x:hidden;width:100%;max-width:100vw;background-color:var(--c-fond);-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none}
   body{overflow-x:hidden;width:100%;max-width:100vw;min-height:100vh;-webkit-text-size-adjust:100%;text-size-adjust:100%;background-color:var(--c-fond);overscroll-behavior:none}
@@ -1939,7 +1939,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         .mb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;max-width:860px;margin:0 auto;}
         .mb-bcard{background:var(--creme);border:1.5px solid var(--gris-clair);border-radius:14px;padding:18px;}
         .mb-bhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
-        .mb-bcat{font-size:10px;font-weight:800;text-transform:uppercase;padding:4px 8px;border-radius:5px;background:rgba(212,168,67,0.16);color:#8B6914;}
+        .mb-bcat{font-size:10px;font-weight:800;text-transform:uppercase;padding:4px 8px;border-radius:5px;background:rgba(212,168,67,0.16);color:var(--c-goldText);}
         .mb-bdate{font-size:11px;color:var(--gris);}
         .mb-btitle{font-size:15px;font-weight:800;margin-bottom:5px;line-height:1.3;}
         .mb-bdesc{font-size:13px;color:var(--gris);line-height:1.5;margin-bottom:12px;}
@@ -2015,7 +2015,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
       {/* NAV */}
       <header className="mb-nav">
         <div className="mb-logo" onClick={() => onNav("landing")}>
-          <div className="mb-logo-ic"><svg width="20" height="20" style={{ color: "#0e1326" }}><use href="#mbi-biz"/></svg></div>
+          <div className="mb-logo-ic"><svg width="20" height="20" style={{ color: G.brun }}><use href="#mbi-biz"/></svg></div>
           <span className="mb-logo-tx">Moyo <span>Business</span></span>
         </div>
         <div className="mb-nav-r">
@@ -2225,7 +2225,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
                 <div className="mb-pname">{p.name}</div>
                 <div className="mb-pmet">{p.metier}</div>
                 {p.ville && <div className="mb-pville"><svg width="11" height="11" style={{ color: "#6B7280", verticalAlign: "-1px" }}><use href="#mbi-pin"/></svg> {p.ville}</div>}
-                <div style={{ fontSize: "0.74rem", color: "#8B6914", fontWeight: 700, margin: "4px 0 2px" }}>★ {p.rating}</div>
+                <div style={{ fontSize: "0.74rem", color: "var(--c-goldText)", fontWeight: 700, margin: "4px 0 2px" }}>★ {p.rating}</div>
                 {p.verif && <div className="mb-pverif"><svg width="10" height="10" style={{ color: "#4A7C28" }}><use href="#mbi-check"/></svg> {p.verif}</div>}
                 <button className="mb-bbtn" style={{ width: "100%", marginTop: 10 }} onClick={() => setAuthChoice({ kind: "pro", id: p.id, label: p.name })}>Contacter ce professionnel</button>
               </div>
@@ -3775,7 +3775,7 @@ function AdminDesktopPage() {
                 return (
                   <button key={key} onClick={() => setConfigTab(key)} style={{ display: "flex", alignItems: "center", gap: 11, padding: "11px 13px", borderRadius: 10, border: "none", background: active ? "rgba(212,168,67,0.1)" : "transparent", cursor: "pointer", textAlign: "left", width: "100%", transition: "background 0.15s" }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={active ? G.rouge : "#777"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d={icon}/></svg>
-                    <span style={{ fontSize: "0.84rem", fontWeight: active ? 700 : 500, color: active ? G.rouge : "#444" }}>{label}</span>
+                    <span style={{ fontSize: "0.84rem", fontWeight: active ? 700 : 500, color: active ? G.rouge : "var(--c-brunLight)" }}>{label}</span>
                   </button>
                 );
               })}
@@ -4609,7 +4609,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
       <OffCanvasSection title="Fonctionnalités">
         {([["feature_statuses","featureStatuses" as keyof typeof appConfig,"Statuts (Stories)"],["feature_assistant","featureAssistant" as keyof typeof appConfig,"Assistant IA"],["maintenance_mode","maintenanceMode" as keyof typeof appConfig,"Mode maintenance"]] as [string, keyof typeof appConfig, string][]).map(([key,ck,label]) => (
           <div key={key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", background: G.creme, borderRadius: 12 }}>
-            <div style={{ fontSize: "0.83rem", fontWeight: 600, color: key === "maintenance_mode" ? G.rouge : "#1a1a1a" }}>{label}</div>
+            <div style={{ fontSize: "0.83rem", fontWeight: 600, color: key === "maintenance_mode" ? G.rouge : G.brun }}>{label}</div>
             <SwitchBtn on={appConfig[ck] === "true"} onToggle={async () => { const v = appConfig[ck] !== "true" ? "true" : "false"; setAppConfig(c => ({ ...c, [ck]: v })); await patch(key, v); }} />
           </div>
         ))}
@@ -4966,7 +4966,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
           </div>
         )}
         <div className="moyo-sidebar-bottom">
-          <div style={{ width: 38, height: 38, borderRadius: "50%", background: `linear-gradient(135deg,${G.or},#8B6914)`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: "0.65rem", fontWeight: 800, flexShrink: 0, border: `2px solid ${G.or}` }}>
+          <div style={{ width: 38, height: 38, borderRadius: "50%", background: `linear-gradient(135deg,${G.or},var(--c-goldText))`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: "0.65rem", fontWeight: 800, flexShrink: 0, border: `2px solid ${G.or}` }}>
             {auth.name?.slice(0, 2).toUpperCase() || "MO"}
           </div>
           <div>
@@ -7160,7 +7160,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
             </div>
             <div style={{ padding: "18px 20px 32px" }}>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
-                {open.partner.account_type === "pro" && open.partner.category && <span style={{ background: "rgba(212,168,67,0.15)", color: "#8B6914", borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 700 }}>{PUB_CATS.find(c => c.id === open.partner.category)?.label || open.partner.category}</span>}
+                {open.partner.account_type === "pro" && open.partner.category && <span style={{ background: "rgba(212,168,67,0.15)", color: "var(--c-goldText)", borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 700 }}>{PUB_CATS.find(c => c.id === open.partner.category)?.label || open.partner.category}</span>}
                 {open.partner.account_type === "pro" && open.partner.zone && <span style={{ background: G.creme, color: G.brunLight, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600 }}>{open.partner.zone}</span>}
                 {open.partner.is_verified && <span style={{ background: "rgba(26,92,58,0.1)", color: G.vert, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 700 }}>✓ Vérifié</span>}
                 {open.partner.account_type === "pro" && <span style={{ background: G.creme, color: G.brun, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 700 }}><span style={{ color: G.or }}>★</span> {open.partner.rating_count ? `${(open.partner.rating_avg || 0).toFixed(1)} (${open.partner.rating_count})` : "Nouveau"}</span>}
@@ -8121,7 +8121,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
               <div style={{ width: 36, height: 36, borderRadius: 10, background: activeSection === item.id ? "rgba(212,168,67,0.1)" : "#F5F5F7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: (item as any).danger ? G.rouge : activeSection === item.id ? G.rouge : "#666" }}>
                 {item.icon}
               </div>
-              <span style={{ flex: 1, fontSize: "0.9rem", fontWeight: activeSection === item.id ? 700 : 500, color: (item as any).danger ? G.rouge : activeSection === item.id ? G.rouge : "#333" }}>{item.label}</span>
+              <span style={{ flex: 1, fontSize: "0.9rem", fontWeight: activeSection === item.id ? 700 : 500, color: (item as any).danger ? G.rouge : activeSection === item.id ? G.rouge : G.brun }}>{item.label}</span>
               {(item as any).badge && <span style={{ fontSize: "0.62rem", background: G.vert, color: "#fff", borderRadius: 50, padding: "2px 7px", fontWeight: 700 }}>{(item as any).badge}</span>}
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
             </div>
@@ -8163,7 +8163,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                 </span>
               )}
               {profile?.category && (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(212,168,67,0.15)", borderRadius: 50, padding: "5px 13px", fontSize: "0.78rem", fontWeight: 700, color: "#8B6914" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(212,168,67,0.15)", borderRadius: 50, padding: "5px 13px", fontSize: "0.78rem", fontWeight: 700, color: "var(--c-goldText)" }}>
                   {PUB_CATS.find(c => c.id === profile.category)?.label || profile.category}
                 </span>
               )}
@@ -8195,7 +8195,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                 </span>
               )}
               {profile?.is_sponsored && (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(212,168,67,0.18)", color: "#8B6914", borderRadius: 50, padding: "4px 11px", fontSize: "0.72rem", fontWeight: 700 }}>★ Sponsorisé</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(212,168,67,0.18)", color: "var(--c-goldText)", borderRadius: 50, padding: "4px 11px", fontSize: "0.72rem", fontWeight: 700 }}>★ Sponsorisé</span>
               )}
               <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: G.creme, borderRadius: 50, padding: "4px 11px", fontSize: "0.72rem", fontWeight: 700, color: G.brun }}>
                 <span style={{ color: G.or }}>★</span>
@@ -8215,7 +8215,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             {/* Modifier mon profil - niveau normal */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer", flex: 1 }} onClick={() => setEditing(true)}>
               <div style={{ width: 54, height: 54, borderRadius: "50%", background: G.blanc, border: `2px solid ${G.gris}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-brunLight)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="3"/>
                   <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                 </svg>
@@ -8227,9 +8227,9 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer", flex: 1, transform: "translateY(18px)" }} onClick={() => fileRef.current?.click()}>
               <div style={{ width: 54, height: 54, borderRadius: "50%", background: G.blanc, border: `2px solid ${G.gris}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.10)", position: "relative" }}>
                 {uploadLoading ? (
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "pulse 1s ease-in-out infinite" }}><circle cx="12" cy="12" r="10"/></svg>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-brunLight)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "pulse 1s ease-in-out infinite" }}><circle cx="12" cy="12" r="10"/></svg>
                 ) : (
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-brunLight)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                     <circle cx="12" cy="13" r="4"/>
                   </svg>
@@ -8244,7 +8244,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             {/* Liste noire - descend sur la vague */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer", flex: 1, transform: "translateY(18px)" }} onClick={() => setShowBlocked(true)}>
               <div style={{ width: 54, height: 54, borderRadius: "50%", background: G.blanc, border: `2px solid ${G.gris}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.10)", position: "relative" }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-brunLight)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                   <line x1="1" y1="1" x2="23" y2="23"/>
@@ -8259,7 +8259,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             {/* Voir mon profil - niveau normal */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer", flex: 1 }} onClick={() => setShowPreview(true)}>
               <div style={{ width: 54, height: 54, borderRadius: "50%", background: G.blanc, border: `2px solid ${G.gris}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-brunLight)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
@@ -8318,7 +8318,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           const isLifetime = stored && new Date(stored).getFullYear() >= 2090;
           // Si isPremium = true → toujours bouton doré, peu importe le localStorage
           if (auth.isPremium) return (
-            <div style={{ background: "linear-gradient(135deg,#D4A843 0%,#B8860B 60%,#8B6914 100%)", borderRadius: 20, padding: "18px 20px", boxShadow: "0 10px 32px rgba(184,134,11,0.45)", border: "1px solid rgba(255,220,100,0.3)", position: "relative", overflow: "hidden" }}>
+            <div style={{ background: "linear-gradient(135deg,#D4A843 0%,#B8860B 60%,var(--c-goldText) 100%)", borderRadius: 20, padding: "18px 20px", boxShadow: "0 10px 32px rgba(184,134,11,0.45)", border: "1px solid rgba(255,220,100,0.3)", position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg,rgba(255,255,255,0.13) 0%,transparent 100%)", borderRadius: "20px 20px 0 0", pointerEvents: "none" }} />
               <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
                 <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 12 }}>
@@ -8998,8 +8998,8 @@ function PaymentCard({ p, isPending, isApproved, isRejected, onActivate, onRejec
               }
               {p.operator === "Carte" || p.operator === "Stripe" ? "Carte bancaire" : p.operator}
               {p.gift_for && <span style={{ background: "rgba(212,168,67,0.15)", color: "#B8860B", borderRadius: 50, padding: "2px 8px", fontSize: "0.65rem", fontWeight: 700 }}>Cadeau pour {p.gift_for_name || "un contact"}</span>}
-              {p.kind === "boost" && <span style={{ background: "rgba(212,168,67,0.15)", color: "#8B6914", borderRadius: 50, padding: "2px 8px", fontSize: "0.65rem", fontWeight: 800 }}>🚀 Mise en avant {p.duration_days ? `${p.duration_days} j` : ""}</span>}
-              {p.kind === "sponsor" && <span style={{ background: "rgba(212,168,67,0.15)", color: "#8B6914", borderRadius: 50, padding: "2px 8px", fontSize: "0.65rem", fontWeight: 800 }}>★ Sponsor fiche {p.duration_days ? `${p.duration_days} j` : ""}</span>}
+              {p.kind === "boost" && <span style={{ background: "rgba(212,168,67,0.15)", color: "var(--c-goldText)", borderRadius: 50, padding: "2px 8px", fontSize: "0.65rem", fontWeight: 800 }}>🚀 Mise en avant {p.duration_days ? `${p.duration_days} j` : ""}</span>}
+              {p.kind === "sponsor" && <span style={{ background: "rgba(212,168,67,0.15)", color: "var(--c-goldText)", borderRadius: 50, padding: "2px 8px", fontSize: "0.65rem", fontWeight: 800 }}>★ Sponsor fiche {p.duration_days ? `${p.duration_days} j` : ""}</span>}
             </div>
             <div style={{ fontSize: "0.7rem", color: G.brunLight }}>{new Date(p.created_at).toLocaleString("fr-FR")} · {formatMoney(p.amount, paymentCurrency(p))}</div>
             <div style={{ fontSize: "0.62rem", color: G.brunLight, fontFamily: "monospace", marginTop: 2 }}>{p.user_id}</div>
@@ -11978,7 +11978,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   <div style={{ width: 16, height: 16, borderRadius: "50%", border: `2px solid ${warnReason === r ? "#f39c12" : "#ccc"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     {warnReason === r && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#f39c12" }} />}
                   </div>
-                  <span style={{ fontSize: "0.83rem", fontWeight: warnReason === r ? 600 : 400, color: warnReason === r ? "#b7770d" : "#333" }}>{r}</span>
+                  <span style={{ fontSize: "0.83rem", fontWeight: warnReason === r ? 600 : 400, color: warnReason === r ? "#b7770d" : G.brun }}>{r}</span>
                 </div>
               ))}
               {warnReason === "Autre motif" && (
@@ -13072,7 +13072,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         </div>
                         {/* Badges statuts */}
                         <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>
-                          {isLifetimePremium(u) && <span style={{ background: "linear-gradient(135deg,#8B6914,#D4A843)", color: "#fff", borderRadius: 50, padding: "1px 6px", fontSize: "0.60rem", fontWeight: 700 }}>♾️ À vie</span>}
+                          {isLifetimePremium(u) && <span style={{ background: "linear-gradient(135deg,var(--c-goldText),#D4A843)", color: "#fff", borderRadius: 50, padding: "1px 6px", fontSize: "0.60rem", fontWeight: 700 }}>♾️ À vie</span>}
                           {u.is_premium && !isLifetimePremium(u) && <span style={{ background: "rgba(212,168,67,0.15)", color: "#D4A843", borderRadius: 50, padding: "1px 6px", fontSize: "0.60rem", fontWeight: 700 }}>★ Prem</span>}
                           {u.is_verified && <span style={{ background: "rgba(26,92,58,0.1)", color: G.vert, borderRadius: 50, padding: "1px 6px", fontSize: "0.60rem", fontWeight: 700 }}>✓ Vérifié</span>}
                           {u.is_admin && <span style={{ background: "rgba(231,76,60,0.1)", color: G.rouge, borderRadius: 50, padding: "1px 6px", fontSize: "0.60rem", fontWeight: 700 }}>⚙ Admin</span>}
@@ -13084,10 +13084,10 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           {!u.is_premium
                             ? <ActionBtn label="+ Premium" color="#D4A843" disabled={isLoading} onClick={() => confirm(`Rendre ${u.name} Premium ?`, () => adminAction(u.id, { is_premium: true, premium_until: new Date(Date.now() + PREMIUM_30_DAYS_MS).toISOString() }, `${u.name} est maintenant Premium.`))} />
                             : isLifetimePremium(u)
-                              ? <ActionBtn label="- À vie" color="#8B6914" disabled={isLoading} onClick={() => confirm(`Retirer le Premium À VIE de ${u.name} ?`, () => adminAction(u.id, { is_premium: false, premium_until: undefined }, `Premium à vie retiré pour ${u.name}.`))} />
+                              ? <ActionBtn label="- À vie" color="var(--c-goldText)" disabled={isLoading} onClick={() => confirm(`Retirer le Premium À VIE de ${u.name} ?`, () => adminAction(u.id, { is_premium: false, premium_until: undefined }, `Premium à vie retiré pour ${u.name}.`))} />
                               : <ActionBtn label="- Premium" color="#B8860B" disabled={isLoading} onClick={() => confirm(`Retirer le Premium de ${u.name} ?`, () => adminAction(u.id, { is_premium: false, premium_until: undefined }, `Premium retiré pour ${u.name}.`))} />
                           }
-                          <ActionBtn label="★ À vie" color="#8B6914" disabled={isLoading || isLifetimePremium(u)} onClick={() => confirm(`Donner le Premium À VIE à ${u.name} ?`, () => adminAction(u.id, { is_premium: true, premium_until: LIFETIME_PREMIUM_UNTIL }, `${u.name} a maintenant le Premium à vie. ♾️`))} />
+                          <ActionBtn label="★ À vie" color="var(--c-goldText)" disabled={isLoading || isLifetimePremium(u)} onClick={() => confirm(`Donner le Premium À VIE à ${u.name} ?`, () => adminAction(u.id, { is_premium: true, premium_until: LIFETIME_PREMIUM_UNTIL }, `${u.name} a maintenant le Premium à vie. ♾️`))} />
                           {/* Admin */}
                           {!u.is_admin
                             ? auth.userId === SUPER_ADMIN_ID && <ActionBtn label="+ Admin" color={G.rouge} disabled={isLoading} onClick={() => { setPinModalInput(""); setPinModal({ user: u, mode: "set" }); }} />
@@ -13141,7 +13141,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           {u.name}
                           {isSelf && <span style={{ fontSize: "0.65rem", background: "rgba(26,92,58,0.1)", color: G.vert, borderRadius: 50, padding: "1px 7px", fontWeight: 700 }}>Vous</span>}
                           {u.name === "..." && <span style={{ fontSize: "0.65rem", background: "rgba(231,76,60,0.1)", color: "#e74c3c", borderRadius: 50, padding: "1px 7px", fontWeight: 700 }}>Incomplet</span>}
-                          {isLifetimePremium(u) && <span style={{ fontSize: "0.65rem", background: "linear-gradient(135deg,#8B6914,#D4A843)", color: "#fff", borderRadius: 50, padding: "1px 7px", fontWeight: 700 }}>♾️ À vie</span>}
+                          {isLifetimePremium(u) && <span style={{ fontSize: "0.65rem", background: "linear-gradient(135deg,var(--c-goldText),#D4A843)", color: "#fff", borderRadius: 50, padding: "1px 7px", fontWeight: 700 }}>♾️ À vie</span>}
                           {/* Indicateur connexion */}
                           {(() => {
                             if (!u.last_seen) return null;
@@ -13192,13 +13192,13 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           <ActionBtn label="+ Premium" color="#D4A843" disabled={isLoading}
                             onClick={() => confirm(`Rendre ${u.name} Premium ?`, () => adminAction(u.id, { is_premium: true, premium_until: new Date(Date.now() + PREMIUM_30_DAYS_MS).toISOString() }, `${u.name} est maintenant Premium.`))} />
                         ) : isLifetimePremium(u) ? (
-                          <ActionBtn label="- À vie" color="#8B6914" disabled={isLoading}
+                          <ActionBtn label="- À vie" color="var(--c-goldText)" disabled={isLoading}
                             onClick={() => confirm(`Retirer le Premium À VIE de ${u.name} ?`, () => adminAction(u.id, { is_premium: false, premium_until: undefined }, `Premium à vie retiré pour ${u.name}.`))} />
                         ) : (
                           <ActionBtn label="- Premium" color="#B8860B" disabled={isLoading}
                             onClick={() => confirm(`Retirer le Premium de ${u.name} ?`, () => adminAction(u.id, { is_premium: false, premium_until: undefined }, `Premium retiré pour ${u.name}.`))} />
                         )}
-                        <ActionBtn label="★ À vie" color="#8B6914" disabled={isLoading || isLifetimePremium(u)}
+                        <ActionBtn label="★ À vie" color="var(--c-goldText)" disabled={isLoading || isLifetimePremium(u)}
                           onClick={() => confirm(`Donner le Premium À VIE à ${u.name} ? Cette action est permanente.`, () => adminAction(u.id, { is_premium: true, premium_until: LIFETIME_PREMIUM_UNTIL }, `${u.name} a maintenant le Premium à vie. ♾️`))} />
                         {auth.userId === SUPER_ADMIN_ID && !isSelf && (() => {
                           const isSuperAdmin = (u as any).admin_level === "superadmin";
@@ -15097,7 +15097,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                       <div style={{ fontWeight: 700, fontSize: "0.85rem", color: G.brun, marginBottom: 12 }}>🏆 Meilleurs contributeurs</div>
                       {topUsers.map(([uid, v], i) => (
                         <div key={uid} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: i < topUsers.length - 1 ? `1px solid ${G.gris}` : "none" }}>
-                          <div style={{ width: 26, height: 26, borderRadius: "50%", background: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : G.creme, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.72rem", color: i < 3 ? "#333" : "#888", flexShrink: 0 }}>{i + 1}</div>
+                          <div style={{ width: 26, height: 26, borderRadius: "50%", background: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : G.creme, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.72rem", color: i < 3 ? G.brun : "#888", flexShrink: 0 }}>{i + 1}</div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontWeight: 700, fontSize: "0.82rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{financeNames[uid] || "Membre"}</div>
                             <div style={{ fontSize: "0.68rem", color: G.brunLight }}>{v.count} achat{v.count > 1 ? "s" : ""}</div>
@@ -15942,7 +15942,7 @@ function catIcon(id: string, color: string, size = 16) {
   }
 }
 const PinIcon = ({ color = "#9AA0A6", size = 14 }: { color?: string; size?: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
-const TagIcon = ({ color = "#1A1A1A", size = 14 }: { color?: string; size?: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
+const TagIcon = ({ color = "var(--c-brun)", size = 14 }: { color?: string; size?: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
 
 
 // PUB_CATS et BIZ_CATEGORIES DÉRIVENT de la source unique (mêmes id que la base).
@@ -16057,7 +16057,7 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: 
       )}
       <div onClick={onOpen} style={{ cursor: onOpen ? "pointer" : "default" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-        <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, padding: "5px 10px", borderRadius: 7, background: isProp ? "rgba(22,163,74,0.12)" : "rgba(212,168,67,0.18)", color: isProp ? "#16A34A" : "#8B6914" }}>{pub.category}</span>
+        <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, padding: "5px 10px", borderRadius: 7, background: isProp ? "rgba(22,163,74,0.12)" : "rgba(212,168,67,0.18)", color: isProp ? "#16A34A" : "var(--c-goldText)" }}>{pub.category}</span>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
             {pub.is_boosted && <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: G.or, color: "#fff", fontSize: 10.5, fontWeight: 800, padding: "4px 9px", borderRadius: 7, letterSpacing: 0.3 }}>★ EN AVANT</span>}
@@ -16072,7 +16072,7 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: 
         <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13, color: G.brunLight, fontWeight: 600 }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><PinIcon color="#9AA0A6" /> {pub.location || pub.city}</span>
           <span style={{ width: 1, height: 16, background: G.gris }} />
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: G.brun }}><TagIcon color="#1A1A1A" /> {priceTxt}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: G.brun }}><TagIcon color="var(--c-brun)" /> {priceTxt}</span>
         </div>
       </div>
       </div>
@@ -16266,7 +16266,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
       ) : (
         <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
           {(["cherche", "propose"] as const).map(t => (
-            <div key={t} onClick={() => setType(t)} style={{ flex: 1, padding: "13px 10px", borderRadius: 12, cursor: "pointer", textAlign: "center", border: `1.5px solid ${type === t ? (t === "propose" ? G.vert : "#111") : G.gris}`, background: type === t ? (t === "propose" ? G.vert : "#111") : G.blanc, color: type === t ? "#fff" : G.brun }}>
+            <div key={t} onClick={() => setType(t)} style={{ flex: 1, padding: "13px 10px", borderRadius: 12, cursor: "pointer", textAlign: "center", border: `1.5px solid ${type === t ? (t === "propose" ? G.vert : G.brun) : G.gris}`, background: type === t ? (t === "propose" ? G.vert : "#111") : G.blanc, color: type === t ? "#fff" : G.brun }}>
               <b style={{ display: "block", fontSize: 14 }}>{t === "cherche" ? "Je cherche" : "Je propose"}</b>
               <small style={{ fontSize: 11, opacity: 0.8 }}>{t === "cherche" ? "un professionnel" : "mes services"}</small>
             </div>
@@ -16458,13 +16458,13 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
 
   return (
     <Sheet title="Mettre en avant" onClose={onClose}>
-      <div style={{ background: "rgba(212,168,67,0.1)", border: `1px solid ${G.or}`, borderRadius: 12, padding: 14, marginBottom: 18, fontSize: 13, color: "#6b5414", lineHeight: 1.5 }}>
+      <div style={{ background: "rgba(212,168,67,0.1)", border: `1px solid ${G.or}`, borderRadius: 12, padding: 14, marginBottom: 18, fontSize: 13, color: "var(--c-goldText)", lineHeight: 1.5 }}>
         🚀 Votre annonce passe <b>en tête des résultats</b> de sa catégorie et reçoit beaucoup plus de vues.
       </div>
       {TIERS.map(t => (
         <div key={t.price} onClick={() => setTier(t)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: `1.5px solid ${tier.price === t.price ? G.or : G.gris}`, background: tier.price === t.price ? "rgba(212,168,67,0.06)" : G.blanc, borderRadius: 13, padding: "14px 15px", cursor: "pointer", marginBottom: 11 }}>
-          <div><b style={{ fontSize: 15 }}>{t.label}</b><br /><small style={{ color: G.brunLight }}>{t.sub}</small></div>
-          <b style={{ fontSize: 16, color: tier.price === t.price ? "#8B6914" : "#111" }}>{t.price.toLocaleString("fr-FR")} FCFA</b>
+          <div><b style={{ fontSize: 15, color: G.brun }}>{t.label}</b><br /><small style={{ color: G.brunLight }}>{t.sub}</small></div>
+          <b style={{ fontSize: 16, color: tier.price === t.price ? "var(--c-goldText)" : G.brun }}>{t.price.toLocaleString("fr-FR")} FCFA</b>
         </div>
       ))}
       <div style={{ display: "flex", gap: 9, margin: "16px 0 6px" }}>
@@ -16546,13 +16546,13 @@ function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: str
 
   return (
     <Sheet title="Sponsoriser ma fiche" onClose={onClose}>
-      <div style={{ background: "rgba(212,168,67,0.1)", border: `1px solid ${G.or}`, borderRadius: 12, padding: 14, marginBottom: 18, fontSize: 13, color: "#6b5414", lineHeight: 1.5 }}>
+      <div style={{ background: "rgba(212,168,67,0.1)", border: `1px solid ${G.or}`, borderRadius: 12, padding: 14, marginBottom: 18, fontSize: 13, color: "var(--c-goldText)", lineHeight: 1.5 }}>
         ★ Votre fiche passe <b>en tête du répertoire</b> et reçoit le badge « Sponsorisé », pour beaucoup plus de visibilité auprès des clients.
       </div>
       {TIERS.map(t => (
         <div key={t.price} onClick={() => setTier(t)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: `1.5px solid ${tier.price === t.price ? G.or : G.gris}`, background: tier.price === t.price ? "rgba(212,168,67,0.06)" : G.blanc, borderRadius: 13, padding: "14px 15px", cursor: "pointer", marginBottom: 11 }}>
-          <div><b style={{ fontSize: 15 }}>{t.label}</b><br /><small style={{ color: G.brunLight }}>{t.sub}</small></div>
-          <b style={{ fontSize: 16, color: tier.price === t.price ? "#8B6914" : "#111" }}>{t.price.toLocaleString("fr-FR")} FCFA</b>
+          <div><b style={{ fontSize: 15, color: G.brun }}>{t.label}</b><br /><small style={{ color: G.brunLight }}>{t.sub}</small></div>
+          <b style={{ fontSize: 16, color: tier.price === t.price ? "var(--c-goldText)" : G.brun }}>{t.price.toLocaleString("fr-FR")} FCFA</b>
         </div>
       ))}
       <div style={{ display: "flex", gap: 9, margin: "16px 0 6px" }}>
@@ -16733,7 +16733,7 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
               </div>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: "0.68rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: "0.4px" }}>Métier</div>
-                <div style={{ fontSize: "0.92rem", fontWeight: 800, color: metier ? "#1A1A1A" : "#9AA0A6", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metier || "Tous"}</div>
+                <div style={{ fontSize: "0.92rem", fontWeight: 800, color: metier ? G.brun : G.brunLight, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metier || "Tous"}</div>
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
               <select value={metier} onChange={e => setMetier(e.target.value)} aria-label="Métier" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
@@ -16901,7 +16901,7 @@ function PubDetail({ auth, pub: initialPub, onBack, onChanged }: { auth: Auth; p
         {/* badge + statut + date */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, padding: "5px 10px", borderRadius: 7, background: isProp ? "rgba(22,163,74,0.12)" : "rgba(212,168,67,0.18)", color: isProp ? "#16A34A" : "#8B6914" }}>{pub.category}</span>
+            <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, padding: "5px 10px", borderRadius: 7, background: isProp ? "rgba(22,163,74,0.12)" : "rgba(212,168,67,0.18)", color: isProp ? "#16A34A" : "var(--c-goldText)" }}>{pub.category}</span>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 20, background: paused ? "rgba(107,114,128,0.12)" : "rgba(22,163,74,0.12)", color: paused ? "#6B7280" : "#16A34A" }}>
               <span style={{ width: 7, height: 7, borderRadius: "50%", background: paused ? "#6B7280" : "#16A34A" }} />{paused ? "En pause" : "Active"}
             </span>
@@ -16939,7 +16939,7 @@ function PubDetail({ auth, pub: initialPub, onBack, onChanged }: { auth: Auth; p
 
         {/* actions */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {actionBtn("rgba(212,168,67,0.15)", "#8B6914", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>, "Modifier l'annonce", () => setEditing(true))}
+          {actionBtn("rgba(212,168,67,0.15)", "var(--c-goldText)", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>, "Modifier l'annonce", () => setEditing(true))}
           {actionBtn("rgba(107,114,128,0.12)", "#374151", paused
             ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>,
@@ -17019,7 +17019,7 @@ function PublierHub({ auth, accountType, onGoFeed, onGoMessages }: { auth: Auth;
 
   const allItems: { key: "cherche" | "propose" | "mes"; title: string; sub: string; tint: string; bg: string; icon: React.ReactNode }[] = [
     {
-      key: "cherche", title: "Je cherche un professionnel", sub: "Publiez un besoin et recevez des propositions", tint: "#111", bg: "rgba(17,17,17,0.08)",
+      key: "cherche", title: "Je cherche un professionnel", sub: "Publiez un besoin et recevez des propositions", tint: "var(--c-brun)", bg: "rgba(17,17,17,0.08)",
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>,
     },
     {
@@ -17076,7 +17076,7 @@ function ProCard({ pro, onOpen, isFav, onToggleFav }: { pro: Profile; onOpen: ()
         </div>
         <div style={{ fontSize: "0.82rem", color: G.brun, fontWeight: 600, marginBottom: 5 }}>{pro.metier || "Professionnel"}</div>
         <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
-          {cat && <span style={{ background: "rgba(212,168,67,0.15)", color: "#8B6914", borderRadius: 50, padding: "2px 8px", fontSize: "0.66rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.3 }}>{cat}</span>}
+          {cat && <span style={{ background: "rgba(212,168,67,0.15)", color: "var(--c-goldText)", borderRadius: 50, padding: "2px 8px", fontSize: "0.66rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.3 }}>{cat}</span>}
           <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: "0.74rem", color: G.brunLight, fontWeight: 600 }}><PinIcon color="#9AA0A6" size={13} /> {pro.city}{pro.zone ? " · " + pro.zone : ""}</span>
         </div>
         <div style={{ marginTop: 6, fontSize: "0.76rem", fontWeight: 700, color: G.brun }}>
@@ -17093,9 +17093,32 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
   const gallery = (pro.gallery as string[]) || [];
   const wa = (pro.whatsapp || "").replace(/[^0-9]/g, "");
   const tel = (pro.public_phone || "").replace(/[^0-9+]/g, "");
+  const callNum = (pro.public_phone || pro.whatsapp || pro.phone || "").replace(/[^0-9+]/g, "");
   const mine = pro.id === auth.userId;
+  const isClient = pro.account_type !== "pro";
   const isWideFiche = typeof window !== "undefined" && window.innerWidth >= 768;
   const [sponsorOpen, setSponsorOpen] = useState(false);
+  // ── Carte « À propos » du client : date d'inscription + nombre de besoins publiés ──
+  const [besoinsCount, setBesoinsCount] = useState<number | null>(null);
+  const [memberSince, setMemberSince] = useState<string | null>((pro as any).created_at || null);
+  useEffect(() => {
+    if (!isClient) return;
+    let alive = true;
+    (async () => {
+      try {
+        const pubs = await sb.query<{ id: string }>(auth.token, "publications", `?user_id=eq.${pro.id}&select=id`, auth.refreshToken);
+        if (alive) setBesoinsCount(pubs.length);
+      } catch { if (alive) setBesoinsCount(0); }
+      if (!((pro as any).created_at)) {
+        try {
+          const rows = await sb.query<any>(auth.token, "profiles", `?id=eq.${pro.id}&select=created_at`, auth.refreshToken);
+          if (alive && rows[0]?.created_at) setMemberSince(rows[0].created_at);
+        } catch {}
+      }
+    })();
+    return () => { alive = false; };
+  }, [pro.id]);
+  const memberLabel = memberSince ? (() => { const s = new Date(memberSince).toLocaleDateString("fr-FR", { month: "long", year: "numeric" }); return s.charAt(0).toUpperCase() + s.slice(1); })() : "—";
 
   // Enregistre une vue de fiche (réutilise profile_views)
   useEffect(() => {
@@ -17166,17 +17189,42 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
           </button>
         </div>
       )}
-      {!mine && (
+      {!mine && (isClient ? (
+        <div style={{ padding: "16px", display: "flex", gap: 10 }}>
+          <button className="moyo-btn-primary" onClick={contactPro} style={{ flex: 1, minWidth: 0, background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "14px", textAlign: "center", fontWeight: 700, fontSize: "0.92rem", cursor: "pointer", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Message
+          </button>
+          {callNum
+            ? <a href={`tel:${callNum}`} style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: G.vert, color: "#fff", borderRadius: 12, padding: "14px", textAlign: "center", fontWeight: 700, fontSize: "0.92rem", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Appeler</div></a>
+            : <button onClick={() => onToast("Numéro non disponible")} style={{ flex: 1, minWidth: 0, background: G.vert, color: "#fff", border: "none", borderRadius: 12, padding: "14px", textAlign: "center", fontWeight: 700, fontSize: "0.92rem", cursor: "pointer", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: 0.7 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Appeler</button>}
+        </div>
+      ) : (
         <div style={{ padding: "16px", display: "flex", gap: 8 }}>
           <button className="moyo-btn-primary" onClick={contactPro} style={{ flex: 1, minWidth: 0, background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", boxSizing: "border-box", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>Message</button>
           {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: "#25D366", color: "#fff", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>WhatsApp</div></a>}
           {tel && <a href={`tel:${tel}`} style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, color: G.brun, borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>Appeler</div></a>}
         </div>
-      )}
+      ))}
 
       {sponsorOpen && <SponsorModal auth={auth} profileId={pro.id} onClose={() => setSponsorOpen(false)} />}
 
       <div style={{ padding: "4px 16px 40px" }}>
+        {/* À propos — client : 2 colonnes (membre depuis · besoins publiés) */}
+        {isClient && <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 16, marginBottom: 14 }}>
+          <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>À propos</div>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 11, justifyContent: "center" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <div><div style={{ fontSize: "0.78rem", color: G.brunLight, marginBottom: 2 }}>Membre depuis</div><div style={{ fontSize: "0.95rem", fontWeight: 700, color: G.brun }}>{memberLabel}</div></div>
+            </div>
+            <div style={{ width: 1, alignSelf: "stretch", background: G.gris, margin: "2px 6px" }} />
+            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 11, justifyContent: "center" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+              <div><div style={{ fontSize: "0.78rem", color: G.brunLight, marginBottom: 2 }}>Besoins publiés</div><div style={{ fontSize: "0.95rem", fontWeight: 700, color: G.brun }}>{besoinsCount === null ? "…" : besoinsCount}</div></div>
+            </div>
+          </div>
+        </div>}
+
         {/* Description */}
         {pro.bio && <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 16, marginBottom: 14 }}>
           <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>À propos</div>
@@ -17316,8 +17364,8 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
               <h2 style={{ fontSize: "1.3rem", fontWeight: 900, color: G.brun, margin: 0, letterSpacing: "-0.4px" }}>Sous-traitants</h2>
               <p style={{ fontSize: "0.8rem", color: G.brunLight, margin: "2px 0 0" }}>Les professionnels de votre catégorie</p>
             </div>
-            <span style={{ flexShrink: 0, display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(212,168,67,0.16)", color: "#8B6914", borderRadius: 50, padding: "7px 13px", fontSize: "0.82rem", fontWeight: 800 }}>
-              {effectiveCat !== "all" && catIcon(effectiveCat, "#8B6914", 15)}
+            <span style={{ flexShrink: 0, display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(212,168,67,0.16)", color: "var(--c-goldText)", borderRadius: 50, padding: "7px 13px", fontSize: "0.82rem", fontWeight: 800 }}>
+              {effectiveCat !== "all" && catIcon(effectiveCat, "var(--c-goldText)", 15)}
               {effectiveCat === "all" ? "Toutes" : (PUB_CATS.find(c => c.id === effectiveCat)?.label || effectiveCat)}
             </span>
           </div>
@@ -17374,7 +17422,7 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: "0.64rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: "0.4px" }}>Métier</div>
-              <div style={{ fontSize: "0.86rem", fontWeight: 800, color: metier ? "#1A1A1A" : "#9AA0A6", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metier || "Tous"}</div>
+              <div style={{ fontSize: "0.86rem", fontWeight: 800, color: metier ? G.brun : G.brunLight, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metier || "Tous"}</div>
             </div>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
             <select value={metier} onChange={e => setMetier(e.target.value)} aria-label="Métier" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer" }}>
@@ -17487,7 +17535,7 @@ export default function App() {
     if (!document.getElementById("moyo-theme-vars")) {
       const s = document.createElement("style");
       s.id = "moyo-theme-vars";
-      s.textContent = ':root{--c-creme:#F8F9FB;--c-cremeDark:#EEF0F4;--c-blanc:#FFFFFF;--c-gris:#E5E7EB;--c-brun:#1A1A1A;--c-brunLight:#6B7280;--c-fond:#E8E9EE;--c-profile-bg:#EEF0F4;--c-pill-fg:#1A1A1A;--c-pill-bd:#E5E7EB}:root[data-theme="dark"],[data-theme="dark"]{--c-creme:#08080D;--c-cremeDark:#121218;--c-blanc:#16161D;--c-gris:#26262F;--c-brun:#F3F4F6;--c-brunLight:#9CA3AF;--c-fond:#08080D;--c-profile-bg:radial-gradient(circle at top,#1B1B22 0%,#121218 45%,#08080D 100%);--c-pill-fg:#FFFFFF;--c-pill-bd:rgba(255,255,255,0.18)}html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #root{background-color:#08080D}';
+      s.textContent = ':root{--c-creme:#F8F9FB;--c-cremeDark:#EEF0F4;--c-blanc:#FFFFFF;--c-gris:#E5E7EB;--c-brun:#1A1A1A;--c-brunLight:#6B7280;--c-fond:#E8E9EE;--c-profile-bg:#EEF0F4;--c-pill-fg:#1A1A1A;--c-pill-bd:#E5E7EB;--c-goldText:var(--c-goldText)}:root[data-theme="dark"],[data-theme="dark"]{--c-creme:#08080D;--c-cremeDark:#121218;--c-blanc:#16161D;--c-gris:#26262F;--c-brun:#F3F4F6;--c-brunLight:#9CA3AF;--c-fond:#08080D;--c-profile-bg:radial-gradient(circle at top,#1B1B22 0%,#121218 45%,#08080D 100%);--c-pill-fg:#FFFFFF;--c-pill-bd:rgba(255,255,255,0.18);--c-goldText:#EAC25A}html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #root{background-color:#08080D}';
       document.head.appendChild(s);
     }
     // ── Police Inter (identité Business) + comportements visuels (survol cartes/boutons) ──
@@ -18500,7 +18548,7 @@ export default function App() {
                 return (
                   <button key={opt} onClick={() => toggle(opt)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, textAlign: "left", padding: "14px 16px", marginBottom: 10, borderRadius: 14, border: `2px solid ${active ? "#2980b9" : G.gris}`, background: active ? "rgba(41,128,185,0.07)" : "#fff", cursor: "pointer" }}>
                     <span style={{ width: 22, height: 22, borderRadius: q.type === "single" ? "50%" : 6, border: `2px solid ${active ? "#2980b9" : "#ccc"}`, background: active ? "#2980b9" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{active && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}</span>
-                    <span style={{ fontSize: "0.9rem", fontWeight: active ? 700 : 500, color: active ? "#2980b9" : "#333" }}>{opt}</span>
+                    <span style={{ fontSize: "0.9rem", fontWeight: active ? 700 : 500, color: active ? "#2980b9" : "var(--c-brunLight)" }}>{opt}</span>
                   </button>
                 );
               })}
