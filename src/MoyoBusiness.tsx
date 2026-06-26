@@ -1029,9 +1029,9 @@ function Input({ label, type = "text", value, onChange, placeholder, icon, error
 
   return (
     <div style={{ marginBottom: 18, width: "100%" }}>
-      {label && <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>{label}</label>}
+      {label && <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: G.brunLight }}>{label}</label>}
       <div style={{ position: "relative", width: "100%" }}>
-        {svgIcon && <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.5, pointerEvents: "none", zIndex: 1, color: "#555", display: "flex" }}>{svgIcon}</span>}
+        {svgIcon && <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.5, pointerEvents: "none", zIndex: 1, color: G.brunLight, display: "flex" }}>{svgIcon}</span>}
         <input
           ref={inputRef}
           type={isPwd ? (showPwd ? "text" : "password") : type}
@@ -1046,7 +1046,7 @@ function Input({ label, type = "text", value, onChange, placeholder, icon, error
             border: `2px solid ${error ? "#e74c3c" : focus ? G.or : G.gris}`,
             borderRadius: 12,
             fontSize: "16px", // ← 16px minimum sinon iOS zoome automatiquement au focus
-            background: G.blanc, color: "#111", outline: "none",
+            background: G.blanc, color: G.brun, outline: "none",
             transition: "border-color 0.2s", display: "block",
           }}
         />
@@ -1057,7 +1057,7 @@ function Input({ label, type = "text", value, onChange, placeholder, icon, error
           }
         </span>}
       </div>
-      {hint && !error && <p style={{ color: "#555", fontSize: "0.75rem", marginTop: 4 }}>{hint}</p>}
+      {hint && !error && <p style={{ color: G.brunLight, fontSize: "0.75rem", marginTop: 4 }}>{hint}</p>}
       {error && <p style={{ color: "#e74c3c", fontSize: "0.75rem", marginTop: 4 }}>{error}</p>}
     </div>
   );
@@ -1119,7 +1119,7 @@ function ErrorModal({ msg, onClose }: { msg: string; onClose: () => void }) {
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ background: G.blanc, borderRadius: 20, padding: "28px 24px", width: "100%", maxWidth: 320, textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
         <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(212,168,67,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
-        <p style={{ fontSize: "0.88rem", color: "#111", lineHeight: 1.6, marginBottom: 22, fontWeight: 500 }}>{msg}</p>
+        <p style={{ fontSize: "0.88rem", color: G.brun, lineHeight: 1.6, marginBottom: 22, fontWeight: 500 }}>{msg}</p>
         <Btn variant="primary" onClick={onClose} style={{ width: "100%" }}>OK</Btn>
       </div>
     </div>
@@ -1152,7 +1152,7 @@ function ModerationModal({ type, onClose }: { type: "insult" | "scam" | "sexual"
           </div>
         </div>
         <div style={{ padding: "16px 24px 22px" }}>
-          <p style={{ fontSize: "0.84rem", color: "#555", lineHeight: 1.65, marginBottom: 20, fontWeight: 400 }}>
+          <p style={{ fontSize: "0.84rem", color: G.brunLight, lineHeight: 1.65, marginBottom: 20, fontWeight: 400 }}>
             {text}
           </p>
           <button
@@ -1318,7 +1318,7 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
   // ════════ ÉCRAN 1 : OFFRE ════════
   if (step === "offer") return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(20,16,10,0.55)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", zIndex: 300, display: "flex", alignItems: "flex-end", justifyContent: "center", overscrollBehavior: "contain", touchAction: "none" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#FCFBF8", borderRadius: 0, width: "100%", maxWidth: 460, height: "100%", maxHeight: "100vh", overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", touchAction: "pan-y", boxShadow: "0 30px 80px rgba(0,0,0,0.4)", position: "relative", padding: "18px 20px 16px" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: G.creme, borderRadius: 0, width: "100%", maxWidth: 460, height: "100%", maxHeight: "100vh", overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", touchAction: "pan-y", boxShadow: "0 30px 80px rgba(0,0,0,0.4)", position: "relative", padding: "18px 20px 16px" }}>
         <div onClick={onClose} style={{ position: "absolute", top: 16, right: 16, cursor: "pointer", background: "#eceae5", borderRadius: "50%", width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2 }}>
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#777" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
         </div>
@@ -1329,8 +1329,8 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
             <svg width="27" height="27" viewBox="0 0 24 24" fill={gold} stroke="none"><path d="M2 18h20l-2.5-9-4.5 4-3-7-3 7-4.5-4z" /></svg>
           </div>
         </div>
-        <div style={{ textAlign: "center", fontSize: "1.1rem", fontWeight: 800, color: "#1a1a2e", lineHeight: 1.18, marginBottom: 6, padding: "0 6px" }}>{title}</div>
-        <div style={{ textAlign: "center", fontSize: "0.84rem", color: "#8a8a8a", lineHeight: 1.4, marginBottom: 14, padding: "0 10px" }}>Cette fonctionnalité est réservée aux membres Premium.</div>
+        <div style={{ textAlign: "center", fontSize: "1.1rem", fontWeight: 800, color: G.brun, lineHeight: 1.18, marginBottom: 6, padding: "0 6px" }}>{title}</div>
+        <div style={{ textAlign: "center", fontSize: "0.84rem", color: G.brunLight, lineHeight: 1.4, marginBottom: 14, padding: "0 10px" }}>Cette fonctionnalité est réservée aux membres Premium.</div>
         <div style={{ background: G.blanc, borderRadius: 18, padding: "3px 14px", boxShadow: "0 2px 10px rgba(0,0,0,0.04)", marginBottom: 14 }}>
           {(showAllAdv ? avantages : highlights).map((a: any, i: number) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 11, padding: "7px 0", borderBottom: i < (showAllAdv ? avantages.length : highlights.length) - 1 ? "1px solid #f0ede6" : "none" }}>
@@ -1338,8 +1338,8 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
                 {showAllAdv ? getIcon(a.icon) : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{a.svg}</svg>}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: "0.78rem", color: "#1a1a2e" }}>{showAllAdv ? a.titre : a.t}</div>
-                <div style={{ fontSize: "0.66rem", color: "#9a9a9a" }}>{showAllAdv ? a.desc : a.d}</div>
+                <div style={{ fontWeight: 700, fontSize: "0.78rem", color: G.brun }}>{showAllAdv ? a.titre : a.t}</div>
+                <div style={{ fontSize: "0.66rem", color: G.brunLight }}>{showAllAdv ? a.desc : a.d}</div>
               </div>
             </div>
           ))}
@@ -1348,7 +1348,7 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showAllAdv ? "rotate(-90deg)" : "rotate(0)" }}><polyline points="9 18 15 12 9 6" /></svg>
           </div>
         </div>
-        <div style={{ textAlign: "center", fontSize: "0.66rem", fontWeight: 800, color: "#a8a8a8", letterSpacing: 1, marginBottom: 9 }}>CHOISISSEZ VOTRE FORMULE</div>
+        <div style={{ textAlign: "center", fontSize: "0.66rem", fontWeight: 800, color: G.brunLight, letterSpacing: 1, marginBottom: 9 }}>CHOISISSEZ VOTRE FORMULE</div>
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           {PREMIUM_PLANS.map(pl => {
             const sel = pl.id === planId;
@@ -1364,14 +1364,14 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
           })}
         </div>
         <div style={{ textAlign: "center", fontSize: "0.78rem", color: "#7a6a3a", fontWeight: 600, marginBottom: 14 }}>Formule sélectionnée : <span style={{ fontWeight: 800, color: "#3a2e10" }}>{selectedPlan.label}</span> - <span style={{ fontWeight: 800, color: gold }}>{planAmount.toLocaleString("fr-FR")} FCFA</span></div>
-        <div style={{ textAlign: "center", fontSize: "0.66rem", fontWeight: 800, color: "#a8a8a8", letterSpacing: 1, marginBottom: 7 }}>CONGO — PAYEZ AVEC</div>
+        <div style={{ textAlign: "center", fontSize: "0.66rem", fontWeight: 800, color: G.brunLight, letterSpacing: 1, marginBottom: 7 }}>CONGO — PAYEZ AVEC</div>
         <button onClick={() => PAY_MTN_ENABLED && setStep("mtn")} disabled={!PAY_MTN_ENABLED} style={{ width: "100%", background: PAY_MTN_ENABLED ? "#FFCC00" : "#dcdcdc", color: G.brun, border: "none", borderRadius: 14, padding: "13px", fontSize: "1rem", fontWeight: 800, cursor: PAY_MTN_ENABLED ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 8 }}>
           {mtnLogo(18)} MTN MoMo{!PAY_MTN_ENABLED && <span style={{ fontSize: "0.62rem", fontWeight: 700 }}> (indisponible)</span>}
         </button>
         <button onClick={() => PAY_AIRTEL_ENABLED && setStep("airtel")} disabled={!PAY_AIRTEL_ENABLED} style={{ width: "100%", background: G.blanc, color: "#E40000", border: `2px solid ${PAY_AIRTEL_ENABLED ? "#E40000" : "#dcdcdc"}`, borderRadius: 14, padding: "11px", fontSize: "1rem", fontWeight: 800, cursor: PAY_AIRTEL_ENABLED ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 12, opacity: PAY_AIRTEL_ENABLED ? 1 : 0.6 }}>
           {airtelLogo(20)} Airtel Money{!PAY_AIRTEL_ENABLED && <span style={{ fontSize: "0.62rem", fontWeight: 700 }}> (indisponible)</span>}
         </button>
-        <div style={{ textAlign: "center", fontSize: "0.66rem", fontWeight: 800, color: "#a8a8a8", letterSpacing: 1, marginBottom: 7 }}>DIASPORA — PAYER PAR CARTE</div>
+        <div style={{ textAlign: "center", fontSize: "0.66rem", fontWeight: 800, color: G.brunLight, letterSpacing: 1, marginBottom: 7 }}>DIASPORA — PAYER PAR CARTE</div>
         <button onClick={async () => {
           if (!PAY_CB_ENABLED) return;
           try {
@@ -1384,7 +1384,7 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
           Visa / Mastercard{!PAY_CB_ENABLED && <span style={{ fontSize: "0.62rem", fontWeight: 700 }}> (indisponible)</span>}
         </button>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, color: "#a8a8a8", fontSize: "0.78rem" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, color: G.brunLight, fontSize: "0.78rem" }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a8a8a8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
           Paiement 100% sécurisé
         </div>
@@ -1420,7 +1420,7 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 300, display: "flex", alignItems: "flex-end", justifyContent: "center", overscrollBehavior: "contain", touchAction: "none" }}>
-      <div style={{ background: "#f6f6f7", width: "100%", maxWidth: 460, height: "100%", maxHeight: "100vh", display: "flex", flexDirection: "column", overscrollBehavior: "contain" }}>
+      <div style={{ background: G.creme, width: "100%", maxWidth: 460, height: "100%", maxHeight: "100vh", display: "flex", flexDirection: "column", overscrollBehavior: "contain" }}>
         <div style={{ background: OP.main, padding: "16px 18px 14px", flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div onClick={() => { setStep("offer"); setTxSent(false); setTxRef(""); }} style={{ cursor: "pointer", background: OP.onColor === "#fff" ? "rgba(255,255,255,0.22)" : "rgba(0,0,0,0.1)", borderRadius: "50%", width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -1438,36 +1438,36 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
         <div style={{ flex: 1, overflowY: "auto", padding: "16px", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}>
           {/* Étape 1 */}
           <div style={{ background: G.blanc, borderRadius: 16, padding: 18, marginBottom: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>{numBadge("1")}<div style={{ fontWeight: 800, fontSize: "1.02rem", color: "#1a1a2e" }}>Effectuez votre paiement</div></div>
-            <div style={{ fontSize: "0.86rem", color: "#666", lineHeight: 1.55, marginBottom: 16 }}>Votre paiement {OP.name} sera reçu et traité par notre responsable des finances.<br /><span style={{ fontWeight: 700, color: "#444" }}>{OP.responsable}</span></div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>{numBadge("1")}<div style={{ fontWeight: 800, fontSize: "1.02rem", color: G.brun }}>Effectuez votre paiement</div></div>
+            <div style={{ fontSize: "0.86rem", color: G.brunLight, lineHeight: 1.55, marginBottom: 16 }}>Votre paiement {OP.name} sera reçu et traité par notre responsable des finances.<br /><span style={{ fontWeight: 700, color: G.brun }}>{OP.responsable}</span></div>
             <a href={tel} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, width: "100%", background: OP.main, color: OP.onColor, borderRadius: 14, padding: "15px", fontSize: "0.95rem", fontWeight: 800, textDecoration: "none", boxSizing: "border-box" as any }}>
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={OP.onColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.53a16 16 0 0 0 6.06 6.06l1.09-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
               Appuyer pour payer - {planAmount.toLocaleString("fr-FR")} FCFA
             </a>
-            <div style={{ background: "#f2f2f3", borderRadius: 12, padding: "12px", marginTop: 12, textAlign: "center" }}>
-              <div style={{ fontSize: "0.78rem", color: "#999", marginBottom: 4 }}>ou composez ce code depuis votre mobile</div>
-              <div style={{ fontSize: "1.05rem", fontWeight: 800, color: "#1a1a2e", fontFamily: "monospace", letterSpacing: 0.5 }}>{OP.ussd}</div>
+            <div style={{ background: G.creme, borderRadius: 12, padding: "12px", marginTop: 12, textAlign: "center" }}>
+              <div style={{ fontSize: "0.78rem", color: G.brunLight, marginBottom: 4 }}>ou composez ce code depuis votre mobile</div>
+              <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, fontFamily: "monospace", letterSpacing: 0.5 }}>{OP.ussd}</div>
             </div>
           </div>
 
           {/* Étape 2 */}
           <div style={{ background: G.blanc, borderRadius: 16, padding: 18, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>{numBadge("2")}<div style={{ fontWeight: 800, fontSize: "1.02rem", color: "#1a1a2e" }}>Entrez le numéro ID ci-dessous</div></div>
-            <div style={{ fontSize: "0.84rem", color: "#666", lineHeight: 1.55, marginBottom: 14 }}>Après validation du paiement {OP.operator}, vous recevrez un SMS avec un numéro de transaction (ID). Entrez ce numéro ID ci-dessous.</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>{numBadge("2")}<div style={{ fontWeight: 800, fontSize: "1.02rem", color: G.brun }}>Entrez le numéro ID ci-dessous</div></div>
+            <div style={{ fontSize: "0.84rem", color: G.brunLight, lineHeight: 1.55, marginBottom: 14 }}>Après validation du paiement {OP.operator}, vous recevrez un SMS avec un numéro de transaction (ID). Entrez ce numéro ID ci-dessous.</div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, border: `1.5px solid ${txRef ? OP.main : "#e2e2e2"}`, borderRadius: 12, padding: "12px 14px", marginBottom: 14 }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
-              <input value={txRef} onChange={e => setTxRef(e.target.value)} placeholder={OP.placeholder} style={{ flex: 1, minWidth: 0, border: "none", outline: "none", fontSize: "0.9rem", fontFamily: "inherit", fontWeight: 600, color: "#1a1a2e", background: "transparent" }} />
+              <input value={txRef} onChange={e => setTxRef(e.target.value)} placeholder={OP.placeholder} style={{ flex: 1, minWidth: 0, border: "none", outline: "none", fontSize: "0.9rem", fontFamily: "inherit", fontWeight: 600, color: G.brun, background: "transparent" }} />
             </div>
             <div style={{ background: OP.tint, border: `1px solid ${OP.tintBorder}`, borderRadius: 12, padding: "12px 14px", display: "flex", gap: 10 }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={OP.tintText} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
-              <div><div style={{ fontWeight: 800, fontSize: "0.82rem", color: OP.tintText, marginBottom: 2 }}>Important</div><div style={{ fontSize: "0.78rem", color: "#777", lineHeight: 1.5 }}>Vous devez entrer le numéro de transaction (ID) reçu par SMS pour que votre paiement soit confirmé.</div></div>
+              <div><div style={{ fontWeight: 800, fontSize: "0.82rem", color: OP.tintText, marginBottom: 2 }}>Important</div><div style={{ fontSize: "0.78rem", color: G.brunLight, lineHeight: 1.5 }}>Vous devez entrer le numéro de transaction (ID) reçu par SMS pour que votre paiement soit confirmé.</div></div>
             </div>
           </div>
 
           {txSent && (
             <div style={{ background: "rgba(39,174,96,0.08)", border: "2px solid #27ae60", borderRadius: 14, padding: 18, textAlign: "center", marginTop: 14 }}>
               <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#27ae60", marginBottom: 6 }}>✓ Numéro ID envoyé avec succès !</div>
-              <div style={{ fontSize: "0.82rem", color: "#555", lineHeight: 1.6 }}>Notre équipe va vérifier votre paiement et activer votre Premium dans les plus brefs délais.</div>
+              <div style={{ fontSize: "0.82rem", color: G.brunLight, lineHeight: 1.6 }}>Notre équipe va vérifier votre paiement et activer votre Premium dans les plus brefs délais.</div>
               <button onClick={onClose} style={{ marginTop: 14, background: "#27ae60", color: "#fff", border: "none", borderRadius: 50, padding: "11px 26px", fontWeight: 700, cursor: "pointer", fontSize: "0.86rem" }}>Fermer</button>
             </div>
           )}
@@ -1481,7 +1481,7 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
             <button disabled={!txRef.trim() || txLoading} onClick={submit} style={{ width: "100%", background: !txRef.trim() || txLoading ? "#d2d2d2" : OP.main, color: !txRef.trim() || txLoading ? "#888" : OP.onColor, border: "none", borderRadius: 50, padding: "15px", fontSize: "0.95rem", fontWeight: 800, cursor: !txRef.trim() ? "not-allowed" : "pointer" }}>
               {txLoading ? "Envoi en cours…" : "✓ J'ai payé - Envoyer mon numéro ID"}
             </button>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, color: "#a8a8a8", fontSize: "0.78rem", marginTop: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, color: G.brunLight, fontSize: "0.78rem", marginTop: 12 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a8a8a8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
               Paiement 100% sécurisé
             </div>
@@ -1537,7 +1537,7 @@ function ResetPassword({ onNav }: { onNav: (p: string) => void }) {
           <span>Mo</span><span style={{ color: G.or }}>yo</span>
         </div>
         <h2 style={{  fontSize: "1.5rem", fontWeight: 700, marginTop: 8 }}>Nouveau mot de passe</h2>
-        <p style={{ color: "#555", fontSize: "0.85rem", marginTop: 4 }}>Choisis un nouveau mot de passe sécurisé</p>
+        <p style={{ color: G.brunLight, fontSize: "0.85rem", marginTop: 4 }}>Choisis un nouveau mot de passe sécurisé</p>
       </div>
       <Input label="Nouveau mot de passe" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Minimum 6 caractères" icon="lock" hint="Au moins 6 caractères" />
       <Input label="Confirmer le mot de passe" type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Répète ton mot de passe" icon="lock" />
@@ -1583,7 +1583,7 @@ function StatCounter({ target, suffix, label, svg }: { target: number; suffix: s
       <div style={{ fontSize: "1.4rem", fontWeight: 700, color: G.rouge, marginBottom: 2 }}>
         {target >= 1000 ? `${Math.floor(count / 1000)} ${String(count % 1000).padStart(3,'0')}${suffix}` : `${count}${suffix}`}
       </div>
-      <div style={{ fontSize: "0.7rem", color: "#555", fontWeight: 500 }}>{label}</div>
+      <div style={{ fontSize: "0.7rem", color: G.brunLight, fontWeight: 500 }}>{label}</div>
     </div>
   );
 }
@@ -3250,23 +3250,23 @@ function BotWidget({ onClose, auth }: { onClose: () => void; auth: Auth }) {
         {/* Home */}
         {mode === "home" && (
           <div style={{ padding: "20px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
-            <p style={{ fontSize: "0.85rem", color: "#555", marginBottom: 4 }}>Que puis-je faire pour toi ?</p>
-            <div onClick={() => setMode("chat")} style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px", background: "#F8F8F8", borderRadius: 14, cursor: "pointer", border: `1px solid ${G.gris}` }}>
+            <p style={{ fontSize: "0.85rem", color: G.brunLight, marginBottom: 4 }}>Que puis-je faire pour toi ?</p>
+            <div onClick={() => setMode("chat")} style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px", background: G.creme, borderRadius: 14, cursor: "pointer", border: `1px solid ${G.gris}` }}>
               <div style={{ width: 40, height: 40, borderRadius: "50%", background: `linear-gradient(135deg,${G.vert},#0D4020)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               </div>
               <div>
                 <div style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun }}>Besoin d'aide</div>
-                <div style={{ fontSize: "0.75rem", color: "#888" }}>Pose ta question, je réponds instantanément</div>
+                <div style={{ fontSize: "0.75rem", color: G.brunLight }}>Pose ta question, je réponds instantanément</div>
               </div>
             </div>
-            <div onClick={() => setMode("report")} style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px", background: "#F8F8F8", borderRadius: 14, cursor: "pointer", border: `1px solid ${G.gris}` }}>
+            <div onClick={() => setMode("report")} style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px", background: G.creme, borderRadius: 14, cursor: "pointer", border: `1px solid ${G.gris}` }}>
               <div style={{ width: 40, height: 40, borderRadius: "50%", background: `linear-gradient(135deg,${G.rouge},${G.rougeDark})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               </div>
               <div>
                 <div style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun }}>Contacter notre équipe</div>
-                <div style={{ fontSize: "0.75rem", color: "#888" }}>Écrire directement à l’assistance Moyo</div>
+                <div style={{ fontSize: "0.75rem", color: G.brunLight }}>Écrire directement à l’assistance Moyo</div>
               </div>
             </div>
           </div>
@@ -3303,11 +3303,11 @@ function BotWidget({ onClose, auth }: { onClose: () => void; auth: Auth }) {
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <div style={{ fontWeight: 700, color: G.brun, marginBottom: 6 }}>Message envoyé</div>
-                <div style={{ fontSize: "0.82rem", color: "#555" }}>L’assistance Moyo vous répondra directement dans votre messagerie.</div>
+                <div style={{ fontSize: "0.82rem", color: G.brunLight }}>L’assistance Moyo vous répondra directement dans votre messagerie.</div>
               </div>
             ) : (
               <>
-                <p style={{ fontSize: "0.85rem", color: "#555", marginBottom: 14 }}>Écris ton message à l’équipe Moyo. La réponse apparaîtra ensuite dans ta messagerie.</p>
+                <p style={{ fontSize: "0.85rem", color: G.brunLight, marginBottom: 14 }}>Écris ton message à l’équipe Moyo. La réponse apparaîtra ensuite dans ta messagerie.</p>
                 <textarea value={reportText} onChange={e => setReportText(e.target.value)} placeholder="Ex : Bonjour, j’ai une question concernant mon compte..." style={{ width: "100%", minHeight: 100, padding: "12px", borderRadius: 12, border: `1px solid ${G.gris}`, fontSize: "0.85rem", resize: "none", outline: "none", marginBottom: 12 }} />
                 <div style={{ display: "flex", gap: 10 }}>
                   <Btn variant="ghost" onClick={() => setMode("home")} style={{ flex: 1 }}>Retour</Btn>
@@ -3388,10 +3388,10 @@ function ConfirmModal({ msg, message, title, onConfirm, onCancel, confirmLabel =
     <div onClick={onCancel} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <div onClick={e => e.stopPropagation()} style={{ background: G.blanc, borderRadius: "26px 26px 0 0", padding: "30px 24px calc(28px + env(safe-area-inset-bottom))", width: "100%", maxWidth: 500, boxShadow: "0 -10px 50px rgba(0,0,0,0.25)", animation: "moyoSheetUp .26s cubic-bezier(.16,1,.3,1)" }}>
         <div style={{ width: 66, height: 66, borderRadius: "50%", background: t.tint, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>{finalIcon}</div>
-        {title && <h3 style={{ fontSize: "1.18rem", fontWeight: 900, color: "#1A1A1A", textAlign: "center", margin: "0 0 8px", letterSpacing: "-0.3px" }}>{title}</h3>}
-        {body && <p style={{ fontSize: "0.92rem", color: "#6B7280", lineHeight: 1.6, margin: "0 auto 24px", fontWeight: 500, whiteSpace: "pre-line", textAlign: "center", maxWidth: 360 }}>{body}</p>}
+        {title && <h3 style={{ fontSize: "1.18rem", fontWeight: 900, color: G.brun, textAlign: "center", margin: "0 0 8px", letterSpacing: "-0.3px" }}>{title}</h3>}
+        {body && <p style={{ fontSize: "0.92rem", color: G.brunLight, lineHeight: 1.6, margin: "0 auto 24px", fontWeight: 500, whiteSpace: "pre-line", textAlign: "center", maxWidth: 360 }}>{body}</p>}
         <button onClick={onConfirm} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: 14, border: "none", background: t.solid, color: "#fff", fontSize: "1rem", fontWeight: 800, fontFamily: "inherit", cursor: loading ? "wait" : "pointer", boxShadow: `0 8px 20px ${t.tint.replace("0.1", "0.3").replace("0.12", "0.32").replace("0.14", "0.3").replace("0.16", "0.34")}`, marginBottom: 11 }}>{loading ? "…" : confirmLabel}</button>
-        <button onClick={onCancel} disabled={loading} style={{ width: "100%", padding: "15px", borderRadius: 14, border: `1.5px solid ${G.gris}`, background: G.blanc, color: "#374151", fontSize: "0.95rem", fontWeight: 700, fontFamily: "inherit", cursor: "pointer" }}>{cancelLabel}</button>
+        <button onClick={onCancel} disabled={loading} style={{ width: "100%", padding: "15px", borderRadius: 14, border: `1.5px solid ${G.gris}`, background: G.blanc, color: G.brun, fontSize: "0.95rem", fontWeight: 700, fontFamily: "inherit", cursor: "pointer" }}>{cancelLabel}</button>
       </div>
     </div>
   );
@@ -3445,10 +3445,10 @@ function InstallButtons({ variant = "light" }: { variant?: "light" | "dark" }) {
                 </div>
               </div>
               <div style={{ padding: "22px", textAlign: "center" }}>
-                <div style={{ fontWeight: 800, fontSize: "1.2rem", color: "#111", marginBottom: 10 }}>Installe l'app Moyo !</div>
-                <p style={{ fontSize: "0.85rem", color: "#666", lineHeight: 1.6, marginBottom: 20 }}>Accède rapidement à Moyo depuis ton écran d'accueil — rapide, pratique et sans passer par le navigateur !</p>
+                <div style={{ fontWeight: 800, fontSize: "1.2rem", color: G.brun, marginBottom: 10 }}>Installe l'app Moyo !</div>
+                <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.6, marginBottom: 20 }}>Accède rapidement à Moyo depuis ton écran d'accueil — rapide, pratique et sans passer par le navigateur !</p>
                 <button onClick={launchAndroidPrompt} style={{ width: "100%", background: `linear-gradient(135deg,${G.rouge},${G.rougeDark})`, color: "#fff", border: "none", borderRadius: 50, padding: "14px", fontSize: "0.95rem", fontWeight: 700, cursor: "pointer", marginBottom: 10, boxShadow: "0 4px 14px rgba(212,168,67,0.35)" }}>Installer l'app</button>
-                <button onClick={() => setModal(null)} style={{ width: "100%", background: G.blanc, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "13px", fontSize: "0.9rem", fontWeight: 700, cursor: "pointer" }}>OK</button>
+                <button onClick={() => setModal(null)} style={{ width: "100%", background: G.blanc, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "13px", fontSize: "0.9rem", fontWeight: 700, cursor: "pointer" }}>OK</button>
               </div>
             </div>
           ) : (
@@ -3458,22 +3458,22 @@ function InstallButtons({ variant = "light" }: { variant?: "light" | "dark" }) {
                   <div style={{ fontSize: "2.4rem", marginBottom: 10 }}>📲</div>
                   <div style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun, marginBottom: 8 }}>Installer Moyo sur iPhone</div>
                   <div style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: 12, margin: "14px 0 20px" }}>
-                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}><div style={{ width: 26, height: 26, borderRadius: "50%", background: G.vert, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.8rem", flexShrink: 0 }}>1</div><div style={{ fontSize: "0.84rem", color: "#333" }}>Appuie sur <b>Partager</b> en bas de Safari</div></div>
-                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}><div style={{ width: 26, height: 26, borderRadius: "50%", background: G.vert, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.8rem", flexShrink: 0 }}>2</div><div style={{ fontSize: "0.84rem", color: "#333" }}>Choisis <b>« Sur l'écran d'accueil »</b></div></div>
-                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}><div style={{ width: 26, height: 26, borderRadius: "50%", background: G.vert, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.8rem", flexShrink: 0 }}>3</div><div style={{ fontSize: "0.84rem", color: "#333" }}>Appuie sur <b>« Ajouter »</b> — c'est fait ! 🎉</div></div>
+                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}><div style={{ width: 26, height: 26, borderRadius: "50%", background: G.vert, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.8rem", flexShrink: 0 }}>1</div><div style={{ fontSize: "0.84rem", color: G.brun }}>Appuie sur <b>Partager</b> en bas de Safari</div></div>
+                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}><div style={{ width: 26, height: 26, borderRadius: "50%", background: G.vert, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.8rem", flexShrink: 0 }}>2</div><div style={{ fontSize: "0.84rem", color: G.brun }}>Choisis <b>« Sur l'écran d'accueil »</b></div></div>
+                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}><div style={{ width: 26, height: 26, borderRadius: "50%", background: G.vert, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.8rem", flexShrink: 0 }}>3</div><div style={{ fontSize: "0.84rem", color: G.brun }}>Appuie sur <b>« Ajouter »</b> — c'est fait ! 🎉</div></div>
                   </div>
                 </>
               ) : modal === "done" ? (
                 <>
                   <div style={{ fontSize: "2.4rem", marginBottom: 10 }}>✅</div>
                   <div style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun, marginBottom: 8 }}>Déjà installée !</div>
-                  <p style={{ fontSize: "0.85rem", color: "#666", lineHeight: 1.6, marginBottom: 20 }}>Moyo est déjà sur ton appareil. Lance-la depuis ton écran d'accueil.</p>
+                  <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.6, marginBottom: 20 }}>Moyo est déjà sur ton appareil. Lance-la depuis ton écran d'accueil.</p>
                 </>
               ) : (
                 <>
                   <div style={{ fontSize: "2.4rem", marginBottom: 10 }}>📲</div>
                   <div style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun, marginBottom: 8 }}>Installer Moyo</div>
-                  <p style={{ fontSize: "0.85rem", color: "#666", lineHeight: 1.6, marginBottom: 20 }}>Ouvre ce site dans <b>Chrome</b> (Android) ou <b>Safari</b> (iPhone), puis « Ajouter à l'écran d'accueil ».</p>
+                  <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.6, marginBottom: 20 }}>Ouvre ce site dans <b>Chrome</b> (Android) ou <b>Safari</b> (iPhone), puis « Ajouter à l'écran d'accueil ».</p>
                 </>
               )}
               <button onClick={() => setModal(null)} style={{ width: "100%", padding: "12px", borderRadius: 50, border: "none", background: `linear-gradient(135deg,${G.vert},#0D2E1C)`, color: "#fff", fontSize: "0.88rem", fontWeight: 700, cursor: "pointer" }}>J'ai compris</button>
@@ -3495,7 +3495,7 @@ function OffCanvasSection({ title, children }: { title: string; children: React.
   return (
     <div style={{ breakInside: "avoid" } as React.CSSProperties}>
       <div style={{ padding: "14px 20px 10px", borderTop: "1px solid #eee" }}>
-        <div style={{ fontWeight: 700, fontSize: "0.7rem", color: "#aaa", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>{title}</div>
+        <div style={{ fontWeight: 700, fontSize: "0.7rem", color: G.brunLight, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>{title}</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>{children}</div>
       </div>
     </div>
@@ -3507,8 +3507,8 @@ function EditableRow({ label, value, open, onOpen, editValue, onEdit, onSave, hi
     <div>
       <div onClick={onOpen} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: 10, background: open ? "rgba(212,168,67,0.06)" : G2.creme, cursor: "pointer", border: `1px solid ${open ? G2.rouge : "transparent"}` }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "#121218" }}>{label}</div>
-          <div style={{ fontSize: "0.7rem", color: "#999", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
+          <div style={{ fontSize: "0.78rem", fontWeight: 600, color: G.brun }}>{label}</div>
+          <div style={{ fontSize: "0.7rem", color: G.brunLight, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
         </div>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={G2.rouge} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginLeft: 8 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       </div>
@@ -3518,7 +3518,7 @@ function EditableRow({ label, value, open, onOpen, editValue, onEdit, onSave, hi
             ? <input type="number" value={editValue} onChange={e => onEdit(e.target.value)} style={{ width: "100%", boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1.5px solid rgba(212,168,67,0.3)", fontSize: "0.84rem", outline: "none" }} />
             : <textarea value={editValue} onChange={e => onEdit(e.target.value)} rows={2} style={{ width: "100%", boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1.5px solid rgba(212,168,67,0.3)", fontSize: "0.8rem", resize: "none", outline: "none", fontFamily: "inherit" }} />
           }
-          {hint && <div style={{ fontSize: "0.68rem", color: "#aaa", marginTop: 3 }}>💡 {hint}</div>}
+          {hint && <div style={{ fontSize: "0.68rem", color: G.brunLight, marginTop: 3 }}>💡 {hint}</div>}
           <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
             <button onClick={onOpen} style={{ flex: 1, padding: "7px", borderRadius: 8, border: `1px solid ${G2.gris}`, background: G2.creme, fontSize: "0.78rem", cursor: "pointer", fontWeight: 600 }}>Annuler</button>
             <button onClick={onSave} style={{ flex: 1, padding: "7px", borderRadius: 8, border: "none", background: G2.rouge, color: G2.blanc, fontSize: "0.78rem", cursor: "pointer", fontWeight: 700 }}>Sauvegarder</button>
@@ -3638,26 +3638,26 @@ function AdminDesktopPage() {
   }, []);
 
   if (!checked) return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F0F1F5" }}>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: G.creme }}>
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "pulse 1s ease-in-out infinite" }}><circle cx="12" cy="12" r="10"/></svg>
     </div>
   );
 
   if (!auth) return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#F0F1F5", gap: 16 }}>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: G.creme, gap: 16 }}>
       <div style={{ width: 72, height: 72, borderRadius: "50%", background: `linear-gradient(135deg,${G.rouge},${G.rougeDark})`, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       </div>
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "1.5rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>Accès refusé</div>
-        <div style={{ fontSize: "0.9rem", color: "#777", marginBottom: 24 }}>Connectez-vous en tant qu'administrateur.</div>
+        <div style={{ fontSize: "0.9rem", color: G.brunLight, marginBottom: 24 }}>Connectez-vous en tant qu'administrateur.</div>
         <button onClick={() => window.close()} style={{ background: `linear-gradient(135deg,${G.rouge},${G.rougeDark})`, color: "#fff", border: "none", borderRadius: 50, padding: "12px 32px", fontSize: "0.9rem", fontWeight: 700, cursor: "pointer" }}>Fermer</button>
       </div>
     </div>
   );
 
   return (
-    <div style={{ height: "100vh", overflowY: "auto", overflowX: "hidden", background: "#F0F1F5" }}>
+    <div style={{ height: "100vh", overflowY: "auto", overflowX: "hidden", background: G.creme }}>
       <style>{`
         /* ── Desktop Admin overrides ── */
         .adm-wrap { --adm-bg: #F0F1F5; }
@@ -3687,7 +3687,7 @@ function AdminDesktopPage() {
         <div style={{ width: 1, height: 28, background: G.gris, flexShrink: 0 }} />
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <div style={{ fontSize: "1rem", fontWeight: 800, color: G.brun }}>Admin Dashboard</div>
-        <div style={{ fontSize: "0.8rem", color: "#bbb" }}>- espace de modération</div>
+        <div style={{ fontSize: "0.8rem", color: G.brunLight }}>- espace de modération</div>
         <div style={{ flex: 1 }} />
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: "50%", background: `linear-gradient(135deg,${G.rouge},${G.rougeDark})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -3708,7 +3708,7 @@ function AdminDesktopPage() {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           Aide
         </button>
-        <button onClick={() => window.close()} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", background: G.creme, border: `1.5px solid ${G.gris}`, borderRadius: 20, cursor: "pointer", fontSize: "0.78rem", fontWeight: 600, color: "#888" }}>
+        <button onClick={() => window.close()} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", background: G.creme, border: `1.5px solid ${G.gris}`, borderRadius: 20, cursor: "pointer", fontSize: "0.78rem", fontWeight: 600, color: G.brunLight }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           Fermer
         </button>
@@ -3730,7 +3730,7 @@ function AdminDesktopPage() {
           </div>
           <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
             {/* ── Menu latéral ── */}
-            <div style={{ width: 240, flexShrink: 0, borderRight: `1px solid ${G.gris}`, background: "#FAFAFB", padding: "14px 10px", display: "flex", flexDirection: "column", gap: 4, overflowY: "auto" }}>
+            <div style={{ width: 240, flexShrink: 0, borderRight: `1px solid ${G.gris}`, background: G.creme, padding: "14px 10px", display: "flex", flexDirection: "column", gap: 4, overflowY: "auto" }}>
               {([
                 ["general", "Général & Règles", "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"],
                 ["contenus", "Contenus & Modals", "M4 7V4h16v3 M9 20h6 M12 4v16"],
@@ -3751,7 +3751,7 @@ function AdminDesktopPage() {
                 <div style={{ width: 34, height: 34, borderRadius: "50%", background: G.rouge, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.85rem", flexShrink: 0 }}>{(auth?.name || "A").charAt(0)}</div>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: "0.8rem", fontWeight: 700, color: G.brun, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{auth?.name || "Admin"}</div>
-                  <div style={{ fontSize: "0.66rem", color: "#999" }}>Super Admin</div>
+                  <div style={{ fontSize: "0.66rem", color: G.brunLight }}>Super Admin</div>
                 </div>
               </div>
             </div>
@@ -3953,7 +3953,7 @@ function AdminDesktopPage() {
               )}
             </OffCanvasSection>}
             {configTab === "securite" && <OffCanvasSection title="Mots interdits (modération)">
-              <div style={{ fontSize: "0.74rem", color: "#888", marginBottom: 10, lineHeight: 1.5 }}>
+              <div style={{ fontSize: "0.74rem", color: G.brunLight, marginBottom: 10, lineHeight: 1.5 }}>
                 Ces mots/expressions seront bloqués dans les messages, en plus de la liste automatique. Séparez-les par une virgule ou un retour à la ligne. La modification prend effet au prochain chargement de l'app pour les membres.
               </div>
               <EditableRow label="Liste des mots interdits" value={appConfig.customBannedWords || "(aucun)"} open={editingConfig === "custom_banned_words"}
@@ -3967,7 +3967,7 @@ function AdminDesktopPage() {
                   buildCustomBannedRegex(editingConfigValue);
                   setEditingConfig(null);
                 }} />
-              <div style={{ fontSize: "0.74rem", color: "#888", margin: "16px 0 10px", lineHeight: 1.5, borderTop: `1px solid ${G.gris}`, paddingTop: 14 }}>
+              <div style={{ fontSize: "0.74rem", color: G.brunLight, margin: "16px 0 10px", lineHeight: 1.5, borderTop: `1px solid ${G.gris}`, paddingTop: 14 }}>
                 <b>Mots « contacts » — membres gratuits uniquement.</b> Bloqués uniquement pour les comptes gratuits (les Premium peuvent les envoyer). Idéal pour empêcher le partage d'autres applis/réseaux. Séparez par une virgule ou un retour à la ligne.
               </div>
               <EditableRow label="Mots contacts (gratuit uniquement)" value={appConfig.contactBannedWords || "(aucun)"} open={editingConfig === "contact_banned_words"}
@@ -3981,7 +3981,7 @@ function AdminDesktopPage() {
                   buildContactBannedRegex(editingConfigValue);
                   setEditingConfig(null);
                 }} />
-              <div style={{ fontSize: "0.74rem", color: "#888", margin: "16px 0 10px", lineHeight: 1.5, borderTop: `1px solid ${G.gris}`, paddingTop: 14 }}>
+              <div style={{ fontSize: "0.74rem", color: G.brunLight, margin: "16px 0 10px", lineHeight: 1.5, borderTop: `1px solid ${G.gris}`, paddingTop: 14 }}>
                 <b>Message automatique de l'Assistant Moyo.</b> Envoyé automatiquement à un membre gratuit dès qu'il tente de partager des coordonnées. Il s'affiche dans sa conversation avec l'Assistant Moyo.
               </div>
               <EditableRow label="Message auto (tentative de contact)" value={appConfig.autoModContactReply || "(par défaut)"} open={editingConfig === "auto_mod_contact_reply"}
@@ -4011,7 +4011,7 @@ function AdminDesktopPage() {
             {configTab === "securite" && ((auth as any)?.adminLevel === "superadmin" || auth?.userId === SUPER_ADMIN_ID) && (
               <>
               <OffCanvasSection title="Intervalles de polling (ms)">
-                <div style={{ fontSize: "0.72rem", color: "#888", marginBottom: 8, lineHeight: 1.5 }}>Valeurs en millisecondes. Ex: 8000 = 8s. Min: 3000ms.</div>
+                <div style={{ fontSize: "0.72rem", color: G.brunLight, marginBottom: 8, lineHeight: 1.5 }}>Valeurs en millisecondes. Ex: 8000 = 8s. Min: 3000ms.</div>
                 {([
                   ["poll_badges_ms", "Badges (intérêts/vues/mises en relation/messages)", String(POLL_BADGES_MS)],
                   ["poll_admin_badge_ms", "Badge admin (tableau de bord)", String(POLL_ADMIN_BADGE_MS)],
@@ -4051,7 +4051,7 @@ function AdminDesktopPage() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
           <div style={{ background: G.blanc, borderRadius: 20, padding: "28px 24px", width: "100%", maxWidth: 380, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
             <div style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun, marginBottom: 6 }}>{adminActionModal.label}</div>
-            <div style={{ fontSize: "0.83rem", color: "#888", marginBottom: 18, lineHeight: 1.5 }}>Entrez l'adresse email de l'utilisateur à qui vous souhaitez attribuer ce rôle.</div>
+            <div style={{ fontSize: "0.83rem", color: G.brunLight, marginBottom: 18, lineHeight: 1.5 }}>Entrez l'adresse email de l'utilisateur à qui vous souhaitez attribuer ce rôle.</div>
             <input
               type="email"
               value={adminActionEmail}
@@ -4067,7 +4067,7 @@ function AdminDesktopPage() {
               style={{ width: "100%", boxSizing: "border-box", padding: "11px 14px", borderRadius: 12, border: `2px solid ${adminActionModal.color}30`, fontSize: "0.88rem", outline: "none", marginBottom: 16, fontFamily: "inherit" }}
             />
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => { (window as any).__adminActionResolve?.(null); setAdminActionModal(null); }} style={{ flex: 1, padding: "12px", borderRadius: 50, border: `1.5px solid ${G.gris}`, background: G.creme, fontSize: "0.85rem", fontWeight: 600, cursor: "pointer", color: "#555" }}>
+              <button onClick={() => { (window as any).__adminActionResolve?.(null); setAdminActionModal(null); }} style={{ flex: 1, padding: "12px", borderRadius: 50, border: `1.5px solid ${G.gris}`, background: G.creme, fontSize: "0.85rem", fontWeight: 600, cursor: "pointer", color: G.brunLight }}>
                 Annuler
               </button>
               <button
@@ -4138,14 +4138,14 @@ function AdminNotifPrefs({ auth }: { auth: Auth }) {
 
   return (
     <div>
-      <div style={{ fontSize: "0.72rem", color: "#888", marginBottom: 10, lineHeight: 1.5 }}>
+      <div style={{ fontSize: "0.72rem", color: G.brunLight, marginBottom: 10, lineHeight: 1.5 }}>
         Active les notifications push qu'un admin doit recevoir. Ex : active « Paiements » pour la personne qui gère les paiements → elle sera prévenue à chaque nouveau paiement.
       </div>
       {notifError && <div style={{ background: "rgba(231,76,60,0.08)", border: "1px solid rgba(231,76,60,0.25)", color: G.rouge, borderRadius: 10, padding: "9px 12px", fontSize: "0.76rem", fontWeight: 600, marginBottom: 10 }}>{notifError}</div>}
       {loading ? (
-        <div style={{ textAlign: "center", padding: 20, color: "#aaa", fontSize: "0.8rem" }}>Chargement…</div>
+        <div style={{ textAlign: "center", padding: 20, color: G.brunLight, fontSize: "0.8rem" }}>Chargement…</div>
       ) : admins.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 20, color: "#aaa", fontSize: "0.8rem", fontStyle: "italic" }}>Aucun admin trouvé.</div>
+        <div style={{ textAlign: "center", padding: 20, color: G.brunLight, fontSize: "0.8rem", fontStyle: "italic" }}>Aucun admin trouvé.</div>
       ) : admins.map(a => {
         const p = prefs[a.id] || { paiements: false, signalements: false, matchs: false, mises_relation: false };
         return (
@@ -4153,7 +4153,7 @@ function AdminNotifPrefs({ auth }: { auth: Auth }) {
             <div style={{ fontSize: "0.85rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>{a.name}{a.id === auth.userId ? " (vous)" : ""}</div>
             {([["signalements", "🚩 Signalements"], ["matchs", "🤝 Nouveaux contacts"], ["mises_relation", "💌 Mises en relation"], ["paiements", "💳 Paiements"]] as [keyof Prefs, string][]).map(([k, label]) => (
               <div key={k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0" }}>
-                <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "#444" }}>{label}</div>
+                <div style={{ fontSize: "0.82rem", fontWeight: 600, color: G.brun }}>{label}</div>
                 <SwitchBtn on={p[k]} onToggle={() => toggle(a.id, k)} />
               </div>
             ))}
@@ -4244,11 +4244,11 @@ function PaymentMethodsConfig({ auth }: { auth: Auth }) {
 
   return (
     <div>
-      <div style={{ fontSize: "0.72rem", color: "#888", marginBottom: 10, lineHeight: 1.5 }}>
+      <div style={{ fontSize: "0.72rem", color: G.brunLight, marginBottom: 10, lineHeight: 1.5 }}>
         Désactive un moyen de paiement en cas de problème (ex : numéro indisponible). Une fois coupé, il apparaît grisé et « Temporairement indisponible » partout .
       </div>
       {loading ? (
-        <div style={{ textAlign: "center", padding: 16, color: "#aaa", fontSize: "0.8rem" }}>Chargement…</div>
+        <div style={{ textAlign: "center", padding: 16, color: G.brunLight, fontSize: "0.8rem" }}>Chargement…</div>
       ) : (<>
         {([["mtn", "MTN MoMo"], ["airtel", "Airtel Money"], ["cb", "Visa / Mastercard (CB)"]] as ["mtn" | "airtel" | "cb", string][]).map(([k, label]) => (
           <div key={k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", background: G.creme, borderRadius: 12, marginBottom: 8 }}>
@@ -4259,7 +4259,7 @@ function PaymentMethodsConfig({ auth }: { auth: Auth }) {
 
         {/* Coordonnées des comptes de réception */}
         <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${G.gris}` }}>
-          <div style={{ fontSize: "0.72rem", color: "#888", marginBottom: 10, lineHeight: 1.5 }}>
+          <div style={{ fontSize: "0.72rem", color: G.brunLight, marginBottom: 10, lineHeight: 1.5 }}>
             Numéro qui reçoit l'argent et nom du responsable. Modifiable à tout moment — appliqué partout immédiatement.
           </div>
           {([
@@ -4272,10 +4272,10 @@ function PaymentMethodsConfig({ auth }: { auth: Auth }) {
             const displayLabel = field === "mtnNum" ? "Numéro MTN (reçoit l'argent)" : field === "mtnResp" ? "Responsable MTN" : field === "airtelNum" ? "Numéro Airtel (reçoit l'argent)" : "Responsable Airtel";
             return (
               <div key={key} style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>{displayLabel}</div>
+                <div style={{ fontSize: "0.68rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>{displayLabel}</div>
                 {!isEditing ? (
                   <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                    <div style={{ flex: 1, padding: "9px 11px", borderRadius: 9, border: `1.5px solid ${G.gris}`, fontSize: "0.82rem", background: "#f7f7f7", color: "#555", display: "flex", alignItems: "center", gap: 6, boxSizing: "border-box" }}>
+                    <div style={{ flex: 1, padding: "9px 11px", borderRadius: 9, border: `1.5px solid ${G.gris}`, fontSize: "0.82rem", background: G.creme, color: G.brunLight, display: "flex", alignItems: "center", gap: 6, boxSizing: "border-box" }}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                       {coords[field]}
                     </div>
@@ -4297,7 +4297,7 @@ function PaymentMethodsConfig({ auth }: { auth: Auth }) {
                       <button onClick={() => saveCoord(key, field, coords[field], label)} disabled={savingCoord === key || !coords[field].trim()} style={{ flex: 1, background: savingCoord === key ? "#bbb" : `linear-gradient(135deg,${G.vert},#0D2E1C)`, color: "#fff", border: "none", borderRadius: 9, padding: "9px 0", fontSize: "0.78rem", fontWeight: 700, cursor: savingCoord === key ? "wait" : "pointer" }}>
                         {savingCoord === key ? "…" : "Enregistrer"}
                       </button>
-                      <button onClick={() => cancelEdit(field)} style={{ flex: 1, background: G.creme, color: "#888", border: `1.5px solid ${G.gris}`, borderRadius: 9, padding: "9px 0", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>
+                      <button onClick={() => cancelEdit(field)} style={{ flex: 1, background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 9, padding: "9px 0", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>
                         Annuler
                       </button>
                     </div>
@@ -4357,7 +4357,7 @@ function AdminPinConfig({ auth }: { auth: Auth }) {
       </div>
       {!editing ? (
         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <div style={{ flex: 1, padding: "9px 11px", borderRadius: 9, border: `1.5px solid ${G.gris}`, fontSize: "0.95rem", background: "#f7f7f7", color: "#555", display: "flex", alignItems: "center", gap: 6, letterSpacing: 4 }}>
+          <div style={{ flex: 1, padding: "9px 11px", borderRadius: 9, border: `1.5px solid ${G.gris}`, fontSize: "0.95rem", background: G.creme, color: G.brunLight, display: "flex", alignItems: "center", gap: 6, letterSpacing: 4 }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             • • • •
           </div>
@@ -4372,7 +4372,7 @@ function AdminPinConfig({ auth }: { auth: Auth }) {
           <input type="password" inputMode="numeric" maxLength={4} value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="Confirmer le PIN" style={{ width: "100%", padding: "10px 11px", borderRadius: 9, border: `2px solid ${G.gris}`, fontSize: "1rem", outline: "none", fontFamily: "inherit", boxSizing: "border-box", marginBottom: 6, textAlign: "center", letterSpacing: 6 }} />
           <div style={{ display: "flex", gap: 6 }}>
             <button onClick={save} disabled={saving} style={{ flex: 1, background: saving ? "#bbb" : `linear-gradient(135deg,${G.vert},#0D2E1C)`, color: "#fff", border: "none", borderRadius: 9, padding: "10px 0", fontSize: "0.82rem", fontWeight: 700, cursor: saving ? "wait" : "pointer" }}>{saving ? "…" : "Enregistrer"}</button>
-            <button onClick={() => { setEditing(false); setPin(""); setConfirmPin(""); setMsg(null); }} style={{ flex: 1, background: G.creme, color: "#888", border: `1.5px solid ${G.gris}`, borderRadius: 9, padding: "10px 0", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
+            <button onClick={() => { setEditing(false); setPin(""); setConfirmPin(""); setMsg(null); }} style={{ flex: 1, background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 9, padding: "10px 0", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
           </div>
         </div>
       )}
@@ -4478,19 +4478,19 @@ function SiteInfoConfig({ auth, group }: { auth: Auth; group: "contacts" | "soci
 
   return (
     <div>
-      <div style={{ fontSize: "0.72rem", color: "#888", marginBottom: 10, lineHeight: 1.5 }}>
+      <div style={{ fontSize: "0.72rem", color: G.brunLight, marginBottom: 10, lineHeight: 1.5 }}>
         {group === "contacts" ? "Coordonnées affichées dans l'app (À propos, mentions légales). Modifiable à tout moment." : group === "socials" ? "Liens vers tes réseaux. Laisse vide pour masquer un réseau de la page d'accueil." : "Textes de la page d'accueil. Le mot coloré reste en rouge."}
       </div>
       {list.map(([key, label]) => {
         const isEditing = editing === key;
         return (
           <div key={key} style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>{label}</div>
+            <div style={{ fontSize: "0.68rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>{label}</div>
             {!isEditing ? (
               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                <div style={{ flex: 1, padding: "9px 11px", borderRadius: 9, border: `1.5px solid ${G.gris}`, fontSize: "0.8rem", background: "#f7f7f7", color: "#555", display: "flex", alignItems: "center", gap: 6, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ flex: 1, padding: "9px 11px", borderRadius: 9, border: `1.5px solid ${G.gris}`, fontSize: "0.8rem", background: G.creme, color: G.brunLight, display: "flex", alignItems: "center", gap: 6, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2.2" style={{ flexShrink: 0 }}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  {vals[key] || <span style={{ fontStyle: "italic", color: "#bbb" }}>(vide)</span>}
+                  {vals[key] || <span style={{ fontStyle: "italic", color: G.brunLight }}>(vide)</span>}
                 </div>
                 <button onClick={() => setEditing(key)} style={{ flexShrink: 0, background: G.creme, color: G.brun, border: `1.5px solid ${G.gris}`, borderRadius: 9, padding: "0 12px", height: 38, fontSize: "0.74rem", fontWeight: 700, cursor: "pointer" }}>Modifier</button>
               </div>
@@ -4499,7 +4499,7 @@ function SiteInfoConfig({ auth, group }: { auth: Auth; group: "contacts" | "soci
                 <input value={vals[key]} autoFocus onChange={e => setVals(v => ({ ...v, [key]: e.target.value }))} style={{ width: "100%", padding: "9px 11px", borderRadius: 9, border: `2px solid ${G.vert}`, fontSize: "0.82rem", outline: "none", fontFamily: "inherit", boxSizing: "border-box", marginBottom: 6 }} />
                 <div style={{ display: "flex", gap: 6 }}>
                   <button onClick={() => setConfirmKey(key)} disabled={saving === key} style={{ flex: 1, background: saving === key ? "#bbb" : `linear-gradient(135deg,${G.vert},#0D2E1C)`, color: "#fff", border: "none", borderRadius: 9, padding: "9px 0", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>{saving === key ? "…" : "Enregistrer"}</button>
-                  <button onClick={() => { setVals(v => ({ ...v, [key]: saved[key] })); setEditing(null); }} style={{ flex: 1, background: G.creme, color: "#888", border: `1.5px solid ${G.gris}`, borderRadius: 9, padding: "9px 0", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
+                  <button onClick={() => { setVals(v => ({ ...v, [key]: saved[key] })); setEditing(null); }} style={{ flex: 1, background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 9, padding: "9px 0", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
                 </div>
               </div>
             )}
@@ -4585,7 +4585,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
         )}
       </OffCanvasSection>
       <OffCanvasSection title="Mots interdits (modération)">
-        <div style={{ fontSize: "0.74rem", color: "#888", marginBottom: 10, lineHeight: 1.5 }}>
+        <div style={{ fontSize: "0.74rem", color: G.brunLight, marginBottom: 10, lineHeight: 1.5 }}>
           Ces mots/expressions seront bloqués dans les messages, en plus de la liste automatique. Séparez-les par une virgule ou un retour à la ligne. La modification prend effet au prochain chargement de l'app pour les membres.
         </div>
         <EditableRow label="Liste des mots interdits" value={appConfig.customBannedWords || "(aucun)"} open={editingConfig === "custom_banned_words"}
@@ -4598,7 +4598,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
             buildCustomBannedRegex(editingConfigValue);
             setEditingConfig(null);
           }} />
-        <div style={{ fontSize: "0.74rem", color: "#888", margin: "16px 0 10px", lineHeight: 1.5, borderTop: `1px solid ${G.gris}`, paddingTop: 14 }}>
+        <div style={{ fontSize: "0.74rem", color: G.brunLight, margin: "16px 0 10px", lineHeight: 1.5, borderTop: `1px solid ${G.gris}`, paddingTop: 14 }}>
           <b>Mots « contacts » — membres gratuits uniquement.</b> Bloqués uniquement pour les comptes gratuits (les Premium peuvent les envoyer). Idéal pour empêcher le partage d'autres applis/réseaux. Séparez par une virgule ou un retour à la ligne.
         </div>
         <EditableRow label="Mots contacts (gratuit uniquement)" value={appConfig.contactBannedWords || "(aucun)"} open={editingConfig === "contact_banned_words"}
@@ -4611,7 +4611,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
             buildContactBannedRegex(editingConfigValue);
             setEditingConfig(null);
           }} />
-        <div style={{ fontSize: "0.74rem", color: "#888", margin: "16px 0 10px", lineHeight: 1.5, borderTop: `1px solid ${G.gris}`, paddingTop: 14 }}>
+        <div style={{ fontSize: "0.74rem", color: G.brunLight, margin: "16px 0 10px", lineHeight: 1.5, borderTop: `1px solid ${G.gris}`, paddingTop: 14 }}>
           <b>Message automatique de l'Assistant Moyo.</b> Envoyé automatiquement à un membre gratuit dès qu'il tente de partager des coordonnées. Il s'affiche dans sa conversation avec l'Assistant Moyo.
         </div>
         <EditableRow label="Message auto (tentative de contact)" value={appConfig.autoModContactReply || "(par défaut)"} open={editingConfig === "auto_mod_contact_reply"}
@@ -4640,7 +4640,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
       {((auth as any)?.adminLevel === "superadmin" || auth?.userId === SUPER_ADMIN_ID) && (
         <>
         <OffCanvasSection title="Intervalles de polling (ms)">
-          <div style={{ fontSize: "0.72rem", color: "#888", marginBottom: 8, lineHeight: 1.5 }}>
+          <div style={{ fontSize: "0.72rem", color: G.brunLight, marginBottom: 8, lineHeight: 1.5 }}>
             Valeurs en millisecondes. Ex: 8000 = 8 secondes. Min recommande: 3000ms.
           </div>
           {([
@@ -4949,7 +4949,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
       <div className="moyo-main-area">
         <div className="moyo-topbar-wide">
           <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, letterSpacing: "-0.2px" }}>{tabs.find(t => t.id === tab)?.label || "Moyo Business"}</div>
-          <div onClick={() => setShowGuide(true)} style={{ fontSize: "0.82rem", fontWeight: 700, color: "#1A1A1A", background: G.blanc, borderRadius: 12, padding: "9px 16px", cursor: "pointer", border: `1.5px solid ${G.gris}`, display: "flex", alignItems: "center", gap: 7 }}>
+          <div onClick={() => setShowGuide(true)} style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, background: G.blanc, borderRadius: 12, padding: "9px 16px", cursor: "pointer", border: `1.5px solid ${G.gris}`, display: "flex", alignItems: "center", gap: 7 }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
             Guide
           </div>
@@ -4962,10 +4962,10 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
         <div style={{ padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", background: G.blanc, borderBottom: `1px solid ${G.gris}`, position: "fixed", top: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 500, zIndex: 100, boxSizing: "border-box", visibility: inConv ? "hidden" : "visible", pointerEvents: inConv ? "none" : "auto" }}>
           <div style={{ marginLeft: 4, lineHeight: 0.95 }}>
             <div style={{ fontSize: "1.5rem", color: G.or, fontWeight: 900, letterSpacing: "-0.5px" }}>Moyo</div>
-            <div style={{ fontSize: "0.95rem", color: "#9AA0A6", fontWeight: 800, letterSpacing: "-0.2px" }}>Business</div>
+            <div style={{ fontSize: "0.95rem", color: G.brunLight, fontWeight: 800, letterSpacing: "-0.2px" }}>Business</div>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginRight: 4 }}>
-            <div onClick={() => setShowGuide(true)} style={{ fontSize: "0.82rem", fontWeight: 700, color: "#1A1A1A", background: "white", borderRadius: 12, padding: "9px 16px", cursor: "pointer", border: `1.5px solid ${G.gris}`, display: "flex", alignItems: "center", gap: 7 }}>
+            <div onClick={() => setShowGuide(true)} style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, background: "white", borderRadius: 12, padding: "9px 16px", cursor: "pointer", border: `1.5px solid ${G.gris}`, display: "flex", alignItems: "center", gap: 7 }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               Guide
             </div>
@@ -4982,7 +4982,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
                   <div style={{ width: 50, height: 50, borderRadius: 16, background: G.or, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 16px rgba(212,168,67,0.35)" }}>
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   </div>
-                  <div style={{ fontSize: "0.56rem", fontWeight: 700, color: "#6B7280", whiteSpace: "nowrap" }}>Publier</div>
+                  <div style={{ fontSize: "0.56rem", fontWeight: 700, color: G.brunLight, whiteSpace: "nowrap" }}>Publier</div>
                 </div>
               );
             }
@@ -4993,7 +4993,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
                     {t.icon(active)}
                     {t.id === "messages" && unreadCount > 0 && <div style={{ position: "absolute", top: -4, right: -6, background: G.rouge, color: "#fff", borderRadius: 50, minWidth: 15, height: 15, padding: "0 4px", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.48rem", fontWeight: 700 }}>{unreadCount > 99 ? "99+" : unreadCount}</div>}
                     {t.id === "likes" && likesReceived > 0 && <div style={{ position: "absolute", top: -4, right: -6, background: G.rouge, color: "#fff", borderRadius: 50, minWidth: 15, height: 15, padding: "0 4px", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.48rem", fontWeight: 700 }}>{likesReceived > 99 ? "99+" : likesReceived}</div>}
-                    {t.id === "visitors" && viewsReceived > 0 && <div style={{ position: "absolute", top: -4, right: -6, background: G.or, color: "#111", borderRadius: 50, minWidth: 15, height: 15, padding: "0 4px", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.48rem", fontWeight: 700 }}>{viewsReceived > 99 ? "99+" : viewsReceived}</div>}
+                    {t.id === "visitors" && viewsReceived > 0 && <div style={{ position: "absolute", top: -4, right: -6, background: G.or, color: G.brun, borderRadius: 50, minWidth: 15, height: 15, padding: "0 4px", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.48rem", fontWeight: 700 }}>{viewsReceived > 99 ? "99+" : viewsReceived}</div>}
                     {t.id === "profile" && auth.isAdmin && adminBadgeCount && adminBadgeCount > 0 ? <div style={{ position: "absolute", top: -4, right: -6, background: G.rouge, color: "#fff", borderRadius: 50, minWidth: 15, height: 15, padding: "0 4px", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.48rem", fontWeight: 700 }}>{adminBadgeCount > 99 ? "99+" : adminBadgeCount}</div> : null}
                   </div>
                   <div style={{ fontSize: "0.56rem", fontWeight: 700, color: active ? G.rouge : "#6B7280", whiteSpace: "nowrap" }}>{t.label}</div>
@@ -5042,7 +5042,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
                   {s.items.map((item, j) => (
                     <div key={j} style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "8px 0", borderBottom: j < s.items.length - 1 ? `1px solid ${G.gris}` : "none" }}>
                       <div style={{ width: 6, height: 6, borderRadius: "50%", background: G.rouge, flexShrink: 0, marginTop: 6 }} />
-                      <p style={{ fontSize: "0.83rem", color: "#555", lineHeight: 1.6, margin: 0 }}>{item}</p>
+                      <p style={{ fontSize: "0.83rem", color: G.brunLight, lineHeight: 1.6, margin: 0 }}>{item}</p>
                     </div>
                   ))}
                 </div>
@@ -5050,9 +5050,9 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
             </div>
           ))}
           {/* Contact */}
-          <div style={{ background: "#f8f8f8", borderRadius: 14, padding: "16px", textAlign: "center", margin: "12px 16px 16px" }}>
+          <div style={{ background: G.creme, borderRadius: 14, padding: "16px", textAlign: "center", margin: "12px 16px 16px" }}>
             <div style={{ fontWeight: 700, fontSize: "0.9rem", color: G.brun, marginBottom: 4 }}>Un problème ou une question ?</div>
-            <p style={{ fontSize: "0.78rem", color: "#888", marginBottom: 14, lineHeight: 1.5 }}>Notre équipe est disponible pour vous aider.</p>
+            <p style={{ fontSize: "0.78rem", color: G.brunLight, marginBottom: 14, lineHeight: 1.5 }}>Notre équipe est disponible pour vous aider.</p>
             <button onClick={() => { setShowGuide(false); setShowBot(true); }} style={{ display: "inline-block", background: G.rouge, color: "#fff", borderRadius: 50, padding: "10px 24px", fontSize: "0.85rem", fontWeight: 700, border: "none", cursor: "pointer" }}>Contacter notre équipe</button>
           </div>
         </div>
@@ -5239,7 +5239,7 @@ function InnerSwitch({ options, value, onChange, compact }: {
   compact?: boolean;
 }) {
   return (
-    <div style={{ display: "flex", background: "#F0F0F0", borderRadius: 50, padding: 4, gap: compact ? 2 : 4, marginBottom: 16 }}>
+    <div style={{ display: "flex", background: G.creme, borderRadius: 50, padding: 4, gap: compact ? 2 : 4, marginBottom: 16 }}>
       {options.map(o => (
         <button key={o.id} onClick={() => onChange(o.id)}
           style={{ flex: 1, minWidth: 0, border: "none", borderRadius: 50, padding: compact ? "8px 6px" : "8px 12px",
@@ -5275,13 +5275,13 @@ const EmptyState = memo(function EmptyState({ icon, title, subtitle }: { icon: R
   return (
     <div style={{ textAlign: "center", padding: "44px 24px", display: "flex", flexDirection: "column",
       alignItems: "center", gap: 14 }}>
-      <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#F5F0EB",
+      <div style={{ width: 64, height: 64, borderRadius: "50%", background: G.creme,
         display: "flex", alignItems: "center", justifyContent: "center" }}>
         {icon}
       </div>
       <div>
-        <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "#333", marginBottom: 6 }}>{title}</div>
-        {subtitle && <div style={{ fontSize: "0.82rem", color: "#888", lineHeight: 1.6 }}>{subtitle}</div>}
+        <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun, marginBottom: 6 }}>{title}</div>
+        {subtitle && <div style={{ fontSize: "0.82rem", color: G.brunLight, lineHeight: 1.6 }}>{subtitle}</div>}
       </div>
     </div>
   );
@@ -5290,13 +5290,13 @@ const EmptyState = memo(function EmptyState({ icon, title, subtitle }: { icon: R
 
 
 function getOnlineStatus(lastSeen?: string): { label: string; color: string } {
-  if (!lastSeen) return { label: "Hors ligne", color: "#bbb" };
+  if (!lastSeen) return { label: "Hors ligne", color: G.brunLight };
   const diff = (Date.now() - new Date(lastSeen).getTime()) / 1000 / 60; // en minutes
   if (diff < 2) return { label: "En ligne", color: "#27ae60" };
   if (diff < 10) return { label: `Vu il y a ${Math.floor(diff)} min`, color: "#f39c12" };
-  if (diff < 60) return { label: `Vu il y a ${Math.floor(diff)} min`, color: "#bbb" };
-  if (diff < 1440) return { label: `Vu il y a ${Math.floor(diff / 60)}h`, color: "#bbb" };
-  return { label: `Vu il y a ${Math.floor(diff / 1440)}j`, color: "#bbb" };
+  if (diff < 60) return { label: `Vu il y a ${Math.floor(diff)} min`, color: G.brunLight };
+  if (diff < 1440) return { label: `Vu il y a ${Math.floor(diff / 60)}h`, color: G.brunLight };
+  return { label: `Vu il y a ${Math.floor(diff / 1440)}j`, color: G.brunLight };
 }
 
 const TickIcon = memo(function TickIcon({ read, isPremium, white = false }: { read: boolean; isPremium: boolean; white?: boolean }) {
@@ -5335,7 +5335,7 @@ const ReplyBanner = React.memo(function ReplyBanner({ replyTo, partnerName, myId
     // ── ReplyBanner v2 : visible, robuste iOS, sans overflow caché ──
     <div style={{
       display: "flex", alignItems: "stretch",
-      background: "#F0F0F0",
+      background: G.creme,
       borderRadius: 12,
       border: `1px solid ${G.gris}`,
       boxShadow: "0 1px 6px rgba(0,0,0,0.08)",
@@ -5354,13 +5354,13 @@ const ReplyBanner = React.memo(function ReplyBanner({ replyTo, partnerName, myId
       {/* Texte */}
       <div style={{ flex: 1, padding: "8px 6px 8px 2px", minWidth: 0 }}>
         <div style={{ fontSize: "0.76rem", fontWeight: 700, color: accent, marginBottom: 3 }}>{name}</div>
-        <div style={{ fontSize: "0.78rem", color: "#666", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.4 }}>
+        <div style={{ fontSize: "0.78rem", color: G.brunLight, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.4 }}>
           {isImg ? (
             <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
               </svg>
-              <span style={{ color: "#888" }}>Photo</span>
+              <span style={{ color: G.brunLight }}>Photo</span>
             </span>
           ) : preview}
         </div>
@@ -6356,7 +6356,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
             )}
           </div>
           <div style={{ fontSize: "0.65rem", fontWeight: 700, color: G.rouge }}>Mon statut</div>
-          <div style={{ fontSize: "0.58rem", color: "#999" }}>{myStatuses.length}/{STATUS_LIMIT}</div>
+          <div style={{ fontSize: "0.58rem", color: G.brunLight }}>{myStatuses.length}/{STATUS_LIMIT}</div>
         </div>
         {statusGroups.slice(0, 12).map(group => {
           const st = group.first;
@@ -6372,14 +6372,14 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
           </div>
         );})}
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.65rem", color: "#bbb", marginTop: 4 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.65rem", color: G.brunLight, marginTop: 4 }}>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
         <span>Statuts visibles uniquement par vos contacts</span>
       </div>
     </div>
     <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0" }}>
       {loading ? <div style={{ textAlign: "center", padding: 40 }}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{animation:"pulse 1s ease-in-out infinite"}}><circle cx="12" cy="12" r="10"/></svg></div> : convs.length === 0
-        ? <div style={{ textAlign: "center", padding: "40px 16px", color: "#888" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", margin: "0 auto 10px" }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p style={{ fontSize: "0.82rem" }}>Contactez des professionnels pour démarrer une conversation !</p></div>
+        ? <div style={{ textAlign: "center", padding: "40px 16px", color: G.brunLight }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", margin: "0 auto 10px" }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p style={{ fontSize: "0.82rem" }}>Contactez des professionnels pour démarrer une conversation !</p></div>
         : (() => {
             // ── Tri par date du dernier message (plus récent en haut) ──
             const formatConvTime = (dateStr?: string): string => {
@@ -6573,7 +6573,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
       }} style={{ flex: 1, minHeight: 0, overflowY: "scroll", overflowX: "hidden", padding: "14px", display: "flex", flexDirection: "column", position: "relative", overscrollBehavior: "contain", zIndex: 1 }}>
         <div style={{ flex: 1 }} />{/* spacer pour pousser les messages vers le bas */}
         <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingBottom: 8, minHeight: "100%" }}>
-          {msgs.length === 0 && <div style={{ textAlign: "center", color: "#555", padding: "24px 0", fontSize: "0.85rem" }}>Dites bonjour !</div>}
+          {msgs.length === 0 && <div style={{ textAlign: "center", color: G.brunLight, padding: "24px 0", fontSize: "0.85rem" }}>Dites bonjour !</div>}
         {msgs.map((m, i) => {
           const isMine = m.sender_id === auth.userId;
           const isImg = isImage(m.content);
@@ -6633,11 +6633,11 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
                         </div>
                         <div style={{ minWidth: 0 }}>
                           {isMine ? (
-                            <div style={{ fontWeight: 700, fontSize: "0.85rem", color: "#444" }}>Photo consultée et détruite</div>
+                            <div style={{ fontWeight: 700, fontSize: "0.85rem", color: G.brun }}>Photo consultée et détruite</div>
                           ) : (
                             <>
-                              <div style={{ fontWeight: 700, fontSize: "0.85rem", color: "#444" }}>Photo détruite</div>
-                              <div style={{ fontSize: "0.72rem", color: "#999" }}>Cette photo a été consultée.</div>
+                              <div style={{ fontWeight: 700, fontSize: "0.85rem", color: G.brun }}>Photo détruite</div>
+                              <div style={{ fontSize: "0.72rem", color: G.brunLight }}>Cette photo a été consultée.</div>
                             </>
                           )}
                         </div>
@@ -6668,7 +6668,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
                       <img src={getImageUrl(m.content)} alt="img" onClick={() => setPreviewImg(getImageUrl(m.content))} style={{ width: "100%", borderRadius: isMine ? "14px 14px 4px 14px" : "14px 14px 14px 4px", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", cursor: "pointer", display: "block" }} />
                     )}
                     <div style={{ display: "flex", alignItems: "center", gap: 3, marginTop: 3, justifyContent: isMine ? "flex-end" : "flex-start" }}>
-                      <span style={{ fontSize: "0.62rem", color: "#aaa" }}>{time}</span>
+                      <span style={{ fontSize: "0.62rem", color: G.brunLight }}>{time}</span>
                       {isMine && <TickIcon read={m.is_read} isPremium={auth.isPremium} />}
                     </div>
                     {/* Badges réactions sous l'image - identique aux messages texte */}
@@ -6690,7 +6690,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
                             await sb.update(auth.token, "messages", m.id, { reactions: newReactions });
                             setMsgs(prev => prev.map(msg => msg.id === m.id ? { ...msg, reactions: newReactions } : msg));
                           }} style={{ background: G.blanc, borderRadius: 50, padding: "2px 6px", fontSize: "0.75rem", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", cursor: "pointer", display: "flex", alignItems: "center", gap: 2, border: `1px solid ${G.gris}` }}>
-                            {emoji}<span style={{ fontSize: "0.65rem", color: "#555", fontWeight: 600 }}>{users.length > 1 ? users.length : ""}</span>
+                            {emoji}<span style={{ fontSize: "0.65rem", color: G.brunLight, fontWeight: 600 }}>{users.length > 1 ? users.length : ""}</span>
                           </div>
                         ))}
                       </div>
@@ -6763,7 +6763,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
                             await sb.update(auth.token, "messages", m.id, { reactions: newReactions });
                             setMsgs(prev => prev.map(msg => msg.id === m.id ? { ...msg, reactions: newReactions } : msg));
                           }} style={{ background: G.blanc, borderRadius: 50, padding: "2px 6px", fontSize: "0.75rem", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", cursor: "pointer", display: "flex", alignItems: "center", gap: 2, border: `1px solid ${G.gris}` }}>
-                            {emoji}<span style={{ fontSize: "0.65rem", color: "#555", fontWeight: 600 }}>{users.length > 1 ? users.length : ""}</span>
+                            {emoji}<span style={{ fontSize: "0.65rem", color: G.brunLight, fontWeight: 600 }}>{users.length > 1 ? users.length : ""}</span>
                           </div>
                         ))}
                       </div>
@@ -6826,9 +6826,9 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: "0.72rem", fontWeight: 700, color: G.vert }}>Modifier le message</div>
-                <div style={{ fontSize: "0.78rem", color: "#777", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{editingMsg.content.replace(/^\[↩ .+? : .+?\]\n/, "")}</div>
+                <div style={{ fontSize: "0.78rem", color: G.brunLight, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{editingMsg.content.replace(/^\[↩ .+? : .+?\]\n/, "")}</div>
               </div>
-              <div onClick={() => { setEditingMsg(null); setText(""); }} style={{ cursor: "pointer", color: "#999", flexShrink: 0, padding: 4 }}>
+              <div onClick={() => { setEditingMsg(null); setText(""); }} style={{ cursor: "pointer", color: G.brunLight, flexShrink: 0, padding: 4 }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </div>
             </div>
@@ -7017,7 +7017,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
                 await sb.update(auth.token, "messages", msgId, { deleted_for: updatedDeletedFor });
                 setToast({ msg: "Message supprimé pour vous", type: "success" });
               }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 20px", cursor: "pointer" }}>
-                <span style={{ fontSize: "0.92rem", fontWeight: 600, color: "#888" }}>Supprimer pour moi</span>
+                <span style={{ fontSize: "0.92rem", fontWeight: 600, color: G.brunLight }}>Supprimer pour moi</span>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               </div>
               )}
@@ -7042,7 +7042,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
           )}
           <img src={previewImg} alt="aperçu" onClick={e => e.stopPropagation()} style={{ maxWidth: "95%", maxHeight: "90vh", borderRadius: 12, objectFit: "contain" }} />
           {burnMsg && (
-            <div onClick={e => e.stopPropagation()} style={{ position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 40px)", maxWidth: 440, display: "flex", alignItems: "center", gap: 11, background: "rgba(0,0,0,0.62)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 14, padding: "13px 16px", color: "#ddd", fontSize: "0.8rem", lineHeight: 1.45, zIndex: 2 }}>
+            <div onClick={e => e.stopPropagation()} style={{ position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 40px)", maxWidth: 440, display: "flex", alignItems: "center", gap: 11, background: "rgba(0,0,0,0.62)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 14, padding: "13px 16px", color: G.brunLight, fontSize: "0.8rem", lineHeight: 1.45, zIndex: 2 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               <span><b style={{ color: "#fff" }}>Photo à vue unique</b> — elle vient d'être détruite et ne pourra plus être affichée.</span>
             </div>
@@ -7067,7 +7067,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ color: "#fff", fontWeight: 700, fontSize: "0.9rem" }}>Vue unique</div>
-                <div style={{ color: "#aaa", fontSize: "0.76rem" }}>La photo sera détruite après ouverture.</div>
+                <div style={{ color: G.brunLight, fontSize: "0.76rem" }}>La photo sera détruite après ouverture.</div>
               </div>
               <div style={{ width: 46, height: 27, borderRadius: 50, background: pendingViewOnce ? G.rouge : "rgba(255,255,255,0.25)", position: "relative", flexShrink: 0, transition: "background 0.15s" }}>
                 <div style={{ position: "absolute", top: 3, left: pendingViewOnce ? 22 : 3, width: 21, height: 21, borderRadius: "50%", background: G.blanc, transition: "left 0.15s" }} />
@@ -7086,7 +7086,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
             <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#fff", margin: "0 22px 8px" }}>Impossible d'afficher cette photo</h3>
-            <p style={{ fontSize: "0.85rem", color: "#999", lineHeight: 1.5, margin: "0 22px 22px" }}>Cette photo a été détruite après avoir été vue.</p>
+            <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.5, margin: "0 22px 22px" }}>Cette photo a été détruite après avoir été vue.</p>
             <div onClick={() => setShowDestroyed(false)} style={{ borderTop: "1px solid rgba(255,255,255,0.12)", padding: 15, color: G.rouge, fontWeight: 700, fontSize: "0.95rem", cursor: "pointer" }}>Fermer</div>
           </div>
         </div>
@@ -7128,11 +7128,11 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
             <div style={{ padding: "18px 20px 32px" }}>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
                 {open.partner.account_type === "pro" && open.partner.category && <span style={{ background: "rgba(212,168,67,0.15)", color: "#8B6914", borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 700 }}>{PUB_CATS.find(c => c.id === open.partner.category)?.label || open.partner.category}</span>}
-                {open.partner.account_type === "pro" && open.partner.zone && <span style={{ background: "#F2F2F2", color: "#555", borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600 }}>{open.partner.zone}</span>}
+                {open.partner.account_type === "pro" && open.partner.zone && <span style={{ background: G.creme, color: G.brunLight, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600 }}>{open.partner.zone}</span>}
                 {open.partner.is_verified && <span style={{ background: "rgba(26,92,58,0.1)", color: G.vert, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 700 }}>✓ Vérifié</span>}
-                {open.partner.account_type === "pro" && <span style={{ background: "#F2F2F2", color: "#333", borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 700 }}><span style={{ color: G.or }}>★</span> {open.partner.rating_count ? `${(open.partner.rating_avg || 0).toFixed(1)} (${open.partner.rating_count})` : "Nouveau"}</span>}
+                {open.partner.account_type === "pro" && <span style={{ background: G.creme, color: G.brun, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 700 }}><span style={{ color: G.or }}>★</span> {open.partner.rating_count ? `${(open.partner.rating_avg || 0).toFixed(1)} (${open.partner.rating_count})` : "Nouveau"}</span>}
               </div>
-              {open.partner.bio && <p style={{ fontSize: "0.88rem", color: "#555", lineHeight: 1.6 }}>{open.partner.bio}</p>}
+              {open.partner.bio && <p style={{ fontSize: "0.88rem", color: G.brunLight, lineHeight: 1.6 }}>{open.partner.bio}</p>}
             </div>
           </div>
         </div>
@@ -7143,10 +7143,10 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
           <div onClick={e => e.stopPropagation()} style={{ background: G.blanc, borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 500, padding: "20px 20px 32px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
               <h3 style={{ fontSize: "1rem", fontWeight: 700, color: G.brun }}>Signaler {open.partner.name}</h3>
-              <div onClick={() => !partnerActionLoading && setPartnerReportOpen(false)} style={{ cursor: "pointer", color: "#aaa", fontSize: "1.3rem", lineHeight: 1 }}>✕</div>
+              <div onClick={() => !partnerActionLoading && setPartnerReportOpen(false)} style={{ cursor: "pointer", color: G.brunLight, fontSize: "1.3rem", lineHeight: 1 }}>✕</div>
             </div>
             {["Faux profil / Arnaque", "Photos inappropriées", "Harcèlement", "Profil mineur", "Autre"].map(r => (
-              <div key={r} onClick={() => !partnerActionLoading && reportPartnerNow(r)} style={{ padding: "14px 16px", background: "#F8F8F8", borderRadius: 12, marginBottom: 8, cursor: partnerActionLoading ? "wait" : "pointer", fontSize: "0.9rem", fontWeight: 500, color: G.brun }}>{r}</div>
+              <div key={r} onClick={() => !partnerActionLoading && reportPartnerNow(r)} style={{ padding: "14px 16px", background: G.creme, borderRadius: 12, marginBottom: 8, cursor: partnerActionLoading ? "wait" : "pointer", fontSize: "0.9rem", fontWeight: 500, color: G.brun }}>{r}</div>
             ))}
           </div>
         </div>
@@ -7177,13 +7177,13 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
           {convList}
         </div>
         {/* ── COLONNE DROITE : chat ouvert ── */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#F0F1F5", height: "100%" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", background: G.creme, height: "100%" }}>
           {!open ? (
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#aaa", gap: 16 }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: G.brunLight, gap: 16 }}>
               <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#E0D5CC" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontWeight: 700, fontSize: "1rem", color: "#bbb", marginBottom: 6 }}>Sélectionne une conversation</div>
-                <div style={{ fontSize: "0.78rem", color: "#ccc" }}>Cliquez sur une conversation pour démarrer</div>
+                <div style={{ fontWeight: 700, fontSize: "1rem", color: G.brunLight, marginBottom: 6 }}>Sélectionne une conversation</div>
+                <div style={{ fontSize: "0.78rem", color: G.brunLight }}>Cliquez sur une conversation pour démarrer</div>
               </div>
             </div>
           ) : null}
@@ -7202,7 +7202,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 650, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }} onClick={() => setShowStatusComposer(false)}>
         <div style={{ background: G.blanc, borderRadius: 22, padding: 22, width: "100%", maxWidth: 340, boxShadow: "0 18px 60px rgba(0,0,0,0.25)" }} onClick={e => e.stopPropagation()}>
           <h3 style={{ fontSize: "1.15rem", fontWeight: 800, marginBottom: 8 }}>Publier un statut</h3>
-          <p style={{ fontSize: "0.86rem", color: "#666", lineHeight: 1.5, marginBottom: 16 }}>Tu peux publier {STATUS_LIMIT} statuts actifs maximum sur 24h. Chaque statut disparaît après 24h et reste visible uniquement par tes matchs.</p>
+          <p style={{ fontSize: "0.86rem", color: G.brunLight, lineHeight: 1.5, marginBottom: 16 }}>Tu peux publier {STATUS_LIMIT} statuts actifs maximum sur 24h. Chaque statut disparaît après 24h et reste visible uniquement par tes matchs.</p>
           <Btn variant="primary" onClick={() => statusInputRef.current?.click()} loading={statusUploading} disabled={myStatuses.length >= STATUS_LIMIT} style={{ width: "100%" }}>{statusUploading ? "Publication..." : myStatuses.length >= STATUS_LIMIT ? "Limite atteinte" : "Ajouter une photo"}</Btn>
           <Btn variant="ghost" onClick={() => setShowStatusComposer(false)} style={{ width: "100%", marginTop: 10 }}>Annuler</Btn>
         </div>
@@ -7320,13 +7320,13 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
                 {statusPeopleModal.type === "views" ? "Vues par" : "Aimé par"} ({statusPeopleModal.people.length})
               </span>
             </div>
-            <div onClick={() => setStatusPeopleModal(null)} style={{ cursor: "pointer", color: "#aaa", fontSize: "1.2rem", lineHeight: 1 }}>✕</div>
+            <div onClick={() => setStatusPeopleModal(null)} style={{ cursor: "pointer", color: G.brunLight, fontSize: "1.2rem", lineHeight: 1 }}>✕</div>
           </div>
           <div style={{ overflowY: "auto", flex: 1 }}>
             {statusPeopleLoading ? (
               <div style={{ textAlign: "center", padding: 30 }}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" style={{ animation: "pulse 0.8s ease-in-out infinite" }}><circle cx="12" cy="12" r="10"/></svg></div>
             ) : statusPeopleModal.people.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "30px 20px", color: "#aaa", fontSize: "0.85rem" }}>
+              <div style={{ textAlign: "center", padding: "30px 20px", color: G.brunLight, fontSize: "0.85rem" }}>
                 {statusPeopleModal.type === "views" ? "Personne n'a encore vu ce statut" : "Personne n'a encore aimé ce statut"}
               </div>
             ) : statusPeopleModal.people.map(person => (
@@ -7337,7 +7337,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
                     {person.name}
                     {person.is_verified && <VerifiedBadge size={13} />}
                   </div>
-                  <div style={{ fontSize: "0.75rem", color: "#888" }}>{[person.account_type === "pro" ? person.metier : null, person.city].filter(Boolean).join(" · ") || person.city}</div>
+                  <div style={{ fontSize: "0.75rem", color: G.brunLight }}>{[person.account_type === "pro" ? person.metier : null, person.city].filter(Boolean).join(" · ") || person.city}</div>
                 </div>
                 {statusPeopleModal.type === "likes" && <svg width="16" height="16" viewBox="0 0 24 24" fill={G.rouge} stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>}
               </div>
@@ -7532,9 +7532,9 @@ function CropModal({ src, onConfirm, onCancel }: { src: string; onConfirm: (blob
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 9000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <div style={{ background: G.blanc, borderRadius: 24, padding: "24px 20px", width: "100%", maxWidth: 340, textAlign: "center" }}>
-        <div style={{ fontWeight: 700, fontSize: "1rem", marginBottom: 6, color: "#111" }}>Cadrer ta photo</div>
-        <div style={{ fontSize: "0.78rem", color: "#888", marginBottom: 16 }}>Glisse pour repositionner · Pince pour zoomer</div>
-        <div ref={canvasContainerRef} data-zoomable="true" style={{ position: "relative", width: SIZE, height: SIZE, margin: "0 auto 16px", borderRadius: 16, overflow: "hidden", background: "#e0e0e0", cursor: dragging ? "grabbing" : "grab", touchAction: "none", userSelect: "none" }}
+        <div style={{ fontWeight: 700, fontSize: "1rem", marginBottom: 6, color: G.brun }}>Cadrer ta photo</div>
+        <div style={{ fontSize: "0.78rem", color: G.brunLight, marginBottom: 16 }}>Glisse pour repositionner · Pince pour zoomer</div>
+        <div ref={canvasContainerRef} data-zoomable="true" style={{ position: "relative", width: SIZE, height: SIZE, margin: "0 auto 16px", borderRadius: 16, overflow: "hidden", background: G.gris, cursor: dragging ? "grabbing" : "grab", touchAction: "none", userSelect: "none" }}
           onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp} onWheel={onWheel}
         >
           <img ref={imgRef2} src={src} alt="" onLoad={draw} style={{ display: "none" }} />
@@ -7561,11 +7561,11 @@ function CropModal({ src, onConfirm, onCancel }: { src: string; onConfirm: (blob
         </div>
         {/* Légende */}
         <div style={{ display: "flex", justifyContent: "center", gap: 16, marginBottom: 14, marginTop: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.7rem", color: "#555" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.7rem", color: G.brunLight }}>
             <svg width="14" height="9" viewBox="0 0 14 9"><rect x="1" y="1" width="12" height="7" fill="none" stroke={G.or} strokeWidth="1.5" strokeDasharray="3 1.5"/></svg>
             Zone carte
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.7rem", color: "#555" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.7rem", color: G.brunLight }}>
             <svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="none" stroke="#555" strokeWidth="1.5" strokeDasharray="3 2"/></svg>
             Avatar rond
           </div>
@@ -7882,20 +7882,20 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
     const isPro = (form.account_type ?? profile?.account_type) === "pro";
     const gal: string[] = (form.gallery as string[]) || (profile?.gallery as string[]) || [];
     const soc = (form.socials as Record<string, string>) || {};
-    const L: React.CSSProperties = { display: "block", fontWeight: 600, marginBottom: 7, fontSize: "0.88rem", color: "#555" };
-    const I: React.CSSProperties = { width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, marginBottom: 14, fontSize: "0.93rem", fontFamily: "inherit", background: G.blanc, color: "#111", outline: "none" };
+    const L: React.CSSProperties = { display: "block", fontWeight: 600, marginBottom: 7, fontSize: "0.88rem", color: G.brunLight };
+    const I: React.CSSProperties = { width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, marginBottom: 14, fontSize: "0.93rem", fontFamily: "inherit", background: G.blanc, color: G.brun, outline: "none" };
     return (
     <div style={{ paddingBottom: 30 }}>
       <ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
       <div style={{ background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "16px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-        <div onClick={() => setEditing(false)} style={{ cursor: "pointer", color: "#555", fontSize: "1.1rem" }}>←</div>
-        <div style={{ fontWeight: 700, fontSize: "1.1rem", color: "#111" }}>{isPro ? "Modifier ma fiche" : "Modifier mon profil"}</div>
+        <div onClick={() => setEditing(false)} style={{ cursor: "pointer", color: G.brunLight, fontSize: "1.1rem" }}>←</div>
+        <div style={{ fontWeight: 700, fontSize: "1.1rem", color: G.brun }}>{isPro ? "Modifier ma fiche" : "Modifier mon profil"}</div>
       </div>
       <div style={{ padding: "20px 16px" }}>
 
         {isPro && <>
-          <label style={L}>Galerie photos <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>({gal.length}/10)</span></label>
+          <label style={L}>Galerie photos <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>({gal.length}/10)</span></label>
           <input ref={galleryRef} type="file" accept="image/*" onChange={addGalleryPhoto} style={{ display: "none" }} />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 18 }}>
             {gal.map(url => (
@@ -7926,7 +7926,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             <option value="">{form.category ? "Sélectionne un métier" : "Choisis d'abord une catégorie"}</option>
             {(form.category ? metiersForCategory(form.category) : []).map(m => <option key={m} value={m}>{m}</option>)}
           </select>
-          <label style={L}>Entreprise <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
+          <label style={L}>Entreprise <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
           <input value={form.company || ""} onChange={e => setForm(f => ({ ...f, company: e.target.value.slice(0, 60) }))} placeholder="Nom de l'entreprise" style={I} />
         </>}
 
@@ -7936,12 +7936,12 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
         </select>
 
         {isPro && <>
-          <label style={L}>Zone d'intervention <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
+          <label style={L}>Zone d'intervention <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
           <select value={form.zone || ""} onChange={e => setForm(f => ({ ...f, zone: e.target.value }))} style={I}>
             <option value="">— Choisir —</option>
             {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
           </select>
-          <label style={L}>Horaires <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
+          <label style={L}>Horaires <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
           <input value={form.hours || ""} onChange={e => setForm(f => ({ ...f, hours: e.target.value.slice(0, 80) }))} placeholder="Ex : Lun-Sam 8h-18h" style={I} />
         </>}
 
@@ -7951,7 +7951,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
 
         {isPro && <>
           <div style={{ height: 1, background: G.gris, margin: "4px 0 18px" }} />
-          <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "#111", marginBottom: 14 }}>Coordonnées publiques</div>
+          <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun, marginBottom: 14 }}>Coordonnées publiques</div>
           <label style={L}>WhatsApp public</label>
           <input value={form.whatsapp || ""} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value.slice(0, 25) }))} placeholder="+242 06 000 00 00" style={I} />
           <label style={L}>Téléphone public</label>
@@ -7969,9 +7969,9 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           <div style={{ height: 1, background: G.gris, margin: "4px 0 18px" }} />
         </>}
 
-        <label style={L}>Téléphone privé <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(récupération du compte)</span></label>
+        <label style={L}>Téléphone privé <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(récupération du compte)</span></label>
         <input value={form.phone || ""} onChange={e => setForm(f => ({ ...f, phone: e.target.value.slice(0, 25) }))} placeholder="+242 06 513 20 12" style={{ ...I, marginBottom: 6 }} />
-        <div style={{ fontSize: "0.74rem", color: "#999", lineHeight: 1.5, marginBottom: 16 }}>Jamais affiché publiquement. Sert à la récupération du compte et aux notifications.</div>
+        <div style={{ fontSize: "0.74rem", color: G.brunLight, lineHeight: 1.5, marginBottom: 16 }}>Jamais affiché publiquement. Sert à la récupération du compte et aux notifications.</div>
 
         <div style={{ display: "flex", gap: 10 }}>
           <Btn variant="ghost" onClick={() => setEditing(false)} style={{ flex: 1 }}>Annuler</Btn>
@@ -8041,12 +8041,12 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <div style={{ fontWeight: 700, fontSize: "1rem", color: "#16A34A" }}>Mot de passe modifié !</div>
-                <div style={{ fontSize: "0.82rem", color: "#888", marginTop: 8 }}>Tu vas être déconnecté(e) pour te reconnecter avec ton nouveau mot de passe...</div>
+                <div style={{ fontSize: "0.82rem", color: G.brunLight, marginTop: 8 }}>Tu vas être déconnecté(e) pour te reconnecter avec ton nouveau mot de passe...</div>
               </div>
             ) : (
               <>
                 <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", color: "#555", marginBottom: 6 }}>Nouveau mot de passe</label>
+                  <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", color: G.brunLight, marginBottom: 6 }}>Nouveau mot de passe</label>
                   <input
                     type="password"
                     value={pwForm.newPw}
@@ -8056,7 +8056,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                   />
                 </div>
                 <div style={{ marginBottom: 20 }}>
-                  <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", color: "#555", marginBottom: 6 }}>Confirmer le mot de passe</label>
+                  <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", color: G.brunLight, marginBottom: 6 }}>Confirmer le mot de passe</label>
                   <input
                     type="password"
                     value={pwForm.confirmPw}
@@ -8110,7 +8110,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             </div>
           </div>
           {FREE_LAUNCH_MODE ? null : profile?.is_premium ? (
-            <div style={{ position: "absolute", bottom: -8, left: "50%", transform: "translateX(-50%)", background: `linear-gradient(135deg,${G.or},#B8860B)`, borderRadius: 50, padding: "4px 14px", fontSize: "0.68rem", fontWeight: 700, color: "#111", whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(212,168,67,0.4)" }}>Premium</div>
+            <div style={{ position: "absolute", bottom: -8, left: "50%", transform: "translateX(-50%)", background: `linear-gradient(135deg,${G.or},#B8860B)`, borderRadius: 50, padding: "4px 14px", fontSize: "0.68rem", fontWeight: 700, color: G.brun, whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(212,168,67,0.4)" }}>Premium</div>
           ) : (
             <div style={{ position: "absolute", bottom: -8, left: "50%", transform: "translateX(-50%)", background: `linear-gradient(135deg,#E74C3C,#C0392B)`, borderRadius: 50, padding: "4px 14px", fontSize: "0.68rem", fontWeight: 700, color: "#fff", whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(192,57,43,0.4)" }}>Gratuit</div>
           )}
@@ -8124,7 +8124,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 6, marginBottom: 10 }}>
             {profile?.account_type === "pro" ? <>
               {profile?.metier && (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#F2F2F2", borderRadius: 50, padding: "5px 13px", fontSize: "0.78rem", fontWeight: 600, color: "#333" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: G.creme, borderRadius: 50, padding: "5px 13px", fontSize: "0.78rem", fontWeight: 600, color: G.brun }}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                   {profile.metier}
                 </span>
@@ -8135,19 +8135,19 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                 </span>
               )}
               {profile?.city && (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#F2F2F2", borderRadius: 50, padding: "5px 13px", fontSize: "0.78rem", fontWeight: 600, color: "#333" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: G.creme, borderRadius: 50, padding: "5px 13px", fontSize: "0.78rem", fontWeight: 600, color: G.brun }}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   {profile.city}
                 </span>
               )}
               {profile?.zone && (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#F2F2F2", borderRadius: 50, padding: "5px 13px", fontSize: "0.78rem", fontWeight: 600, color: "#333" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: G.creme, borderRadius: 50, padding: "5px 13px", fontSize: "0.78rem", fontWeight: 600, color: G.brun }}>
                   {profile.zone}
                 </span>
               )}
             </> : (
               profile?.city && (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#F2F2F2", borderRadius: 50, padding: "5px 13px", fontSize: "0.78rem", fontWeight: 600, color: "#333" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: G.creme, borderRadius: 50, padding: "5px 13px", fontSize: "0.78rem", fontWeight: 600, color: G.brun }}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   {profile.city}
                 </span>
@@ -8164,7 +8164,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
               {profile?.is_sponsored && (
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(212,168,67,0.18)", color: "#8B6914", borderRadius: 50, padding: "4px 11px", fontSize: "0.72rem", fontWeight: 700 }}>★ Sponsorisé</span>
               )}
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "#F2F2F2", borderRadius: 50, padding: "4px 11px", fontSize: "0.72rem", fontWeight: 700, color: "#333" }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: G.creme, borderRadius: 50, padding: "4px 11px", fontSize: "0.72rem", fontWeight: 700, color: G.brun }}>
                 <span style={{ color: G.or }}>★</span>
                 {profile?.rating_count ? `${(profile.rating_avg || 0).toFixed(1)} (${profile.rating_count} avis)` : "Nouveau"}
               </span>
@@ -8172,7 +8172,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           )}
           {profile?.bio && (
             <div style={{ display: "inline-block", background: "rgba(0,0,0,0.04)", borderRadius: 14, padding: "10px 18px", maxWidth: 280 }}>
-              <div style={{ fontSize: "0.85rem", color: "#555", fontStyle: "italic", lineHeight: 1.6 }}>"{profile.bio}"</div>
+              <div style={{ fontSize: "0.85rem", color: G.brunLight, fontStyle: "italic", lineHeight: 1.6 }}>"{profile.bio}"</div>
             </div>
           )}
         </div>
@@ -8361,7 +8361,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 800, fontSize: "1rem", color: G.brun, marginBottom: 3 }}>Parrainer un ami</div>
-            <div style={{ fontSize: "0.78rem", color: "#888", lineHeight: 1.4 }}>Gagnez <span style={{ fontWeight: 800, color: G.vert }}>7 jours Premium offerts</span> pour chaque ami qui s'abonne</div>
+            <div style={{ fontSize: "0.78rem", color: G.brunLight, lineHeight: 1.4 }}>Gagnez <span style={{ fontWeight: 800, color: G.vert }}>7 jours Premium offerts</span> pour chaque ami qui s'abonne</div>
           </div>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </div>}
@@ -8373,7 +8373,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: "0.7rem", color: emailVerified ? "#27ae60" : G.rouge, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 2 }}>Email de connexion</div>
-              <div style={{ fontSize: "0.87rem", color: "#333", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{auth.email || "-"}</div>
+              <div style={{ fontSize: "0.87rem", color: G.brun, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{auth.email || "-"}</div>
             </div>
             {emailVerified ? (
               <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(39,174,96,0.1)", border: "1px solid rgba(39,174,96,0.25)", borderRadius: 50, padding: "6px 13px", flexShrink: 0 }}>
@@ -8429,7 +8429,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                     <h3 style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun, marginBottom: 8 }}>Email vérifié !</h3>
-                    <p style={{ fontSize: "0.85rem", color: "#888", marginBottom: 20 }}>Ton adresse email est maintenant vérifiée.</p>
+                    <p style={{ fontSize: "0.85rem", color: G.brunLight, marginBottom: 20 }}>Ton adresse email est maintenant vérifiée.</p>
                     <button onClick={() => { setShowVerifyModal(false); setVerifySuccess(false); }} style={{ width: "100%", padding: "12px", borderRadius: 50, border: "none", background: "#27ae60", color: "#fff", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer" }}>Fermer</button>
                   </>
                 ) : (
@@ -8438,7 +8438,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                     </div>
                     <h3 style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun, marginBottom: 8 }}>Code envoyé !</h3>
-                    <p style={{ fontSize: "0.85rem", color: "#888", marginBottom: 20 }}>Entre le code à 6 chiffres reçu sur <strong>{auth.email}</strong>. Valable 15 minutes.</p>
+                    <p style={{ fontSize: "0.85rem", color: G.brunLight, marginBottom: 20 }}>Entre le code à 6 chiffres reçu sur <strong>{auth.email}</strong>. Valable 15 minutes.</p>
                     <input
                       type="number"
                       value={verifyCode}
@@ -8488,9 +8488,9 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>Faire vérifier mon compte</div>
-                <div style={{ fontSize: "0.78rem", color: "#888", marginTop: 2 }}>Obtenir le badge de confiance</div>
+                <div style={{ fontSize: "0.78rem", color: G.brunLight, marginTop: 2 }}>Obtenir le badge de confiance</div>
               </div>
-              <div style={{ color: "#ccc", fontSize: "1rem" }}>›</div>
+              <div style={{ color: G.brunLight, fontSize: "1rem" }}>›</div>
             </div>
           </a>
         ) : (
@@ -8500,7 +8500,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>Compte vérifié</div>
-              <div style={{ fontSize: "0.82rem", color: "#888", marginTop: 2 }}>Badge de confiance actif</div>
+              <div style={{ fontSize: "0.82rem", color: G.brunLight, marginTop: 2 }}>Badge de confiance actif</div>
             </div>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
           </div>
@@ -8517,7 +8517,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>Assistant flottant</div>
-              <div style={{ fontSize: "0.82rem", color: "#888", marginTop: 2 }}>{assistantEnabled ? "Visible sur vos écrans" : "Masqué pour vous"}</div>
+              <div style={{ fontSize: "0.82rem", color: G.brunLight, marginTop: 2 }}>{assistantEnabled ? "Visible sur vos écrans" : "Masqué pour vous"}</div>
             </div>
           </div>
           <div onClick={onToggleAssistant} style={{ width: 52, height: 28, borderRadius: 50, background: assistantEnabled ? "#27ae60" : G.gris, cursor: "pointer", position: "relative", transition: "background 0.3s", flexShrink: 0 }}>
@@ -8538,7 +8538,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>Mode {darkMode ? "sombre" : "clair"}</div>
-              <div style={{ fontSize: "0.82rem", color: "#888", marginTop: 2 }}>{darkMode ? "Thème sombre activé" : "Thème clair activé"}</div>
+              <div style={{ fontSize: "0.82rem", color: G.brunLight, marginTop: 2 }}>{darkMode ? "Thème sombre activé" : "Thème clair activé"}</div>
             </div>
           </div>
           <div onClick={onToggleDark} style={{ width: 52, height: 28, borderRadius: 50, background: darkMode ? "#121218" : G.gris, cursor: "pointer", position: "relative", transition: "background 0.3s", flexShrink: 0 }}>
@@ -8561,10 +8561,10 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                 </div>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>Activer les notifications</div>
-                  <div style={{ fontSize: "0.82rem", color: "#888", marginTop: 2 }}>Sur iPhone, une étape est nécessaire</div>
+                  <div style={{ fontSize: "0.82rem", color: G.brunLight, marginTop: 2 }}>Sur iPhone, une étape est nécessaire</div>
                 </div>
               </div>
-              <div style={{ background: "rgba(212,168,67,0.08)", border: "1px solid rgba(212,168,67,0.25)", borderRadius: 12, padding: "12px 14px", fontSize: "0.8rem", color: "#555", lineHeight: 1.7 }}>
+              <div style={{ background: "rgba(212,168,67,0.08)", border: "1px solid rgba(212,168,67,0.25)", borderRadius: 12, padding: "12px 14px", fontSize: "0.8rem", color: G.brunLight, lineHeight: 1.7 }}>
                 Pour recevoir les notifications sur iPhone :<br />
                 1. Ouvrez Moyo dans <b>Safari</b> (pas Chrome)<br />
                 2. Touchez l'icône <b>Partager</b> <span style={{ fontSize: "0.9rem" }}>⬆️</span> en bas de l'écran<br />
@@ -8586,7 +8586,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                 </div>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>Notifications</div>
-                  <div style={{ fontSize: "0.82rem", color: "#888", marginTop: 2 }}>{on ? "Activées" : "Intérêts, mises en relation et messages"}</div>
+                  <div style={{ fontSize: "0.82rem", color: G.brunLight, marginTop: 2 }}>{on ? "Activées" : "Intérêts, mises en relation et messages"}</div>
                 </div>
               </div>
               <div onClick={async () => {
@@ -8615,7 +8615,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>
               {ratingSubmitted ? "Ton avis Moyo" : "Noter Moyo"}
             </div>
-            <div style={{ fontSize: "0.82rem", color: "#888", marginTop: 2 }}>
+            <div style={{ fontSize: "0.82rem", color: G.brunLight, marginTop: 2 }}>
               {ratingSubmitted
                 ? `${["", "😕", "🙁", "😐", "😊", "😍"][userRating]} ${userRating}/5 étoiles - Modifier`
                 : "Donne-nous ton avis sur l'application"}
@@ -8627,11 +8627,11 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
         </div>}
 
         {(!isWideProfile || ["rating","main"].includes(activeSection)) && showRating && (
-            <div style={{ background: "#FAFAFA", border: `1px solid ${G.or}`, borderTop: "none", borderRadius: "0 0 16px 16px", padding: "20px 20px 16px" }}>
+            <div style={{ background: G.creme, border: `1px solid ${G.or}`, borderTop: "none", borderRadius: "0 0 16px 16px", padding: "20px 20px 16px" }}>
               {ratingSubmitted && !ratingLoading ? (
                 <div style={{ textAlign: "center", paddingBottom: 4 }}>
                   <div style={{ marginBottom: 6, display: "flex", justifyContent: "center" }}><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#e67e22" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-                  <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "#111", marginBottom: 4 }}>Merci pour ton avis !</div>
+                  <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun, marginBottom: 4 }}>Merci pour ton avis !</div>
                   <div style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: 14 }}>
                     {[1,2,3,4,5].map(s => (
                       <svg key={s} width="22" height="22" viewBox="0 0 24 24" fill={s <= userRating ? G.or : "#ddd"} stroke="none">
@@ -8640,7 +8640,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                     ))}
                   </div>
                   {ratingComment && (
-                    <div style={{ fontSize: "0.8rem", color: "#666", fontStyle: "italic", marginBottom: 14, background: G.blanc, borderRadius: 10, padding: "8px 12px", border: `1px solid #EEE` }}>
+                    <div style={{ fontSize: "0.8rem", color: G.brunLight, fontStyle: "italic", marginBottom: 14, background: G.blanc, borderRadius: 10, padding: "8px 12px", border: `1px solid #EEE` }}>
                       "{ratingComment}"
                     </div>
                   )}
@@ -8650,8 +8650,8 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                 </div>
               ) : (
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: "0.88rem", color: "#111", marginBottom: 4, textAlign: "center" }}>Comment tu trouves Moyo ?</div>
-                  <div style={{ fontSize: "0.78rem", color: "#888", marginBottom: 14, textAlign: "center" }}>Ton avis nous aide à améliorer l'application</div>
+                  <div style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, marginBottom: 4, textAlign: "center" }}>Comment tu trouves Moyo ?</div>
+                  <div style={{ fontSize: "0.78rem", color: G.brunLight, marginBottom: 14, textAlign: "center" }}>Ton avis nous aide à améliorer l'application</div>
                   <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 4 }}>
                     {[1,2,3,4,5].map(star => (
                       <div key={star} onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)} onClick={() => { setUserRating(star); setRatingError(""); }} style={{ cursor: "pointer", transform: (hoverRating || userRating) >= star ? "scale(1.25)" : "scale(1)", transition: "transform 0.15s" }}>
@@ -8659,7 +8659,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                       </div>
                     ))}
                   </div>
-                  <div style={{ textAlign: "center", fontSize: "0.75rem", color: "#aaa", marginBottom: 14, minHeight: 18 }}>
+                  <div style={{ textAlign: "center", fontSize: "0.75rem", color: G.brunLight, marginBottom: 14, minHeight: 18 }}>
                     {userRating > 0 && ["", "Très déçu(e)", "Déçu(e)", "Correct", "Bien !", "Excellent !"][userRating]}
                   </div>
                   <textarea value={ratingComment} onChange={e => setRatingComment(e.target.value.slice(0, 300))} placeholder="Laisse un commentaire (optionnel)..." rows={3} style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 10, border: `1.5px solid #DDD`, fontSize: "0.82rem", resize: "none", outline: "none", fontFamily: "inherit", marginBottom: 4 }} />
@@ -8713,18 +8713,18 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
               {canExpand && warningsExpanded && (
                 <div style={{ padding: "0 16px 14px" }}>
                   {warningsLoading ? (
-                    <div style={{ textAlign: "center", padding: "10px 0", color: "#aaa", fontSize: "0.8rem" }}>Chargement…</div>
+                    <div style={{ textAlign: "center", padding: "10px 0", color: G.brunLight, fontSize: "0.8rem" }}>Chargement…</div>
                   ) : warningsList.length === 0 ? (
-                    <div style={{ textAlign: "center", padding: "10px 0", color: "#aaa", fontSize: "0.8rem", fontStyle: "italic" }}>Aucun détail disponible.</div>
+                    <div style={{ textAlign: "center", padding: "10px 0", color: G.brunLight, fontSize: "0.8rem", fontStyle: "italic" }}>Aucun détail disponible.</div>
                   ) : (
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {warningsList.map((w, idx) => (
                         <div key={w.id} style={{ background: G.blanc, borderRadius: 10, padding: "10px 12px", border: `1px solid ${borderCard}` }}>
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
                             <span style={{ fontSize: "0.78rem", fontWeight: 800, color: labelColor }}>Avertissement {idx + 1}</span>
-                            <span style={{ fontSize: "0.68rem", color: "#999" }}>{new Date(w.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                            <span style={{ fontSize: "0.68rem", color: G.brunLight }}>{new Date(w.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                           </div>
-                          <div style={{ fontSize: "0.82rem", color: "#444", lineHeight: 1.45 }}>{w.reason}</div>
+                          <div style={{ fontSize: "0.82rem", color: G.brun, lineHeight: 1.45 }}>{w.reason}</div>
                         </div>
                       ))}
                     </div>
@@ -8744,7 +8744,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>Modifier mon mot de passe</div>
-              <div style={{ fontSize: "0.78rem", color: "#888", marginTop: 2 }}>Changer ton mot de passe de connexion</div>
+              <div style={{ fontSize: "0.78rem", color: G.brunLight, marginTop: 2 }}>Changer ton mot de passe de connexion</div>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
           </div>
@@ -8779,7 +8779,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           <div style={{ background: G.blanc, borderRadius: 16, padding: 20, boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
             <div style={{ fontWeight: 700, fontSize: "1rem", marginBottom: 16 }}>Liste noire</div>
             {blockedUsers.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "30px 20px", color: "#aaa" }}>
+              <div style={{ textAlign: "center", padding: "30px 20px", color: G.brunLight }}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", margin: "0 auto 10px" }}><polyline points="20 6 9 17 4 12"/></svg>
                 <p style={{ fontSize: "0.88rem" }}>Aucun utilisateur bloqué</p>
               </div>
@@ -8790,7 +8790,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>{b.profile?.name || "Membre"}</div>
-                  <div style={{ fontSize: "0.75rem", color: "#888" }}>{b.profile?.city || "-"}</div>
+                  <div style={{ fontSize: "0.75rem", color: G.brunLight }}>{b.profile?.city || "-"}</div>
                 </div>
                 <div onClick={() => handleUnblock(b.id)} style={{ background: "rgba(212,168,67,0.08)", border: `1px solid rgba(212,168,67,0.2)`, borderRadius: 50, padding: "6px 14px", fontSize: "0.75rem", fontWeight: 700, color: G.rouge, cursor: "pointer" }}>Débloquer</div>
               </div>
@@ -8807,11 +8807,11 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           <div style={{ background: G.blanc, borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 500, maxHeight: "70vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "20px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid #F5F5F5` }}>
               <div style={{ fontSize: "1rem", fontWeight: 700, color: G.brun }}>Liste noire</div>
-              <div onClick={() => setShowBlocked(false)} style={{ cursor: "pointer", color: "#aaa", fontSize: "1.2rem" }}>✕</div>
+              <div onClick={() => setShowBlocked(false)} style={{ cursor: "pointer", color: G.brunLight, fontSize: "1.2rem" }}>✕</div>
             </div>
             <div style={{ overflowY: "auto", flex: 1, padding: "12px 0 20px" }}>
               {blockedUsers.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "40px 20px", color: "#aaa" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", margin: "0 auto 12px" }}><polyline points="20 6 9 17 4 12"/></svg><p style={{ fontSize: "0.88rem" }}>Aucun utilisateur bloqué</p></div>
+                <div style={{ textAlign: "center", padding: "40px 20px", color: G.brunLight }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", margin: "0 auto 12px" }}><polyline points="20 6 9 17 4 12"/></svg><p style={{ fontSize: "0.88rem" }}>Aucun utilisateur bloqué</p></div>
               ) : blockedUsers.map(b => (
                 <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px" }}>
                   <div style={{ width: 44, height: 44, borderRadius: "50%", background: G.gris, overflow: "hidden", flexShrink: 0 }}>
@@ -8819,7 +8819,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>{b.profile?.name || "Membre"}</div>
-                    <div style={{ fontSize: "0.75rem", color: "#888" }}>{b.profile?.city || "-"}</div>
+                    <div style={{ fontSize: "0.75rem", color: G.brunLight }}>{b.profile?.city || "-"}</div>
                   </div>
                   <div onClick={() => handleUnblock(b.id)} style={{ background: "rgba(212,168,67,0.08)", border: `1px solid rgba(212,168,67,0.2)`, borderRadius: 50, padding: "6px 14px", fontSize: "0.75rem", fontWeight: 700, color: G.rouge, cursor: "pointer", flexShrink: 0 }}>Débloquer</div>
                 </div>
@@ -8880,9 +8880,9 @@ function UserWarningModal({ warning, onAcknowledge }: {
         {/* Body */}
         <div style={{ padding: "22px 22px 26px", textAlign: "center" }}>
           <div style={{ background: "rgba(212,168,67,0.08)", border: "1.5px solid rgba(212,168,67,0.25)", borderRadius: 14, padding: "14px 16px", marginBottom: 18 }}>
-            <p style={{ fontSize: "0.92rem", color: "#333", lineHeight: 1.7, margin: 0, fontWeight: 500 }}>{warning.reason.replace("🎁 ", "")}</p>
+            <p style={{ fontSize: "0.92rem", color: G.brun, lineHeight: 1.7, margin: 0, fontWeight: 500 }}>{warning.reason.replace("🎁 ", "")}</p>
           </div>
-          <div style={{ fontSize: "0.78rem", color: "#aaa", marginBottom: 18, lineHeight: 1.6 }}>
+          <div style={{ fontSize: "0.78rem", color: G.brunLight, marginBottom: 18, lineHeight: 1.6 }}>
             Actualisez l'application pour profiter de toutes les fonctionnalités Premium 🌟
           </div>
           <button onClick={onAcknowledge} style={{ width: "100%", background: "linear-gradient(135deg,#D4A843,#B8922E)", color: "#fff", border: "none", borderRadius: 50, padding: "15px", fontSize: "0.95rem", fontWeight: 800, cursor: "pointer", boxShadow: "0 6px 20px rgba(212,168,67,0.45)", letterSpacing: "0.02em" }}>
@@ -8908,17 +8908,17 @@ function UserWarningModal({ warning, onAcknowledge }: {
         </div>
         <div style={{ padding: "20px 22px 24px" }}>
           {isInfo ? (
-            <p style={{ fontSize: "0.88rem", color: "#333", lineHeight: 1.75, marginBottom: 20, textAlign: "center" }}>{warning.reason}</p>
+            <p style={{ fontSize: "0.88rem", color: G.brun, lineHeight: 1.75, marginBottom: 20, textAlign: "center" }}>{warning.reason}</p>
           ) : (
             <>
-              <p style={{ fontSize: "0.85rem", color: "#333", lineHeight: 1.7, marginBottom: 14 }}>Votre compte a reçu un avertissement pour non-respect des règles de la communauté MOYO.</p>
+              <p style={{ fontSize: "0.85rem", color: G.brun, lineHeight: 1.7, marginBottom: 14 }}>Votre compte a reçu un avertissement pour non-respect des règles de la communauté MOYO.</p>
               {warning.reason && (
                 <div style={{ background: "rgba(243,156,18,0.08)", border: "1px solid rgba(243,156,18,0.25)", borderRadius: 10, padding: "10px 14px", marginBottom: 14 }}>
                   <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#e67e22", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Motif</div>
-                  <div style={{ fontSize: "0.82rem", color: "#555" }}>{warning.reason}</div>
+                  <div style={{ fontSize: "0.82rem", color: G.brunLight }}>{warning.reason}</div>
                 </div>
               )}
-              <p style={{ fontSize: "0.82rem", color: "#666", lineHeight: 1.65, marginBottom: 20 }}>Merci d'adopter un comportement respectueux et sécurisé dans vos échanges. En cas de récidive, votre compte pourra être temporairement suspendu ou supprimé.</p>
+              <p style={{ fontSize: "0.82rem", color: G.brunLight, lineHeight: 1.65, marginBottom: 20 }}>Merci d'adopter un comportement respectueux et sécurisé dans vos échanges. En cas de récidive, votre compte pourra être temporairement suspendu ou supprimé.</p>
             </>
           )}
           <button onClick={onAcknowledge} style={{ width: "100%", background: isInfo ? "linear-gradient(135deg,#2980b9,#1a6091)" : "linear-gradient(135deg,#f39c12,#e67e22)", color: "#fff", border: "none", borderRadius: 50, padding: "14px", fontSize: "0.9rem", fontWeight: 700, cursor: "pointer", letterSpacing: "0.03em", boxShadow: isInfo ? "0 4px 16px rgba(41,128,185,0.35)" : "0 4px 16px rgba(243,156,18,0.35)" }}>
@@ -8932,7 +8932,7 @@ function UserWarningModal({ warning, onAcknowledge }: {
 
 type PaymentRequest = { id: string; user_id: string; operator: string; tx_ref: string; amount: number; status: string; created_at: string; approved_at?: string; gift_for?: string; gift_for_name?: string; archived?: boolean; currency?: string; kind?: string | null; target_id?: string | null; duration_days?: number | null; profile?: { name: string; photo_url?: string | null; gender?: string } };
 function getPremiumCountdown(approvedAt?: string, amount?: number): { label: string; color: string; expired: boolean } {
-  if (!approvedAt) return { label: "", color: "#888", expired: false };
+  if (!approvedAt) return { label: "", color: G.brunLight, expired: false };
   const ms = typeof amount === "number" ? premiumMsForAmount(amount) : PREMIUM_30_DAYS_MS;
   const expiry = new Date(new Date(approvedAt).getTime() + ms);
   const diffMs = expiry.getTime() - Date.now();
@@ -8968,8 +8968,8 @@ function PaymentCard({ p, isPending, isApproved, isRejected, onActivate, onRejec
               {p.kind === "boost" && <span style={{ background: "rgba(212,168,67,0.15)", color: "#8B6914", borderRadius: 50, padding: "2px 8px", fontSize: "0.65rem", fontWeight: 800 }}>🚀 Mise en avant {p.duration_days ? `${p.duration_days} j` : ""}</span>}
               {p.kind === "sponsor" && <span style={{ background: "rgba(212,168,67,0.15)", color: "#8B6914", borderRadius: 50, padding: "2px 8px", fontSize: "0.65rem", fontWeight: 800 }}>★ Sponsor fiche {p.duration_days ? `${p.duration_days} j` : ""}</span>}
             </div>
-            <div style={{ fontSize: "0.7rem", color: "#888" }}>{new Date(p.created_at).toLocaleString("fr-FR")} · {formatMoney(p.amount, paymentCurrency(p))}</div>
-            <div style={{ fontSize: "0.62rem", color: "#bbb", fontFamily: "monospace", marginTop: 2 }}>{p.user_id}</div>
+            <div style={{ fontSize: "0.7rem", color: G.brunLight }}>{new Date(p.created_at).toLocaleString("fr-FR")} · {formatMoney(p.amount, paymentCurrency(p))}</div>
+            <div style={{ fontSize: "0.62rem", color: G.brunLight, fontFamily: "monospace", marginTop: 2 }}>{p.user_id}</div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
@@ -8980,12 +8980,12 @@ function PaymentCard({ p, isPending, isApproved, isRejected, onActivate, onRejec
       </div>
       <div style={{ display: "flex", flexDirection: window.innerWidth < 768 ? "column" : "row", gap: 8, marginBottom: isPending ? 10 : 0 }}>
         <div style={{ flex: 1, background: G.creme, borderRadius: 8, padding: "8px 10px" }}>
-          <div style={{ fontSize: "0.65rem", color: "#aaa", fontWeight: 700, marginBottom: 3, textTransform: "uppercase" }}>Réf. client</div>
-          <div style={{ fontWeight: 700, fontSize: "0.82rem", color: "#888", letterSpacing: 0.5, wordBreak: "break-all" }}>{p.tx_ref}</div>
+          <div style={{ fontSize: "0.65rem", color: G.brunLight, fontWeight: 700, marginBottom: 3, textTransform: "uppercase" }}>Réf. client</div>
+          <div style={{ fontWeight: 700, fontSize: "0.82rem", color: G.brunLight, letterSpacing: 0.5, wordBreak: "break-all" }}>{p.tx_ref}</div>
         </div>
         {!isApproved && !isRejected && (
           <div style={{ flex: 1, background: verified === "match" ? "rgba(39,174,96,0.07)" : verified === "mismatch" ? "rgba(231,76,60,0.07)" : G.creme, borderRadius: 8, padding: "10px 12px", border: `1.5px solid ${verified === "match" ? "rgba(39,174,96,0.3)" : verified === "mismatch" ? "rgba(231,76,60,0.3)" : "transparent"}` }}>
-            <div style={{ fontSize: "0.65rem", color: "#aaa", fontWeight: 700, marginBottom: 3, textTransform: "uppercase" }}>{p.operator === "Carte" || p.operator === "Stripe" ? "Réf. transaction Stripe" : `Réf. ${p.operator} reçue`}</div>
+            <div style={{ fontSize: "0.65rem", color: G.brunLight, fontWeight: 700, marginBottom: 3, textTransform: "uppercase" }}>{p.operator === "Carte" || p.operator === "Stripe" ? "Réf. transaction Stripe" : `Réf. ${p.operator} reçue`}</div>
             <input value={adminRef} onChange={e => { setAdminRef(e.target.value); setVerified(null); }} placeholder="Entrez ici…" style={{ width: "100%", border: "none", background: "transparent", fontSize: "0.95rem", fontWeight: 700, outline: "none", color: G.brun, letterSpacing: 0.5, fontFamily: "inherit", padding: window.innerWidth < 768 ? "4px 0" : 0 }} />
           </div>
         )}
@@ -8997,7 +8997,7 @@ function PaymentCard({ p, isPending, isApproved, isRejected, onActivate, onRejec
           {verified === null && <button onClick={() => setVerified(match ? "match" : "mismatch")} disabled={!adminRef.trim()} style={{ flex: 1, background: adminRef.trim() ? "linear-gradient(135deg,#2980b9,#1a6091)" : "#ddd", color: adminRef.trim() ? "#fff" : "#aaa", border: "none", borderRadius: 50, padding: "10px", fontSize: "0.82rem", fontWeight: 700, cursor: adminRef.trim() ? "pointer" : "not-allowed" }}>🔍 Vérifier</button>}
           {verified === "match" && <button onClick={() => onActivate(p)} style={{ flex: 1, background: "linear-gradient(135deg,#27ae60,#1e8449)", color: "#fff", border: "none", borderRadius: 50, padding: "10px", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer" }}>✓ Activer Premium</button>}
           {verified === "mismatch" && <button onClick={() => onReject(p)} style={{ flex: 1, background: "rgba(231,76,60,0.08)", color: "#e74c3c", border: "1.5px solid rgba(231,76,60,0.2)", borderRadius: 50, padding: "10px", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer" }}>✕ Rejeter & notifier</button>}
-          {verified !== null && <button onClick={() => { setVerified(null); setAdminRef(""); }} style={{ background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "10px 14px", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" }}>↩</button>}
+          {verified !== null && <button onClick={() => { setVerified(null); setAdminRef(""); }} style={{ background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "10px 14px", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" }}>↩</button>}
         </div>
       )}
       {confirmDelete && (
@@ -9012,18 +9012,18 @@ function PaymentCard({ p, isPending, isApproved, isRejected, onActivate, onRejec
             <div style={{ padding: "16px 20px 20px" }}>
               <div style={{ background: "rgba(231,76,60,0.06)", border: "1px solid rgba(231,76,60,0.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 14 }}>
                 <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#c0392b", marginBottom: 6 }}>Ce qui va se passer :</div>
-                <ul style={{ fontSize: "0.78rem", color: "#555", lineHeight: 1.7, paddingLeft: 16, margin: 0 }}>
+                <ul style={{ fontSize: "0.78rem", color: G.brunLight, lineHeight: 1.7, paddingLeft: 16, margin: 0 }}>
                   <li>Ce paiement sera déplacé dans l'onglet <strong>Archivage</strong></li>
                   <li>Le Premium de l'utilisateur n'est <strong>pas</strong> modifié</li>
                   <li>Le chiffre d'affaires reste inchangé</li>
                   <li>Vous pourrez le supprimer définitivement depuis Archivage</li>
                 </ul>
               </div>
-              <div style={{ fontSize: "0.75rem", color: "#888", marginBottom: 14, textAlign: "center" }}>
+              <div style={{ fontSize: "0.75rem", color: G.brunLight, marginBottom: 14, textAlign: "center" }}>
                 Réf: <span style={{ fontFamily: "monospace", fontWeight: 600 }}>{p.tx_ref}</span>
               </div>
               <div style={{ display: "flex", gap: 10 }}>
-                <button onClick={() => setConfirmDelete(false)} style={{ flex: 1, background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "11px", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer" }}>Annuler</button>
+                <button onClick={() => setConfirmDelete(false)} style={{ flex: 1, background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "11px", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer" }}>Annuler</button>
                 <button onClick={() => { setConfirmDelete(false); onDelete(p); }} style={{ flex: 1, background: "linear-gradient(135deg,#e74c3c,#c0392b)", color: "#fff", border: "none", borderRadius: 50, padding: "11px", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer" }}>
                   Archiver
                 </button>
@@ -9122,9 +9122,9 @@ function AdminNotes({ auth, targetType, targetId }: { auth: Auth; targetType: "u
       {expanded && (
         <div style={{ padding: "0 12px 12px" }}>
           {loading ? (
-            <div style={{ fontSize: "0.78rem", color: "#aaa", textAlign: "center", padding: "8px 0" }}>Chargement…</div>
+            <div style={{ fontSize: "0.78rem", color: G.brunLight, textAlign: "center", padding: "8px 0" }}>Chargement…</div>
           ) : notes.length === 0 ? (
-            <div style={{ fontSize: "0.78rem", color: "#aaa", fontStyle: "italic", textAlign: "center", padding: "8px 0" }}>Aucune note pour l'instant.</div>
+            <div style={{ fontSize: "0.78rem", color: G.brunLight, fontStyle: "italic", textAlign: "center", padding: "8px 0" }}>Aucune note pour l'instant.</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 4 }}>
               {notes.map(n => (
@@ -9132,11 +9132,11 @@ function AdminNotes({ auth, targetType, targetId }: { auth: Auth; targetType: "u
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
                     <span style={{ fontWeight: 700, fontSize: "0.74rem", color: G.brun }}>{n.author_name}</span>
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: "0.64rem", color: "#aaa" }}>{fmt(n.created_at)}</span>
+                      <span style={{ fontSize: "0.64rem", color: G.brunLight }}>{fmt(n.created_at)}</span>
                       <button onClick={() => delNote(n.id)} style={{ background: "none", border: "none", color: "#c0392b", cursor: "pointer", fontSize: "0.66rem", fontWeight: 600 }}>supprimer</button>
                     </span>
                   </div>
-                  <div style={{ fontSize: "0.8rem", color: "#444", lineHeight: 1.45, whiteSpace: "pre-wrap" }}>{n.note}</div>
+                  <div style={{ fontSize: "0.8rem", color: G.brun, lineHeight: 1.45, whiteSpace: "pre-wrap" }}>{n.note}</div>
                 </div>
               ))}
             </div>
@@ -9191,7 +9191,7 @@ function AdminPinGate({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () =
           <button onClick={verifyPin} disabled={pinInput.length < 4 || pinLoading} style={{ width: "100%", marginTop: 14, background: pinInput.length === 4 ? `linear-gradient(135deg,${G.rouge},${G.rougeDark})` : "#ddd", color: pinInput.length === 4 ? "#fff" : "#aaa", border: "none", borderRadius: 50, padding: "13px", fontSize: "0.92rem", fontWeight: 700, cursor: pinInput.length === 4 ? "pointer" : "not-allowed" }}>
             {pinLoading ? "Vérification…" : "Accéder au panel"}
           </button>
-          <button onClick={onBack} style={{ width: "100%", marginTop: 8, background: "transparent", color: "#888", border: "none", fontSize: "0.82rem", cursor: "pointer", padding: "8px" }}>Annuler</button>
+          <button onClick={onBack} style={{ width: "100%", marginTop: 8, background: "transparent", color: G.brunLight, border: "none", fontSize: "0.82rem", cursor: "pointer", padding: "8px" }}>Annuler</button>
         </div>
       </div>
     </div>
@@ -9237,16 +9237,16 @@ function MsgModal({ user, msgText, setMsgText, msgHistory, msgHistoryLoading, ms
   // ── Bloc de saisie inliné (évite le re-mount à chaque frappe) ──
   const renderSaisieBlock = (compact?: boolean) => (
     <div style={{ padding: compact ? "16px" : "24px", borderTop: compact ? `1px solid ${G.gris}` : "none", flexShrink: 0, background: G.blanc, display: "flex", flexDirection: "column", flex: compact ? "none" : 1 }}>
-      <div style={{ fontWeight: 700, fontSize: "0.85rem", color: "#555", marginBottom: 8 }}>Message personnalisé</div>
+      <div style={{ fontWeight: 700, fontSize: "0.85rem", color: G.brunLight, marginBottom: 8 }}>Message personnalisé</div>
       <textarea
         value={msgText}
         onChange={e => setMsgText(e.target.value)}
         placeholder={compact ? "Écrivez votre message ici ou sélectionnez un modèle ci-dessus…" : "Écrivez votre message ici ou sélectionnez un modèle à gauche…"}
         style={{ width: "100%", boxSizing: "border-box", padding: "12px", borderRadius: 12, border: "2px solid rgba(41,128,185,0.3)", fontSize: "0.88rem", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.6, minHeight: compact ? 90 : undefined, flex: compact ? "none" : 1 }}
       />
-      {msgText && <div style={{ fontSize: "0.72rem", color: "#aaa", marginTop: 4, textAlign: "right" }}>{msgText.length} caractères</div>}
+      {msgText && <div style={{ fontSize: "0.72rem", color: G.brunLight, marginTop: 4, textAlign: "right" }}>{msgText.length} caractères</div>}
       <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
-        <button onClick={onClose} style={{ flex: 1, background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "12px", fontSize: "0.88rem", fontWeight: 600, cursor: "pointer" }}>Annuler</button>
+        <button onClick={onClose} style={{ flex: 1, background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "12px", fontSize: "0.88rem", fontWeight: 600, cursor: "pointer" }}>Annuler</button>
         <button onClick={onSend} style={{ flex: 2, background: "linear-gradient(135deg,#2980b9,#1a6091)", color: "#fff", border: "none", borderRadius: 50, padding: "12px", fontSize: "0.88rem", fontWeight: 700, cursor: "pointer" }}>Envoyer le message</button>
       </div>
     </div>
@@ -9255,20 +9255,20 @@ function MsgModal({ user, msgText, setMsgText, msgHistory, msgHistoryLoading, ms
   // ── Contenu historique inliné (évite le re-mount) ──
   const renderHistoriqueContent = () => (
     <div style={{ padding: "10px 16px 6px" }}>
-      <div style={{ fontSize: "0.63rem", fontWeight: 800, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.09em", marginBottom: 6 }}>
+      <div style={{ fontSize: "0.63rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: "0.09em", marginBottom: 6 }}>
         Historique ({msgHistory.length} message{msgHistory.length > 1 ? "s" : ""} envoyé{msgHistory.length > 1 ? "s" : ""})
       </div>
       {msgHistoryLoading ? (
-        <div style={{ textAlign: "center", padding: "8px 0", color: "#aaa", fontSize: "0.75rem" }}>Chargement…</div>
+        <div style={{ textAlign: "center", padding: "8px 0", color: G.brunLight, fontSize: "0.75rem" }}>Chargement…</div>
       ) : msgHistory.length === 0 ? (
-        <div style={{ fontSize: "0.75rem", color: "#bbb", padding: "6px 0 8px", fontStyle: "italic" }}>Aucun message envoyé pour le moment</div>
+        <div style={{ fontSize: "0.75rem", color: G.brunLight, padding: "6px 0 8px", fontStyle: "italic" }}>Aucun message envoyé pour le moment</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           {msgHistory.map(m => (
-            <div key={m.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, background: "#F8FAFB", borderRadius: 8, padding: "7px 10px", border: "1px solid #E8F0F8" }}>
+            <div key={m.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, background: G.creme, borderRadius: 8, padding: "7px 10px", border: "1px solid #E8F0F8" }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 {formatDate(m.created_at) && <div style={{ fontSize: "0.68rem", color: "#2980b9", fontWeight: 600, marginBottom: 2 }}>{formatDate(m.created_at)}</div>}
-                <div style={{ fontSize: "0.76rem", color: "#333", lineHeight: 1.4 }}>{m.reason || ""}</div>
+                <div style={{ fontSize: "0.76rem", color: G.brun, lineHeight: 1.4 }}>{m.reason || ""}</div>
               </div>
               <button onClick={() => onDeleteHistory(m.id)} title="Supprimer" style={{ background: "rgba(231,76,60,0.08)", border: "none", borderRadius: 6, width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
@@ -9296,7 +9296,7 @@ function MsgModal({ user, msgText, setMsgText, msgHistory, msgHistoryLoading, ms
               </div>
               <div>
                 <div style={{ fontWeight: 800, fontSize: "0.95rem", color: G.brun }}>Message à {user.name}</div>
-                <div style={{ fontSize: "0.7rem", color: "#888", marginTop: 2 }}>Sélectionne un modèle ou écris un message personnalisé</div>
+                <div style={{ fontSize: "0.7rem", color: G.brunLight, marginTop: 2 }}>Sélectionne un modèle ou écris un message personnalisé</div>
               </div>
             </div>
             {/* Onglets */}
@@ -9312,7 +9312,7 @@ function MsgModal({ user, msgText, setMsgText, msgHistory, msgHistoryLoading, ms
           {msgTab === "modeles" && (
             <div style={{ flex: 1, overflowY: "auto", padding: "10px 16px", display: "flex", flexDirection: "column", gap: 5 }}>
               {msgTemplates.map((t, i) => (
-                <div key={i} onClick={() => setMsgText(t)} style={{ padding: "9px 12px", borderRadius: 10, cursor: "pointer", background: msgText === t ? "rgba(41,128,185,0.1)" : G.creme, border: `1.5px solid ${msgText === t ? "#2980b9" : "transparent"}`, fontSize: "0.8rem", color: "#333", lineHeight: 1.4, transition: "all 0.12s", flexShrink: 0 }}>
+                <div key={i} onClick={() => setMsgText(t)} style={{ padding: "9px 12px", borderRadius: 10, cursor: "pointer", background: msgText === t ? "rgba(41,128,185,0.1)" : G.creme, border: `1.5px solid ${msgText === t ? "#2980b9" : "transparent"}`, fontSize: "0.8rem", color: G.brun, lineHeight: 1.4, transition: "all 0.12s", flexShrink: 0 }}>
                   {t.length > 75 ? t.slice(0, 75) + "…" : t}
                 </div>
               ))}
@@ -11223,7 +11223,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
     switch (status) {
       case "pending":    return { bg: "rgba(243,156,18,0.12)", color: "#f39c12", label: "En attente" };
       case "reviewed":   return { bg: "rgba(39,174,96,0.12)",  color: "#27ae60", label: "Traité" };
-      case "rejected":   return { bg: "rgba(127,140,141,0.12)", color: "#7f8c8d", label: "Rejeté" };
+      case "rejected":   return { bg: "rgba(127,140,141,0.12)", color: G.brunLight, label: "Rejeté" };
       case "banned":     return { bg: "rgba(231,76,60,0.12)",  color: "#e74c3c", label: "Banni" };
       default:           return { bg: "rgba(52,152,219,0.12)", color: "#3498db", label: status };
     }
@@ -11234,7 +11234,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
     if (r.reason?.startsWith("[AUTO-MOD")) return { label: "Auto-modération", color: "#e67e22" };
     if (r.reason?.startsWith("[BOT SIGNALEMENT]")) return { label: "Alerte bot", color: "#8e44ad" };
     if (isSupportReason(r.reason)) return { label: "Messagerie", color: G.vert };
-    if (!r.reported_id) return { label: "Alerte système", color: "#7f8c8d" };
+    if (!r.reported_id) return { label: "Alerte système", color: G.brunLight };
     return { label: "Signalement profil", color: G.rouge };
   };
 
@@ -11347,8 +11347,8 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 12000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <div style={{ background: G.blanc, borderRadius: 20, width: "100%", maxWidth: 420, padding: 20, boxShadow: "0 20px 60px rgba(0,0,0,0.25)" }}>
             <h3 style={{ fontSize: "1rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>Répondre via {SUPPORT_TEAM_NAME}</h3>
-            <p style={{ fontSize: "0.78rem", color: "#666", lineHeight: 1.5, marginBottom: 12 }}>La réponse apparaîtra directement dans la messagerie de l’utilisateur comme une conversation avec l’assistance Moyo.</p>
-            <div style={{ background: "rgba(26,92,58,0.06)", border: "1px solid rgba(26,92,58,0.15)", borderRadius: 12, padding: 10, fontSize: "0.78rem", color: "#444", lineHeight: 1.5, marginBottom: 12 }}>{cleanSupportReason(supportReply.report.reason)}</div>
+            <p style={{ fontSize: "0.78rem", color: G.brunLight, lineHeight: 1.5, marginBottom: 12 }}>La réponse apparaîtra directement dans la messagerie de l’utilisateur comme une conversation avec l’assistance Moyo.</p>
+            <div style={{ background: "rgba(26,92,58,0.06)", border: "1px solid rgba(26,92,58,0.15)", borderRadius: 12, padding: 10, fontSize: "0.78rem", color: G.brun, lineHeight: 1.5, marginBottom: 12 }}>{cleanSupportReason(supportReply.report.reason)}</div>
             <textarea value={supportReplyText} onChange={e => setSupportReplyText(e.target.value)} placeholder="Écrire la réponse de l’assistance Moyo..." style={{ width: "100%", minHeight: 110, boxSizing: "border-box", border: `1px solid ${G.gris}`, borderRadius: 12, padding: 12, fontSize: "0.86rem", outline: "none", resize: "vertical", marginBottom: 12 }} />
             <div style={{ display: "flex", gap: 10 }}>
               <Btn variant="ghost" onClick={() => { setSupportReply(null); setSupportReplyText(""); }} style={{ flex: 1 }}>Annuler</Btn>
@@ -11378,13 +11378,13 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             </div>
             <div style={{ padding: "16px 20px 24px" }}>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-                {viewPaymentProfile.city && <span style={{ background: G.creme, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600, color: "#555" }}>{viewPaymentProfile.city}</span>}
-                {viewPaymentProfile.religion && <span style={{ background: "rgba(212,168,67,0.12)", borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600, color: "#555" }}>{viewPaymentProfile.religion}</span>}
-                {viewPaymentProfile.profession && <span style={{ background: G.creme, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600, color: "#555" }}>{viewPaymentProfile.profession}</span>}
+                {viewPaymentProfile.city && <span style={{ background: G.creme, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600, color: G.brunLight }}>{viewPaymentProfile.city}</span>}
+                {viewPaymentProfile.religion && <span style={{ background: "rgba(212,168,67,0.12)", borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600, color: G.brunLight }}>{viewPaymentProfile.religion}</span>}
+                {viewPaymentProfile.profession && <span style={{ background: G.creme, borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600, color: G.brunLight }}>{viewPaymentProfile.profession}</span>}
                 {viewPaymentProfile.hobbies && <span style={{ background: "rgba(26,92,58,0.07)", borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600, color: "#2a5a3a" }}>{viewPaymentProfile.hobbies}</span>}
               </div>
-              {viewPaymentProfile.bio && <p style={{ fontSize: "0.88rem", color: "#555", lineHeight: 1.65, marginBottom: 12 }}>{viewPaymentProfile.bio}</p>}
-              <div style={{ background: G.creme, borderRadius: 8, padding: "6px 10px", fontSize: "0.68rem", color: "#aaa", fontFamily: "monospace", wordBreak: "break-all" }}>{viewPaymentProfile.id}</div>
+              {viewPaymentProfile.bio && <p style={{ fontSize: "0.88rem", color: G.brunLight, lineHeight: 1.65, marginBottom: 12 }}>{viewPaymentProfile.bio}</p>}
+              <div style={{ background: G.creme, borderRadius: 8, padding: "6px 10px", fontSize: "0.68rem", color: G.brunLight, fontFamily: "monospace", wordBreak: "break-all" }}>{viewPaymentProfile.id}</div>
             </div>
           </div>
         </div>
@@ -11403,23 +11403,23 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             </div>
             {/* Corps */}
             <div style={{ padding: "20px 22px 24px" }}>
-              <p style={{ fontSize: "0.88rem", color: "#444", lineHeight: 1.6, marginBottom: 16, textAlign: "center" }}>
+              <p style={{ fontSize: "0.88rem", color: G.brun, lineHeight: 1.6, marginBottom: 16, textAlign: "center" }}>
                 {premiumEventActive
                   ? "⚠️ Cela va retirer le statut Premium à tous les utilisateurs qui ne sont pas abonnés réels. Les vrais abonnés (avec premium_until valide) ne seront pas affectés."
                   : "⚠️ Cela va activer le Premium pour TOUS les utilisateurs gratuitement. Utilisez uniquement pour un événement spécial."}
               </p>
               {!premiumEventActive && (
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: "0.75rem", color: "#888", marginBottom: 4, fontWeight: 600 }}>Date d'expiration <span style={{ color: G.rouge }}>*</span></div>
+                  <div style={{ fontSize: "0.75rem", color: G.brunLight, marginBottom: 4, fontWeight: 600 }}>Date d'expiration <span style={{ color: G.rouge }}>*</span></div>
                   <input type="datetime-local" value={premiumEventExpiresAt} onChange={e => setPremiumEventExpiresAt(e.target.value)} style={{ width: "100%", boxSizing: "border-box", padding: "9px 12px", borderRadius: 10, border: "2px solid rgba(184,134,11,0.4)", fontSize: "0.84rem", outline: "none", fontFamily: "inherit" }} />
-                  <div style={{ fontSize: "0.7rem", color: "#aaa", marginTop: 3 }}>Passé cette date, le Premium sera retiré automatiquement aux non-abonnés</div>
+                  <div style={{ fontSize: "0.7rem", color: G.brunLight, marginTop: 3 }}>Passé cette date, le Premium sera retiré automatiquement aux non-abonnés</div>
                 </div>
               )}
               <p style={{ fontSize: "0.78rem", color: "#e74c3c", fontWeight: 600, textAlign: "center", marginBottom: 20 }}>
                 Cette action affecte tous les utilisateurs de la plateforme.
               </p>
               <div style={{ display: "flex", gap: 10 }}>
-                <button onClick={() => { setPremiumEventConfirm(false); setPremiumEventExpiresAt(""); }} style={{ flex: 1, background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "12px", fontSize: "0.88rem", fontWeight: 600, cursor: "pointer" }}>
+                <button onClick={() => { setPremiumEventConfirm(false); setPremiumEventExpiresAt(""); }} style={{ flex: 1, background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "12px", fontSize: "0.88rem", fontWeight: 600, cursor: "pointer" }}>
                   Annuler
                 </button>
                 <button disabled={!premiumEventActive && !premiumEventExpiresAt} onClick={() => { setPremiumEventConfirm(false); togglePremiumEvent(); }} style={{ flex: 1, background: !premiumEventActive && !premiumEventExpiresAt ? "#aaa" : premiumEventActive ? "linear-gradient(135deg,#e74c3c,#c0392b)" : `linear-gradient(135deg,${G.or},#b8860b)`, color: "#fff", border: "none", borderRadius: 50, padding: "12px", fontSize: "0.88rem", fontWeight: 700, cursor: !premiumEventActive && !premiumEventExpiresAt ? "not-allowed" : "pointer" }}>
@@ -11438,7 +11438,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e67e22" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               </div>
               <div style={{ fontWeight: 800, fontSize: "1rem", color: G.brun }}>📢 Diffusion générale</div>
-              <div style={{ fontSize: "0.75rem", color: "#888", marginTop: 4 }}>Destinataires : {broadcastTarget === "all" ? "tous les membres" : broadcastTarget === "premium" ? "les membres Premium" : "les membres gratuits"}</div>
+              <div style={{ fontSize: "0.75rem", color: G.brunLight, marginTop: 4 }}>Destinataires : {broadcastTarget === "all" ? "tous les membres" : broadcastTarget === "premium" ? "les membres Premium" : "les membres gratuits"}</div>
             </div>
             <div style={{ padding: "16px 20px 20px" }}>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
@@ -11454,12 +11454,12 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   "Pour votre sécurité, ne partagez jamais vos informations personnelles.",
                   "Moyo ne vous demandera jamais d'argent. Signalez toute tentative d'arnaque.",
                 ].map(t => (
-                  <button key={t} onClick={() => setBroadcastText(t)} style={{ fontSize: "0.72rem", background: broadcastText === t ? "rgba(230,126,34,0.12)" : G.creme, border: `1.5px solid ${broadcastText === t ? "#e67e22" : "transparent"}`, borderRadius: 8, padding: "5px 8px", cursor: "pointer", color: "#333", textAlign: "left", lineHeight: 1.3 }}>{t.length > 48 ? t.slice(0, 48) + "…" : t}</button>
+                  <button key={t} onClick={() => setBroadcastText(t)} style={{ fontSize: "0.72rem", background: broadcastText === t ? "rgba(230,126,34,0.12)" : G.creme, border: `1.5px solid ${broadcastText === t ? "#e67e22" : "transparent"}`, borderRadius: 8, padding: "5px 8px", cursor: "pointer", color: G.brun, textAlign: "left", lineHeight: 1.3 }}>{t.length > 48 ? t.slice(0, 48) + "…" : t}</button>
                 ))}
               </div>
               <textarea value={broadcastText} onChange={e => setBroadcastText(e.target.value)} placeholder="Écrivez votre message de diffusion…" rows={4} style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 10, border: "2px solid rgba(230,126,34,0.3)", fontSize: "0.84rem", resize: "none", outline: "none", fontFamily: "inherit" }} />
               <div style={{ marginTop: 12 }}>
-                <div style={{ fontSize: "0.75rem", color: "#888", marginBottom: 6, fontWeight: 600 }}>Destinataires</div>
+                <div style={{ fontSize: "0.75rem", color: G.brunLight, marginBottom: 6, fontWeight: 600 }}>Destinataires</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {([["all", "Tout le monde"], ["premium", "Premium"], ["gratuit", "Gratuits"]] as ["all" | "premium" | "gratuit", string][]).map(([val, lbl]) => (
                     <button key={val} type="button" onClick={() => setBroadcastTarget(val)} style={{ padding: "7px 13px", borderRadius: 999, border: `1.5px solid ${broadcastTarget === val ? "#e67e22" : G.gris}`, background: broadcastTarget === val ? "rgba(230,126,34,0.12)" : "#fff", color: broadcastTarget === val ? "#d35400" : "#666", fontWeight: 700, fontSize: "0.74rem", cursor: "pointer" }}>{lbl}</button>
@@ -11467,12 +11467,12 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 </div>
               </div>
               <div style={{ marginTop: 10 }}>
-                <div style={{ fontSize: "0.75rem", color: "#888", marginBottom: 4, fontWeight: 600 }}>Date d'expiration du message <span style={{ color: G.rouge }}>*</span></div>
+                <div style={{ fontSize: "0.75rem", color: G.brunLight, marginBottom: 4, fontWeight: 600 }}>Date d'expiration du message <span style={{ color: G.rouge }}>*</span></div>
                 <input type="datetime-local" value={broadcastExpiresAt} onChange={e => setBroadcastExpiresAt(e.target.value)} style={{ width: "100%", boxSizing: "border-box", padding: "9px 12px", borderRadius: 10, border: "2px solid rgba(230,126,34,0.3)", fontSize: "0.84rem", outline: "none", fontFamily: "inherit" }} />
-                <div style={{ fontSize: "0.7rem", color: "#aaa", marginTop: 3 }}>Passé cette date, le message ne s'affichera plus</div>
+                <div style={{ fontSize: "0.7rem", color: G.brunLight, marginTop: 3 }}>Passé cette date, le message ne s'affichera plus</div>
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-                <button onClick={() => { setBroadcastModal(false); setBroadcastExpiresAt(""); setBroadcastTarget("all"); }} style={{ flex: 1, background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "12px", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer" }}>Annuler</button>
+                <button onClick={() => { setBroadcastModal(false); setBroadcastExpiresAt(""); setBroadcastTarget("all"); }} style={{ flex: 1, background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "12px", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer" }}>Annuler</button>
                 <button disabled={broadcastLoading || !broadcastExpiresAt} onClick={async () => {
                   if (!broadcastText.trim() || !broadcastExpiresAt) return;
                   // Sécurité : refuser une date d'expiration déjà passée
@@ -11529,7 +11529,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <div style={{ fontWeight: 800, fontSize: "0.95rem" }}>Aperçu de la diffusion</div>
             </div>
             <div style={{ padding: 20 }}>
-              <div style={{ fontSize: "0.7rem", color: "#999", marginBottom: 8 }}>Voici comment la bannière apparaît aux utilisateurs ciblés :</div>
+              <div style={{ fontSize: "0.7rem", color: G.brunLight, marginBottom: 8 }}>Voici comment la bannière apparaît aux utilisateurs ciblés :</div>
               <div style={{ background: G.creme, borderRadius: 12, padding: "14px 16px", fontSize: "0.88rem", color: G.brun, lineHeight: 1.5 }}>{broadcastPreview}</div>
               <button onClick={() => setBroadcastPreview(null)} style={{ width: "100%", marginTop: 16, background: G.rouge, color: "#fff", border: "none", borderRadius: 12, padding: "12px", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer" }}>Fermer</button>
             </div>
@@ -11551,18 +11551,18 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             <div style={{ padding: "20px 22px 24px" }}>
               {broadcastResult.ok ? (
                 <>
-                  <p style={{ fontSize: "0.86rem", color: "#333", lineHeight: 1.7, marginBottom: 12, textAlign: "center" }}>Le message a bien été enregistré et sera affiché à tous les utilisateurs concernés.</p>
+                  <p style={{ fontSize: "0.86rem", color: G.brun, lineHeight: 1.7, marginBottom: 12, textAlign: "center" }}>Le message a bien été enregistré et sera affiché à tous les utilisateurs concernés.</p>
                   <div style={{ background: "rgba(26,92,58,0.07)", border: "1px solid rgba(26,92,58,0.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 18 }}>
                     <div style={{ fontSize: "0.7rem", fontWeight: 700, color: G.vert, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Message diffusé</div>
-                    <div style={{ fontSize: "0.82rem", color: "#555", lineHeight: 1.5 }}>{broadcastResult.message}</div>
+                    <div style={{ fontSize: "0.82rem", color: G.brunLight, lineHeight: 1.5 }}>{broadcastResult.message}</div>
                   </div>
                 </>
               ) : (
                 <>
-                  <p style={{ fontSize: "0.85rem", color: "#333", lineHeight: 1.7, marginBottom: 12, textAlign: "center" }}>Le message <strong>n'a pas été envoyé</strong>. Aucun utilisateur ne le verra.</p>
+                  <p style={{ fontSize: "0.85rem", color: G.brun, lineHeight: 1.7, marginBottom: 12, textAlign: "center" }}>Le message <strong>n'a pas été envoyé</strong>. Aucun utilisateur ne le verra.</p>
                   <div style={{ background: "rgba(212,168,67,0.07)", border: "1px solid rgba(212,168,67,0.22)", borderRadius: 10, padding: "10px 14px", marginBottom: 18 }}>
                     <div style={{ fontSize: "0.7rem", fontWeight: 700, color: G.rouge, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Détail de l'erreur</div>
-                    <div style={{ fontSize: "0.82rem", color: "#555", lineHeight: 1.5 }}>{broadcastResult.message}</div>
+                    <div style={{ fontSize: "0.82rem", color: G.brunLight, lineHeight: 1.5 }}>{broadcastResult.message}</div>
                   </div>
                 </>
               )}
@@ -11621,7 +11621,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   </div>
                   <div>
                     <div style={{ fontWeight: 800, fontSize: "0.95rem", color: G.brun }}>Email à {mailModal.user.name}</div>
-                    <div style={{ fontSize: "0.7rem", color: "#888", marginTop: 2 }}>Sélectionne un email à envoyer</div>
+                    <div style={{ fontSize: "0.7rem", color: G.brunLight, marginTop: 2 }}>Sélectionne un email à envoyer</div>
                   </div>
                 </div>
                 {/* Onglets */}
@@ -11638,9 +11638,9 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               {mailTab === "historique" && (
                 <div style={{ flex: 1, overflowY: "auto", padding: "10px 16px 6px" }}>
                   {mailHistoryLoading ? (
-                    <div style={{ textAlign: "center", padding: "8px 0", color: "#aaa", fontSize: "0.75rem" }}>Chargement…</div>
+                    <div style={{ textAlign: "center", padding: "8px 0", color: G.brunLight, fontSize: "0.75rem" }}>Chargement…</div>
                   ) : mailHistory.length === 0 ? (
-                    <div style={{ fontSize: "0.75rem", color: "#bbb", padding: "6px 0 8px", fontStyle: "italic" }}>Aucun email envoyé pour le moment</div>
+                    <div style={{ fontSize: "0.75rem", color: G.brunLight, padding: "6px 0 8px", fontStyle: "italic" }}>Aucun email envoyé pour le moment</div>
                   ) : (
                     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                       {mailHistory.map(m => (
@@ -11649,7 +11649,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                             <div style={{ fontSize: "0.68rem", color: "#8e44ad", fontWeight: 600, marginBottom: 2 }}>
                               {new Date(m.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                             </div>
-                            <div style={{ fontSize: "0.76rem", color: "#333", lineHeight: 1.4 }}>{m.reason}</div>
+                            <div style={{ fontSize: "0.76rem", color: G.brun, lineHeight: 1.4 }}>{m.reason}</div>
                           </div>
                           <button onClick={() => deleteMailHistory(m.id)} style={{ background: "rgba(231,76,60,0.08)", border: "none", borderRadius: 6, width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
@@ -11665,12 +11665,12 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               {mailTab === "modeles" && (
               <div style={{ flex: 1, overflowY: "auto", padding: "10px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#16A34A", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Bienvenue</div>
-                <div onClick={() => sendMailFunction("send-bienvenue", "Email de bienvenue", mailModal.user)} style={{ padding: "12px 14px", borderRadius: 12, cursor: mailSending === "send-bienvenue" ? "not-allowed" : "pointer", background: mailSending === "send-bienvenue" ? "#e8f5e9" : "#f0fff4", border: `1.5px solid ${mailSending === "send-bienvenue" ? "#a5d6a7" : "#c3e6cb"}`, fontSize: "0.83rem", color: "#333", lineHeight: 1.4, display: "flex", alignItems: "center", gap: 10, marginBottom: 12, opacity: mailSending && mailSending !== "send-bienvenue" ? 0.5 : 1 }}>
+                <div onClick={() => sendMailFunction("send-bienvenue", "Email de bienvenue", mailModal.user)} style={{ padding: "12px 14px", borderRadius: 12, cursor: mailSending === "send-bienvenue" ? "not-allowed" : "pointer", background: mailSending === "send-bienvenue" ? "#e8f5e9" : "#f0fff4", border: `1.5px solid ${mailSending === "send-bienvenue" ? "#a5d6a7" : "#c3e6cb"}`, fontSize: "0.83rem", color: G.brun, lineHeight: 1.4, display: "flex", alignItems: "center", gap: 10, marginBottom: 12, opacity: mailSending && mailSending !== "send-bienvenue" ? 0.5 : 1 }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16A34A", flexShrink: 0 }} />
                   {mailSending === "send-bienvenue" ? "Envoi en cours..." : "Email de bienvenue"}
                 </div>
                 <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#D4A843", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Inscription incomplète</div>
-                <div onClick={() => sendMailTemplate("send-inscription-incomplete", "Finalisez votre inscription", "Finalisez votre inscription Moyo", `Bonjour,\n\nVotre inscription sur Moyo n'a pas abouti car votre profil n'avait pas été complété à 100 %.\n\nVous pouvez vous réinscrire avec les mêmes identifiants (e-mail et mot de passe) sur : 👉 https://moyo-congo.com\n\nPensez à compléter votre profil jusqu'au bout pour apparaître dans les résultats.\n\nÀ bientôt sur Moyo !\n\nMoyo Brazzaville - République du Congo\ncontact@moyo-congo.com | WhatsApp : +242 06 513 20 12`, mailModal.user)} style={{ padding: "12px 14px", borderRadius: 12, cursor: mailSending === "send-inscription-incomplete" ? "not-allowed" : "pointer", background: mailSending === "send-inscription-incomplete" ? "#fdeaea" : "#fff5f5", border: `1.5px solid ${mailSending === "send-inscription-incomplete" ? "#f0b4b4" : "#f5d5d5"}`, fontSize: "0.83rem", color: "#333", lineHeight: 1.4, display: "flex", alignItems: "center", gap: 10, marginBottom: 12, opacity: mailSending && mailSending !== "send-inscription-incomplete" ? 0.5 : 1 }}>
+                <div onClick={() => sendMailTemplate("send-inscription-incomplete", "Finalisez votre inscription", "Finalisez votre inscription Moyo", `Bonjour,\n\nVotre inscription sur Moyo n'a pas abouti car votre profil n'avait pas été complété à 100 %.\n\nVous pouvez vous réinscrire avec les mêmes identifiants (e-mail et mot de passe) sur : 👉 https://moyo-congo.com\n\nPensez à compléter votre profil jusqu'au bout pour apparaître dans les résultats.\n\nÀ bientôt sur Moyo !\n\nMoyo Brazzaville - République du Congo\ncontact@moyo-congo.com | WhatsApp : +242 06 513 20 12`, mailModal.user)} style={{ padding: "12px 14px", borderRadius: 12, cursor: mailSending === "send-inscription-incomplete" ? "not-allowed" : "pointer", background: mailSending === "send-inscription-incomplete" ? "#fdeaea" : "#fff5f5", border: `1.5px solid ${mailSending === "send-inscription-incomplete" ? "#f0b4b4" : "#f5d5d5"}`, fontSize: "0.83rem", color: G.brun, lineHeight: 1.4, display: "flex", alignItems: "center", gap: 10, marginBottom: 12, opacity: mailSending && mailSending !== "send-inscription-incomplete" ? 0.5 : 1 }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#D4A843", flexShrink: 0 }} />
                   {mailSending === "send-inscription-incomplete" ? "Envoi en cours..." : "Finalisez votre inscription"}
                 </div>
@@ -11680,7 +11680,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   { fn: "send-relance-15j", label: "Inactivité 15 jours - Des profils t'attendent" },
                   { fn: "send-relance-30j", label: "Inactivité 30 jours - Compte bientôt supprimé" },
                 ].map(item => (
-                  <div key={item.fn} onClick={() => sendMailFunction(item.fn, item.label, mailModal.user)} style={{ padding: "12px 14px", borderRadius: 12, cursor: mailSending === item.fn ? "not-allowed" : "pointer", background: mailSending === item.fn ? "#f3e8ff" : "#faf5ff", border: `1.5px solid ${mailSending === item.fn ? "#d8b4fe" : "#e8d5f5"}`, fontSize: "0.83rem", color: "#333", lineHeight: 1.4, transition: "all 0.12s", display: "flex", alignItems: "center", gap: 10, opacity: mailSending && mailSending !== item.fn ? 0.5 : 1 }}>
+                  <div key={item.fn} onClick={() => sendMailFunction(item.fn, item.label, mailModal.user)} style={{ padding: "12px 14px", borderRadius: 12, cursor: mailSending === item.fn ? "not-allowed" : "pointer", background: mailSending === item.fn ? "#f3e8ff" : "#faf5ff", border: `1.5px solid ${mailSending === item.fn ? "#d8b4fe" : "#e8d5f5"}`, fontSize: "0.83rem", color: G.brun, lineHeight: 1.4, transition: "all 0.12s", display: "flex", alignItems: "center", gap: 10, opacity: mailSending && mailSending !== item.fn ? 0.5 : 1 }}>
                     <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#8e44ad", flexShrink: 0 }} />
                     {mailSending === item.fn ? "Envoi en cours..." : item.label}
                   </div>
@@ -11690,34 +11690,34 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             </div>
 
             {/* ── COLONNE DROITE : saisie libre ── */}
-            <div style={{ width: window.innerWidth >= 768 ? "50%" : "100%", flex: 1, display: "flex", flexDirection: "column", padding: "24px", background: "#fafafa", borderTop: window.innerWidth < 768 ? `1px solid ${G.gris}` : "none" }}>
+            <div style={{ width: window.innerWidth >= 768 ? "50%" : "100%", flex: 1, display: "flex", flexDirection: "column", padding: "24px", background: G.creme, borderTop: window.innerWidth < 768 ? `1px solid ${G.gris}` : "none" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
                 <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(142,68,173,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8e44ad" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: "0.88rem", color: "#333" }}>Email personnalisé</div>
-                  <div style={{ fontSize: "0.72rem", color: "#aaa" }}>à {mailModal.user.name} · {mailModal.user.email || "pas d'email"}</div>
+                  <div style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun }}>Email personnalisé</div>
+                  <div style={{ fontSize: "0.72rem", color: G.brunLight }}>à {mailModal.user.name} · {mailModal.user.email || "pas d'email"}</div>
                 </div>
               </div>
-              <div style={{ fontWeight: 600, fontSize: "0.75rem", color: "#888", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.05em" }}>Sujet</div>
+              <div style={{ fontWeight: 600, fontSize: "0.75rem", color: G.brunLight, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.05em" }}>Sujet</div>
               <input
                 value={mailCustomSubject}
                 onChange={e => setMailCustomSubject(e.target.value)}
                 placeholder="Ex: Votre compte Moyo"
                 style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 10, border: "1.5px solid #e8d5f5", fontSize: "0.85rem", outline: "none", fontFamily: "inherit", marginBottom: 12, background: G.blanc }}
               />
-              <div style={{ fontWeight: 600, fontSize: "0.75rem", color: "#888", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.05em" }}>Message</div>
+              <div style={{ fontWeight: 600, fontSize: "0.75rem", color: G.brunLight, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.05em" }}>Message</div>
               <textarea
                 value={mailCustomBody}
                 onChange={e => setMailCustomBody(e.target.value)}
                 placeholder="Écrivez votre message ici…"
                 style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 10, border: "1.5px solid #e8d5f5", fontSize: "0.85rem", outline: "none", fontFamily: "inherit", resize: "none", flex: 1, minHeight: 140, lineHeight: 1.6, background: G.blanc }}
               />
-              {mailCustomBody && <div style={{ fontSize: "0.7rem", color: "#aaa", textAlign: "right", marginTop: 3 }}>{mailCustomBody.length} caractères</div>}
+              {mailCustomBody && <div style={{ fontSize: "0.7rem", color: G.brunLight, textAlign: "right", marginTop: 3 }}>{mailCustomBody.length} caractères</div>}
               {!mailModal.user.email && <div style={{ fontSize: "0.72rem", color: "#e74c3c", marginTop: 4, fontWeight: 600 }}>⚠️ Cet utilisateur n'a pas d'email enregistré</div>}
               <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-                <button onClick={() => { setMailModal(null); setMailHistory([]); }} style={{ flex: 1, background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "12px", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer" }}>Fermer</button>
+                <button onClick={() => { setMailModal(null); setMailHistory([]); }} style={{ flex: 1, background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "12px", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer" }}>Fermer</button>
                 <button
                   disabled={!mailCustomSubject.trim() || !mailCustomBody.trim()}
                   onClick={async () => {
@@ -11772,9 +11772,9 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             {/* Liste */}
             <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}>
               {premiumListLoading ? (
-                <div style={{ textAlign: "center", padding: 40, color: "#aaa" }}>Chargement...</div>
+                <div style={{ textAlign: "center", padding: 40, color: G.brunLight }}>Chargement...</div>
               ) : premiumProfiles.length === 0 ? (
-                <div style={{ textAlign: "center", padding: 40, color: "#aaa" }}>Aucun membre Premium</div>
+                <div style={{ textAlign: "center", padding: 40, color: G.brunLight }}>Aucun membre Premium</div>
               ) : premiumProfiles.map(p => (
                 <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: `1px solid ${G.gris}` }}>
                   <div style={{ width: 44, height: 44, borderRadius: "50%", background: G.creme, flexShrink: 0, overflow: "hidden" }}>
@@ -11782,7 +11782,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: "0.88rem" }}>{p.name}</div>
-                    <div style={{ fontSize: "0.72rem", color: "#888" }}>{p.age} ans · {p.city}</div>
+                    <div style={{ fontSize: "0.72rem", color: G.brunLight }}>{p.age} ans · {p.city}</div>
                   </div>
                   <div style={{ fontSize: "0.68rem", color: "#D4A843", fontWeight: 700, textAlign: "right", flexShrink: 0 }}>
                     {p.premium_until ? `Expire le\n${new Date(p.premium_until).toLocaleDateString("fr-FR")}` : "Premium"}
@@ -11816,7 +11816,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               }} disabled={pinModalInput.length < 4} style={{ width: "100%", marginTop: 12, background: pinModalInput.length === 4 ? "linear-gradient(135deg,#8e44ad,#6c3483)" : "#ddd", color: pinModalInput.length === 4 ? "#fff" : "#aaa", border: "none", borderRadius: 50, padding: "13px", fontSize: "0.9rem", fontWeight: 700, cursor: pinModalInput.length === 4 ? "pointer" : "not-allowed" }}>
                 {pinModal.mode === "set" ? "Rendre admin avec ce PIN" : "Mettre à jour le PIN"}
               </button>
-              <button onClick={() => { setPinModal(null); setPinModalInput(""); }} style={{ width: "100%", marginTop: 8, background: "transparent", color: "#888", border: "none", fontSize: "0.82rem", cursor: "pointer", padding: "8px" }}>Annuler</button>
+              <button onClick={() => { setPinModal(null); setPinModalInput(""); }} style={{ width: "100%", marginTop: 8, background: "transparent", color: G.brunLight, border: "none", fontSize: "0.82rem", cursor: "pointer", padding: "8px" }}>Annuler</button>
             </div>
           </div>
         </div>
@@ -11827,25 +11827,25 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
           <div onClick={e => e.stopPropagation()} style={{ background: G.blanc, borderRadius: 22, width: "100%", maxWidth: 460, boxShadow: "0 24px 64px rgba(0,0,0,0.3)", overflow: "hidden" }}>
             <div style={{ padding: "16px 20px", borderBottom: `1px solid ${G.gris}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ fontWeight: 900, fontSize: "1.02rem", color: G.brun }}>{templateModal.id ? "Modifier le modèle" : "Créer un modèle"}</div>
-              <button onClick={() => setTemplateModal(null)} style={{ border: "none", background: G.creme, borderRadius: "50%", width: 30, height: 30, cursor: "pointer", color: "#666" }}>✕</button>
+              <button onClick={() => setTemplateModal(null)} style={{ border: "none", background: G.creme, borderRadius: "50%", width: 30, height: 30, cursor: "pointer", color: G.brunLight }}>✕</button>
             </div>
             <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
-                <div style={{ fontSize: "0.76rem", fontWeight: 700, color: "#888", marginBottom: 6 }}>Titre</div>
+                <div style={{ fontSize: "0.76rem", fontWeight: 700, color: G.brunLight, marginBottom: 6 }}>Titre</div>
                 <input value={templateModal.title} onChange={e => setTemplateModal(m => m ? { ...m, title: e.target.value } : m)} placeholder="Ex : Abonnement - Annulation" style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${G.gris}`, borderRadius: 10, padding: "10px 12px", fontSize: "0.86rem", outline: "none", fontFamily: "inherit" }} />
               </div>
               <div>
-                <div style={{ fontSize: "0.76rem", fontWeight: 700, color: "#888", marginBottom: 6 }}>Catégorie</div>
+                <div style={{ fontSize: "0.76rem", fontWeight: 700, color: G.brunLight, marginBottom: 6 }}>Catégorie</div>
                 <select value={templateModal.category} onChange={e => setTemplateModal(m => m ? { ...m, category: e.target.value } : m)} style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${G.gris}`, borderRadius: 10, padding: "10px 12px", fontSize: "0.86rem", outline: "none", background: G.blanc, cursor: "pointer" }}>
                   {TEMPLATE_CATS.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <div style={{ fontSize: "0.76rem", fontWeight: 700, color: "#888", marginBottom: 6 }}>Contenu</div>
+                <div style={{ fontSize: "0.76rem", fontWeight: 700, color: G.brunLight, marginBottom: 6 }}>Contenu</div>
                 <textarea value={templateModal.content} onChange={e => setTemplateModal(m => m ? { ...m, content: e.target.value } : m)} placeholder="Rédigez la réponse type…" rows={5} style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${G.gris}`, borderRadius: 10, padding: "10px 12px", fontSize: "0.86rem", outline: "none", resize: "vertical", fontFamily: "inherit" }} />
               </div>
               <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-                <button onClick={() => setTemplateModal(null)} style={{ background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 12, padding: "11px 20px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
+                <button onClick={() => setTemplateModal(null)} style={{ background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 12, padding: "11px 20px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
                 <button onClick={saveTemplate} disabled={!templateModal.title.trim() || !templateModal.content.trim()} style={{ background: (!templateModal.title.trim() || !templateModal.content.trim()) ? "rgba(212,168,67,0.4)" : G.rouge, color: "#fff", border: "none", borderRadius: 12, padding: "11px 20px", fontSize: "0.84rem", fontWeight: 800, cursor: (!templateModal.title.trim() || !templateModal.content.trim()) ? "not-allowed" : "pointer" }}>{templateModal.id ? "Enregistrer" : "Créer"}</button>
               </div>
             </div>
@@ -11862,28 +11862,28 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             <div onClick={e => e.stopPropagation()} style={{ background: G.blanc, borderRadius: 22, width: "100%", maxWidth: 420, boxShadow: "0 24px 64px rgba(0,0,0,0.3)", overflow: "hidden", maxHeight: "90vh", overflowY: "auto" }}>
               <div style={{ padding: "18px 20px", borderBottom: `1px solid ${G.gris}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ fontWeight: 900, fontSize: "1.05rem", color: G.brun }}>Bannir {u.name}</div>
-                <button onClick={close} style={{ border: "none", background: G.creme, borderRadius: "50%", width: 30, height: 30, cursor: "pointer", color: "#666" }}>✕</button>
+                <button onClick={close} style={{ border: "none", background: G.creme, borderRadius: "50%", width: 30, height: 30, cursor: "pointer", color: G.brunLight }}>✕</button>
               </div>
               <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
                 {/* Option 1 : définitif */}
                 <button onClick={() => doBan({ is_banned: true, is_visible: false }, `${u.name} a été banni(e) définitivement.`)} style={{ textAlign: "left", border: `1.5px solid ${G.gris}`, background: G.blanc, borderRadius: 14, padding: 14, cursor: "pointer", display: "flex", gap: 12, alignItems: "flex-start" }}>
                   <span style={{ fontSize: "1.3rem" }}>🚫</span>
-                  <span><span style={{ fontWeight: 800, color: G.brun, fontSize: "0.92rem" }}>Bannissement définitif</span><br /><span style={{ fontSize: "0.76rem", color: "#888" }}>Accès bloqué jusqu'à ce qu'un admin le débannisse. Le compte est conservé.</span></span>
+                  <span><span style={{ fontWeight: 800, color: G.brun, fontSize: "0.92rem" }}>Bannissement définitif</span><br /><span style={{ fontSize: "0.76rem", color: G.brunLight }}>Accès bloqué jusqu'à ce qu'un admin le débannisse. Le compte est conservé.</span></span>
                 </button>
                 {/* Option 2 : éjection immédiate */}
                 <button onClick={() => doBan({ is_banned: true, is_visible: false }, `${u.name} a été éjecté(e) immédiatement.`)} style={{ textAlign: "left", border: `1.5px solid rgba(231,76,60,0.4)`, background: "rgba(231,76,60,0.04)", borderRadius: 14, padding: 14, cursor: "pointer", display: "flex", gap: 12, alignItems: "flex-start" }}>
                   <span style={{ fontSize: "1.3rem" }}>⚡</span>
-                  <span><span style={{ fontWeight: 800, color: "#c0392b", fontSize: "0.92rem" }}>Éjection immédiate</span><br /><span style={{ fontSize: "0.76rem", color: "#888" }}>La session active est coupée sur-le-champ : la personne est renvoyée à l'accueil et ne peut plus se reconnecter.</span></span>
+                  <span><span style={{ fontWeight: 800, color: "#c0392b", fontSize: "0.92rem" }}>Éjection immédiate</span><br /><span style={{ fontSize: "0.76rem", color: G.brunLight }}>La session active est coupée sur-le-champ : la personne est renvoyée à l'accueil et ne peut plus se reconnecter.</span></span>
                 </button>
                 {/* Option 3 : temporaire */}
                 <div style={{ border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 14 }}>
                   <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 10 }}>
                     <span style={{ fontSize: "1.3rem" }}>⏳</span>
-                    <span><span style={{ fontWeight: 800, color: G.brun, fontSize: "0.92rem" }}>Bannissement temporaire</span><br /><span style={{ fontSize: "0.76rem", color: "#888" }}>Bloqué pendant une durée définie, avec décompte affiché. Reconnexion automatique à la fin.</span></span>
+                    <span><span style={{ fontWeight: 800, color: G.brun, fontSize: "0.92rem" }}>Bannissement temporaire</span><br /><span style={{ fontSize: "0.76rem", color: G.brunLight }}>Bloqué pendant une durée définie, avec décompte affiché. Reconnexion automatique à la fin.</span></span>
                   </div>
                   <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
                     <input type="number" min={1} value={banHours} onChange={e => setBanHours(e.target.value)} style={{ width: 90, boxSizing: "border-box", border: `1.5px solid ${G.gris}`, borderRadius: 10, padding: "9px 11px", fontSize: "0.86rem", outline: "none" }} />
-                    <span style={{ fontSize: "0.82rem", color: "#666" }}>heure(s)</span>
+                    <span style={{ fontSize: "0.82rem", color: G.brunLight }}>heure(s)</span>
                     <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                       {[1, 6, 24, 72, 168].map(h => (
                         <button key={h} onClick={() => setBanHours(String(h))} style={{ border: `1px solid ${G.gris}`, background: parseInt(banHours) === h ? "rgba(212,168,67,0.1)" : "#fff", color: parseInt(banHours) === h ? G.rouge : "#777", borderRadius: 8, padding: "5px 9px", fontSize: "0.7rem", fontWeight: 700, cursor: "pointer" }}>{h >= 24 ? `${h / 24}j` : `${h}h`}</button>
@@ -11906,7 +11906,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f39c12" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               </div>
               <div style={{ fontWeight: 800, fontSize: "1rem", color: G.brun }}>Avertir {warnModal.user.name}</div>
-              <div style={{ fontSize: "0.75rem", color: "#888", marginTop: 4 }}>
+              <div style={{ fontSize: "0.75rem", color: G.brunLight, marginTop: 4 }}>
                 Avertissement {(warnModal.user.warning_count || 0) + 1}/3
               </div>
             </div>
@@ -11915,9 +11915,9 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               {/* Avertissements existants (supprimables) */}
               {(existingWarningsLoading || existingWarnings.length > 0) && (
                 <div style={{ marginBottom: 18 }}>
-                  <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Avertissements actuels</div>
+                  <div style={{ fontSize: "0.78rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Avertissements actuels</div>
                   {existingWarningsLoading ? (
-                    <div style={{ fontSize: "0.78rem", color: "#aaa", textAlign: "center", padding: "8px 0" }}>Chargement…</div>
+                    <div style={{ fontSize: "0.78rem", color: G.brunLight, textAlign: "center", padding: "8px 0" }}>Chargement…</div>
                   ) : (
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {existingWarnings.map((w, idx) => (
@@ -11925,9 +11925,9 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2 }}>
                               <span style={{ fontSize: "0.74rem", fontWeight: 800, color: "#b7770d" }}>Avertissement {idx + 1}</span>
-                              <span style={{ fontSize: "0.64rem", color: "#aaa" }}>{new Date(w.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                              <span style={{ fontSize: "0.64rem", color: G.brunLight }}>{new Date(w.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                             </div>
-                            <div style={{ fontSize: "0.8rem", color: "#444", lineHeight: 1.4 }}>{w.reason}</div>
+                            <div style={{ fontSize: "0.8rem", color: G.brun, lineHeight: 1.4 }}>{w.reason}</div>
                           </div>
                           <button onClick={() => confirm(`Supprimer cet avertissement de ${warnModal.user.name} ?`, () => deleteOneWarning(w.id, warnModal.user))} style={{ background: "rgba(231,76,60,0.08)", border: "none", borderRadius: 7, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
@@ -11939,7 +11939,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   <div style={{ height: 1, background: G.gris, margin: "16px 0 0" }} />
                 </div>
               )}
-              <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Nouveau motif</div>
+              <div style={{ fontSize: "0.78rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Nouveau motif</div>
               {WARN_REASONS.map(r => (
                 <div key={r} onClick={() => setWarnReason(r)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 10, marginBottom: 6, cursor: "pointer", background: warnReason === r ? "rgba(243,156,18,0.1)" : G.creme, border: `1.5px solid ${warnReason === r ? "#f39c12" : "transparent"}`, transition: "all 0.15s" }}>
                   <div style={{ width: 16, height: 16, borderRadius: "50%", border: `2px solid ${warnReason === r ? "#f39c12" : "#ccc"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -11958,7 +11958,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 />
               )}
               <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-                <button onClick={() => { setWarnModal(null); setWarnReason(WARN_REASONS[0]); setWarnCustom(""); }} style={{ flex: 1, background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "12px", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer" }}>
+                <button onClick={() => { setWarnModal(null); setWarnReason(WARN_REASONS[0]); setWarnCustom(""); }} style={{ flex: 1, background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "12px", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer" }}>
                   Annuler
                 </button>
                 <button
@@ -12038,16 +12038,16 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <div style={{ background: G.creme, borderRadius: 12, padding: "12px 14px", marginBottom: 16 }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
-                    <span style={{ color: "#888" }}>Ville</span>
+                    <span style={{ color: G.brunLight }}>Ville</span>
                     <span style={{ fontWeight: 600, color: G.brun }}>{reportProfilePreview.city}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
-                    <span style={{ color: "#888" }}>ID</span>
-                    <span style={{ fontWeight: 500, color: "#666", fontSize: "0.72rem", fontFamily: "monospace" }}>{reportProfilePreview.id.slice(0, 20)}…</span>
+                    <span style={{ color: G.brunLight }}>ID</span>
+                    <span style={{ fontWeight: 500, color: G.brunLight, fontSize: "0.72rem", fontFamily: "monospace" }}>{reportProfilePreview.id.slice(0, 20)}…</span>
                   </div>
                   {reportProfilePreview.created_at && (
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
-                      <span style={{ color: "#888" }}>Inscrit le</span>
+                      <span style={{ color: G.brunLight }}>Inscrit le</span>
                       <span style={{ fontWeight: 600, color: G.brun }}>{formatDate(reportProfilePreview.created_at)}</span>
                     </div>
                   )}
@@ -12082,7 +12082,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 </div>
                 <div>
                   <div style={{ fontSize: "1rem", fontWeight: 800, color: G.brun }}>Guide Admin</div>
-                  <div style={{ fontSize: "0.72rem", color: "#999", marginTop: 1 }}>Tableau de bord MOYO</div>
+                  <div style={{ fontSize: "0.72rem", color: G.brunLight, marginTop: 1 }}>Tableau de bord MOYO</div>
                 </div>
               </div>
               <div onClick={() => setShowHelp(false)} style={{ cursor: "pointer", width: 32, height: 32, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -12120,7 +12120,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12155,7 +12155,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12178,7 +12178,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12199,7 +12199,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string, string][]).map(([label, color, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <div style={{ width: 10, height: 10, borderRadius: "50%", background: color, marginTop: 3, flexShrink: 0 }} />
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12222,7 +12222,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12250,7 +12250,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12270,7 +12270,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12289,7 +12289,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E67E22" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12310,7 +12310,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12332,7 +12332,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2980b9" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12354,7 +12354,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e67e22" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12395,7 +12395,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12417,7 +12417,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e44ad" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12444,7 +12444,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e44ad" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12500,7 +12500,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12521,7 +12521,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e67e22" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12548,7 +12548,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12571,7 +12571,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: "#555" }}>{desc}</span></div>
+                      <div><span style={{ fontWeight: 700, fontSize: "0.8rem", color: G.brun }}>{label} : </span><span style={{ fontSize: "0.8rem", color: G.brunLight }}>{desc}</span></div>
                     </div>
                   ))}
                 </div>
@@ -12579,7 +12579,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
 
               {/* Signature */}
               <div style={{ marginTop: 20, paddingTop: 18, borderTop: `1px solid ${G.gris}`, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, textAlign: "center" }}>
-                <div style={{ fontSize: "0.7rem", color: "#bbb", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600 }}>Conçu et développé par</div>
+                <div style={{ fontSize: "0.7rem", color: G.brunLight, letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600 }}>Conçu et développé par</div>
                 <div style={{ fontSize: "1rem", fontWeight: 800, color: G.brun, letterSpacing: "0.01em" }}>Roméo GUEBO</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 2, alignItems: "center" }}>
                   <span style={{ fontSize: "0.75rem", fontWeight: 700, color: G.rouge }}>CEO Moyo</span>
@@ -12588,7 +12588,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     "Responsable marketing et développement commercial",
                     "Chef de projet digital",
                   ].map((role, i) => (
-                    <span key={i} style={{ fontSize: "0.71rem", color: "#888", lineHeight: 1.5 }}>· {role}</span>
+                    <span key={i} style={{ fontSize: "0.71rem", color: G.brunLight, lineHeight: 1.5 }}>· {role}</span>
                   ))}
                 </div>
                 <a href="mailto:romeoguebo97@gmail.com" style={{ marginTop: 4, fontSize: "0.72rem", color: G.rouge, textDecoration: "none", fontWeight: 600, opacity: 0.8 }}>
@@ -12720,7 +12720,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                       {items.map(it => (
                         <div key={it.tab} onClick={() => { setActiveTab(it.tab as any); if (it.tab === "reviews") loadReviews(); }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 10, background: G.creme, cursor: "pointer" }}>
-                          <span style={{ fontSize: "0.84rem", fontWeight: 600, color: "#333" }}>{it.label}</span>
+                          <span style={{ fontSize: "0.84rem", fontWeight: 600, color: G.brun }}>{it.label}</span>
                           <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <span style={{ background: it.color, color: "#fff", borderRadius: 50, minWidth: 20, height: 20, padding: "0 6px", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", fontWeight: 800 }}>{it.n}</span>
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -12742,7 +12742,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   <div key={label} style={{ background: G.blanc, borderRadius: 16, padding: "16px 14px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
                     <div style={{ color, marginBottom: 6 }}>{icon}</div>
                     <div style={{ fontSize: "1.8rem", fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
-                    <div style={{ fontSize: "0.73rem", color: "#777", marginTop: 4 }}>{label}</div>
+                    <div style={{ fontSize: "0.73rem", color: G.brunLight, marginTop: 4 }}>{label}</div>
                   </div>
                 ))}
               </div>
@@ -12759,7 +12759,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   ] as [string, number, string, string | null][]).map(([label, val, color, action]) => (
                     <div key={label} onClick={() => { if (action === "premium") setShowPremiumList(true); if (action === "matches") setShowMatchList(true); }} style={{ background: `${color}0d`, borderRadius: 12, padding: "12px", border: `1px solid ${color}25`, cursor: action ? "pointer" : "default", position: "relative" }}>
                       <div style={{ fontSize: "1.4rem", fontWeight: 800, color }}>{val}</div>
-                      <div style={{ fontSize: "0.7rem", color: "#555", marginTop: 2 }}>{label}</div>
+                      <div style={{ fontSize: "0.7rem", color: G.brunLight, marginTop: 2 }}>{label}</div>
                       {action && <div style={{ position: "absolute", top: 8, right: 8, fontSize: "0.55rem", color, fontWeight: 700, opacity: 0.7 }}>Voir ›</div>}
                     </div>
                   ))}
@@ -12778,24 +12778,24 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     <div style={{ display: "flex", gap: 10, marginBottom: 8 }}>
                       <div style={{ flex: 1, textAlign: "center" }}>
                         <div style={{ fontSize: "1.3rem", fontWeight: 800, color: "#B8860B" }}>{stats.maleCount}</div>
-                        <div style={{ fontSize: "0.7rem", color: "#555" }}>Professionnels</div>
+                        <div style={{ fontSize: "0.7rem", color: G.brunLight }}>Professionnels</div>
                       </div>
                       <div style={{ flex: 1, textAlign: "center" }}>
                         <div style={{ fontSize: "1.3rem", fontWeight: 800, color: "#1a6ef5" }}>{stats.femaleCount}</div>
-                        <div style={{ fontSize: "0.7rem", color: "#555" }}>Clients</div>
+                        <div style={{ fontSize: "0.7rem", color: G.brunLight }}>Clients</div>
                       </div>
                     </div>
-                    <div style={{ height: 10, borderRadius: 50, background: "#f0f0f0", overflow: "hidden", display: "flex" }}>
+                    <div style={{ height: 10, borderRadius: 50, background: G.creme, overflow: "hidden", display: "flex" }}>
                       <div style={{ width: `${proPct}%`, background: "#D4A843", borderRadius: "50px 0 0 50px", transition: "width 0.5s" }} />
                       <div style={{ flex: 1, background: "#1a6ef5", borderRadius: "0 50px 50px 0" }} />
                     </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, fontSize: "0.68rem", color: "#888" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, fontSize: "0.68rem", color: G.brunLight }}>
                       <span>{proPct}% pros</span>
                       <span>{100 - proPct}% clients</span>
                     </div>
                   </>
                   );
-                })() : <p style={{ fontSize: "0.82rem", color: "#aaa" }}>Données insuffisantes</p>}
+                })() : <p style={{ fontSize: "0.82rem", color: G.brunLight }}>Données insuffisantes</p>}
               </div>
 
               {/* Top villes */}
@@ -12810,7 +12810,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           <span style={{ fontSize: "0.82rem", fontWeight: 600 }}>{city}</span>
                           <span style={{ fontSize: "0.78rem", color: G.rouge, fontWeight: 700 }}>{count}</span>
                         </div>
-                        <div style={{ height: 5, borderRadius: 50, background: "#f0f0f0", overflow: "hidden" }}>
+                        <div style={{ height: 5, borderRadius: 50, background: G.creme, overflow: "hidden" }}>
                           <div style={{ width: `${Math.round(count / stats.users * 100)}%`, background: `linear-gradient(90deg,${G.rouge},${G.or})`, height: "100%", borderRadius: 50 }} />
                         </div>
                       </div>
@@ -12836,9 +12836,9 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         <div style={{ fontWeight: 600, fontSize: "0.85rem", display: "flex", alignItems: "center", gap: 5, color: G.brun }}>
                           {u.name}{u.is_premium && <IcoStar />}
                         </div>
-                        <div style={{ fontSize: "0.72rem", color: "#888" }}>{u.city} · {u.age} ans</div>
+                        <div style={{ fontSize: "0.72rem", color: G.brunLight }}>{u.city} · {u.age} ans</div>
                       </div>
-                      <div style={{ fontSize: "0.68rem", color: "#aaa" }}>{formatDate(u.created_at)}</div>
+                      <div style={{ fontSize: "0.68rem", color: G.brunLight }}>{formatDate(u.created_at)}</div>
                     </div>
                   ))}
                 </div>
@@ -12881,13 +12881,13 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     {adminViewedProfile.is_verified && <span style={{ background: "rgba(26,92,58,0.1)", color: G.vert, borderRadius: 50, padding: "3px 10px", fontSize: "0.72rem", fontWeight: 700 }}>✓ Vérifié</span>}
                     {adminViewedProfile.is_admin && <span style={{ background: "rgba(231,76,60,0.1)", color: G.rouge, borderRadius: 50, padding: "3px 10px", fontSize: "0.72rem", fontWeight: 700 }}>⚙ Admin</span>}
                   </div>
-                  {adminViewedProfile.bio && <div style={{ marginBottom: 12 }}><div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Bio</div><div style={{ fontSize: "0.88rem", color: "#333", lineHeight: 1.6 }}>{adminViewedProfile.bio}</div></div>}
+                  {adminViewedProfile.bio && <div style={{ marginBottom: 12 }}><div style={{ fontSize: "0.7rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Bio</div><div style={{ fontSize: "0.88rem", color: G.brun, lineHeight: 1.6 }}>{adminViewedProfile.bio}</div></div>}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                    {adminViewedProfile.religion && <div style={{ background: "#F8F8F8", borderRadius: 10, padding: "8px 12px" }}><div style={{ fontSize: "0.65rem", color: "#aaa", fontWeight: 700, textTransform: "uppercase" }}>Religion</div><div style={{ fontSize: "0.83rem", fontWeight: 600, color: "#333", marginTop: 2 }}>{adminViewedProfile.religion}</div></div>}
-                    {adminViewedProfile.profession && <div style={{ background: "#F8F8F8", borderRadius: 10, padding: "8px 12px" }}><div style={{ fontSize: "0.65rem", color: "#aaa", fontWeight: 700, textTransform: "uppercase" }}>Profession</div><div style={{ fontSize: "0.83rem", fontWeight: 600, color: "#333", marginTop: 2 }}>{adminViewedProfile.profession}</div></div>}
-                    {adminViewedProfile.hobbies && <div style={{ background: "#F8F8F8", borderRadius: 10, padding: "8px 12px", gridColumn: "1 / -1" }}><div style={{ fontSize: "0.65rem", color: "#aaa", fontWeight: 700, textTransform: "uppercase" }}>Centres d'intérêt</div><div style={{ fontSize: "0.83rem", fontWeight: 600, color: "#333", marginTop: 2 }}>{adminViewedProfile.hobbies}</div></div>}
+                    {adminViewedProfile.religion && <div style={{ background: G.creme, borderRadius: 10, padding: "8px 12px" }}><div style={{ fontSize: "0.65rem", color: G.brunLight, fontWeight: 700, textTransform: "uppercase" }}>Religion</div><div style={{ fontSize: "0.83rem", fontWeight: 600, color: G.brun, marginTop: 2 }}>{adminViewedProfile.religion}</div></div>}
+                    {adminViewedProfile.profession && <div style={{ background: G.creme, borderRadius: 10, padding: "8px 12px" }}><div style={{ fontSize: "0.65rem", color: G.brunLight, fontWeight: 700, textTransform: "uppercase" }}>Profession</div><div style={{ fontSize: "0.83rem", fontWeight: 600, color: G.brun, marginTop: 2 }}>{adminViewedProfile.profession}</div></div>}
+                    {adminViewedProfile.hobbies && <div style={{ background: G.creme, borderRadius: 10, padding: "8px 12px", gridColumn: "1 / -1" }}><div style={{ fontSize: "0.65rem", color: G.brunLight, fontWeight: 700, textTransform: "uppercase" }}>Centres d'intérêt</div><div style={{ fontSize: "0.83rem", fontWeight: 600, color: G.brun, marginTop: 2 }}>{adminViewedProfile.hobbies}</div></div>}
                   </div>
-                  {(adminViewedProfile as any).created_at && <div style={{ marginTop: 12, fontSize: "0.72rem", color: "#bbb", textAlign: "center" }}>Inscrit le {formatDate((adminViewedProfile as any).created_at)}</div>}
+                  {(adminViewedProfile as any).created_at && <div style={{ marginTop: 12, fontSize: "0.72rem", color: G.brunLight, textAlign: "center" }}>Inscrit le {formatDate((adminViewedProfile as any).created_at)}</div>}
                   <AdminNotes auth={auth} targetType="user" targetId={adminViewedProfile.id} />
                 </div>
               </div>
@@ -12917,7 +12917,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             <select
               value={usersSort}
               onChange={e => { const s = e.target.value as typeof usersSort; setUsersSort(s); setUserPage(0); loadUsers(userSearch, 0, s); }}
-              style={{ flex: 1, padding: "8px 12px", borderRadius: 10, border: `2px solid ${G.gris}`, fontSize: "0.8rem", fontWeight: 600, color: "#333", background: G.blanc, cursor: "pointer", outline: "none" }}
+              style={{ flex: 1, padding: "8px 12px", borderRadius: 10, border: `2px solid ${G.gris}`, fontSize: "0.8rem", fontWeight: 600, color: G.brun, background: G.blanc, cursor: "pointer", outline: "none" }}
             >
               <option value="created_at.desc">📅 Plus récents</option>
               <option value="created_at.asc">📅 Plus anciens</option>
@@ -12949,10 +12949,10 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "pulse 1s ease-in-out infinite" }}><circle cx="12" cy="12" r="10"/></svg>
             </div>
           ) : users.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 40, color: "#aaa", fontSize: "0.88rem" }}>Aucun utilisateur trouvé</div>
+            <div style={{ textAlign: "center", padding: 40, color: G.brunLight, fontSize: "0.88rem" }}>Aucun utilisateur trouvé</div>
           ) : (
             <>
-              <div style={{ fontSize: "0.75rem", color: "#888", marginBottom: 10, fontWeight: 600 }}>{displayedUsers.length} utilisateur(s) affichés</div>
+              <div style={{ fontSize: "0.75rem", color: G.brunLight, marginBottom: 10, fontWeight: 600 }}>{displayedUsers.length} utilisateur(s) affichés</div>
 
               {/* ── Filtre profils incomplets ── */}
               <div
@@ -12973,7 +12973,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   <div style={{ display: "flex", gap: 6, flex: 1, flexWrap: "wrap", alignItems: "center" }}>
                     <button
                       onClick={() => selectedUsers.size === displayedUsers.filter(u => u.id !== auth.userId).length ? deselectAll() : selectAll(displayedUsers)}
-                      style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 8, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", color: "#333" }}
+                      style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 8, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", color: G.brun }}
                     >
                       {selectedUsers.size === displayedUsers.filter(u => u.id !== auth.userId).length && displayedUsers.length > 0 ? "✗ Tout désélectionner" : "✓ Tout sélectionner"}
                     </button>
@@ -13015,7 +13015,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     return (
                       <div key={u.id} style={{ background: isSelected ? "rgba(231,76,60,0.04)" : G.blanc, borderRadius: 12, padding: "8px 12px", display: "flex", alignItems: "center", gap: 8, boxShadow: "0 1px 4px rgba(0,0,0,0.05)", border: `1.5px solid ${isSelected ? "#e74c3c" : "transparent"}`, flexWrap: "wrap" }}>
                         {/* Numéro de ligne */}
-                        <div style={{ width: 28, flexShrink: 0, textAlign: "right", fontSize: "0.65rem", color: "#bbb", fontWeight: 700, fontFamily: "monospace" }}>
+                        <div style={{ width: 28, flexShrink: 0, textAlign: "right", fontSize: "0.65rem", color: G.brunLight, fontWeight: 700, fontFamily: "monospace" }}>
                           {userPage * USER_PAGE_SIZE_LIST + rowIdx + 1}
                         </div>
                         {/* Case à cocher */}
@@ -13035,7 +13035,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                             {u.name} {isSelf && <span style={{ fontSize: "0.60rem", color: G.vert, fontWeight: 700 }}>(Vous)</span>}
                             {u.name === "..." && <span style={{ fontSize: "0.60rem", color: "#e74c3c", fontWeight: 700, marginLeft: 3 }}>Incomplet</span>}
                           </div>
-                          <div style={{ fontSize: "0.67rem", color: "#888" }}>{u.age} ans · {u.city}</div>
+                          <div style={{ fontSize: "0.67rem", color: G.brunLight }}>{u.age} ans · {u.city}</div>
                         </div>
                         {/* Badges statuts */}
                         <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>
@@ -13117,13 +13117,13 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                             const hours = Math.floor(diff / 3600000);
                             const days = Math.floor(diff / 86400000);
                             if (mins < 5) return <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: "0.65rem", color: "#27ae60", fontWeight: 700 }}><span style={{ width: 7, height: 7, borderRadius: "50%", background: "#27ae60", display: "inline-block" }}></span>En ligne</span>;
-                            if (mins < 60) return <span style={{ fontSize: "0.65rem", color: "#888", fontWeight: 600 }}>vu il y a {mins}min</span>;
-                            if (hours < 24) return <span style={{ fontSize: "0.65rem", color: "#888", fontWeight: 600 }}>vu il y a {hours}h</span>;
-                            if (days < 7) return <span style={{ fontSize: "0.65rem", color: "#aaa", fontWeight: 600 }}>vu il y a {days}j</span>;
-                            return <span style={{ fontSize: "0.65rem", color: "#bbb", fontWeight: 600 }}>vu le {new Date(u.last_seen).toLocaleDateString("fr-FR")}</span>;
+                            if (mins < 60) return <span style={{ fontSize: "0.65rem", color: G.brunLight, fontWeight: 600 }}>vu il y a {mins}min</span>;
+                            if (hours < 24) return <span style={{ fontSize: "0.65rem", color: G.brunLight, fontWeight: 600 }}>vu il y a {hours}h</span>;
+                            if (days < 7) return <span style={{ fontSize: "0.65rem", color: G.brunLight, fontWeight: 600 }}>vu il y a {days}j</span>;
+                            return <span style={{ fontSize: "0.65rem", color: G.brunLight, fontWeight: 600 }}>vu le {new Date(u.last_seen).toLocaleDateString("fr-FR")}</span>;
                           })()}
                         </div>
-                        <div style={{ fontSize: "0.75rem", color: "#888", marginTop: 2 }}>
+                        <div style={{ fontSize: "0.75rem", color: G.brunLight, marginTop: 2 }}>
                           {u.age} ans · {u.city}
                           {u.created_at && <span> · inscrit le {formatDate(u.created_at)}</span>}
                         </div>
@@ -13153,7 +13153,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
 
                     {/* Actions - ligne 1 : Premium & Admin */}
                     <div style={{ borderTop: `1px solid ${G.gris}`, paddingTop: 10 }}>
-                      <div style={{ fontSize: "0.68rem", color: "#aaa", fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>Statuts</div>
+                      <div style={{ fontSize: "0.68rem", color: G.brunLight, fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>Statuts</div>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
                         {!u.is_premium ? (
                           <ActionBtn label="+ Premium" color="#D4A843" disabled={isLoading}
@@ -13210,7 +13210,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                       </div>
 
                       {/* Actions modération */}
-                      <div style={{ fontSize: "0.68rem", color: "#aaa", fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>Modération</div>
+                      <div style={{ fontSize: "0.68rem", color: G.brunLight, fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>Modération</div>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                         <ActionBtn label="Proposer" color="#e67e22" disabled={isLoading} onClick={() => openProposeFromCard(u)} />
                         <ActionBtn label="Avertir" color="#f39c12" disabled={isLoading || cannotModerate}
@@ -13249,7 +13249,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <Btn variant="ghost" onClick={() => { const p = Math.max(0, userPage - 1); setUserPage(p); loadUsers(userSearch, p, usersSort); }} disabled={userPage === 0} style={{ flex: 1, padding: "10px" }}>
                   ← Précédent
                 </Btn>
-                <span style={{ display: "flex", alignItems: "center", fontSize: "0.8rem", color: "#888", padding: "0 8px" }}>
+                <span style={{ display: "flex", alignItems: "center", fontSize: "0.8rem", color: G.brunLight, padding: "0 8px" }}>
                   Page {userPage + 1}
                 </span>
                 <Btn variant="ghost" onClick={() => { const p = userPage + 1; setUserPage(p); loadUsers(userSearch, p, usersSort); }} disabled={users.length < USER_PAGE_SIZE} style={{ flex: 1, padding: "10px" }}>
@@ -13265,10 +13265,10 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f39c12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               <span style={{ fontWeight: 700, fontSize: "0.78rem", color: "#f39c12" }}>Note technique</span>
             </div>
-            <p style={{ fontSize: "0.73rem", color: "#555", lineHeight: 1.5 }}>
+            <p style={{ fontSize: "0.73rem", color: G.brunLight, lineHeight: 1.5 }}>
               Si les actions Bannir/Débannir échouent, la colonne <code>is_banned</code> est peut-être absente. SQL à exécuter dans Supabase : <code>ALTER TABLE profiles ADD COLUMN is_banned boolean DEFAULT false;</code>
             </p>
-            <p style={{ fontSize: "0.73rem", color: "#555", lineHeight: 1.5, marginTop: 6 }}>
+            <p style={{ fontSize: "0.73rem", color: G.brunLight, lineHeight: 1.5, marginTop: 6 }}>
               Si les mises à jour sont bloquées (erreur 403), les policies RLS doivent autoriser les admins à modifier les profils. Contactez le développeur.
             </p>
           </div>
@@ -13294,7 +13294,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <div style={{ width: 46, height: 46, borderRadius: "50%", background: "rgba(212,168,67,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
                 <div>
                   <div style={{ fontWeight: 900, fontSize: "1.15rem", color: G.brun }}>Diffusion générale</div>
-                  <div style={{ fontSize: "0.78rem", color: "#888" }}>Envoyez une annonce visible à tous les utilisateurs sélectionnés.</div>
+                  <div style={{ fontSize: "0.78rem", color: G.brunLight }}>Envoyez une annonce visible à tous les utilisateurs sélectionnés.</div>
                 </div>
               </div>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(39,174,96,0.1)", color: "#1e8449", borderRadius: 50, padding: "6px 13px", fontSize: "0.76rem", fontWeight: 800 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#27ae60" }} />{broadcastList.length} diffusion{broadcastList.length > 1 ? "s" : ""} active{broadcastList.length > 1 ? "s" : ""}</div>
@@ -13304,7 +13304,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               {/* GAUCHE : modèles rapides */}
               <div style={{ flex: "1 1 210px", minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 900, fontSize: "0.92rem", color: G.brun }}><svg width="16" height="16" viewBox="0 0 24 24" fill={G.rouge} stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Modèles rapides</div>
-                <div style={{ fontSize: "0.74rem", color: "#999", margin: "3px 0 12px" }}>Cliquez sur un modèle pour préremplir le message.</div>
+                <div style={{ fontSize: "0.74rem", color: G.brunLight, margin: "3px 0 12px" }}>Cliquez sur un modèle pour préremplir le message.</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(115px, 1fr))", gap: 8 }}>
                   {([
                     { lbl: "Maintenance", col: "#E67E22", txt: "Moyo est en maintenance ce soir de [H] à [H]. Merci de votre compréhension.", ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> },
@@ -13328,11 +13328,11 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <div style={{ fontWeight: 800, fontSize: "0.86rem", color: G.brun, marginBottom: 7 }}>1. Message à diffuser</div>
                 <div style={{ position: "relative", marginBottom: 18 }}>
                   <textarea value={broadcastText} onChange={e => setBroadcastText(e.target.value.slice(0, 500))} maxLength={500} placeholder="Écrivez votre message ici…" rows={4} style={{ width: "100%", boxSizing: "border-box", padding: "12px 12px 26px", borderRadius: 12, border: `1.5px solid ${G.gris}`, fontSize: "0.86rem", resize: "vertical", outline: "none", fontFamily: "inherit" }} />
-                  <div style={{ position: "absolute", right: 12, bottom: 9, fontSize: "0.7rem", color: "#aaa" }}>{broadcastText.length} / 500 caractères</div>
+                  <div style={{ position: "absolute", right: 12, bottom: 9, fontSize: "0.7rem", color: G.brunLight }}>{broadcastText.length} / 500 caractères</div>
                 </div>
 
                 <div style={{ fontWeight: 800, fontSize: "0.86rem", color: G.brun, marginBottom: 8 }}>2. Destinataires</div>
-                <div style={{ fontSize: "0.72rem", color: "#999", fontWeight: 700, marginBottom: 6 }}>Abonnement</div>
+                <div style={{ fontSize: "0.72rem", color: G.brunLight, fontWeight: 700, marginBottom: 6 }}>Abonnement</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
                   {([["all", "Tous", <svg key="i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 20h20l-2-9-5 4-3-7-3 7-5-4-2 9z"/></svg>], ["premium", "Premium", <svg key="i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 20h20l-2-9-5 4-3-7-3 7-5-4-2 9z"/></svg>], ["gratuit", "Gratuits", <svg key="i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>]] as ["all" | "premium" | "gratuit", string, React.ReactElement][]).map(([val, lbl, ico]) => (
                     <button key={val} type="button" onClick={() => setBroadcastPlan(val)} style={{ display: "flex", alignItems: "center", gap: 7, padding: "9px 15px", borderRadius: 999, border: `1.5px solid ${broadcastPlan === val ? G.rouge : G.gris}`, background: broadcastPlan === val ? "rgba(212,168,67,0.08)" : "#fff", color: broadcastPlan === val ? G.rouge : "#666", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer" }}>{ico}{lbl}</button>
@@ -13352,13 +13352,13 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     <div>
                       <div style={{ fontSize: "0.72rem", color: "#1e8449", fontWeight: 600 }}>Audience estimée</div>
                       <div style={{ fontSize: "1.15rem", fontWeight: 900, color: G.brun, lineHeight: 1.1 }}>{audienceCount === null ? "…" : audienceCount.toLocaleString("fr-FR")} {audienceCount === 1 ? "utilisateur" : "utilisateurs"}</div>
-                      <div style={{ fontSize: "0.66rem", color: "#888" }}>Selon vos critères actuels</div>
+                      <div style={{ fontSize: "0.66rem", color: G.brunLight }}>Selon vos critères actuels</div>
                     </div>
                   </div>
                 </div>
 
                 <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 18, flexWrap: "wrap" }}>
-                  <button onClick={() => { setBroadcastText(""); setBroadcastDate(""); setBroadcastTime(""); setBroadcastPlan("all"); }} style={{ background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 12, padding: "12px 24px", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
+                  <button onClick={() => { setBroadcastText(""); setBroadcastDate(""); setBroadcastTime(""); setBroadcastPlan("all"); }} style={{ background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 12, padding: "12px 24px", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
                   <button disabled={broadcastLoading || !broadcastText.trim() || !broadcastDate} onClick={async () => {
                     if (!broadcastText.trim() || !broadcastDate) return;
                     const iso = new Date(`${broadcastDate}T${broadcastTime || "00:00"}`).toISOString();
@@ -13394,7 +13394,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
           <div style={{ background: G.blanc, borderRadius: 18, padding: 18, marginTop: 16, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
             <div style={{ fontWeight: 900, fontSize: "1.05rem", color: G.brun, marginBottom: 12 }}>Diffusions actives ({broadcastList.length})</div>
             {broadcastList.length === 0 ? (
-              <div style={{ fontSize: "0.82rem", color: "#aaa", textAlign: "center", padding: "30px 0" }}>Aucune diffusion active.</div>
+              <div style={{ fontSize: "0.82rem", color: G.brunLight, textAlign: "center", padding: "30px 0" }}>Aucune diffusion active.</div>
             ) : (
               <>
                 <div style={{ display: "flex", flexDirection: "column" }}>
@@ -13408,10 +13408,10 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         <div style={{ width: 46, height: 46, borderRadius: 10, background: "rgba(212,168,67,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
                         <div style={{ flex: "1 1 170px", minWidth: 0 }}>
                           <div style={{ fontSize: "0.86rem", fontWeight: 700, color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.message}</div>
-                          <div style={{ fontSize: "0.7rem", color: "#999", marginTop: 2 }}>Publié le {new Date(b.created_at || Date.now()).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })} à {new Date(b.created_at || Date.now()).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</div>
+                          <div style={{ fontSize: "0.7rem", color: G.brunLight, marginTop: 2 }}>Publié le {new Date(b.created_at || Date.now()).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })} à {new Date(b.created_at || Date.now()).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</div>
                         </div>
                         <div style={{ flex: "0 0 auto", minWidth: 110 }}>
-                          <div style={{ fontSize: "0.74rem", color: "#666", fontWeight: 600 }}>{genreLbl}</div>
+                          <div style={{ fontSize: "0.74rem", color: G.brunLight, fontWeight: 600 }}>{genreLbl}</div>
                           <div style={{ display: "inline-block", fontSize: "0.64rem", fontWeight: 700, color: pl === "premium" ? "#B8860B" : pl === "gratuit" ? "#1e8449" : "#888", background: pl === "premium" ? "rgba(212,168,67,0.15)" : pl === "gratuit" ? "rgba(39,174,96,0.12)" : G.creme, borderRadius: 50, padding: "1px 8px", marginTop: 2 }}>{planLbl}</div>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 5, color: G.rouge, fontWeight: 700, fontSize: "0.74rem", whiteSpace: "nowrap" }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Expire {expiresInLabel(b.expires_at)}</div>
@@ -13540,11 +13540,11 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   {list.length === 0 ? (
                     <div style={{ textAlign: "center", padding: "36px 0" }}>
                       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 10px", display: "block" }}><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
-                      <p style={{ color: "#bbb", fontSize: "0.84rem" }}>Aucune archive ne correspond à ta recherche.</p>
+                      <p style={{ color: G.brunLight, fontSize: "0.84rem" }}>Aucune archive ne correspond à ta recherche.</p>
                     </div>
                   ) : groups.map(grp => (
                     <div key={grp.lbl}>
-                      <div style={{ fontSize: "0.74rem", fontWeight: 800, color: "#999", textTransform: "none", padding: "14px 0 8px" }}>{grp.lbl}</div>
+                      <div style={{ fontSize: "0.74rem", fontWeight: 800, color: G.brunLight, textTransform: "none", padding: "14px 0 8px" }}>{grp.lbl}</div>
                       {grp.items.map(r => {
                         const m = meta(r);
                         const st = reportStatusStyle(r.status);
@@ -13556,7 +13556,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                               <div style={{ width: 42, height: 42, borderRadius: "50%", background: m.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{m.icon}</div>
                               <div style={{ flex: "1 1 180px", minWidth: 0 }}>
                                 <div style={{ fontSize: "0.88rem", fontWeight: 700, color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</div>
-                                <div style={{ fontSize: "0.74rem", color: "#999" }}>{m.sub}</div>
+                                <div style={{ fontSize: "0.74rem", color: G.brunLight }}>{m.sub}</div>
                               </div>
                               <div style={{ display: "flex", gap: 6, flexShrink: 0, flexWrap: "wrap" }}>
                                 <span style={{ background: m.bg, color: m.color, borderRadius: 50, padding: "3px 11px", fontSize: "0.68rem", fontWeight: 700 }}>{m.typeLabel}</span>
@@ -13564,7 +13564,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                               </div>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, minWidth: 90 }}>
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                <div><div style={{ fontSize: "0.74rem", fontWeight: 700, color: "#666" }}>{m.actor}</div><div style={{ fontSize: "0.66rem", color: "#aaa" }}>{time}</div></div>
+                                <div><div style={{ fontSize: "0.74rem", fontWeight: 700, color: G.brunLight }}>{m.actor}</div><div style={{ fontSize: "0.66rem", color: G.brunLight }}>{time}</div></div>
                               </div>
                               <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                                 <button onClick={() => toggleArchived(r.id || "")} style={{ display: "flex", alignItems: "center", gap: 5, border: `1px solid ${G.gris}`, background: G.blanc, color: G.brun, borderRadius: 9, padding: "7px 11px", fontSize: "0.73rem", fontWeight: 700, cursor: "pointer" }}><IcoEye />Voir{expanded ? " moins" : " les détails"}</button>
@@ -13572,10 +13572,10 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                               </div>
                             </div>
                             {expanded && (
-                              <div style={{ marginTop: 10, background: G.creme, borderRadius: 12, padding: "12px 14px", fontSize: "0.78rem", color: "#555", lineHeight: 1.6 }}>
+                              <div style={{ marginTop: 10, background: G.creme, borderRadius: 12, padding: "12px 14px", fontSize: "0.78rem", color: G.brunLight, lineHeight: 1.6 }}>
                                 <div style={{ fontWeight: 700, color: G.brun, marginBottom: 4 }}>Détail</div>
                                 <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{r.reason || "—"}</div>
-                                <div style={{ marginTop: 8, fontSize: "0.72rem", color: "#999" }}>Statut : {st.label} · {new Date(r.created_at || Date.now()).toLocaleString("fr-FR")}</div>
+                                <div style={{ marginTop: 8, fontSize: "0.72rem", color: G.brunLight }}>Statut : {st.label} · {new Date(r.created_at || Date.now()).toLocaleString("fr-FR")}</div>
                               </div>
                             )}
                           </div>
@@ -13588,13 +13588,13 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 {/* Pagination */}
                 {list.length > 0 && (
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 14, flexWrap: "wrap", gap: 10 }}>
-                    <div style={{ fontSize: "0.76rem", color: "#999" }}>Affichage de {(page - 1) * PER + 1} à {Math.min(page * PER, list.length)} sur {list.length} archive{list.length > 1 ? "s" : ""}</div>
+                    <div style={{ fontSize: "0.76rem", color: G.brunLight }}>Affichage de {(page - 1) * PER + 1} à {Math.min(page * PER, list.length)} sur {list.length} archive{list.length > 1 ? "s" : ""}</div>
                     {totalPages > 1 && (
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         <button onClick={() => setArchivePage(p => Math.max(1, p - 1))} disabled={page <= 1} style={{ border: `1px solid ${G.gris}`, background: G.blanc, borderRadius: 9, padding: "7px 11px", cursor: page <= 1 ? "not-allowed" : "pointer", opacity: page <= 1 ? 0.5 : 1, color: G.brun }}>‹</button>
                         {Array.from({ length: totalPages }, (_, i) => i + 1).filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1).map((n, idx, arr) => (
                           <React.Fragment key={n}>
-                            {idx > 0 && n - arr[idx - 1] > 1 && <span style={{ color: "#bbb" }}>…</span>}
+                            {idx > 0 && n - arr[idx - 1] > 1 && <span style={{ color: G.brunLight }}>…</span>}
                             <button onClick={() => setArchivePage(n)} style={{ border: `1px solid ${n === page ? G.rouge : G.gris}`, background: n === page ? G.rouge : "#fff", color: n === page ? "#fff" : G.brun, borderRadius: 9, padding: "7px 12px", fontSize: "0.76rem", fontWeight: 700, cursor: "pointer", minWidth: 34 }}>{n}</button>
                           </React.Fragment>
                         ))}
@@ -13621,7 +13621,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 }
               </h3>
               {effectiveFilter === "archived" && archivedCount > 0 && (
-                <span style={{ fontSize: "0.7rem", color: "#aaa" }}>Supprimables</span>
+                <span style={{ fontSize: "0.7rem", color: G.brunLight }}>Supprimables</span>
               )}
             </div>
 
@@ -13630,16 +13630,16 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 {effectiveFilter === "archived"
                   ? <>
                       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 10px", display: "block" }}><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
-                      <p style={{ color: "#bbb", fontSize: "0.82rem" }}>Aucun signalement archivé</p>
+                      <p style={{ color: G.brunLight, fontSize: "0.82rem" }}>Aucun signalement archivé</p>
                     </>
                   : effectiveFilter === "messaging"
                   ? <>
                       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 10px", display: "block" }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                      <p style={{ color: "#bbb", fontSize: "0.82rem" }}>Aucune conversation pour le moment</p>
+                      <p style={{ color: G.brunLight, fontSize: "0.82rem" }}>Aucune conversation pour le moment</p>
                     </>
                   : <>
                       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 10px", display: "block" }}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                      <p style={{ color: "#bbb", fontSize: "0.82rem" }}>Aucun signalement en attente ✓</p>
+                      <p style={{ color: G.brunLight, fontSize: "0.82rem" }}>Aucun signalement en attente ✓</p>
                     </>
                 }
               </div>
@@ -13684,7 +13684,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                             </span>
                             {unread > 0 && <span style={{ background: G.rouge, color: "#fff", borderRadius: 50, padding: "1px 7px", fontSize: "0.62rem", fontWeight: 800 }}>{unread}</span>}
                           </div>
-                          <div style={{ fontSize: "0.75rem", color: "#888", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          <div style={{ fontSize: "0.75rem", color: G.brunLight, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                             {lastMsg?.reason?.startsWith(SUPPORT_PREFIX_REPLY) ? "✉️ Vous : " : "👤 "}{cleanSupportReason(lastMsg?.reason || "")}
                           </div>
                         </div>
@@ -13743,9 +13743,9 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     <div key={r.id || i} onClick={() => toggleArchived(r.id || String(i))} style={{ padding: "11px 0", borderBottom: i < filteredReports.length - 1 ? `1px solid ${G.gris}` : "none", display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
                       <span style={{ background: `${cat.color}18`, color: cat.color, borderRadius: 50, padding: "2px 9px", fontSize: "0.64rem", fontWeight: 700, flexShrink: 0 }}>{cat.label}</span>
                       <span style={{ background: statusStyle.bg, color: statusStyle.color, borderRadius: 50, padding: "2px 9px", fontSize: "0.62rem", fontWeight: 600, flexShrink: 0 }}>{statusStyle.label}</span>
-                      <span style={{ flex: 1, minWidth: 0, fontSize: "0.78rem", color: "#444", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{who}</span>
-                      <span style={{ fontSize: "0.66rem", color: "#aaa", flexShrink: 0 }}>{formatDate(r.created_at)}</span>
-                      <span style={{ color: "#bbb", fontSize: "0.7rem", flexShrink: 0 }}>▾</span>
+                      <span style={{ flex: 1, minWidth: 0, fontSize: "0.78rem", color: G.brun, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{who}</span>
+                      <span style={{ fontSize: "0.66rem", color: G.brunLight, flexShrink: 0 }}>{formatDate(r.created_at)}</span>
+                      <span style={{ color: G.brunLight, fontSize: "0.7rem", flexShrink: 0 }}>▾</span>
                     </div>
                   );
                 }
@@ -13820,7 +13820,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           {isSupport && <span style={{ fontSize: "0.72rem", color: G.vert, paddingLeft: 4 }}>Conversation support</span>}
                           {/* Date */}
                           {r.created_at && (
-                            <div style={{ fontSize: "0.69rem", color: "#bbb", display: "flex", alignItems: "center", gap: 3, paddingLeft: 4 }}>
+                            <div style={{ fontSize: "0.69rem", color: G.brunLight, display: "flex", alignItems: "center", gap: 3, paddingLeft: 4 }}>
                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                               {formatDateTime(r.created_at)}
                             </div>
@@ -13837,7 +13837,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           ? <span>
                               {r.reported_id?.slice(0, 12)}…
                             </span>
-                          : <span style={{ color: "#ccc" }}>Alerte système</span>
+                          : <span style={{ color: G.brunLight }}>Alerte système</span>
                       }
                       {r.created_at && (
                         <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
@@ -13923,7 +13923,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           style={{
                             display: "flex", alignItems: "center", gap: 4,
                             background: alreadyHandled ? "rgba(108,117,125,0.06)" : "rgba(108,117,125,0.1)",
-                            color: "#6c757d", border: "1px solid rgba(108,117,125,0.25)", borderRadius: 8,
+                            color: G.brunLight, border: "1px solid rgba(108,117,125,0.25)", borderRadius: 8,
                             padding: "5px 10px", fontSize: "0.7rem", fontWeight: 600,
                             cursor: alreadyHandled || isLoading ? "not-allowed" : "pointer",
                             opacity: alreadyHandled ? 0.5 : 1,
@@ -13958,7 +13958,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                             style={{
                               display: "flex", alignItems: "center", gap: 4,
                               background: alreadyHandled ? "rgba(127,140,141,0.06)" : "rgba(127,140,141,0.1)",
-                              color: "#7f8c8d", border: "1px solid rgba(127,140,141,0.25)", borderRadius: 8,
+                              color: G.brunLight, border: "1px solid rgba(127,140,141,0.25)", borderRadius: 8,
                               padding: "5px 10px", fontSize: "0.7rem", fontWeight: 600,
                               cursor: alreadyHandled || isLoading ? "not-allowed" : "pointer",
                               opacity: alreadyHandled ? 0.5 : 1,
@@ -14012,7 +14012,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                             style={{
                               display: "flex", alignItems: "center", gap: 4,
                               background: alreadyHandled ? "rgba(127,140,141,0.06)" : "rgba(127,140,141,0.1)",
-                              color: "#7f8c8d", border: "1px solid rgba(127,140,141,0.25)", borderRadius: 8,
+                              color: G.brunLight, border: "1px solid rgba(127,140,141,0.25)", borderRadius: 8,
                               padding: "5px 10px", fontSize: "0.7rem", fontWeight: 600,
                               cursor: alreadyHandled || isLoading ? "not-allowed" : "pointer",
                               opacity: alreadyHandled ? 0.5 : 1,
@@ -14069,7 +14069,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
           {/* Note archive + SQL policy DELETE */}
           {activeTab === "reports" && reportFilter === "archived" && archivedCount > 0 && (
             <>
-              <div style={{ background: "rgba(108,117,125,0.06)", border: "1px solid rgba(108,117,125,0.15)", borderRadius: 12, padding: "10px 14px", marginTop: 12, fontSize: "0.74rem", color: "#6c757d", display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ background: "rgba(108,117,125,0.06)", border: "1px solid rgba(108,117,125,0.15)", borderRadius: 12, padding: "10px 14px", marginTop: 12, fontSize: "0.74rem", color: G.brunLight, display: "flex", alignItems: "center", gap: 8 }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
                 {archivedCount} signalement{archivedCount > 1 ? "s" : ""} archivé{archivedCount > 1 ? "s" : ""} - traités, rejetés ou bannis. Clique "Supprimer" pour nettoyer définitivement.
               </div>
@@ -14143,7 +14143,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 {(() => {
                   const q = templateSearch.trim().toLowerCase();
                   const filtered = supportTemplates.filter(t => (templateCat === "all" || t.category === templateCat) && (!q || `${t.title} ${t.content}`.toLowerCase().includes(q)));
-                  if (filtered.length === 0) return <div style={{ textAlign: "center", color: "#bbb", fontSize: "0.82rem", padding: "26px 0" }}>Aucun modèle trouvé.</div>;
+                  if (filtered.length === 0) return <div style={{ textAlign: "center", color: G.brunLight, fontSize: "0.82rem", padding: "26px 0" }}>Aucun modèle trouvé.</div>;
                   return (
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       {filtered.map(t => (
@@ -14153,7 +14153,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                               <div style={{ display: "inline-block", background: "rgba(212,168,67,0.08)", color: G.rouge, borderRadius: 50, padding: "1px 9px", fontSize: "0.62rem", fontWeight: 800, marginBottom: 5 }}>{t.category}</div>
                               <div style={{ fontSize: "0.85rem", fontWeight: 800, color: G.brun }}>{t.title}</div>
                             </div>
-                            <button onClick={() => setTplMenu(tplMenu === t.id ? null : t.id)} style={{ border: "none", background: "transparent", cursor: "pointer", color: "#999", fontSize: "1.1rem", lineHeight: 1, padding: "0 4px", flexShrink: 0 }}>⋮</button>
+                            <button onClick={() => setTplMenu(tplMenu === t.id ? null : t.id)} style={{ border: "none", background: "transparent", cursor: "pointer", color: G.brunLight, fontSize: "1.1rem", lineHeight: 1, padding: "0 4px", flexShrink: 0 }}>⋮</button>
                           </div>
                           {tplMenu === t.id && (
                             <div style={{ position: "absolute", top: 36, right: 12, background: G.blanc, borderRadius: 10, boxShadow: "0 6px 20px rgba(0,0,0,0.15)", border: `1px solid ${G.gris}`, zIndex: 5, overflow: "hidden", minWidth: 130 }}>
@@ -14161,7 +14161,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                               <button onClick={() => deleteTemplate(t.id)} style={{ display: "block", width: "100%", textAlign: "left", border: "none", borderTop: `1px solid ${G.gris}`, background: G.blanc, padding: "10px 14px", fontSize: "0.78rem", color: "#e74c3c", cursor: "pointer" }}>🗑 Supprimer</button>
                             </div>
                           )}
-                          <div style={{ fontSize: "0.78rem", color: "#666", lineHeight: 1.5, margin: "6px 0 12px", whiteSpace: "pre-wrap" }}>{t.content}</div>
+                          <div style={{ fontSize: "0.78rem", color: G.brunLight, lineHeight: 1.5, margin: "6px 0 12px", whiteSpace: "pre-wrap" }}>{t.content}</div>
                           <button onClick={() => copyTemplate(t.content)} style={{ display: "inline-flex", alignItems: "center", gap: 6, border: `1px solid ${G.gris}`, background: G.blanc, color: G.brun, borderRadius: 9, padding: "7px 13px", fontSize: "0.76rem", fontWeight: 700, cursor: "pointer" }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button>
                         </div>
                       ))}
@@ -14196,7 +14196,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <div key={i} style={{ background: G.blanc, borderRadius: 18, padding: "16px 18px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", display: "flex", alignItems: "center", gap: 14 }}>
                 <div style={{ width: 52, height: 52, borderRadius: "50%", background: c.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{c.ic}</div>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: "0.78rem", color: "#888", fontWeight: 600 }}>{c.label}</div>
+                  <div style={{ fontSize: "0.78rem", color: G.brunLight, fontWeight: 600 }}>{c.label}</div>
                   <div style={{ fontSize: "1.7rem", fontWeight: 900, color: G.brun, lineHeight: 1.1 }}>{c.value}</div>
                   <div style={{ fontSize: "0.72rem", color: c.subColor, fontWeight: 700, marginTop: 1 }}>{c.sub}</div>
                 </div>
@@ -14217,7 +14217,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   </button>
                 </div>
                 {officialStatuses.length === 0 ? (
-                  <div style={{ fontSize: "0.82rem", color: "#aaa", textAlign: "center", padding: "34px 0" }}>Aucun statut officiel actif pour le moment.</div>
+                  <div style={{ fontSize: "0.82rem", color: G.brunLight, textAlign: "center", padding: "34px 0" }}>Aucun statut officiel actif pour le moment.</div>
                 ) : (
                   <>
                     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -14229,16 +14229,16 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                               <span style={{ fontSize: "0.9rem", fontWeight: 800, color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 230 }}>{s.caption || "Statut Moyo"}</span>
                               {s.is_sponsored && <span style={{ background: "rgba(212,168,67,0.1)", color: G.rouge, borderRadius: 50, padding: "2px 9px", fontSize: "0.64rem", fontWeight: 800 }}>Sponsorisé</span>}
                             </div>
-                            <div style={{ fontSize: "0.72rem", color: "#999", marginTop: 3 }}>Publié le {new Date(s.created_at || Date.now()).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })} à {new Date(s.created_at || Date.now()).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</div>
+                            <div style={{ fontSize: "0.72rem", color: G.brunLight, marginTop: 3 }}>Publié le {new Date(s.created_at || Date.now()).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })} à {new Date(s.created_at || Date.now()).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</div>
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                             <div style={{ textAlign: "center" }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 5, color: G.brun, fontWeight: 800, fontSize: "0.85rem" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>{(s._views || 0).toLocaleString("fr-FR")}</div>
-                              <div style={{ fontSize: "0.62rem", color: "#aaa" }}>Vues</div>
+                              <div style={{ fontSize: "0.62rem", color: G.brunLight }}>Vues</div>
                             </div>
                             <div style={{ textAlign: "center" }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 5, color: G.brun, fontWeight: 800, fontSize: "0.85rem" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>{s._replies || 0}</div>
-                              <div style={{ fontSize: "0.62rem", color: "#aaa" }}>Réponses</div>
+                              <div style={{ fontSize: "0.62rem", color: G.brunLight }}>Réponses</div>
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 5, color: G.rouge, fontWeight: 700, fontSize: "0.72rem", whiteSpace: "nowrap" }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Expire {expiresInLabel(s.expires_at)}</div>
                             <button onClick={() => s.image_url && window.open(s.image_url, "_blank")} style={{ display: "flex", alignItems: "center", gap: 5, background: G.blanc, border: `1px solid ${G.gris}`, borderRadius: 9, padding: "7px 12px", fontSize: "0.74rem", fontWeight: 700, color: G.brun, cursor: "pointer" }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Voir</button>
@@ -14262,7 +14262,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               {/* ── COLONNE DROITE : nouveau statut ── */}
               <div style={{ flex: "1 1 320px", background: G.blanc, borderRadius: 18, padding: 18, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
                 <div style={{ fontWeight: 900, fontSize: "1.05rem", color: G.brun, marginBottom: 4 }}>Nouveau statut</div>
-                <p style={{ fontSize: "0.78rem", color: "#888", lineHeight: 1.5, marginBottom: 14 }}>Publiez un statut officiel visible par tous les membres pendant 24h.</p>
+                <p style={{ fontSize: "0.78rem", color: G.brunLight, lineHeight: 1.5, marginBottom: 14 }}>Publiez un statut officiel visible par tous les membres pendant 24h.</p>
 
                 <input ref={stFileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => onPickStatusFile(e.target.files?.[0] || undefined)} />
 
@@ -14275,7 +14275,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   <button onClick={() => stFileRef.current?.click()} style={{ width: "100%", border: `2px dashed rgba(212,168,67,0.4)`, borderRadius: 14, padding: "26px 12px", background: "rgba(212,168,67,0.04)", color: G.rouge, fontWeight: 800, fontSize: "0.9rem", cursor: "pointer", marginBottom: 12, display: "flex", flexDirection: "column", alignItems: "center", gap: 7 }}>
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                     Choisir une image
-                    <span style={{ fontSize: "0.68rem", color: "#aaa", fontWeight: 600 }}>PNG, JPG ou WEBP. Max 5MB</span>
+                    <span style={{ fontSize: "0.68rem", color: G.brunLight, fontWeight: 600 }}>PNG, JPG ou WEBP. Max 5MB</span>
                   </button>
                 )}
 
@@ -14284,7 +14284,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   <input value={stCaption} onChange={e => setStCaption(e.target.value)} placeholder="Légende (optionnel)" style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${G.gris}`, borderRadius: 12, padding: "12px 12px 12px 34px", fontSize: "0.85rem", outline: "none" }} />
                 </div>
 
-                <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#777", marginBottom: 6 }}>Bouton d'action (optionnel)</div>
+                <div style={{ fontSize: "0.72rem", fontWeight: 700, color: G.brunLight, marginBottom: 6 }}>Bouton d'action (optionnel)</div>
                 <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
                   {([["none", "Aucun"], ["link", "Lien"], ["phone", "Numéro"]] as ["none" | "link" | "phone", string][]).map(([val, lbl]) => (
                     <button key={val} type="button" onClick={() => setStCtaType(val)} style={{ flex: 1, padding: "9px", borderRadius: 10, border: `1.5px solid ${stCtaType === val ? G.rouge : G.gris}`, background: stCtaType === val ? "rgba(212,168,67,0.08)" : "#fff", color: stCtaType === val ? G.rouge : "#666", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer" }}>{lbl}</button>
@@ -14303,9 +14303,9 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   </div>
                 )}
 
-                <label style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: "0.8rem", color: "#555", margin: "4px 0 14px", cursor: "pointer", lineHeight: 1.35 }}>
+                <label style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: "0.8rem", color: G.brunLight, margin: "4px 0 14px", cursor: "pointer", lineHeight: 1.35 }}>
                   <input type="checkbox" checked={stSponsored} onChange={e => setStSponsored(e.target.checked)} style={{ marginTop: 2 }} />
-                  <span>Marquer comme sponsorisé<br /><span style={{ color: "#999", fontSize: "0.74rem" }}>(pub payée par un tiers)</span></span>
+                  <span>Marquer comme sponsorisé<br /><span style={{ color: G.brunLight, fontSize: "0.74rem" }}>(pub payée par un tiers)</span></span>
                 </label>
 
                 <button onClick={publishOfficialStatus} disabled={!stFile || stPublishing} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 9, background: (!stFile || stPublishing) ? "rgba(212,168,67,0.45)" : G.rouge, color: "#fff", border: "none", borderRadius: 14, padding: "14px", fontWeight: 800, fontSize: "0.95rem", cursor: (!stFile || stPublishing) ? "not-allowed" : "pointer", boxShadow: "0 6px 18px rgba(212,168,67,0.28)" }}>
@@ -14339,7 +14339,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                       <div style={{ width: 46, height: 46, borderRadius: "50%", background: "rgba(212,168,67,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
                       <div>
                         <div style={{ fontWeight: 900, fontSize: "1.15rem", color: G.brun }}>Créer une campagne Premium</div>
-                        <div style={{ fontSize: "0.8rem", color: "#888" }}>Offrez le Premium gratuitement à des utilisateurs ciblés pour un événement spécial.</div>
+                        <div style={{ fontSize: "0.8rem", color: G.brunLight }}>Offrez le Premium gratuitement à des utilisateurs ciblés pour un événement spécial.</div>
                       </div>
                     </div>
 
@@ -14366,14 +14366,14 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
 
                     <div style={{ fontWeight: 800, fontSize: "0.84rem", color: G.brun, marginBottom: 8 }}>3. Date de fin de la campagne</div>
                     <input type="date" value={campEndDate} onChange={e => setCampEndDate(e.target.value)} style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${G.gris}`, borderRadius: 10, padding: "11px 13px", fontSize: "0.86rem", outline: "none", color: G.brun }} />
-                    <div style={{ fontSize: "0.72rem", color: "#999", margin: "6px 0 20px" }}>À la date sélectionnée, le Premium sera retiré automatiquement.</div>
+                    <div style={{ fontSize: "0.72rem", color: G.brunLight, margin: "6px 0 20px" }}>À la date sélectionnée, le Premium sera retiré automatiquement.</div>
 
-                    <div style={{ fontWeight: 800, fontSize: "0.84rem", color: G.brun, marginBottom: 8 }}>4. Message affiché aux bénéficiaires <span style={{ color: "#aaa", fontWeight: 500 }}>(optionnel)</span></div>
+                    <div style={{ fontWeight: 800, fontSize: "0.84rem", color: G.brun, marginBottom: 8 }}>4. Message affiché aux bénéficiaires <span style={{ color: G.brunLight, fontWeight: 500 }}>(optionnel)</span></div>
                     <textarea value={campMessage} onChange={e => setCampMessage(e.target.value.slice(0, 200))} rows={3} placeholder="🎉 Moyo vous offre le Premium pour célébrer un événement. Profitez-en !" style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${G.gris}`, borderRadius: 10, padding: "11px 13px", fontSize: "0.84rem", outline: "none", resize: "vertical", fontFamily: "inherit" }} />
-                    <div style={{ textAlign: "right", fontSize: "0.7rem", color: "#aaa", marginTop: 4 }}>{campMessage.length}/200</div>
+                    <div style={{ textAlign: "right", fontSize: "0.7rem", color: G.brunLight, marginTop: 4 }}>{campMessage.length}/200</div>
 
                     <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 18 }}>
-                      <button onClick={() => { setCampMessage(""); setCampEndDate(""); setCampTarget("all"); setCampDays(7); }} style={{ background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 11, padding: "12px 22px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer" }}>Réinitialiser</button>
+                      <button onClick={() => { setCampMessage(""); setCampEndDate(""); setCampTarget("all"); setCampDays(7); }} style={{ background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 11, padding: "12px 22px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer" }}>Réinitialiser</button>
                       <button onClick={() => { if (!campEndDate) { showToast("Choisis une date de fin.", "error"); return; } setCampConfirm(true); }} disabled={campLaunching} style={{ background: campLaunching ? "rgba(230,126,34,0.5)" : "#E67E22", color: "#fff", border: "none", borderRadius: 11, padding: "12px 22px", fontSize: "0.84rem", fontWeight: 800, cursor: campLaunching ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 7, boxShadow: "0 6px 16px rgba(230,126,34,0.3)" }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>{campLaunching ? "Lancement…" : "Lancer la campagne"}</button>
                     </div>
                   </div>
@@ -14389,7 +14389,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     </div>
                     {[["Cible", campTargetLabel(campTarget)], ["Durée", `${campDays} jours`], ["Date de fin", campEndDate ? fmtDate(new Date(campEndDate).toISOString()) : "—"], ["Membres concernés", campCountLoading ? "…" : campCount === null ? "—" : `${campCount.toLocaleString("fr-FR")} utilisateurs`]].map(([k, v], i) => (
                       <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 10, padding: "9px 0", borderBottom: i < 3 ? `1px solid ${G.creme}` : "none" }}>
-                        <span style={{ fontSize: "0.78rem", color: "#999" }}>{k}</span>
+                        <span style={{ fontSize: "0.78rem", color: G.brunLight }}>{k}</span>
                         <span style={{ fontSize: "0.8rem", fontWeight: 700, color: G.brun, textAlign: "right" }}>{v}</span>
                       </div>
                     ))}
@@ -14397,7 +14397,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E67E22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                       <div style={{ fontSize: "0.74rem", color: "#9a5a1a", lineHeight: 1.5 }}><strong>Impact estimé</strong><br />{campCountLoading ? "Calcul en cours…" : `${(campCount || 0).toLocaleString("fr-FR")} utilisateur${(campCount || 0) > 1 ? "s" : ""} recevront le Premium gratuitement pendant ${campDays} jours.`}</div>
                     </div>
-                    <div style={{ fontSize: "0.7rem", color: "#aaa", lineHeight: 1.5, marginTop: 12, display: "flex", gap: 7 }}>
+                    <div style={{ fontSize: "0.7rem", color: G.brunLight, lineHeight: 1.5, marginTop: 12, display: "flex", gap: 7 }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                       <span>Les abonnés Premium actuels ne sont pas impactés. Le Premium sera retiré automatiquement à la date de fin.</span>
                     </div>
@@ -14408,10 +14408,10 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <div style={{ background: G.blanc, borderRadius: 18, padding: 20, boxShadow: "0 2px 10px rgba(0,0,0,0.05)", marginTop: 16 }}>
                   <div style={{ fontWeight: 900, fontSize: "1rem", color: G.brun, marginBottom: 14 }}>Campagnes précédentes</div>
                   {campaignsHistory.length === 0 ? (
-                    <div style={{ textAlign: "center", color: "#bbb", fontSize: "0.82rem", padding: "24px 0" }}>Aucune campagne lancée pour le moment.</div>
+                    <div style={{ textAlign: "center", color: G.brunLight, fontSize: "0.82rem", padding: "24px 0" }}>Aucune campagne lancée pour le moment.</div>
                   ) : (
                     <div style={{ overflowX: "auto" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "2fr 1.4fr 0.8fr 1fr 1.4fr 1fr", gap: 10, fontSize: "0.7rem", fontWeight: 800, color: "#aaa", padding: "0 0 8px", borderBottom: `1px solid ${G.gris}`, minWidth: 620 }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "2fr 1.4fr 0.8fr 1fr 1.4fr 1fr", gap: 10, fontSize: "0.7rem", fontWeight: 800, color: G.brunLight, padding: "0 0 8px", borderBottom: `1px solid ${G.gris}`, minWidth: 620 }}>
                         <span>Campagne</span><span>Cible</span><span>Durée</span><span>Bénéficiaires</span><span>Période</span><span>Statut</span>
                       </div>
                       {visibleCamps.map(c => {
@@ -14420,12 +14420,12 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           <div key={c.id} style={{ display: "grid", gridTemplateColumns: "2fr 1.4fr 0.8fr 1fr 1.4fr 1fr", gap: 10, alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${G.creme}`, minWidth: 620 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
                               <div style={{ width: 30, height: 30, borderRadius: "50%", background: "rgba(142,124,195,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><svg width="15" height="15" viewBox="0 0 24 24" fill="#8e7cc3" stroke="none"><path d="M2 19h20l-2-7-4 3-4-7-4 7-4-3z"/></svg></div>
-                              <div style={{ minWidth: 0 }}><div style={{ fontSize: "0.8rem", fontWeight: 700, color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div><div style={{ fontSize: "0.68rem", color: "#aaa", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.sub}</div></div>
+                              <div style={{ minWidth: 0 }}><div style={{ fontSize: "0.8rem", fontWeight: 700, color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div><div style={{ fontSize: "0.68rem", color: G.brunLight, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.sub}</div></div>
                             </div>
-                            <span style={{ fontSize: "0.76rem", color: "#666" }}>{c.targetLabel}</span>
-                            <span style={{ fontSize: "0.76rem", color: "#666" }}>{c.days} j</span>
-                            <span style={{ fontSize: "0.76rem", color: "#666", fontWeight: 700 }}>{(c.beneficiaries || 0).toLocaleString("fr-FR")}</span>
-                            <span style={{ fontSize: "0.72rem", color: "#666" }}>{fmtDate(c.start)} – {fmtDate(c.end)}</span>
+                            <span style={{ fontSize: "0.76rem", color: G.brunLight }}>{c.targetLabel}</span>
+                            <span style={{ fontSize: "0.76rem", color: G.brunLight }}>{c.days} j</span>
+                            <span style={{ fontSize: "0.76rem", color: G.brunLight, fontWeight: 700 }}>{(c.beneficiaries || 0).toLocaleString("fr-FR")}</span>
+                            <span style={{ fontSize: "0.72rem", color: G.brunLight }}>{fmtDate(c.start)} – {fmtDate(c.end)}</span>
                             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: "0.72rem", fontWeight: 700, color: ended ? "#1e8449" : "#E67E22" }}><span style={{ width: 7, height: 7, borderRadius: "50%", background: ended ? "#27ae60" : "#E67E22" }} />{ended ? "Terminée" : "En cours"}</span>
                           </div>
                         );
@@ -14492,13 +14492,13 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <button onClick={newSurveyDraft} style={{ flex: 1, background: "#2980b9", color: "#fff", border: "none", borderRadius: 10, padding: "11px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer" }}>+ Créer un sondage</button>
                 <button onClick={loadDefaultSurvey} style={{ flex: "0 0 auto", background: G.blanc, color: "#2980b9", border: `1.5px solid #2980b9`, borderRadius: 10, padding: "11px 14px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer" }}>Sondage par défaut</button>
               </div>
-              <div style={{ fontSize: "0.74rem", color: "#888", background: G.creme, borderRadius: 10, padding: "9px 12px", marginBottom: 14, lineHeight: 1.5 }}>💡 Un sondage <b>Publié</b> est automatiquement envoyé aux membres ciblés (ils reçoivent l'invitation). Mettez-le en <b>Brouillon</b> pour arrêter de le diffuser.</div>
+              <div style={{ fontSize: "0.74rem", color: G.brunLight, background: G.creme, borderRadius: 10, padding: "9px 12px", marginBottom: 14, lineHeight: 1.5 }}>💡 Un sondage <b>Publié</b> est automatiquement envoyé aux membres ciblés (ils reçoivent l'invitation). Mettez-le en <b>Brouillon</b> pour arrêter de le diffuser.</div>
               {surveysLoading ? (
-                <div style={{ textAlign: "center", padding: 40, color: "#aaa", fontSize: "0.85rem" }}>Chargement…</div>
+                <div style={{ textAlign: "center", padding: 40, color: G.brunLight, fontSize: "0.85rem" }}>Chargement…</div>
               ) : surveys.length === 0 ? (
                 <div style={{ background: G.blanc, borderRadius: 14, padding: 32, textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                  <p style={{ color: "#999", fontSize: "0.86rem" }}>Aucun sondage pour l'instant.</p>
-                  <p style={{ color: "#bbb", fontSize: "0.78rem", marginTop: 4 }}>Créez-en un ou partez du sondage par défaut.</p>
+                  <p style={{ color: G.brunLight, fontSize: "0.86rem" }}>Aucun sondage pour l'instant.</p>
+                  <p style={{ color: G.brunLight, fontSize: "0.78rem", marginTop: 4 }}>Créez-en un ou partez du sondage par défaut.</p>
                 </div>
               ) : surveys.map(s => {
                 const tgt = (() => { const [g, p] = (s.target || "all|all").split("|"); const gl = g === "femmes" ? "Femmes" : g === "hommes" ? "Hommes" : "Tous"; const pl = p === "premium" ? "Premium" : p === "gratuit" ? "Gratuits" : "Tous"; return `${gl} · ${pl}`; })();
@@ -14507,14 +14507,14 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 800, fontSize: "0.95rem", color: G.brun }}>{s.title}</div>
-                        <div style={{ fontSize: "0.74rem", color: "#888", marginTop: 3 }}>{(s.questions || []).length} question{(s.questions || []).length > 1 ? "s" : ""} · Cible : {tgt} · {surveyCounts[s.id] || 0} réponse{(surveyCounts[s.id] || 0) > 1 ? "s" : ""}</div>
+                        <div style={{ fontSize: "0.74rem", color: G.brunLight, marginTop: 3 }}>{(s.questions || []).length} question{(s.questions || []).length > 1 ? "s" : ""} · Cible : {tgt} · {surveyCounts[s.id] || 0} réponse{(surveyCounts[s.id] || 0) > 1 ? "s" : ""}</div>
                       </div>
                       <span style={{ flexShrink: 0, background: s.status === "active" ? "rgba(39,174,96,0.12)" : "#f0f0f0", color: s.status === "active" ? "#27ae60" : "#999", borderRadius: 50, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 800 }}>{s.status === "active" ? "● Publié" : "Brouillon"}</span>
                     </div>
                     <div style={{ display: "flex", gap: 7, marginTop: 12, flexWrap: "wrap" }}>
                       <button onClick={() => loadSurveyResults(s)} style={{ flex: "1 1 auto", background: "#2980b9", color: "#fff", border: "none", borderRadius: 9, padding: "8px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>📊 Résultats</button>
                       <button onClick={() => toggleSurveyStatus(s)} style={{ flex: "1 1 auto", background: s.status === "active" ? "#fff" : "#27ae60", color: s.status === "active" ? "#555" : "#fff", border: s.status === "active" ? `1px solid ${G.gris}` : "none", borderRadius: 9, padding: "8px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>{s.status === "active" ? "Dépublier" : "📢 Publier"}</button>
-                      <button onClick={() => setSurveyEditor({ ...s, questions: JSON.parse(JSON.stringify(s.questions || [])) })} style={{ flex: "1 1 auto", background: G.blanc, color: "#555", border: `1px solid ${G.gris}`, borderRadius: 9, padding: "8px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Modifier</button>
+                      <button onClick={() => setSurveyEditor({ ...s, questions: JSON.parse(JSON.stringify(s.questions || [])) })} style={{ flex: "1 1 auto", background: G.blanc, color: G.brunLight, border: `1px solid ${G.gris}`, borderRadius: 9, padding: "8px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Modifier</button>
                       <button onClick={() => deleteSurvey(s)} style={{ flex: "0 0 auto", background: G.blanc, color: "#c0392b", border: `1px solid rgba(212,168,67,0.3)`, borderRadius: 9, padding: "8px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Suppr.</button>
                     </div>
                   </div>
@@ -14532,7 +14532,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
                   <div style={{ background: G.blanc, borderRadius: 16, padding: "16px 14px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", textAlign: "center" }}>
                     <div style={{ fontSize: "2rem", fontWeight: 800, color: "#B8860B", lineHeight: 1 }}>{reviewsStats.total}</div>
-                    <div style={{ fontSize: "0.73rem", color: "#777", marginTop: 4 }}>Avis total</div>
+                    <div style={{ fontSize: "0.73rem", color: G.brunLight, marginTop: 4 }}>Avis total</div>
                   </div>
                   <div style={{ background: G.blanc, borderRadius: 16, padding: "16px 14px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", textAlign: "center" }}>
                     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 5, marginBottom: 4 }}>
@@ -14541,7 +14541,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         <svg width="18" height="18" viewBox="0 0 24 24" fill={G.or} stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                       )}
                     </div>
-                    <div style={{ fontSize: "0.73rem", color: "#777" }}>Note moyenne /5</div>
+                    <div style={{ fontSize: "0.73rem", color: G.brunLight }}>Note moyenne /5</div>
                   </div>
                 </div>
               )}
@@ -14560,10 +14560,10 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                             <svg key={i} width="10" height="10" viewBox="0 0 24 24" fill={G.or} stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                           ))}
                         </div>
-                        <div style={{ flex: 1, background: "#F0F0F0", borderRadius: 50, height: 7, overflow: "hidden" }}>
+                        <div style={{ flex: 1, background: G.creme, borderRadius: 50, height: 7, overflow: "hidden" }}>
                           <div style={{ width: `${pct}%`, height: "100%", background: n >= 4 ? "#27ae60" : n === 3 ? G.or : G.rouge, borderRadius: 50, transition: "width 0.5s" }} />
                         </div>
-                        <div style={{ fontSize: "0.7rem", color: "#888", flexShrink: 0, width: 34, textAlign: "right" }}>{count} ({pct}%)</div>
+                        <div style={{ fontSize: "0.7rem", color: G.brunLight, flexShrink: 0, width: 34, textAlign: "right" }}>{count} ({pct}%)</div>
                       </div>
                     );
                   })}
@@ -14572,7 +14572,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
 
               {/* ── Liste des avis ── */}
               {reviews.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "40px 20px", color: "#aaa" }}>
+                <div style={{ textAlign: "center", padding: "40px 20px", color: G.brunLight }}>
                   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#DDD" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 12px" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   <div style={{ fontSize: "0.88rem" }}>Aucun avis pour l'instant</div>
                 </div>
@@ -14591,7 +14591,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                             </div>
                             <div>
                               <div style={{ fontWeight: 700, fontSize: "0.83rem", color: G.brun }}>{r.profile?.name || "Membre"}</div>
-                              <div style={{ fontSize: "0.7rem", color: "#aaa" }}>{r.profile?.city || "-"} · {new Date(r.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}</div>
+                              <div style={{ fontSize: "0.7rem", color: G.brunLight }}>{r.profile?.city || "-"} · {new Date(r.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}</div>
                             </div>
                           </div>
                           {/* Note */}
@@ -14604,7 +14604,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
 
                         {/* Commentaire */}
                         {r.comment && (
-                          <div style={{ fontSize: "0.82rem", color: "#444", lineHeight: 1.6, fontStyle: "italic", background: "#F7F7F7", borderRadius: 8, padding: "8px 10px", marginBottom: 10 }}>
+                          <div style={{ fontSize: "0.82rem", color: G.brun, lineHeight: 1.6, fontStyle: "italic", background: G.creme, borderRadius: 8, padding: "8px 10px", marginBottom: 10 }}>
                             "{r.comment}"
                           </div>
                         )}
@@ -14670,18 +14670,18 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <button onClick={() => setSurveyEditor(null)} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: "50%", width: 30, height: 30, cursor: "pointer", color: "#fff" }}>✕</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
-              <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: "#333", marginBottom: 6 }}>Titre du sondage</label>
+              <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: G.brun, marginBottom: 6 }}>Titre du sondage</label>
               <input value={surveyEditor.title} onChange={e => setSurveyEditor((s: any) => ({ ...s, title: e.target.value }))} placeholder="Ex : Votre satisfaction Moyo" style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.84rem", outline: "none", boxSizing: "border-box", marginBottom: 14 }} />
-              <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: "#333", marginBottom: 6 }}>Message d'invitation (affiché au membre)</label>
+              <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: G.brun, marginBottom: 6 }}>Message d'invitation (affiché au membre)</label>
               <textarea value={surveyEditor.intro_message} onChange={e => setSurveyEditor((s: any) => ({ ...s, intro_message: e.target.value }))} rows={2} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.84rem", outline: "none", boxSizing: "border-box", resize: "vertical", fontFamily: "inherit", marginBottom: 14 }} />
-              <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: "#333", marginBottom: 6 }}>Destinataires</label>
+              <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: G.brun, marginBottom: 6 }}>Destinataires</label>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
                 <select value={(surveyEditor.target || "all|all").split("|")[1]} onChange={e => setSurveyEditor((s: any) => ({ ...s, target: `all|${e.target.value}` }))} style={{ padding: "10px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.82rem", background: G.blanc }}>
                   <option value="all">Tous les comptes</option><option value="premium">Premium</option><option value="gratuit">Gratuits</option>
                 </select>
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <label style={{ fontSize: "0.78rem", fontWeight: 800, color: "#333" }}>Questions</label>
+                <label style={{ fontSize: "0.78rem", fontWeight: 800, color: G.brun }}>Questions</label>
                 <button onClick={() => setSurveyEditor((s: any) => ({ ...s, questions: [...(s.questions || []), { id: `q${Date.now()}`, text: "", type: "single", options: ["", ""] }] }))} style={{ background: "rgba(41,128,185,0.1)", color: "#2980b9", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: "0.76rem", fontWeight: 700, cursor: "pointer" }}>+ Question</button>
               </div>
               {(surveyEditor.questions || []).map((q: any, qi: number) => (
@@ -14697,11 +14697,11 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     ))}
                   </div>
                   {q.type === "text" ? (
-                    <div style={{ fontSize: "0.74rem", color: "#999", background: G.creme, borderRadius: 8, padding: "8px 10px", fontStyle: "italic" }}>Le membre répondra dans un champ texte libre.</div>
+                    <div style={{ fontSize: "0.74rem", color: G.brunLight, background: G.creme, borderRadius: 8, padding: "8px 10px", fontStyle: "italic" }}>Le membre répondra dans un champ texte libre.</div>
                   ) : (<>
                   {q.options.map((opt: string, oi: number) => (
                     <div key={oi} style={{ display: "flex", gap: 6, marginBottom: 5, alignItems: "center" }}>
-                      <span style={{ color: "#bbb", fontSize: "0.8rem" }}>{q.type === "single" ? "○" : "☐"}</span>
+                      <span style={{ color: G.brunLight, fontSize: "0.8rem" }}>{q.type === "single" ? "○" : "☐"}</span>
                       <input value={opt} onChange={e => setSurveyEditor((s: any) => ({ ...s, questions: s.questions.map((x: any, i: number) => i === qi ? { ...x, options: x.options.map((o: string, j: number) => j === oi ? e.target.value : o) } : x) }))} placeholder={`Option ${oi + 1}`} style={{ flex: 1, padding: "7px 9px", borderRadius: 7, border: `1px solid ${G.gris}`, fontSize: "0.8rem", outline: "none" }} />
                       {q.options.length > 2 && <button onClick={() => setSurveyEditor((s: any) => ({ ...s, questions: s.questions.map((x: any, i: number) => i === qi ? { ...x, options: x.options.filter((_: string, j: number) => j !== oi) } : x) }))} style={{ background: "none", border: "none", color: "#c0392b", cursor: "pointer" }}>✕</button>}
                     </div>
@@ -14710,10 +14710,10 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   </>)}
                 </div>
               ))}
-              {(surveyEditor.questions || []).length === 0 && <div style={{ textAlign: "center", color: "#bbb", fontSize: "0.8rem", padding: 16 }}>Aucune question. Cliquez sur « + Question ».</div>}
+              {(surveyEditor.questions || []).length === 0 && <div style={{ textAlign: "center", color: G.brunLight, fontSize: "0.8rem", padding: 16 }}>Aucune question. Cliquez sur « + Question ».</div>}
             </div>
             <div style={{ padding: "14px 20px", borderTop: `1px solid ${G.gris}`, display: "flex", gap: 10, flexShrink: 0 }}>
-              <button onClick={() => setSurveyEditor(null)} style={{ flex: "0 0 auto", background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 12, padding: "12px 18px", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
+              <button onClick={() => setSurveyEditor(null)} style={{ flex: "0 0 auto", background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 12, padding: "12px 18px", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
               <button onClick={saveSurvey} disabled={savingSurvey} style={{ flex: 1, background: savingSurvey ? "rgba(41,128,185,0.5)" : "#2980b9", color: "#fff", border: "none", borderRadius: 12, padding: "12px", fontSize: "0.88rem", fontWeight: 800, cursor: savingSurvey ? "not-allowed" : "pointer" }}>{savingSurvey ? "Enregistrement…" : "Enregistrer le sondage"}</button>
             </div>
           </div>
@@ -14729,16 +14729,16 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <button onClick={() => setSurveyResults(null)} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: "50%", width: 30, height: 30, cursor: "pointer", color: "#fff", flexShrink: 0 }}>✕</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
-              {surveyResults.loading ? <div style={{ textAlign: "center", padding: 40, color: "#aaa" }}>Chargement…</div>
-                : surveyResults.responses.length === 0 ? <div style={{ textAlign: "center", padding: 40, color: "#999", fontSize: "0.85rem" }}>Aucune réponse pour l'instant.</div>
+              {surveyResults.loading ? <div style={{ textAlign: "center", padding: 40, color: G.brunLight }}>Chargement…</div>
+                : surveyResults.responses.length === 0 ? <div style={{ textAlign: "center", padding: 40, color: G.brunLight, fontSize: "0.85rem" }}>Aucune réponse pour l'instant.</div>
                 : (surveyResults.survey.questions || []).map((q: any, qi: number) => {
                   if (q.type === "text") {
                     const texts = surveyResults.responses.map((r: any) => (r.answers?.[q.id] || [])[0]).filter((t: string) => t && t.trim());
                     return (
                       <div key={qi} style={{ marginBottom: 20 }}>
-                        <div style={{ fontWeight: 800, fontSize: "0.86rem", color: G.brun, marginBottom: 10 }}>{qi + 1}. {q.text} <span style={{ fontWeight: 600, color: "#999", fontSize: "0.76rem" }}>({texts.length} réponse{texts.length > 1 ? "s" : ""})</span></div>
-                        {texts.length === 0 ? <div style={{ fontSize: "0.78rem", color: "#bbb", fontStyle: "italic" }}>Aucune réponse écrite.</div>
-                          : texts.map((t: string, i: number) => <div key={i} style={{ background: G.creme, borderRadius: 10, padding: "9px 12px", fontSize: "0.82rem", color: "#333", marginBottom: 6, lineHeight: 1.4 }}>« {t} »</div>)}
+                        <div style={{ fontWeight: 800, fontSize: "0.86rem", color: G.brun, marginBottom: 10 }}>{qi + 1}. {q.text} <span style={{ fontWeight: 600, color: G.brunLight, fontSize: "0.76rem" }}>({texts.length} réponse{texts.length > 1 ? "s" : ""})</span></div>
+                        {texts.length === 0 ? <div style={{ fontSize: "0.78rem", color: G.brunLight, fontStyle: "italic" }}>Aucune réponse écrite.</div>
+                          : texts.map((t: string, i: number) => <div key={i} style={{ background: G.creme, borderRadius: 10, padding: "9px 12px", fontSize: "0.82rem", color: G.brun, marginBottom: 6, lineHeight: 1.4 }}>« {t} »</div>)}
                       </div>
                     );
                   }
@@ -14751,8 +14751,8 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                       <div style={{ fontWeight: 800, fontSize: "0.86rem", color: G.brun, marginBottom: 10 }}>{qi + 1}. {q.text}</div>
                       {q.options.map((o: string) => { const c = counts[o]; const pct = Math.round(c / total * 100); return (
                         <div key={o} style={{ marginBottom: 8 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", color: "#444", marginBottom: 3 }}><span>{o}</span><span style={{ fontWeight: 700 }}>{c} ({pct}%)</span></div>
-                          <div style={{ height: 8, background: "#eee", borderRadius: 5, overflow: "hidden" }}><div style={{ width: `${pct}%`, height: "100%", background: "#2980b9" }} /></div>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", color: G.brun, marginBottom: 3 }}><span>{o}</span><span style={{ fontWeight: 700 }}>{c} ({pct}%)</span></div>
+                          <div style={{ height: 8, background: G.gris, borderRadius: 5, overflow: "hidden" }}><div style={{ width: `${pct}%`, height: "100%", background: "#2980b9" }} /></div>
                         </div>
                       ); })}
                     </div>
@@ -14771,7 +14771,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
             <div style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun }}>Accès restreint</div>
-            <div style={{ fontSize: "0.85rem", color: "#888", maxWidth: 280, lineHeight: 1.6 }}>Vous n'avez pas les autorisations nécessaires pour accéder à cette section. Contactez le Super Admin.</div>
+            <div style={{ fontSize: "0.85rem", color: G.brunLight, maxWidth: 280, lineHeight: 1.6 }}>Vous n'avez pas les autorisations nécessaires pour accéder à cette section. Contactez le Super Admin.</div>
           </div>
         ) : (
         <div style={{ padding: "16px" }}>
@@ -14834,7 +14834,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             ) : (() => {
               const list = payments.filter(p => p.status === "pending");
               return list.length === 0
-                ? <div style={{ textAlign: "center", padding: "40px 20px", color: "#aaa", fontSize: "0.88rem" }}>Aucune demande en attente 🎉</div>
+                ? <div style={{ textAlign: "center", padding: "40px 20px", color: G.brunLight, fontSize: "0.88rem" }}>Aucune demande en attente 🎉</div>
                 : <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>{list.map(p => <PaymentCard key={p.id} p={p} isPending={true} isApproved={false} isRejected={false} onActivate={activatePayment} onReject={rejectPayment} onDelete={archivePayment} onViewProfile={openPaymentProfile} />)}</div>;
             })()
           )}
@@ -14846,7 +14846,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             ) : (() => {
               const list = payments.filter(p => p.status === "approved" || p.status === "rejected");
               return list.length === 0
-                ? <div style={{ textAlign: "center", padding: "40px 20px", color: "#aaa", fontSize: "0.88rem" }}>Aucune demande traitée</div>
+                ? <div style={{ textAlign: "center", padding: "40px 20px", color: G.brunLight, fontSize: "0.88rem" }}>Aucune demande traitée</div>
                 : <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>{list.map(p => <PaymentCard key={p.id} p={p} isPending={false} isApproved={p.status === "approved"} isRejected={p.status === "rejected"} onActivate={activatePayment} onReject={rejectPayment} onDelete={archivePayment} onViewProfile={openPaymentProfile} />)}</div>;
             })()
           )}
@@ -14934,11 +14934,11 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                       <div style={{ fontSize: "0.6rem", opacity: 0.85, marginTop: 2 }}>{countEUR} paiement{countEUR > 1 ? "s" : ""}</div>
                     </div>
                   </div>
-                  {financeResetAt && <div style={{ fontSize: "0.66rem", color: "#aaa", textAlign: "center", marginBottom: 10 }}>Depuis la réinitialisation du {new Date(financeResetAt).toLocaleDateString("fr-FR")}{excludedCount > 0 ? ` · ${excludedCount} exclu${excludedCount > 1 ? "s" : ""} du CA` : ""}</div>}
+                  {financeResetAt && <div style={{ fontSize: "0.66rem", color: G.brunLight, textAlign: "center", marginBottom: 10 }}>Depuis la réinitialisation du {new Date(financeResetAt).toLocaleDateString("fr-FR")}{excludedCount > 0 ? ` · ${excludedCount} exclu${excludedCount > 1 ? "s" : ""} du CA` : ""}</div>}
 
                   {/* Sélecteur de devise pour les analyses détaillées */}
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                    <span style={{ fontSize: "0.72rem", color: "#888", fontWeight: 600 }}>Analyses en :</span>
+                    <span style={{ fontSize: "0.72rem", color: G.brunLight, fontWeight: 600 }}>Analyses en :</span>
                     <div style={{ display: "flex", gap: 4, background: G.creme, borderRadius: 50, padding: 3 }}>
                       {([["XAF", "FCFA"], ["EUR", "€"]] as [string, string][]).map(([k, lbl]) => (
                         <button key={k} onClick={() => setFinanceCurrency(k as any)} style={{ padding: "5px 14px", borderRadius: 50, border: "none", background: financeCurrency === k ? (k === "EUR" ? "#16A34A" : "#8e44ad") : "transparent", color: financeCurrency === k ? "#fff" : "#888", fontSize: "0.74rem", fontWeight: 700, cursor: "pointer" }}>{lbl}</button>
@@ -14950,7 +14950,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                       Exporter
                     </button>
-                    <button onClick={() => confirm("Réinitialiser les statistiques financières ? Le compteur repartira de zéro à partir d'aujourd'hui. Aucun paiement n'est supprimé.", resetFinance)} title="Réinitialiser le compteur (sans rien supprimer)" style={{ background: "transparent", color: "#aaa", border: `1px solid ${G.gris}`, borderRadius: 50, padding: "7px 14px", fontSize: "0.74rem", fontWeight: 600, cursor: "pointer" }}>↺ Réinitialiser</button>
+                    <button onClick={() => confirm("Réinitialiser les statistiques financières ? Le compteur repartira de zéro à partir d'aujourd'hui. Aucun paiement n'est supprimé.", resetFinance)} title="Réinitialiser le compteur (sans rien supprimer)" style={{ background: "transparent", color: G.brunLight, border: `1px solid ${G.gris}`, borderRadius: 50, padding: "7px 14px", fontSize: "0.74rem", fontWeight: 600, cursor: "pointer" }}>↺ Réinitialiser</button>
                   </div>
 
                   {/* ── Indicateurs de conversion ── */}
@@ -14963,7 +14963,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     ] as [string, any, string, string][]).map(([label, val, color, bg]) => (
                       <div key={label} style={{ background: bg, borderRadius: 12, padding: "12px 14px", border: `1px solid ${color}22` }}>
                         <div style={{ fontSize: "1.3rem", fontWeight: 900, color }}>{val}</div>
-                        <div style={{ fontSize: "0.7rem", color: "#888", fontWeight: 600, marginTop: 2 }}>{label}</div>
+                        <div style={{ fontSize: "0.7rem", color: G.brunLight, fontWeight: 600, marginTop: 2 }}>{label}</div>
                       </div>
                     ))}
                   </div>
@@ -14973,9 +14973,9 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     <div style={{ background: G.blanc, borderRadius: 14, padding: "14px 16px", marginBottom: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", border: "1px solid #F0F0F0", display: "flex", alignItems: "center", gap: 12 }}>
                       <div style={{ width: 40, height: 40, borderRadius: "50%", background: last.gift_for ? "rgba(212,168,67,0.15)" : "rgba(142,68,173,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1.1rem" }}>{last.gift_for ? "🎁" : "⭐"}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: "0.68rem", color: "#999", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Dernier paiement</div>
+                        <div style={{ fontSize: "0.68rem", color: G.brunLight, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Dernier paiement</div>
                         <div style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{financeNames[last.user_id] || "Membre"}{last.gift_for ? ` → cadeau pour ${last.gift_for_name || "un membre"}` : ""}</div>
-                        <div style={{ fontSize: "0.7rem", color: "#aaa" }}>{new Date(last.approved_at || last.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</div>
+                        <div style={{ fontSize: "0.7rem", color: G.brunLight }}>{new Date(last.approved_at || last.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</div>
                       </div>
                       <div style={{ fontWeight: 800, fontSize: "1rem", color: "#8e44ad", flexShrink: 0 }}>{formatMoney(last.amount || 0, paymentCurrency(last))}</div>
                     </div>
@@ -15043,11 +15043,11 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                               </svg>
                               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
                                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: "#8e44ad", display: "inline-block" }} /><span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#555" }}>Premium ({premiumCount})</span></div>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: "#8e44ad", display: "inline-block" }} /><span style={{ fontSize: "0.8rem", fontWeight: 700, color: G.brunLight }}>Premium ({premiumCount})</span></div>
                                   <span style={{ fontSize: "0.8rem", fontWeight: 800, color: "#8e44ad" }}>{formatMoney(premiumSum, cur)} · {pPct}%</span>
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: G.or, display: "inline-block" }} /><span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#555" }}>Cadeaux ({giftCount})</span></div>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: G.or, display: "inline-block" }} /><span style={{ fontSize: "0.8rem", fontWeight: 700, color: G.brunLight }}>Cadeaux ({giftCount})</span></div>
                                   <span style={{ fontSize: "0.8rem", fontWeight: 800, color: "#B8860B" }}>{formatMoney(giftSum, cur)} · {gPct}%</span>
                                 </div>
                               </div>
@@ -15067,7 +15067,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           <div style={{ width: 26, height: 26, borderRadius: "50%", background: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : G.creme, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.72rem", color: i < 3 ? "#333" : "#888", flexShrink: 0 }}>{i + 1}</div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontWeight: 700, fontSize: "0.82rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{financeNames[uid] || "Membre"}</div>
-                            <div style={{ fontSize: "0.68rem", color: "#999" }}>{v.count} achat{v.count > 1 ? "s" : ""}</div>
+                            <div style={{ fontSize: "0.68rem", color: G.brunLight }}>{v.count} achat{v.count > 1 ? "s" : ""}</div>
                           </div>
                           <div style={{ fontWeight: 800, fontSize: "0.85rem", color: "#8e44ad", flexShrink: 0 }}>{formatMoney(v.sum, cur)}</div>
                         </div>
@@ -15078,7 +15078,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   {/* ── Détail par mois (dépliable, avec exclusion) ── */}
                   <div style={{ fontWeight: 700, fontSize: "0.85rem", color: G.brun, marginBottom: 10 }}>📅 Détail par mois</div>
                   {months.length === 0 ? (
-                    <div style={{ textAlign: "center", padding: "30px 20px", color: "#aaa", fontSize: "0.85rem" }}>Aucun revenu sur la période</div>
+                    <div style={{ textAlign: "center", padding: "30px 20px", color: G.brunLight, fontSize: "0.85rem" }}>Aucun revenu sur la période</div>
                   ) : (
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {months.map(([k, v]) => (
@@ -15086,7 +15086,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           <div onClick={() => setFinanceOpenMonth(financeOpenMonth === k ? "" : k)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
                             <div>
                               <div style={{ fontWeight: 700, fontSize: "0.85rem", color: G.brun, textTransform: "capitalize" }}>{fmtMonth(k)}</div>
-                              <div style={{ fontSize: "0.7rem", color: "#999" }}>{v.count} paiement{v.count > 1 ? "s" : ""}{v.items.length > v.count ? ` · ${v.items.length - v.count} exclu${v.items.length - v.count > 1 ? "s" : ""}` : ""}</div>
+                              <div style={{ fontSize: "0.7rem", color: G.brunLight }}>{v.count} paiement{v.count > 1 ? "s" : ""}{v.items.length > v.count ? ` · ${v.items.length - v.count} exclu${v.items.length - v.count > 1 ? "s" : ""}` : ""}</div>
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#8e44ad" }}>{formatMoney(v.sum, cur)}</div>
@@ -15101,7 +15101,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                                   <div key={it.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "7px 10px", borderRadius: 8, background: excluded ? "rgba(231,76,60,0.05)" : G.creme }}>
                                     <div style={{ minWidth: 0, flex: 1 }}>
                                       <div style={{ fontSize: "0.76rem", fontWeight: 700, color: excluded ? "#bbb" : "#555", textDecoration: excluded ? "line-through" : "none" }}>{it.operator} · {formatMoney(it.amount || 0, paymentCurrency(it))}</div>
-                                      <div style={{ fontSize: "0.65rem", color: "#aaa", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{it.tx_ref} · {new Date(it.approved_at || it.created_at).toLocaleDateString("fr-FR")}</div>
+                                      <div style={{ fontSize: "0.65rem", color: G.brunLight, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{it.tx_ref} · {new Date(it.approved_at || it.created_at).toLocaleDateString("fr-FR")}</div>
                                     </div>
                                     <button onClick={(e) => { e.stopPropagation(); toggleFinanceExclude(it.id, it.tx_ref); }} style={{ flexShrink: 0, background: excluded ? "rgba(39,174,96,0.1)" : "rgba(231,76,60,0.08)", color: excluded ? "#27ae60" : "#e74c3c", border: `1.5px solid ${excluded ? "rgba(39,174,96,0.3)" : "rgba(231,76,60,0.25)"}`, borderRadius: 50, padding: "4px 10px", fontSize: "0.68rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
                                       {excluded ? "↩ Réintégrer" : "🧪 Exclure du CA"}
@@ -15140,7 +15140,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                       <button disabled={selectedArchiveIds.size === 0} onClick={() => confirm(`Supprimer DÉFINITIVEMENT ${selectedArchiveIds.size} entrée${selectedArchiveIds.size > 1 ? "s" : ""} ? Cette action est irréversible.`, deleteSelectedArchived)} style={{ background: selectedArchiveIds.size === 0 ? "rgba(231,76,60,0.04)" : "rgba(231,76,60,0.12)", color: "#e74c3c", border: "1.5px solid rgba(231,76,60,0.25)", borderRadius: 50, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: selectedArchiveIds.size === 0 ? "not-allowed" : "pointer", opacity: selectedArchiveIds.size === 0 ? 0.5 : 1 }}>
                         Supprimer ({selectedArchiveIds.size})
                       </button>
-                      <button onClick={() => { setArchiveSelectMode(false); setSelectedArchiveIds(new Set()); }} style={{ background: G.blanc, color: "#666", border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
+                      <button onClick={() => { setArchiveSelectMode(false); setSelectedArchiveIds(new Set()); }} style={{ background: G.blanc, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
                     </>
                   )}
                 </div>
@@ -15148,7 +15148,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               {archivedLoading ? (
                 <div style={{ textAlign: "center", padding: 20 }}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" style={{ animation: "pulse 0.8s ease-in-out infinite" }}><circle cx="12" cy="12" r="10"/></svg></div>
               ) : archivedPayments.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "30px 0", fontSize: "0.85rem", color: "#bbb" }}>Aucun élément archivé</div>
+                <div style={{ textAlign: "center", padding: "30px 0", fontSize: "0.85rem", color: G.brunLight }}>Aucun élément archivé</div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {archivedPayments.map(a => {
@@ -15161,9 +15161,9 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           </div>
                         )}
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#555" }}>{a.operator} · {formatMoney(a.amount, paymentCurrency(a))}</div>
-                          <div style={{ fontSize: "0.68rem", color: "#aaa", fontFamily: "monospace", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.tx_ref}</div>
-                          <div style={{ fontSize: "0.65rem", color: "#ccc", marginTop: 1 }}>{new Date(a.created_at).toLocaleDateString("fr-FR")}</div>
+                          <div style={{ fontSize: "0.78rem", fontWeight: 700, color: G.brunLight }}>{a.operator} · {formatMoney(a.amount, paymentCurrency(a))}</div>
+                          <div style={{ fontSize: "0.68rem", color: G.brunLight, fontFamily: "monospace", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.tx_ref}</div>
+                          <div style={{ fontSize: "0.65rem", color: G.brunLight, marginTop: 1 }}>{new Date(a.created_at).toLocaleDateString("fr-FR")}</div>
                         </div>
                         {!archiveSelectMode && (
                           <button onClick={() => confirm(`Supprimer DÉFINITIVEMENT cette entrée (${a.tx_ref}) ? Action irréversible.`, () => deleteArchivedOne(a))} style={{ width: 30, height: 30, borderRadius: "50%", border: "none", background: "rgba(231,76,60,0.08)", color: "#e74c3c", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
@@ -15192,25 +15192,25 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             return (
             <div>
               <div style={{ marginBottom: 6, fontWeight: 800, fontSize: "1rem", color: G.brun }}>Dépenses</div>
-              <div style={{ fontSize: "0.8rem", color: "#888", marginBottom: 14 }}>Consultez et gérez toutes les sorties d'argent.</div>
+              <div style={{ fontSize: "0.8rem", color: G.brunLight, marginBottom: 14 }}>Consultez et gérez toutes les sorties d'argent.</div>
 
               {/* Carte total + ajout */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
                   <input type="date" value={expFrom} onChange={e => setExpFrom(e.target.value)} style={{ padding: "8px 10px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.8rem", color: G.brun, background: G.blanc }} />
-                  <span style={{ color: "#aaa" }}>→</span>
+                  <span style={{ color: G.brunLight }}>→</span>
                   <input type="date" value={expTo} onChange={e => setExpTo(e.target.value)} style={{ padding: "8px 10px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.8rem", color: G.brun, background: G.blanc }} />
                   <select value={expCatFilter} onChange={e => setExpCatFilter(e.target.value)} style={{ padding: "8px 10px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.8rem", color: G.brun, background: G.blanc }}>
                     <option value="">Toutes les catégories</option>
                     {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
-                  <button onClick={() => { setExpFrom(""); setExpTo(""); setExpCatFilter(""); }} style={{ padding: "8px 12px", borderRadius: 10, border: `1.5px solid ${G.gris}`, background: G.blanc, color: "#666", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>↻ Réinitialiser</button>
+                  <button onClick={() => { setExpFrom(""); setExpTo(""); setExpCatFilter(""); }} style={{ padding: "8px 12px", borderRadius: 10, border: `1.5px solid ${G.gris}`, background: G.blanc, color: G.brunLight, fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>↻ Réinitialiser</button>
                 </div>
                 <div style={{ background: G.blanc, borderRadius: 14, padding: "14px 18px", border: `1px solid ${G.gris}`, minWidth: 190, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14 }}>
                   <div>
-                    <div style={{ fontSize: "0.72rem", color: "#888", fontWeight: 700 }}>Total des dépenses</div>
+                    <div style={{ fontSize: "0.72rem", color: G.brunLight, fontWeight: 700 }}>Total des dépenses</div>
                     <div style={{ fontSize: "1.3rem", fontWeight: 900, color: "#e74c3c", marginTop: 2 }}>{fmtBudget(totalDisplay)}</div>
-                    <div style={{ fontSize: "0.7rem", color: "#aaa", marginTop: 1 }}>{filtered.length} dépense{filtered.length > 1 ? "s" : ""}</div>
+                    <div style={{ fontSize: "0.7rem", color: G.brunLight, marginTop: 1 }}>{filtered.length} dépense{filtered.length > 1 ? "s" : ""}</div>
                   </div>
                   <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(231,76,60,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
@@ -15235,12 +15235,12 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               {expensesLoading ? (
                 <div style={{ textAlign: "center", padding: 40 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2" strokeLinecap="round" style={{ animation: "pulse 0.8s ease-in-out infinite" }}><circle cx="12" cy="12" r="10"/></svg></div>
               ) : filtered.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "40px 20px", color: "#aaa", fontSize: "0.88rem" }}>Aucune dépense enregistrée.</div>
+                <div style={{ textAlign: "center", padding: "40px 20px", color: G.brunLight, fontSize: "0.88rem" }}>Aucune dépense enregistrée.</div>
               ) : (
                 <div style={{ overflowX: "auto", border: `1px solid ${G.gris}`, borderRadius: 12, background: G.blanc }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem", minWidth: 820 }}>
                     <thead>
-                      <tr style={{ textAlign: "left", color: "#888", borderBottom: `1px solid ${G.gris}` }}>
+                      <tr style={{ textAlign: "left", color: G.brunLight, borderBottom: `1px solid ${G.gris}` }}>
                         {["Date", "Catégorie", "Libellé", "Montant", "Commentaire", "Saisi par", "Type de frais", "Actions"].map(h => (
                           <th key={h} style={{ padding: "11px 12px", fontWeight: 700, whiteSpace: "nowrap" }}>{h}</th>
                         ))}
@@ -15251,18 +15251,18 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         const col = EXPENSE_CAT_COLORS[e.category] || "#95a5a6";
                         return (
                           <tr key={e.id} style={{ borderBottom: `1px solid ${G.gris}` }}>
-                            <td style={{ padding: "11px 12px", whiteSpace: "nowrap", color: "#555" }}>{new Date(e.date).toLocaleDateString("fr-FR")}</td>
+                            <td style={{ padding: "11px 12px", whiteSpace: "nowrap", color: G.brunLight }}>{new Date(e.date).toLocaleDateString("fr-FR")}</td>
                             <td style={{ padding: "11px 12px", whiteSpace: "nowrap" }}>
                               <span style={{ background: `${col}1a`, color: col, borderRadius: 50, padding: "3px 10px", fontSize: "0.72rem", fontWeight: 700 }}>{e.category}</span>
                             </td>
                             <td style={{ padding: "11px 12px", color: G.brun, fontWeight: 600 }}>{e.label}</td>
                             <td style={{ padding: "11px 12px", whiteSpace: "nowrap", color: "#e74c3c", fontWeight: 700 }}>{formatMoney(e.amount, e.currency)}</td>
-                            <td style={{ padding: "11px 12px", color: "#888" }}>{e.comment || "—"}</td>
-                            <td style={{ padding: "11px 12px", whiteSpace: "nowrap", color: "#555" }}>{e.entered_by || "—"}</td>
-                            <td style={{ padding: "11px 12px", whiteSpace: "nowrap", color: "#555" }}>{e.fee_type === "quotidien" ? "Frais quotidiens" : "Frais ponctuels"}</td>
+                            <td style={{ padding: "11px 12px", color: G.brunLight }}>{e.comment || "—"}</td>
+                            <td style={{ padding: "11px 12px", whiteSpace: "nowrap", color: G.brunLight }}>{e.entered_by || "—"}</td>
+                            <td style={{ padding: "11px 12px", whiteSpace: "nowrap", color: G.brunLight }}>{e.fee_type === "quotidien" ? "Frais quotidiens" : "Frais ponctuels"}</td>
                             <td style={{ padding: "11px 12px", whiteSpace: "nowrap" }}>
                               <div style={{ display: "flex", gap: 6 }}>
-                                <button onClick={() => setExpenseForm({ ...e })} title="Modifier" style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${G.gris}`, background: G.blanc, color: "#555", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                                <button onClick={() => setExpenseForm({ ...e })} title="Modifier" style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${G.gris}`, background: G.blanc, color: G.brunLight, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
                                 </button>
                                 <button onClick={() => confirm(`Supprimer la dépense « ${e.label} » ? Cette action est irréversible.`, () => deleteExpense(e))} title="Supprimer" style={{ width: 30, height: 30, borderRadius: 8, border: "1px solid rgba(231,76,60,0.25)", background: "rgba(231,76,60,0.08)", color: "#e74c3c", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
@@ -15277,7 +15277,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   </table>
                 </div>
               )}
-              <div style={{ fontSize: "0.72rem", color: "#aaa", marginTop: 10 }}>Affichage de {filtered.length} sur {expenses.length} dépense{expenses.length > 1 ? "s" : ""}. Les montants sont affichés dans leur devise d'origine ; le total est converti en {budgetCurrency === "EUR" ? "€" : "FCFA"}.</div>
+              <div style={{ fontSize: "0.72rem", color: G.brunLight, marginTop: 10 }}>Affichage de {filtered.length} sur {expenses.length} dépense{expenses.length > 1 ? "s" : ""}. Les montants sont affichés dans leur devise d'origine ; le total est converti en {budgetCurrency === "EUR" ? "€" : "FCFA"}.</div>
             </div>
             );
           })()}
@@ -15315,7 +15315,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             return (
             <div>
               <div style={{ marginBottom: 6, fontWeight: 800, fontSize: "1rem", color: G.brun }}>Résultat net</div>
-              <div style={{ fontSize: "0.8rem", color: "#888", marginBottom: 14 }}>Consultez votre performance financière. Les données sont calculées automatiquement.</div>
+              <div style={{ fontSize: "0.8rem", color: G.brunLight, marginBottom: 14 }}>Consultez votre performance financière. Les données sont calculées automatiquement.</div>
 
               {/* Sélecteurs de période + devise */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginBottom: 8 }}>
@@ -15331,7 +15331,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               {resultPeriod === "custom" && (
                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 14 }}>
                   <input type="date" value={resultFrom} onChange={e => setResultFrom(e.target.value)} style={{ padding: "8px 10px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.8rem", color: G.brun, background: G.blanc }} />
-                  <span style={{ color: "#aaa" }}>→</span>
+                  <span style={{ color: G.brunLight }}>→</span>
                   <input type="date" value={resultTo} onChange={e => setResultTo(e.target.value)} style={{ padding: "8px 10px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.8rem", color: G.brun, background: G.blanc }} />
                 </div>
               )}
@@ -15341,15 +15341,15 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   <div style={{ background: G.blanc, border: `1px solid ${G.gris}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
                     <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(39,174,96,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-                    <div><div style={{ fontSize: "0.72rem", color: "#888", fontWeight: 700 }}>Total recettes</div><div style={{ fontSize: "1.25rem", fontWeight: 900, color: "#27ae60" }}>{fmtBudget(totalRecettes)}</div><div style={{ fontSize: "0.68rem", color: "#aaa" }}>Entrées d'argent</div></div>
+                    <div><div style={{ fontSize: "0.72rem", color: G.brunLight, fontWeight: 700 }}>Total recettes</div><div style={{ fontSize: "1.25rem", fontWeight: 900, color: "#27ae60" }}>{fmtBudget(totalRecettes)}</div><div style={{ fontSize: "0.68rem", color: G.brunLight }}>Entrées d'argent</div></div>
                   </div>
                   <div style={{ background: G.blanc, border: `1px solid ${G.gris}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
                     <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(231,76,60,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div>
-                    <div><div style={{ fontSize: "0.72rem", color: "#888", fontWeight: 700 }}>Total dépenses</div><div style={{ fontSize: "1.25rem", fontWeight: 900, color: "#e74c3c" }}>{fmtBudget(totalDepenses)}</div><div style={{ fontSize: "0.68rem", color: "#aaa" }}>Sorties d'argent</div></div>
+                    <div><div style={{ fontSize: "0.72rem", color: G.brunLight, fontWeight: 700 }}>Total dépenses</div><div style={{ fontSize: "1.25rem", fontWeight: 900, color: "#e74c3c" }}>{fmtBudget(totalDepenses)}</div><div style={{ fontSize: "0.68rem", color: G.brunLight }}>Sorties d'argent</div></div>
                   </div>
                   <div style={{ background: G.blanc, border: `1px solid ${G.gris}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
                     <div style={{ width: 38, height: 38, borderRadius: "50%", background: marge >= 0 ? "rgba(39,174,96,0.12)" : "rgba(231,76,60,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: marge >= 0 ? "#27ae60" : "#e74c3c", fontWeight: 900 }}>%</div>
-                    <div><div style={{ fontSize: "0.72rem", color: "#888", fontWeight: 700 }}>Marge en %</div><div style={{ fontSize: "1.25rem", fontWeight: 900, color: marge >= 0 ? "#27ae60" : "#e74c3c" }}>{marge.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %</div><div style={{ fontSize: "0.68rem", color: "#aaa" }}>(Résultat net / Total recettes)</div></div>
+                    <div><div style={{ fontSize: "0.72rem", color: G.brunLight, fontWeight: 700 }}>Marge en %</div><div style={{ fontSize: "1.25rem", fontWeight: 900, color: marge >= 0 ? "#27ae60" : "#e74c3c" }}>{marge.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %</div><div style={{ fontSize: "0.68rem", color: G.brunLight }}>(Résultat net / Total recettes)</div></div>
                   </div>
                 </div>
                 {/* Colonne droite : grande carte Résultat net (verte si bénéfice, rouge si déficit) */}
@@ -15357,7 +15357,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   <div style={{ width: 64, height: 64, borderRadius: "50%", background: net >= 0 ? "#27ae60" : "#e74c3c", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/><path d="M21 12v-2a2 2 0 0 0-2-2H6"/><circle cx="16" cy="12" r="1"/></svg>
                   </div>
-                  <div style={{ fontSize: "0.85rem", color: "#888", fontWeight: 700 }}>Résultat net</div>
+                  <div style={{ fontSize: "0.85rem", color: G.brunLight, fontWeight: 700 }}>Résultat net</div>
                   <div style={{ fontSize: "2rem", fontWeight: 900, color: net >= 0 ? "#27ae60" : "#e74c3c", lineHeight: 1.1 }}>{fmtBudget(net)}</div>
                   <div style={{ fontSize: "0.8rem", fontWeight: 700, color: net >= 0 ? "#27ae60" : "#e74c3c" }}>{net >= 0 ? "Bénéfice" : "Déficit"} · {label}</div>
                 </div>
@@ -15367,7 +15367,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between", background: "rgba(39,174,96,0.06)", border: "1px solid rgba(39,174,96,0.2)", borderLeft: "4px solid #27ae60", borderRadius: 12, padding: "14px 18px" }}>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: "0.9rem", color: G.brun }}>Résultat net = <span style={{ color: "#27ae60" }}>Total Recettes</span> − <span style={{ color: "#e74c3c" }}>Total Dépenses</span></div>
-                  <div style={{ fontSize: "0.75rem", color: "#888", marginTop: 3 }}>Les calculs sont mis à jour automatiquement. Les frais quotidiens sont reconduits chaque jour de la période.</div>
+                  <div style={{ fontSize: "0.75rem", color: G.brunLight, marginTop: 3 }}>Les calculs sont mis à jour automatiquement. Les frais quotidiens sont reconduits chaque jour de la période.</div>
                 </div>
                 <button onClick={exportResult} style={{ background: "rgba(39,174,96,0.12)", color: "#1a8c4a", border: "1.5px solid rgba(39,174,96,0.35)", borderRadius: 50, padding: "10px 22px", fontSize: "0.85rem", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -15388,10 +15388,10 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
           <div onClick={e => e.stopPropagation()} style={{ background: G.blanc, borderRadius: 20, width: "100%", maxWidth: 460, maxHeight: "90vh", overflowY: "auto", padding: 22, boxShadow: "0 20px 60px rgba(0,0,0,0.25)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
               <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, margin: 0 }}>{expenseForm.id ? "Modifier la dépense" : "Ajouter une dépense"}</h3>
-              <button onClick={() => !expenseSaving && setExpenseForm(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#aaa", fontSize: "1.4rem", lineHeight: 1 }}>×</button>
+              <button onClick={() => !expenseSaving && setExpenseForm(null)} style={{ background: "none", border: "none", cursor: "pointer", color: G.brunLight, fontSize: "1.4rem", lineHeight: 1 }}>×</button>
             </div>
             {(() => {
-              const lbl = { display: "block", fontSize: "0.74rem", fontWeight: 700, color: "#888", marginBottom: 5 } as React.CSSProperties;
+              const lbl = { display: "block", fontSize: "0.74rem", fontWeight: 700, color: G.brunLight, marginBottom: 5 } as React.CSSProperties;
               const inp = { width: "100%", boxSizing: "border-box" as const, border: `1.5px solid ${G.gris}`, borderRadius: 10, padding: "10px 12px", fontSize: "0.86rem", outline: "none", color: G.brun, background: G.blanc };
               const set = (patch: Partial<Expense>) => setExpenseForm(f => f ? { ...f, ...patch } : f);
               return (
@@ -15434,7 +15434,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         return (
                           <button key={k} onClick={() => set({ fee_type: k })} style={{ flex: 1, textAlign: "left", padding: "10px 12px", borderRadius: 10, cursor: "pointer", border: `2px solid ${on ? "#27ae60" : G.gris}`, background: on ? "rgba(39,174,96,0.08)" : G.blanc }}>
                             <div style={{ fontSize: "0.82rem", fontWeight: 700, color: on ? "#27ae60" : G.brun }}>{t}</div>
-                            <div style={{ fontSize: "0.68rem", color: "#999", marginTop: 2 }}>{d}</div>
+                            <div style={{ fontSize: "0.68rem", color: G.brunLight, marginTop: 2 }}>{d}</div>
                           </button>
                         );
                       })}
@@ -15486,7 +15486,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   <button disabled={selectedLogIds.size === 0} onClick={() => confirm(`Supprimer définitivement ${selectedLogIds.size} action${selectedLogIds.size > 1 ? "s" : ""} sélectionnée${selectedLogIds.size > 1 ? "s" : ""} ? Cette action est irréversible.`, deleteSelectedAdminLogs)} style={{ background: selectedLogIds.size === 0 ? "rgba(231,76,60,0.04)" : "rgba(231,76,60,0.12)", color: "#e74c3c", border: "1.5px solid rgba(231,76,60,0.25)", borderRadius: 50, padding: "6px 14px", fontSize: "0.78rem", fontWeight: 700, cursor: selectedLogIds.size === 0 ? "not-allowed" : "pointer", opacity: selectedLogIds.size === 0 ? 0.5 : 1 }}>
                     Supprimer ({selectedLogIds.size})
                   </button>
-                  <button onClick={() => { setLogSelectMode(false); setSelectedLogIds(new Set()); }} style={{ background: G.blanc, color: "#666", border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "6px 14px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>
+                  <button onClick={() => { setLogSelectMode(false); setSelectedLogIds(new Set()); }} style={{ background: G.blanc, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "6px 14px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>
                     Annuler
                   </button>
                 </>
@@ -15513,14 +15513,14 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             const employees = Object.entries(byEmp).sort((a, b) => b[1].total - a[1].total);
             return (
               <div style={{ marginBottom: 18 }}>
-                <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "#555", marginBottom: 8 }}>Activité par admin</div>
+                <div style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brunLight, marginBottom: 8 }}>Activité par admin</div>
                 <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
                   {([["today", "Aujourd'hui"], ["7d", "7 jours"], ["30d", "30 jours"], ["all", "Tout"]] as [string, string][]).map(([k, label]) => (
                     <button key={k} onClick={() => setLogsPeriod(k as any)} style={{ flex: 1, padding: "6px 8px", borderRadius: 8, border: `1.5px solid ${logsPeriod === k ? "#8e44ad" : G.gris}`, background: logsPeriod === k ? "rgba(142,68,173,0.08)" : G.blanc, color: logsPeriod === k ? "#8e44ad" : "#888", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer" }}>{label}</button>
                   ))}
                 </div>
                 {employees.length === 0 ? (
-                  <div style={{ textAlign: "center", padding: "20px", color: "#aaa", fontSize: "0.82rem" }}>Aucune action sur cette période</div>
+                  <div style={{ textAlign: "center", padding: "20px", color: G.brunLight, fontSize: "0.82rem" }}>Aucune action sur cette période</div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                     {employees.map(([name, stats]) => (
@@ -15531,7 +15531,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         </div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                           {Object.entries(stats.types).sort((a, b) => b[1] - a[1]).map(([cat, n]) => (
-                            <span key={cat} style={{ background: G.creme, borderRadius: 8, padding: "3px 8px", fontSize: "0.7rem", color: "#555", fontWeight: 600 }}>{cat} : {n}</span>
+                            <span key={cat} style={{ background: G.creme, borderRadius: 8, padding: "3px 8px", fontSize: "0.7rem", color: G.brunLight, fontWeight: 600 }}>{cat} : {n}</span>
                           ))}
                         </div>
                       </div>
@@ -15539,14 +15539,14 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   </div>
                 )}
                 <div style={{ borderTop: "1px solid #eee", margin: "16px 0 4px" }} />
-                <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "#555", marginBottom: 4 }}>Détail des actions</div>
+                <div style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brunLight, marginBottom: 4 }}>Détail des actions</div>
               </div>
             );
           })()}
           {logsLoading ? (
             <div style={{ textAlign: "center", padding: 40 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8e44ad" strokeWidth="2" strokeLinecap="round" style={{ animation: "pulse 0.8s ease-in-out infinite" }}><circle cx="12" cy="12" r="10"/></svg></div>
           ) : adminLogs.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "40px 20px", color: "#aaa", fontSize: "0.88rem" }}>Aucune action enregistrée</div>
+            <div style={{ textAlign: "center", padding: "40px 20px", color: G.brunLight, fontSize: "0.88rem" }}>Aucune action enregistrée</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {adminLogs.map(log => (
@@ -15562,11 +15562,11 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 3 }}>
                       <span style={{ fontWeight: 700, fontSize: "0.82rem", color: G.brun }}>{log.admin_name}</span>
-                      <span style={{ fontSize: "0.68rem", color: "#aaa" }}>{new Date(log.created_at).toLocaleString("fr-FR")}</span>
+                      <span style={{ fontSize: "0.68rem", color: G.brunLight }}>{new Date(log.created_at).toLocaleString("fr-FR")}</span>
                     </div>
-                    <div style={{ fontSize: "0.8rem", color: "#555", lineHeight: 1.4 }}>{log.action}</div>
+                    <div style={{ fontSize: "0.8rem", color: G.brunLight, lineHeight: 1.4 }}>{log.action}</div>
                     {log.target_user_id && (
-                      <div style={{ fontSize: "0.68rem", color: "#aaa", marginTop: 3, fontFamily: "monospace" }}>Membre : {log.target_user_id.slice(0, 16)}…</div>
+                      <div style={{ fontSize: "0.68rem", color: G.brunLight, marginTop: 3, fontFamily: "monospace" }}>Membre : {log.target_user_id.slice(0, 16)}…</div>
                     )}
                   </div>
                   {auth.userId === SUPER_ADMIN_ID && !logSelectMode && (
@@ -16065,7 +16065,7 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: 
               </div>
             </div>
             <div style={{ display: "flex", gap: 9 }}>
-              <button onClick={onViewProfile} style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, background: "#fff", color: G.or, border: `1.5px solid ${G.or}`, borderRadius: 11, padding: "11px 12px", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer", whiteSpace: "nowrap" }}>
+              <button onClick={onViewProfile} style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, background: G.blanc, color: G.or, border: `1.5px solid ${G.or}`, borderRadius: 11, padding: "11px 12px", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer", whiteSpace: "nowrap" }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
                 Voir le profil
               </button>
@@ -16193,9 +16193,9 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
   const headerTitle = editPub ? "Modifier l'annonce" : isPropose ? "Proposer un service" : presetType === "cherche" ? "Publier votre besoin" : "Publier une annonce";
   const submitLabel = editPub ? "Enregistrer les modifications" : isPropose ? "Publier mon service" : "Publier l'annonce";
 
-  const lbl = (txt: string) => <label style={{ display: "block", fontWeight: 700, fontSize: "0.9rem", color: "#1A1A1A", marginBottom: 8 }}>{txt} <span style={{ color: "#E11D48" }}>*</span></label>;
-  const fieldSel: React.CSSProperties = { width: "100%", appearance: "none", WebkitAppearance: "none", MozAppearance: "none", border: `1.5px solid ${G.gris}`, background: G.blanc, color: "#1A1A1A", borderRadius: 14, padding: "15px 42px 15px 48px", fontSize: 16, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxSizing: "border-box" };
-  const fieldInput: React.CSSProperties = { width: "100%", border: `1.5px solid ${G.gris}`, background: G.blanc, color: "#1A1A1A", borderRadius: 14, padding: "15px 16px", fontSize: 16, fontWeight: 500, fontFamily: "inherit", boxSizing: "border-box", outline: "none" };
+  const lbl = (txt: string) => <label style={{ display: "block", fontWeight: 700, fontSize: "0.9rem", color: G.brun, marginBottom: 8 }}>{txt} <span style={{ color: "#E11D48" }}>*</span></label>;
+  const fieldSel: React.CSSProperties = { width: "100%", appearance: "none", WebkitAppearance: "none", MozAppearance: "none", border: `1.5px solid ${G.gris}`, background: G.blanc, color: G.brun, borderRadius: 14, padding: "15px 42px 15px 48px", fontSize: 16, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", boxSizing: "border-box" };
+  const fieldInput: React.CSSProperties = { width: "100%", border: `1.5px solid ${G.gris}`, background: G.blanc, color: G.brun, borderRadius: 14, padding: "15px 16px", fontSize: 16, fontWeight: 500, fontFamily: "inherit", boxSizing: "border-box", outline: "none" };
   const iconLeft = (node: React.ReactNode) => <span style={{ position: "absolute", left: 15, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", display: "flex" }}>{node}</span>;
   const chevronRight = <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", display: "flex" }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>;
 
@@ -16204,7 +16204,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
     <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12, padding: "13px 15px", borderBottom: last ? "none" : `1px solid ${G.gris}` }}>
       <span style={{ display: "flex", flexShrink: 0 }}>{icon}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: "0.74rem", color: "#9AA0A6", fontWeight: 600 }}>{label}</div>
+        <div style={{ fontSize: "0.74rem", color: G.brunLight, fontWeight: 600 }}>{label}</div>
         <div style={{ fontSize: "0.95rem", color: value ? "#1A1A1A" : "#9AA0A6", fontWeight: value ? 700 : 500 }}>{value || placeholder}</div>
       </div>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
@@ -16241,12 +16241,12 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
       {lbl("Catégorie")}
       <div style={{ position: "relative", marginBottom: categoryLocked ? 6 : 18 }}>
         {iconLeft(catIcon(categoryLocked && lockedCat ? lockedCat : cat, G.or, 22))}
-        <select value={categoryLocked && lockedCat ? lockedCat : cat} onChange={e => setCat(e.target.value)} disabled={categoryLocked} style={{ ...fieldSel, ...(categoryLocked ? { background: "#F0F0F2", color: "#888", cursor: "not-allowed" } : {}) }}>
+        <select value={categoryLocked && lockedCat ? lockedCat : cat} onChange={e => setCat(e.target.value)} disabled={categoryLocked} style={{ ...fieldSel, ...(categoryLocked ? { background: G.creme, color: G.brunLight, cursor: "not-allowed" } : {}) }}>
           {PUB_CATS.filter(c => c.id !== "all").map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
         </select>
         {chevronRight}
       </div>
-      {categoryLocked && <div style={{ fontSize: "0.78rem", color: "#9AA0A6", marginBottom: 16, display: "flex", alignItems: "center", gap: 6, lineHeight: 1.4 }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Catégorie de votre compte — seul le métier est modifiable.</div>}
+      {categoryLocked && <div style={{ fontSize: "0.78rem", color: G.brunLight, marginBottom: 16, display: "flex", alignItems: "center", gap: 6, lineHeight: 1.4 }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Catégorie de votre compte — seul le métier est modifiable.</div>}
 
       {lbl("Métier")}
       <div style={{ position: "relative", marginBottom: 18 }}>
@@ -16263,7 +16263,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
       {lbl("Description")}
       <div style={{ position: "relative", marginBottom: 18 }}>
         <textarea value={desc} onChange={e => setDesc(e.target.value.slice(0, 500))} rows={4} maxLength={500} placeholder={isPropose ? "Décrivez votre service, vos compétences, vos méthodes…" : "Détails, surface, délais, matériaux fournis…"} style={{ ...fieldInput, resize: "vertical", paddingBottom: 28 }} />
-        <span style={{ position: "absolute", right: 14, bottom: 14, fontSize: "0.75rem", color: "#9AA0A6", pointerEvents: "none" }}>{desc.length}/500</span>
+        <span style={{ position: "absolute", right: 14, bottom: 14, fontSize: "0.75rem", color: G.brunLight, pointerEvents: "none" }}>{desc.length}/500</span>
       </div>
 
       {lbl(isPropose ? "Tarif indicatif (FCFA)" : "Budget (FCFA)")}
@@ -16272,7 +16272,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
           ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="M21 12a2 2 0 0 0-2-2h-4a2 2 0 0 0 0 4h4a2 2 0 0 0 2-2z"/></svg>)}
         <input type="number" inputMode="numeric" value={budget} onChange={e => setBudget(e.target.value)} placeholder={isPropose ? "Ex : à partir de 50 000" : "300000"} style={{ ...fieldSel, cursor: "text", padding: "15px 64px 15px 48px", fontWeight: 500 }} />
-        <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", color: "#9AA0A6", fontSize: 14, fontWeight: 700, pointerEvents: "none" }}>FCFA</span>
+        <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", color: G.brunLight, fontSize: 14, fontWeight: 700, pointerEvents: "none" }}>FCFA</span>
       </div>
 
       {isPropose ? (
@@ -16284,13 +16284,13 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
             {locRow(<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/></svg>, "Quartier", quartier, "Sélectionnez un quartier", ["Autre"], setQuartier, true)}
           </div>
 
-          <label style={{ display: "block", fontWeight: 700, fontSize: "0.9rem", color: "#1A1A1A", marginBottom: 8 }}>Photos <span style={{ color: "#9AA0A6", fontWeight: 500 }}>(optionnel)</span></label>
+          <label style={{ display: "block", fontWeight: 700, fontSize: "0.9rem", color: G.brun, marginBottom: 8 }}>Photos <span style={{ color: G.brunLight, fontWeight: 500 }}>(optionnel)</span></label>
           <div style={{ border: `1.5px solid ${G.gris}`, borderRadius: 14, background: G.blanc, padding: "14px 15px", marginBottom: 18 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5a2 2 0 0 0-2.8 0L5 21"/></svg>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: "0.92rem", fontWeight: 700, color: "#1A1A1A", lineHeight: 1.3 }}>Ajouter des photos de vos réalisations</div>
-                <div style={{ fontSize: "0.78rem", color: "#9AA0A6", marginTop: 2 }}>Jusqu'à 5 photos</div>
+                <div style={{ fontSize: "0.92rem", fontWeight: 700, color: G.brun, lineHeight: 1.3 }}>Ajouter des photos de vos réalisations</div>
+                <div style={{ fontSize: "0.78rem", color: G.brunLight, marginTop: 2 }}>Jusqu'à 5 photos</div>
               </div>
               <button onClick={() => photoInput.current?.click()} disabled={photos.length >= 5 || uploading} aria-label="Ajouter une photo" style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 12, border: "none", background: "rgba(212,168,67,0.16)", color: G.or, cursor: photos.length >= 5 || uploading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: photos.length >= 5 ? 0.5 : 1 }}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -16305,7 +16305,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
                     <button onClick={() => setPhotos(p => p.filter((_, j) => j !== i))} aria-label="Retirer" style={{ position: "absolute", top: 2, right: 2, width: 20, height: 20, borderRadius: "50%", border: "none", background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: 12, lineHeight: "20px", cursor: "pointer", padding: 0 }}>×</button>
                   </div>
                 ))}
-                {uploading && <div style={{ width: 64, height: 64, borderRadius: 10, border: `1px dashed ${G.gris}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", color: "#9AA0A6" }}>Envoi…</div>}
+                {uploading && <div style={{ width: 64, height: 64, borderRadius: 10, border: `1px dashed ${G.gris}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", color: G.brunLight }}>Envoi…</div>}
               </div>
             )}
           </div>
@@ -16349,7 +16349,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
     return (
       <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
         <div style={{ position: "sticky", top: 0, zIndex: 5, background: G.creme, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "16px 18px", borderBottom: `1px solid ${G.gris}` }}>
-          <h3 style={{ fontSize: 18, fontWeight: 900, margin: 0, color: "#1A1A1A" }}>{headerTitle}</h3>
+          <h3 style={{ fontSize: 18, fontWeight: 900, margin: 0, color: G.brun }}>{headerTitle}</h3>
           <button onClick={onClose} aria-label="Fermer" style={{ width: 32, height: 32, borderRadius: "50%", border: "none", background: G.gris, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -16412,7 +16412,7 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>Paiement en cours de vérification</div>
-        <div style={{ fontSize: "0.86rem", color: "#666", lineHeight: 1.55, marginBottom: 20 }}>
+        <div style={{ fontSize: "0.86rem", color: G.brunLight, lineHeight: 1.55, marginBottom: 20 }}>
           Dès que votre paiement de <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> est confirmé, votre annonce passera en tête des résultats pendant <b>{tier.days} jour{tier.days > 1 ? "s" : ""}</b>. Activation généralement sous 15 minutes.
         </div>
         <Btn variant="gold" onClick={onClose} style={{ width: "100%" }}>Terminé</Btn>
@@ -16427,7 +16427,7 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
       </div>
       {TIERS.map(t => (
         <div key={t.price} onClick={() => setTier(t)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: `1.5px solid ${tier.price === t.price ? G.or : G.gris}`, background: tier.price === t.price ? "rgba(212,168,67,0.06)" : G.blanc, borderRadius: 13, padding: "14px 15px", cursor: "pointer", marginBottom: 11 }}>
-          <div><b style={{ fontSize: 15 }}>{t.label}</b><br /><small style={{ color: "#999" }}>{t.sub}</small></div>
+          <div><b style={{ fontSize: 15 }}>{t.label}</b><br /><small style={{ color: G.brunLight }}>{t.sub}</small></div>
           <b style={{ fontSize: 16, color: tier.price === t.price ? "#8B6914" : "#111" }}>{t.price.toLocaleString("fr-FR")} FCFA</b>
         </div>
       ))}
@@ -16442,16 +16442,16 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
           );
         })}
       </div>
-      <div style={{ background: G.creme, border: `1px solid ${G.gris}`, borderRadius: 12, padding: "13px 15px", margin: "12px 0", fontSize: "0.84rem", color: "#444", lineHeight: 1.6 }}>
+      <div style={{ background: G.creme, border: `1px solid ${G.gris}`, borderRadius: 12, padding: "13px 15px", margin: "12px 0", fontSize: "0.84rem", color: G.brun, lineHeight: 1.6 }}>
         Envoyez <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> au numéro <b>{operator === "MTN" ? "MTN MoMo" : "Airtel Money"}</b> :
         <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, margin: "4px 0 2px", letterSpacing: 0.5 }}>{payNumber}</div>
-        {payResp && <div style={{ fontSize: "0.76rem", color: "#888" }}>Au nom de : {payResp}</div>}
+        {payResp && <div style={{ fontSize: "0.76rem", color: G.brunLight }}>Au nom de : {payResp}</div>}
       </div>
       <div style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, marginBottom: 6 }}>Référence de la transaction reçue par SMS</div>
       <input value={txRef} onChange={e => setTxRef(e.target.value)} placeholder="Ex : PP260523.2232.A52074" style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${txRef ? G.or : G.gris}`, borderRadius: 12, padding: "13px 14px", fontSize: "0.9rem", fontWeight: 600, fontFamily: "inherit", outline: "none", marginBottom: 14 }} />
       {err && <div style={{ background: "rgba(231,76,60,0.08)", border: "1.5px solid #e74c3c", borderRadius: 12, padding: "10px 12px", marginBottom: 10, fontSize: "0.8rem", color: "#c0392b", lineHeight: 1.5 }}>{err}</div>}
       <Btn variant="gold" onClick={submit} disabled={!txRef.trim()} loading={paying} style={{ width: "100%" }}>J'ai payé — envoyer la demande</Btn>
-      <div style={{ fontSize: "0.74rem", color: "#999", textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>Votre annonce sera mise en avant après vérification du paiement (généralement sous 15 min).</div>
+      <div style={{ fontSize: "0.74rem", color: G.brunLight, textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>Votre annonce sera mise en avant après vérification du paiement (généralement sous 15 min).</div>
     </Sheet>
   );
 }
@@ -16500,7 +16500,7 @@ function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: str
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>Paiement en cours de vérification</div>
-        <div style={{ fontSize: "0.86rem", color: "#666", lineHeight: 1.55, marginBottom: 20 }}>
+        <div style={{ fontSize: "0.86rem", color: G.brunLight, lineHeight: 1.55, marginBottom: 20 }}>
           Dès que votre paiement de <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> est confirmé, votre fiche sera sponsorisée et apparaîtra en tête du répertoire pendant <b>{tier.days} jours</b>. Activation généralement sous 15 minutes.
         </div>
         <Btn variant="gold" onClick={onClose} style={{ width: "100%" }}>Terminé</Btn>
@@ -16515,7 +16515,7 @@ function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: str
       </div>
       {TIERS.map(t => (
         <div key={t.price} onClick={() => setTier(t)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: `1.5px solid ${tier.price === t.price ? G.or : G.gris}`, background: tier.price === t.price ? "rgba(212,168,67,0.06)" : G.blanc, borderRadius: 13, padding: "14px 15px", cursor: "pointer", marginBottom: 11 }}>
-          <div><b style={{ fontSize: 15 }}>{t.label}</b><br /><small style={{ color: "#999" }}>{t.sub}</small></div>
+          <div><b style={{ fontSize: 15 }}>{t.label}</b><br /><small style={{ color: G.brunLight }}>{t.sub}</small></div>
           <b style={{ fontSize: 16, color: tier.price === t.price ? "#8B6914" : "#111" }}>{t.price.toLocaleString("fr-FR")} FCFA</b>
         </div>
       ))}
@@ -16530,16 +16530,16 @@ function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: str
           );
         })}
       </div>
-      <div style={{ background: G.creme, border: `1px solid ${G.gris}`, borderRadius: 12, padding: "13px 15px", margin: "12px 0", fontSize: "0.84rem", color: "#444", lineHeight: 1.6 }}>
+      <div style={{ background: G.creme, border: `1px solid ${G.gris}`, borderRadius: 12, padding: "13px 15px", margin: "12px 0", fontSize: "0.84rem", color: G.brun, lineHeight: 1.6 }}>
         Envoyez <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> au numéro <b>{operator === "MTN" ? "MTN MoMo" : "Airtel Money"}</b> :
         <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, margin: "4px 0 2px", letterSpacing: 0.5 }}>{payNumber}</div>
-        {payResp && <div style={{ fontSize: "0.76rem", color: "#888" }}>Au nom de : {payResp}</div>}
+        {payResp && <div style={{ fontSize: "0.76rem", color: G.brunLight }}>Au nom de : {payResp}</div>}
       </div>
       <div style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, marginBottom: 6 }}>Référence de la transaction reçue par SMS</div>
       <input value={txRef} onChange={e => setTxRef(e.target.value)} placeholder="Ex : PP260523.2232.A52074" style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${txRef ? G.or : G.gris}`, borderRadius: 12, padding: "13px 14px", fontSize: "0.9rem", fontWeight: 600, fontFamily: "inherit", outline: "none", marginBottom: 14 }} />
       {err && <div style={{ background: "rgba(231,76,60,0.08)", border: "1.5px solid #e74c3c", borderRadius: 12, padding: "10px 12px", marginBottom: 10, fontSize: "0.8rem", color: "#c0392b", lineHeight: 1.5 }}>{err}</div>}
       <Btn variant="gold" onClick={submit} disabled={!txRef.trim()} loading={paying} style={{ width: "100%" }}>J'ai payé — envoyer la demande</Btn>
-      <div style={{ fontSize: "0.74rem", color: "#999", textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>Votre fiche sera sponsorisée après vérification du paiement (généralement sous 15 min).</div>
+      <div style={{ fontSize: "0.74rem", color: G.brunLight, textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>Votre fiche sera sponsorisée après vérification du paiement (généralement sous 15 min).</div>
     </Sheet>
   );
 }
@@ -16837,10 +16837,10 @@ function PubDetail({ auth, pub: initialPub, onBack, onChanged }: { auth: Auth; p
               <span style={{ width: 7, height: 7, borderRadius: "50%", background: paused ? "#6B7280" : "#16A34A" }} />{paused ? "En pause" : "Active"}
             </span>
           </div>
-          <span style={{ fontSize: 12.5, color: "#9AA0A6", flexShrink: 0 }}>{timeAgo(pub.created_at)}</span>
+          <span style={{ fontSize: 12.5, color: G.brunLight, flexShrink: 0 }}>{timeAgo(pub.created_at)}</span>
         </div>
 
-        <h2 style={{ fontSize: "1.35rem", fontWeight: 900, color: "#1A1A1A", margin: "0 0 16px", lineHeight: 1.25, letterSpacing: "-0.3px" }}>{pub.title}</h2>
+        <h2 style={{ fontSize: "1.35rem", fontWeight: 900, color: G.brun, margin: "0 0 16px", lineHeight: 1.25, letterSpacing: "-0.3px" }}>{pub.title}</h2>
 
         {pub.photos && pub.photos.length > 0 && (
           <div style={{ display: "flex", gap: 8, overflowX: "auto", marginBottom: 16, paddingBottom: 2 }}>
@@ -16848,22 +16848,22 @@ function PubDetail({ auth, pub: initialPub, onBack, onChanged }: { auth: Auth; p
           </div>
         )}
 
-        <div style={{ fontSize: "0.95rem", fontWeight: 800, color: "#1A1A1A", marginBottom: 7 }}>Description</div>
-        <div style={{ fontSize: "0.95rem", color: "#4B5563", lineHeight: 1.6, ...(expanded ? {} : { display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }) }}>{pub.description}</div>
+        <div style={{ fontSize: "0.95rem", fontWeight: 800, color: G.brun, marginBottom: 7 }}>Description</div>
+        <div style={{ fontSize: "0.95rem", color: G.brunLight, lineHeight: 1.6, ...(expanded ? {} : { display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }) }}>{pub.description}</div>
         {longDesc && <button onClick={() => setExpanded(v => !v)} style={{ background: "none", border: "none", color: G.or, fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", padding: "6px 0 0", fontFamily: "inherit" }}>{expanded ? "Voir moins" : "Voir plus"}</button>}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 12, margin: "18px 0 4px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: "0.95rem", color: "#374151", fontWeight: 600 }}><PinIcon color="#EF4444" /> {pub.location ? `${pub.location}, ${pub.city}` : pub.city}</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: "0.95rem", color: "#374151", fontWeight: 600 }}><TagIcon color={G.or} /> {priceTxt}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: "0.95rem", color: G.brun, fontWeight: 600 }}><PinIcon color="#EF4444" /> {pub.location ? `${pub.location}, ${pub.city}` : pub.city}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: "0.95rem", color: G.brun, fontWeight: 600 }}><TagIcon color={G.or} /> {priceTxt}</div>
         </div>
 
         {/* statistiques */}
-        <div style={{ fontSize: "0.95rem", fontWeight: 800, color: "#1A1A1A", margin: "22px 0 12px" }}>Statistiques</div>
+        <div style={{ fontSize: "0.95rem", fontWeight: 800, color: G.brun, margin: "22px 0 12px" }}>Statistiques</div>
         <div style={{ display: "flex", gap: 12, marginBottom: 22 }}>
           {[{ n: vues, l: "Vues" }, { n: reponses, l: "Réponses" }].map(s => (
             <div key={s.l} style={{ flex: 1, background: G.blanc, border: `1px solid ${G.gris}`, borderRadius: 14, padding: "16px 12px", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-              <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "#1A1A1A", lineHeight: 1.1 }}>{s.n}</div>
-              <div style={{ fontSize: "0.82rem", color: "#9AA0A6", marginTop: 3 }}>{s.l}</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 900, color: G.brun, lineHeight: 1.1 }}>{s.n}</div>
+              <div style={{ fontSize: "0.82rem", color: G.brunLight, marginTop: 3 }}>{s.l}</div>
             </div>
           ))}
         </div>
@@ -16920,10 +16920,10 @@ function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: ()
         <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Mes publications</h3>
       </div>
       <div className="dgrid" style={{ padding: "14px 16px 96px", display: "flex", flexDirection: "column", gap: 14 }}>
-        {loading && <p className="dspan" style={{ textAlign: "center", color: "#999", padding: 22 }}>Chargement…</p>}
+        {loading && <p className="dspan" style={{ textAlign: "center", color: G.brunLight, padding: 22 }}>Chargement…</p>}
         {!loading && pubs.length === 0 && (
-          <div className="dspan" style={{ textAlign: "center", padding: "48px 20px", color: "#999" }}>
-            <p style={{ fontWeight: 700, color: "#444", marginBottom: 6 }}>Aucune publication pour le moment</p>
+          <div className="dspan" style={{ textAlign: "center", padding: "48px 20px", color: G.brunLight }}>
+            <p style={{ fontWeight: 700, color: G.brun, marginBottom: 6 }}>Aucune publication pour le moment</p>
             <p style={{ fontSize: "0.85rem" }}>Vos annonces publiées apparaîtront ici.</p>
           </div>
         )}
@@ -16967,15 +16967,15 @@ function PublierHub({ auth, accountType, onGoFeed, onGoMessages }: { auth: Auth;
 
   return (
     <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", boxSizing: "border-box", overflowX: "hidden", padding: "22px 16px 24px" }}>
-      <h2 style={{ fontSize: "1.5rem", fontWeight: 900, color: "#1A1A1A", margin: "0 0 4px", letterSpacing: "-0.5px" }}>Publier</h2>
-      <p style={{ fontSize: "0.92rem", color: "#6B7280", margin: "0 0 22px" }}>Que souhaitez-vous faire ?</p>
+      <h2 style={{ fontSize: "1.5rem", fontWeight: 900, color: G.brun, margin: "0 0 4px", letterSpacing: "-0.5px" }}>Publier</h2>
+      <p style={{ fontSize: "0.92rem", color: G.brunLight, margin: "0 0 22px" }}>Que souhaitez-vous faire ?</p>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {items.map(it => (
           <button key={it.key} onClick={() => setView(it.key)} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", maxWidth: "100%", boxSizing: "border-box", textAlign: "left", cursor: "pointer", background: G.blanc, border: `1px solid ${G.gris}`, borderRadius: 18, padding: "18px 16px", boxShadow: "0 2px 10px rgba(0,0,0,0.04)", fontFamily: "inherit" }}>
             <div style={{ width: 52, height: 52, flexShrink: 0, borderRadius: 14, background: it.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>{it.icon}</div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: "1rem", fontWeight: 800, color: "#1A1A1A", marginBottom: 3, letterSpacing: "-0.2px" }}>{it.title}</div>
-              <div style={{ fontSize: "0.8rem", lineHeight: 1.35, color: "#6B7280" }}>{it.sub}</div>
+              <div style={{ fontSize: "1rem", fontWeight: 800, color: G.brun, marginBottom: 3, letterSpacing: "-0.2px" }}>{it.title}</div>
+              <div style={{ fontSize: "0.8rem", lineHeight: 1.35, color: G.brunLight }}>{it.sub}</div>
             </div>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9CDD3" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
           </button>
@@ -16993,7 +16993,7 @@ function ProCard({ pro, onOpen, isFav, onToggleFav }: { pro: Profile; onOpen: ()
   const cat = PUB_CATS.find(c => c.id === pro.category)?.label || pro.category;
   return (
     <div onClick={onOpen} style={{ background: G.blanc, border: `1.5px solid ${pro.is_sponsored ? G.or : G.gris}`, borderRadius: 14, padding: 14, display: "flex", gap: 12, cursor: "pointer", position: "relative", boxShadow: pro.is_sponsored ? "0 4px 16px rgba(212,168,67,0.16)" : "none" }}>
-      {pro.is_sponsored && <div style={{ position: "absolute", top: -1, right: 14, background: G.or, color: "#111", fontSize: 9.5, fontWeight: 800, padding: "3px 9px", borderRadius: "0 0 6px 6px", letterSpacing: 0.3 }}>★ SPONSORISÉ</div>}
+      {pro.is_sponsored && <div style={{ position: "absolute", top: -1, right: 14, background: G.or, color: G.brun, fontSize: 9.5, fontWeight: 800, padding: "3px 9px", borderRadius: "0 0 6px 6px", letterSpacing: 0.3 }}>★ SPONSORISÉ</div>}
       <button onClick={(e) => { e.stopPropagation(); onToggleFav(); }} aria-label={isFav ? "Retirer des favoris" : "Ajouter aux favoris"} style={{ position: "absolute", bottom: 8, right: 10, border: "none", background: "transparent", cursor: "pointer", padding: 4, fontSize: 20, lineHeight: 1, color: isFav ? G.rouge : "#cfc8be" }}>{isFav ? "♥" : "♡"}</button>
       <div style={{ flexShrink: 0 }}>
         {pro.photo_url
@@ -17002,15 +17002,15 @@ function ProCard({ pro, onOpen, isFav, onToggleFav }: { pro: Profile; onOpen: ()
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
-          <span style={{ fontSize: "0.98rem", fontWeight: 800, color: "#111", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pro.company || pro.name}</span>
+          <span style={{ fontSize: "0.98rem", fontWeight: 800, color: G.brun, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pro.company || pro.name}</span>
           {pro.is_verified && <VerifiedBadge size={14} />}
         </div>
-        <div style={{ fontSize: "0.82rem", color: "#444", fontWeight: 600, marginBottom: 5 }}>{pro.metier || "Professionnel"}</div>
+        <div style={{ fontSize: "0.82rem", color: G.brun, fontWeight: 600, marginBottom: 5 }}>{pro.metier || "Professionnel"}</div>
         <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
           {cat && <span style={{ background: "rgba(212,168,67,0.15)", color: "#8B6914", borderRadius: 50, padding: "2px 8px", fontSize: "0.66rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.3 }}>{cat}</span>}
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: "0.74rem", color: "#777", fontWeight: 600 }}><PinIcon color="#9AA0A6" size={13} /> {pro.city}{pro.zone ? " · " + pro.zone : ""}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: "0.74rem", color: G.brunLight, fontWeight: 600 }}><PinIcon color="#9AA0A6" size={13} /> {pro.city}{pro.zone ? " · " + pro.zone : ""}</span>
         </div>
-        <div style={{ marginTop: 6, fontSize: "0.76rem", fontWeight: 700, color: "#333" }}>
+        <div style={{ marginTop: 6, fontSize: "0.76rem", fontWeight: 700, color: G.brun }}>
           <span style={{ color: G.or }}>★</span> {pro.rating_count ? `${(pro.rating_avg || 0).toFixed(1)} (${pro.rating_count})` : "Nouveau"}
         </div>
       </div>
@@ -17063,7 +17063,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
         {!mine && <button onClick={onToggleFav} aria-label={isFav ? "Retirer des favoris" : "Ajouter aux favoris"} style={{ position: "absolute", top: 14, right: 14, width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.16)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.25)" }}>
           <svg width="19" height="19" viewBox="0 0 24 24" fill={isFav ? G.or : "none"} stroke={isFav ? G.or : "#fff"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         </button>}
-        {pro.is_sponsored && <div style={{ position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)", background: G.or, color: "#111", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 50, whiteSpace: "nowrap" }}>★ SPONSORISÉ</div>}
+        {pro.is_sponsored && <div style={{ position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)", background: G.or, color: G.brun, fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 50, whiteSpace: "nowrap" }}>★ SPONSORISÉ</div>}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 20 }}>
           {pro.photo_url
             ? <img src={pro.photo_url} alt="" style={{ width: 96, height: 96, borderRadius: 20, objectFit: "cover", border: `2px solid ${G.or}` }} />
@@ -17098,7 +17098,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
         <div style={{ padding: "16px", display: "flex", gap: 8 }}>
           <button className="moyo-btn-primary" onClick={contactPro} style={{ flex: 1, minWidth: 0, background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", boxSizing: "border-box", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>Message</button>
           {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: "#25D366", color: "#fff", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>WhatsApp</div></a>}
-          {tel && <a href={`tel:${tel}`} style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, color: "#111", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>Appeler</div></a>}
+          {tel && <a href={`tel:${tel}`} style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, color: G.brun, borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>Appeler</div></a>}
         </div>
       )}
 
@@ -17107,13 +17107,13 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
       <div style={{ padding: "4px 16px 40px" }}>
         {/* Description */}
         {pro.bio && <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 16, marginBottom: 14 }}>
-          <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#999", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>À propos</div>
-          <div style={{ fontSize: "0.9rem", color: "#333", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{pro.bio}</div>
+          <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>À propos</div>
+          <div style={{ fontSize: "0.9rem", color: G.brun, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{pro.bio}</div>
         </div>}
 
         {/* Galerie */}
         {gallery.length > 0 && <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#999", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Réalisations</div>
+          <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Réalisations</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
             {gallery.map((url, i) => (
               <div key={i} style={{ position: "relative", paddingBottom: "100%", borderRadius: 10, overflow: "hidden", border: `1px solid ${G.gris}` }}>
@@ -17125,26 +17125,26 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
 
         {/* Infos pratiques */}
         {(pro.hours || pro.zone) && <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 16, marginBottom: 14 }}>
-          <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#999", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Infos pratiques</div>
-          {pro.hours && <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.86rem", color: "#333", marginBottom: 6 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>{pro.hours}</div>}
-          {pro.zone && <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.86rem", color: "#333" }}><PinIcon color="#9AA0A6" size={14} />Zone : {pro.zone}</div>}
+          <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Infos pratiques</div>
+          {pro.hours && <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.86rem", color: G.brun, marginBottom: 6 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>{pro.hours}</div>}
+          {pro.zone && <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.86rem", color: G.brun }}><PinIcon color="#9AA0A6" size={14} />Zone : {pro.zone}</div>}
         </div>}
 
         {/* Réseaux */}
         {socialLinks.length > 0 && <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
           {socialLinks.map(s => (
             <a key={s.k} href={s.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
-              <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "8px 14px", fontSize: "0.8rem", fontWeight: 600, color: "#333" }}>{s.label}</div>
+              <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "8px 14px", fontSize: "0.8rem", fontWeight: 600, color: G.brun }}>{s.label}</div>
             </a>
           ))}
         </div>}
 
         {/* Avis (préparation étape 6) */}
         <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 16 }}>
-          <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "#999", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Avis clients</div>
+          <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Avis clients</div>
           {pro.rating_count
-            ? <div style={{ fontSize: "0.9rem", color: "#333" }}><span style={{ color: G.or, fontWeight: 800 }}>★ {(pro.rating_avg || 0).toFixed(1)}</span> sur {pro.rating_count} avis</div>
-            : <div style={{ fontSize: "0.85rem", color: "#999" }}>Aucun avis pour le moment.</div>}
+            ? <div style={{ fontSize: "0.9rem", color: G.brun }}><span style={{ color: G.or, fontWeight: 800 }}>★ {(pro.rating_avg || 0).toFixed(1)}</span> sur {pro.rating_count} avis</div>
+            : <div style={{ fontSize: "0.85rem", color: G.brunLight }}>Aucun avis pour le moment.</div>}
         </div>
       </div>
     </div>
@@ -18193,13 +18193,13 @@ export default function App() {
         </div>
         {/* Contenu */}
         <div style={{ padding: "22px 24px 24px", textAlign: "center" }}>
-          <h3 style={{ fontSize: "1.15rem", fontWeight: 700, color: "#111", marginBottom: 8 }}>Installe l'app Moyo !</h3>
+          <h3 style={{ fontSize: "1.15rem", fontWeight: 700, color: G.brun, marginBottom: 8 }}>Installe l'app Moyo !</h3>
           {isIos ? (
-            <p style={{ fontSize: "0.85rem", color: "#555", lineHeight: 1.6, marginBottom: 20 }}>
+            <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.6, marginBottom: 20 }}>
               Appuie sur <strong style={{ color: G.rouge }}>Partager</strong> en bas de ton navigateur, puis <strong style={{ color: G.rouge }}>Sur l'écran d'accueil</strong>
             </p>
           ) : (
-            <p style={{ fontSize: "0.85rem", color: "#555", lineHeight: 1.6, marginBottom: 20 }}>
+            <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.6, marginBottom: 20 }}>
               Accède rapidement à Moyo depuis ton écran d'accueil - rapide, pratique et sans passer par le navigateur !
             </p>
           )}
@@ -18208,7 +18208,7 @@ export default function App() {
               Installer l'app
             </button>
           )}
-          <button onClick={() => { setShowInstall(false); localStorage.setItem("moyo_install_dismissed", "1"); }} style={{ width: "100%", background: "transparent", color: "#555", border: `2px solid ${G.gris}`, borderRadius: 50, padding: "12px", fontSize: "0.88rem", fontWeight: 600, cursor: "pointer" }}>
+          <button onClick={() => { setShowInstall(false); localStorage.setItem("moyo_install_dismissed", "1"); }} style={{ width: "100%", background: "transparent", color: G.brunLight, border: `2px solid ${G.gris}`, borderRadius: 50, padding: "12px", fontSize: "0.88rem", fontWeight: 600, cursor: "pointer" }}>
             OK
           </button>
         </div>
@@ -18261,7 +18261,7 @@ export default function App() {
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4L12 17l-6.3 4.4L8 14 2 9.4h7.6z"/></svg>
           </div>
           <div style={{ fontWeight: 900, fontSize: "1.25rem", color: G.brun, marginBottom: 8 }}>Paiement réussi 🎉</div>
-          <div style={{ fontSize: "0.9rem", color: "#666", lineHeight: 1.55, marginBottom: 22 }}>
+          <div style={{ fontSize: "0.9rem", color: G.brunLight, lineHeight: 1.55, marginBottom: 22 }}>
             Ton abonnement <strong style={{ color: "#B8860B" }}>Premium</strong> est désormais actif ! Tu peux maintenant contacter les clients, partager tes coordonnées dans le chat, envoyer des photos et bien plus encore.
           </div>
           <button onClick={() => setPremiumSuccess(false)} style={{ width: "100%", background: "linear-gradient(135deg,#D4A843,#B8860B)", color: "#fff", border: "none", borderRadius: 50, padding: "14px", fontSize: "0.95rem", fontWeight: 800, cursor: "pointer", boxShadow: "0 4px 14px rgba(184,134,11,0.35)" }}>
@@ -18284,9 +18284,9 @@ export default function App() {
             <div style={{ color: "#fff", fontWeight: 800, fontSize: "1.1rem" }}>Votre avis nous intéresse</div>
           </div>
           <div style={{ padding: "20px 22px 24px" }}>
-            <p style={{ fontSize: "0.88rem", color: "#555", lineHeight: 1.55, textAlign: "center", marginBottom: 20 }}>{activeSurvey.intro_message || "Aidez-nous à améliorer Moyo en répondant à quelques questions rapides."}</p>
+            <p style={{ fontSize: "0.88rem", color: G.brunLight, lineHeight: 1.55, textAlign: "center", marginBottom: 20 }}>{activeSurvey.intro_message || "Aidez-nous à améliorer Moyo en répondant à quelques questions rapides."}</p>
             <button onClick={() => { setSurveyAnswers({}); setSurveyStep(0); setShowSurveyInvite(true); }} style={{ width: "100%", background: "#2980b9", color: "#fff", border: "none", borderRadius: 50, padding: "14px", fontSize: "0.92rem", fontWeight: 800, cursor: "pointer", marginBottom: 8 }}>J'aide Moyo ({(activeSurvey.questions || []).length} questions)</button>
-            <button onClick={() => { persistDismissedSurvey(activeSurvey.id); setActiveSurvey(null); }} style={{ width: "100%", background: "transparent", color: "#999", border: "none", padding: "8px", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" }}>Plus tard</button>
+            <button onClick={() => { persistDismissedSurvey(activeSurvey.id); setActiveSurvey(null); }} style={{ width: "100%", background: "transparent", color: G.brunLight, border: "none", padding: "8px", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" }}>Plus tard</button>
           </div>
         </div>
       </div>
@@ -18323,14 +18323,14 @@ export default function App() {
           <div style={{ background: G.blanc, borderRadius: "22px 22px 0 0", width: "100%", maxWidth: 480, maxHeight: "90vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "18px 22px 14px", flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <span style={{ fontSize: "0.76rem", fontWeight: 700, color: "#888" }}>Question {surveyStep + 1} / {qs.length}</span>
-                <button onClick={() => { persistDismissedSurvey(activeSurvey.id); setShowSurveyInvite(false); setActiveSurvey(null); }} style={{ background: "#f0f0f0", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", color: "#888" }}>✕</button>
+                <span style={{ fontSize: "0.76rem", fontWeight: 700, color: G.brunLight }}>Question {surveyStep + 1} / {qs.length}</span>
+                <button onClick={() => { persistDismissedSurvey(activeSurvey.id); setShowSurveyInvite(false); setActiveSurvey(null); }} style={{ background: G.creme, border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", color: G.brunLight }}>✕</button>
               </div>
-              <div style={{ height: 6, background: "#eee", borderRadius: 5, overflow: "hidden" }}><div style={{ width: `${progress}%`, height: "100%", background: "#2980b9", transition: "width 0.3s ease" }} /></div>
+              <div style={{ height: 6, background: G.gris, borderRadius: 5, overflow: "hidden" }}><div style={{ width: `${progress}%`, height: "100%", background: "#2980b9", transition: "width 0.3s ease" }} /></div>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "8px 22px 16px" }}>
               <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, marginBottom: 6 }}>{q.text}</div>
-              <div style={{ fontSize: "0.76rem", color: "#999", marginBottom: 16 }}>{q.type === "multi" ? "Plusieurs réponses possibles" : q.type === "text" ? "Votre réponse" : "Une seule réponse"}</div>
+              <div style={{ fontSize: "0.76rem", color: G.brunLight, marginBottom: 16 }}>{q.type === "multi" ? "Plusieurs réponses possibles" : q.type === "text" ? "Votre réponse" : "Une seule réponse"}</div>
               {q.type === "text" ? (
                 <textarea value={sel[0] || ""} onChange={e => setSurveyAnswers(prev => ({ ...prev, [q.id]: e.target.value.trim() ? [e.target.value] : [] }))} rows={5} placeholder="Écrivez votre réponse ici…" style={{ width: "100%", padding: "14px 16px", borderRadius: 14, border: `2px solid ${G.gris}`, fontSize: "0.9rem", outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" }} />
               ) : q.options.map((opt: string) => {
@@ -18344,7 +18344,7 @@ export default function App() {
               })}
             </div>
             <div style={{ padding: "14px 22px", borderTop: `1px solid ${G.gris}`, display: "flex", gap: 10, flexShrink: 0 }}>
-              {surveyStep > 0 && <button onClick={() => setSurveyStep(s => s - 1)} style={{ flex: "0 0 auto", background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 12, padding: "13px 18px", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer" }}>Précédent</button>}
+              {surveyStep > 0 && <button onClick={() => setSurveyStep(s => s - 1)} style={{ flex: "0 0 auto", background: G.creme, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 12, padding: "13px 18px", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer" }}>Précédent</button>}
               {last
                 ? <button onClick={submit} disabled={!canNext || surveySubmitting} style={{ flex: 1, background: (canNext && !surveySubmitting) ? "linear-gradient(135deg,#27ae60,#1e8449)" : "rgba(39,174,96,0.5)", color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: "0.9rem", fontWeight: 800, cursor: (canNext && !surveySubmitting) ? "pointer" : "not-allowed" }}>{surveySubmitting ? "Envoi…" : "Envoyer mes réponses"}</button>
                 : <button onClick={() => canNext && setSurveyStep(s => s + 1)} disabled={!canNext} style={{ flex: 1, background: canNext ? "#2980b9" : "rgba(41,128,185,0.4)", color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: "0.9rem", fontWeight: 800, cursor: canNext ? "pointer" : "not-allowed" }}>Suivant</button>}
