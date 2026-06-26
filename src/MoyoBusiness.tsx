@@ -6502,7 +6502,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
                     </div>
                     {nouveau && (
                       <div style={{ position: "absolute", right: -2, bottom: -2, width: 20, height: 20, borderRadius: "50%", background: G.rouge, border: "2px solid #fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM10 5h4v2h-4z"/></svg>
                       </div>
                     )}
                   </div>
@@ -13168,11 +13168,13 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   {/* Identifiant technique */}
                   <div style={{ fontSize: "0.66rem", color: G.brunLight, marginBottom: 8, fontFamily: "monospace", wordBreak: "break-all" }}>ID : {av.id}</div>
 
-                  {/* Notes internes */}
-                  <AdminNotes auth={auth} targetType="user" targetId={av.id} />
-
                   {/* Actions + modération */}
                   {renderUserActions(av)}
+
+                  {/* Notes internes (tout en bas) */}
+                  <div style={{ marginTop: 14 }}>
+                    <AdminNotes auth={auth} targetType="user" targetId={av.id} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -17278,8 +17280,6 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
 
   return (
     <>
-    {/* Fond plein écran : capte le défilement et les taps en dehors de la fiche (le fond ne bouge plus) */}
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 89, background: "rgba(8,8,13,0.45)", backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)", touchAction: "none", overscrollBehavior: "contain" }} />
     <div style={{ position: "fixed", top: isWideFiche ? 0 : 64, bottom: isWideFiche ? 0 : 88, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: isWideFiche ? 560 : 500, zIndex: 90, background: G.creme, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", boxSizing: "border-box", boxShadow: isWideFiche ? "0 0 60px rgba(0,0,0,0.18)" : undefined }}>
       {/* Header */}
       <div style={{ position: "relative", background: `linear-gradient(rgba(8,8,13,0.82), rgba(8,8,13,0.90)), url(${FICHE_HERO_BG}) center/cover no-repeat`, padding: "16px 16px 22px" }}>
