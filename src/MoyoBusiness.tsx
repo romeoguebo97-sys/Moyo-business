@@ -2480,8 +2480,27 @@ function Login({ onNav, onAuth }: { onNav: (p: string) => void; onAuth: (a: Auth
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
+  // ── Anti-force-brute (UX) : verrou local après plusieurs mots de passe erronés.
+  //    La vraie protection reste la limite serveur Supabase ; ceci ralentit les essais et informe l'utilisateur.
+  const LOGIN_MAX_FAILS = 5;       // essais autorisés avant verrouillage
+  const LOGIN_LOCK_SECONDS = 60;   // durée du verrou (secondes)
+  const [failCount, setFailCount] = useState<number>(() => { try { return Number(sessionStorage.getItem("moyo_login_fails") || "0") || 0; } catch { return 0; } });
+  const [lockUntil, setLockUntil] = useState<number>(() => { try { return Number(sessionStorage.getItem("moyo_login_lock") || "0") || 0; } catch { return 0; } });
+  const [nowTs, setNowTs] = useState<number>(Date.now());
+  useEffect(() => {
+    if (lockUntil <= Date.now()) return;
+    const id = setInterval(() => setNowTs(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [lockUntil]);
+  const lockRemaining = Math.max(0, Math.ceil((lockUntil - nowTs) / 1000));
+  const isLocked = lockRemaining > 0;
+  const resetLoginGuard = () => { setFailCount(0); setLockUntil(0); try { sessionStorage.removeItem("moyo_login_fails"); sessionStorage.removeItem("moyo_login_lock"); } catch {} };
 
   const handleLogin = async () => {
+    if (lockUntil > Date.now()) {
+      setErrorMsg(`Trop de tentatives échouées. Réessayez dans ${Math.ceil((lockUntil - Date.now()) / 1000)} s.`);
+      return;
+    }
     setLoading(true);
     try {
       const res = await sb.signIn(form.email.trim(), form.password);
@@ -2490,7 +2509,18 @@ function Login({ onNav, onAuth }: { onNav: (p: string) => void; onAuth: (a: Auth
         if (errMsg.includes("Email not confirmed") || errMsg.includes("email_not_confirmed")) {
           setErrorMsg("Votre email n'est pas encore confirmé. Vérifiez votre boîte mail et cliquez sur le lien d'activation.");
         } else if (errMsg.includes("Invalid login") || errMsg.includes("invalid_credentials") || errMsg.includes("Invalid credentials")) {
-          setErrorMsg("Adresse e-mail ou mot de passe incorrect. Vérifiez vos informations et réessayez.");
+          const fails = failCount + 1;
+          setFailCount(fails);
+          try { sessionStorage.setItem("moyo_login_fails", String(fails)); } catch {}
+          if (fails >= LOGIN_MAX_FAILS) {
+            const until = Date.now() + LOGIN_LOCK_SECONDS * 1000;
+            setLockUntil(until); setNowTs(Date.now());
+            try { sessionStorage.setItem("moyo_login_lock", String(until)); } catch {}
+            setErrorMsg(`Trop de tentatives échouées. Connexion bloquée pendant ${LOGIN_LOCK_SECONDS} secondes par sécurité.`);
+          } else {
+            const left = LOGIN_MAX_FAILS - fails;
+            setErrorMsg(`Adresse e-mail ou mot de passe incorrect. Il vous reste ${left} tentative${left > 1 ? "s" : ""} avant un blocage temporaire.`);
+          }
         } else if (errMsg.includes("Too many requests") || errMsg.includes("over_request_rate_limit")) {
           setErrorMsg("Trop de tentatives. Patientez quelques minutes avant de réessayer.");
         } else {
@@ -2503,6 +2533,8 @@ function Login({ onNav, onAuth }: { onNav: (p: string) => void; onAuth: (a: Auth
         setErrorMsg("Connexion impossible. Vérifiez votre email et mot de passe, puis réessayez.");
         setLoading(false); return;
       }
+      // Identifiants corrects → on lève tout verrou anti-force-brute.
+      resetLoginGuard();
       const profiles = await sb.query<Profile>(res.access_token, "profiles", `?id=eq.${res.user.id}`);
       if (!profiles[0]) {
         setErrorMsg("Profil introuvable. Réessaie dans quelques secondes.");
@@ -2537,6 +2569,7 @@ function Login({ onNav, onAuth }: { onNav: (p: string) => void; onAuth: (a: Auth
         return;
       }
 
+      resetLoginGuard();
       onAuth({
         token: res.access_token,
         userId: res.user.id,
@@ -2564,7 +2597,7 @@ function Login({ onNav, onAuth }: { onNav: (p: string) => void; onAuth: (a: Auth
   if (tempBanUntil) return <BanScreen until={tempBanUntil} onExpire={() => setTempBanUntil(null)} />;
   if (showForgot) return <AuthLayout onBack={() => onNav("landing")}><ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />{toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}<div style={{ textAlign: "center", marginBottom: 24 }}><div style={{  fontSize: "2rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span><span style={{ color: G.brunLight, fontWeight: 800 }}> Business</span></div><h2 style={{  fontSize: "1.4rem", fontWeight: 700, marginTop: 8 }}>Mot de passe oublié</h2></div>{forgotSent ? <div style={{ textAlign: "center" }}><div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(212,168,67,0.08)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><p style={{ color: "#555", fontSize: "0.88rem", marginBottom: 20 }}>Email envoyé ! Vérifie ta boîte mail.</p><Btn variant="ghost" onClick={() => { setShowForgot(false); setForgotSent(false); }}>← Retour à la connexion</Btn></div> : <><Input label="Ton email" type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder="ton@email.com" icon="email" /><Btn variant="primary" onClick={handleForgot} style={{ width: "100%", marginBottom: 12 }}>Envoyer le lien</Btn><div style={{ textAlign: "center" }}><span onClick={() => setShowForgot(false)} style={{ fontSize: "0.85rem", color: "#555", cursor: "pointer" }}>← Retour</span></div></>}</AuthLayout>;
 
-  return <AuthLayout onBack={() => onNav("landing")}><ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />{toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}<div style={{ textAlign: "center", marginBottom: 28 }}><div style={{  fontSize: "2rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span><span style={{ color: G.brunLight, fontWeight: 800 }}> Business</span></div><h2 style={{  fontSize: "1.6rem", fontWeight: 700, marginTop: 6 }}>Bon retour !</h2><p style={{ color: "#555", fontSize: "0.85rem", marginTop: 4 }}>Échangez avec vos contacts</p></div><Input label="Email" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="ton@email.com" icon="email" /><Input label="Mot de passe" type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="••••••••" icon="lock" /><div style={{ textAlign: "right", marginBottom: 20, marginTop: -8 }}><span onClick={() => setShowForgot(true)} style={{ fontSize: "0.82rem", color: G.rouge, cursor: "pointer", fontWeight: 500 }}>Mot de passe oublié ?</span></div><Btn variant="primary" onClick={handleLogin} loading={loading} style={{ width: "100%" }} disabled={!form.email || !form.password}>Se connecter →</Btn><p style={{ textAlign: "center", marginTop: 20, fontSize: "0.85rem", color: "#555" }}>Pas encore de compte ? <span style={{ color: G.rouge, cursor: "pointer", fontWeight: 600 }} onClick={() => onNav("signup")}>S'inscrire</span></p></AuthLayout>;
+  return <AuthLayout onBack={() => onNav("landing")}><ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />{toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}<div style={{ textAlign: "center", marginBottom: 28 }}><div style={{  fontSize: "2rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span><span style={{ color: G.brunLight, fontWeight: 800 }}> Business</span></div><h2 style={{  fontSize: "1.6rem", fontWeight: 700, marginTop: 6 }}>Bon retour !</h2><p style={{ color: "#555", fontSize: "0.85rem", marginTop: 4 }}>Échangez avec vos contacts</p></div><Input label="Email" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="ton@email.com" icon="email" /><Input label="Mot de passe" type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="••••••••" icon="lock" /><div style={{ textAlign: "right", marginBottom: 20, marginTop: -8 }}><span onClick={() => setShowForgot(true)} style={{ fontSize: "0.82rem", color: G.rouge, cursor: "pointer", fontWeight: 500 }}>Mot de passe oublié ?</span></div><Btn variant="primary" onClick={handleLogin} loading={loading} style={{ width: "100%" }} disabled={!form.email || !form.password || isLocked}>{isLocked ? `Réessayez dans ${lockRemaining}s` : "Se connecter →"}</Btn><p style={{ textAlign: "center", marginTop: 20, fontSize: "0.85rem", color: "#555" }}>Pas encore de compte ? <span style={{ color: G.rouge, cursor: "pointer", fontWeight: 600 }} onClick={() => onNav("signup")}>S'inscrire</span></p></AuthLayout>;
 }
 
 function SignUp({ onNav }: { onNav: (p: string) => void }) {
@@ -2879,7 +2912,7 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
   return (
     <AuthLayout onBack={() => step === 1 ? onNav("landing") : (step === 3 && resumeMode) ? setStep(1) : setStep(s => s - 1)}>
       <ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />
-      {successMsg && <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}><div style={{ background: G.blanc, borderRadius: 20, padding: "28px 24px", width: "100%", maxWidth: 320, textAlign: "center" }}><div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(26,92,58,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><h3 style={{ fontSize: "1.3rem", fontWeight: 700, color: "#111", marginBottom: 10 }}>COMPTE CRÉÉ !</h3><p style={{ fontSize: "0.92rem", color: "#555", lineHeight: 1.6, marginBottom: 20 }}>{signupSuccessMsg}</p><div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: "0.78rem", color: "#aaa" }}><div style={{ width: 8, height: 8, borderRadius: "50%", background: G.rouge }} />Redirection...</div></div></div>}
+      {successMsg && <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}><div style={{ background: G.blanc, borderRadius: 20, padding: "28px 24px", width: "100%", maxWidth: 320, textAlign: "center" }}><div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(26,92,58,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><h3 style={{ fontSize: "1.3rem", fontWeight: 700, color: G.brun, marginBottom: 10 }}>COMPTE CRÉÉ !</h3><p style={{ fontSize: "0.92rem", color: "#555", lineHeight: 1.6, marginBottom: 20 }}>{signupSuccessMsg}</p><div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: "0.78rem", color: "#aaa" }}><div style={{ width: 8, height: 8, borderRadius: "50%", background: G.rouge }} />Redirection...</div></div></div>}
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
       {/* Header */}
@@ -2916,7 +2949,7 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
             <div key={c.val} onClick={() => upd("account_type", c.val)} style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 15px", borderRadius: 16, cursor: "pointer", marginBottom: 14, border: `2px solid ${on ? c.ring : G.gris}`, background: on ? c.tint.replace(/0\.1[0-9]?/, "0.06") : G.blanc, boxShadow: on ? `0 4px 16px ${c.tint}` : "0 1px 4px rgba(0,0,0,0.03)", transition: "all .15s" }}>
               <div style={{ width: 50, height: 50, flexShrink: 0, borderRadius: "50%", background: c.tint, display: "flex", alignItems: "center", justifyContent: "center" }}>{c.icon}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 800, fontSize: "1rem", color: "#1A1A1A", marginBottom: 3 }}>{c.title}</div>
+                <div style={{ fontWeight: 800, fontSize: "1rem", color: G.brun, marginBottom: 3 }}>{c.title}</div>
                 <div style={{ fontSize: "0.8rem", color: "#6B7280", lineHeight: 1.4 }}>{c.sub}</div>
               </div>
               <div style={{ width: 22, height: 22, flexShrink: 0, borderRadius: "50%", border: `2px solid ${on ? c.ring : G.gris}`, background: on ? c.ring : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -2965,7 +2998,7 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
         }} style={{ display: "none" }} />
 
         {/* Photo de profil */}
-        <label style={{ display: "block", fontWeight: 600, marginBottom: 10, fontSize: "0.9rem", color: "#1A1A1A" }}>Photo de profil</label>
+        <label style={{ display: "block", fontWeight: 600, marginBottom: 10, fontSize: "0.9rem", color: G.brun }}>Photo de profil</label>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 22 }}>
           <div style={{ position: "relative", width: 92, height: 92 }} onClick={() => fileRef.current?.click()}>
             {photoPreview ? (
@@ -2987,12 +3020,12 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
           {/* Nom de l'activité */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Nom de votre activité ou entreprise <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
-            <input value={form.company} onChange={e => upd("company", e.target.value.slice(0, 60))} placeholder="ex : Royal Beauty" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+            <input value={form.company} onChange={e => upd("company", e.target.value.slice(0, 60))} placeholder="ex : Royal Beauty" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
           </div>
           {/* Catégorie */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Catégorie <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
-            <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value, metier: "" }))} style={{ width: "100%", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }}>
+            <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value, metier: "" }))} style={{ width: "100%", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }}>
               <option value="">Sélectionnez une catégorie</option>
               {PUB_CATS.filter(c => c.id !== "all").map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
             </select>
@@ -3000,7 +3033,7 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
           {/* Métier */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Métier <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
-            <select value={form.metier} disabled={!form.category} onChange={e => upd("metier", e.target.value)} style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: form.category ? G.blanc : "#F3F4F6", color: "#111", outline: "none", cursor: form.category ? "pointer" : "not-allowed" }}>
+            <select value={form.metier} disabled={!form.category} onChange={e => upd("metier", e.target.value)} style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: form.category ? G.blanc : G.gris, color: G.brun, outline: "none", cursor: form.category ? "pointer" : "not-allowed" }}>
               <option value="">{form.category ? "Sélectionnez votre métier" : "Choisissez d'abord une catégorie"}</option>
               {(form.category ? metiersForCategory(form.category) : []).map(m => <option key={m} value={m}>{m}</option>)}
             </select>
@@ -3008,7 +3041,7 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
           {/* Ville */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Ville <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
-            <select value={form.city} onChange={e => upd("city", e.target.value)} style={{ width: "100%", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }}>
+            <select value={form.city} onChange={e => upd("city", e.target.value)} style={{ width: "100%", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }}>
               <option value="">Sélectionnez votre ville</option>
               {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
             </select>
@@ -3016,17 +3049,17 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
           {/* Téléphone */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Numéro de téléphone <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
-            <input value={form.phone} onChange={e => upd("phone", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+            <input value={form.phone} onChange={e => upd("phone", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
           </div>
           {/* WhatsApp public */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>WhatsApp public <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
-            <input value={form.whatsapp} onChange={e => upd("whatsapp", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+            <input value={form.whatsapp} onChange={e => upd("whatsapp", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
           </div>
           {/* Présentation de l'activité */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Présentation de votre activité <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
-            <textarea value={form.bio} onChange={e => upd("bio", e.target.value.slice(0, 300))} placeholder="Décrivez vos services…" rows={3} maxLength={300} style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none", resize: "none" }} />
+            <textarea value={form.bio} onChange={e => upd("bio", e.target.value.slice(0, 300))} placeholder="Décrivez vos services…" rows={3} maxLength={300} style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none", resize: "none" }} />
             <div style={{ textAlign: "right", fontSize: "0.75rem", color: form.bio.length >= 290 ? G.rouge : "#aaa", marginTop: 4 }}>{form.bio.length}/300</div>
           </div>
           <Btn variant="primary" onClick={handleSubmit} loading={loading} style={{ width: "100%" }} disabled={!form.company || !form.category || !form.metier || !form.city || !form.phone || !form.bio.trim()}>Créer mon compte professionnel</Btn>
@@ -3034,12 +3067,12 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
           {/* Nom complet */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Nom complet <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
-            <input value={form.name} onChange={e => upd("name", e.target.value.slice(0, 60))} placeholder="ex : Faïda" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+            <input value={form.name} onChange={e => upd("name", e.target.value.slice(0, 60))} placeholder="ex : Faïda" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
           </div>
           {/* Ville */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Ville <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
-            <select value={form.city} onChange={e => upd("city", e.target.value)} style={{ width: "100%", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }}>
+            <select value={form.city} onChange={e => upd("city", e.target.value)} style={{ width: "100%", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }}>
               <option value="">Sélectionnez votre ville</option>
               {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
             </select>
@@ -3047,12 +3080,12 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
           {/* Téléphone */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Numéro de téléphone <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
-            <input value={form.phone} onChange={e => upd("phone", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none" }} />
+            <input value={form.phone} onChange={e => upd("phone", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
           </div>
           {/* Bio */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Bio <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
-            <textarea value={form.bio} onChange={e => upd("bio", e.target.value.slice(0, 200))} placeholder="Parlez un peu de vous…" rows={3} maxLength={200} style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: "#111", outline: "none", resize: "none" }} />
+            <textarea value={form.bio} onChange={e => upd("bio", e.target.value.slice(0, 200))} placeholder="Parlez un peu de vous…" rows={3} maxLength={200} style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none", resize: "none" }} />
             <div style={{ textAlign: "right", fontSize: "0.75rem", color: form.bio.length >= 190 ? G.rouge : "#aaa", marginTop: 4 }}>{form.bio.length}/200</div>
           </div>
           <Btn variant="primary" onClick={handleSubmit} loading={loading} style={{ width: "100%" }} disabled={!form.name || !form.city || !form.phone}>Créer mon compte</Btn>
@@ -16858,9 +16891,9 @@ function PubDetail({ auth, pub: initialPub, onBack, onChanged }: { auth: Auth; p
     <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
       <div style={{ position: "sticky", top: 0, zIndex: 5, background: G.creme, display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", borderBottom: `1px solid ${G.gris}` }}>
         <button onClick={onBack} aria-label="Retour" style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: G.blanc, boxShadow: "0 1px 4px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ color: G.brun }}><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Mon annonce</h3>
+        <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0, color: G.brun }}>Mon annonce</h3>
         <div style={{ marginLeft: "auto" }}><ShareButton compact shareUrl={makeShareUrl("pub", pub.id)} shareTitle={`Moyo Business — ${pub.title}`} shareText={`${pub.title} — découvrez cette annonce sur Moyo Business`} /></div>
       </div>
 
@@ -16951,9 +16984,9 @@ function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: ()
     <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
       <div style={{ position: "sticky", top: 0, zIndex: 5, background: G.creme, display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", borderBottom: `1px solid ${G.gris}` }}>
         <button onClick={onBack} aria-label="Retour" style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: G.blanc, boxShadow: "0 1px 4px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ color: G.brun }}><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Mes publications</h3>
+        <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0, color: G.brun }}>Mes publications</h3>
       </div>
       <div className="dgrid" style={{ padding: "14px 16px 96px", display: "flex", flexDirection: "column", gap: 14 }}>
         {loading && <p className="dspan" style={{ textAlign: "center", color: G.brunLight, padding: 22 }}>Chargement…</p>}
