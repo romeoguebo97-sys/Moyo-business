@@ -133,13 +133,13 @@ const moderateMessage = (text: string): { blocked: boolean; type?: "insult" | "s
 };
 
 const getModerationMessage = (type: "insult" | "scam" | "sexual"): string => {
-  if (type === "insult") return "Ce message contient des termes irrespectueux et ne peut pas être envoyé. Sur Moyo, nous encourageons la bienveillance, la douceur et le respect mutuel.";
-  if (type === "scam") return "Ce message contient des demandes d'argent ou de transfert. Ce type de comportement est interdit sur Moyo et peut entraîner la suppression de votre compte.";
+  if (type === "insult") return "Ce message contient des termes irrespectueux et ne peut pas être envoyé. Sur Moyo Business, nous encourageons la bienveillance, la douceur et le respect mutuel.";
+  if (type === "scam") return "Ce message contient des demandes d'argent ou de transfert. Ce type de comportement est interdit sur Moyo Business et peut entraîner la suppression de votre compte.";
   if (type === "sexual") return "Ce message contient du contenu inapproprié et ne peut pas être envoyé.";
-  return "Ce message ne respecte pas les règles de Moyo.";
+  return "Ce message ne respecte pas les règles de Moyo Business.";
 };
 
-// Fond messages style Moyo - compatible tous navigateurs mobiles
+// Fond messages style Moyo Business - compatible tous navigateurs mobiles
 const MSG_BG_STYLE: React.CSSProperties = {
   position: "relative",
 };
@@ -304,7 +304,7 @@ fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(limit_likes_free,limit_statu
     const savedSession = localStorage.getItem("moyo_session");
     const isAdminUser = savedSession ? JSON.parse(savedSession)?.isAdmin === true : false;
     if (!isAdminUrl && !isAdminUser) {
-      const msg = map["maintenance_message"] || "Moyo est en maintenance. Nous revenons très vite ! 🔧";
+      const msg = map["maintenance_message"] || "Moyo Business est en maintenance. Nous revenons très vite ! 🔧";
       const el = document.getElementById("root");
       if (el) el.innerHTML = `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#F0F1F5;flex-direction:column;gap:20px;padding:24px;text-align:center"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><div style="font-size:2rem;font-weight:900;color:#D4A843;letter-spacing:-0.5px">Mo<span style="color:#B8860B">yo</span></div><div style="font-size:1.1rem;font-weight:700;color:#1a1a1a">Maintenance en cours</div><div style="font-size:0.88rem;color:#666;max-width:300px;line-height:1.7;background:white;padding:14px 18px;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.07)">${msg}</div></div>`;
     }
@@ -312,13 +312,13 @@ fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=in.(limit_likes_free,limit_statu
 }).catch(() => {});
 
 const SUPPORT_TEAM_ID = "moyo-support-team";
-const SUPPORT_TEAM_NAME = "Assistance Moyo";
-// Photo de l'équipe Assistance Moyo (uploadée dans Supabase Storage). Vide = icône par défaut.
+const SUPPORT_TEAM_NAME = "Assistance Moyo Business";
+// Photo de l'équipe Assistance Moyo Business (uploadée dans Supabase Storage). Vide = icône par défaut.
 const SUPPORT_TEAM_PHOTO = "https://mcswcapxpruiffzrxfvl.supabase.co/storage/v1/object/public/assistant/Image%2031%20mai%202026,%2004_26_29.png";
 const SUPPORT_PREFIX_USER = "[SUPPORT_USER]";
 const SUPPORT_PREFIX_REPLY = "[SUPPORT_REPLY]";
-// Message envoyé automatiquement par l'Assistant Moyo lors d'une tentative de partage de contact (gratuit) — éditable depuis la config admin
-let AUTO_MOD_CONTACT_REPLY = "Bonjour, notre système informatique a détecté une tentative d'échange de coordonnées personnelles. Cette action enfreint les Conditions Générales d'Utilisation de Moyo. Le partage de coordonnées étant réservé aux membres Premium, nous vous invitons à respecter les règles de la communauté afin d'éviter toute restriction ou suppression définitive de votre compte.";
+// Message envoyé automatiquement par l'Assistant Moyo Business lors d'une tentative de partage de contact (gratuit) — éditable depuis la config admin
+let AUTO_MOD_CONTACT_REPLY = "Bonjour, notre système informatique a détecté une tentative d'échange de coordonnées personnelles. Cette action enfreint les Conditions Générales d'Utilisation de Moyo Business. Le partage de coordonnées étant réservé aux membres Premium, nous vous invitons à respecter les règles de la communauté afin d'éviter toute restriction ou suppression définitive de votre compte.";
 const isSupportReason = (reason?: string) => !!reason && (reason.startsWith(SUPPORT_PREFIX_USER) || reason.startsWith(SUPPORT_PREFIX_REPLY));
 const cleanSupportReason = (reason?: string) => (reason || "").replace(SUPPORT_PREFIX_USER, "").replace(SUPPORT_PREFIX_REPLY, "").trim();
 
@@ -2462,7 +2462,7 @@ function BanScreen({ until, onExpire, onBack }: { until?: string | null; onExpir
           )
         ) : (
           <>
-            <p style={{ fontSize: "0.9rem", color: "#666", lineHeight: 1.6, marginBottom: 20 }}>Ton compte a été suspendu suite à une violation des conditions d'utilisation de Moyo. Pour toute réclamation, contacte-nous à {CONTACT_EMAIL} ou sur WhatsApp au {formatWhatsApp(CONTACT_WHATSAPP)}.</p>
+            <p style={{ fontSize: "0.9rem", color: "#666", lineHeight: 1.6, marginBottom: 20 }}>Ton compte a été suspendu suite à une violation des conditions d'utilisation de Moyo Business. Pour toute réclamation, contacte-nous à {CONTACT_EMAIL} ou sur WhatsApp au {formatWhatsApp(CONTACT_WHATSAPP)}.</p>
             {onBack && <button onClick={onBack} style={{ width: "100%", background: G.creme, color: "#555", border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: "13px", fontSize: "0.9rem", fontWeight: 700, cursor: "pointer" }}>Retour à l'accueil</button>}
           </>
         )}
@@ -2510,7 +2510,7 @@ function Login({ onNav, onAuth }: { onNav: (p: string) => void; onAuth: (a: Auth
       }
       if ((profiles[0] as any).is_banned) {
         await sb.signOut(res.access_token);
-        setErrorMsg(`Ton compte a été suspendu suite à une violation des conditions d'utilisation de Moyo. Pour toute réclamation, contacte-nous à ${CONTACT_EMAIL} ou sur WhatsApp au ${formatWhatsApp(CONTACT_WHATSAPP)}`);
+        setErrorMsg(`Ton compte a été suspendu suite à une violation des conditions d'utilisation de Moyo Business. Pour toute réclamation, contacte-nous à ${CONTACT_EMAIL} ou sur WhatsApp au ${formatWhatsApp(CONTACT_WHATSAPP)}`);
         setLoading(false); return;
       }
       const banUntil = (profiles[0] as any).ban_until as string | null | undefined;
@@ -3080,7 +3080,7 @@ const BOT_FAQ = [
   { q: ["parrain", "parrainage", "filleul", "inviter", "lien", "7 jours", "jours offerts"], r: "Le parrainage est simple : sur votre Profil, appuyez sur 'Parrainer un ami' pour partager votre lien unique. Quand un ami s'inscrit via ce lien et passe Premium, vous gagnez automatiquement 7 jours Premium offerts. Pas de limite !" },
   { q: ["message", "envoyer", "écrire", "conversation", "contacter"], r: `Pour contacter un professionnel, ouvrez sa fiche et appuyez sur "Contacter" : une conversation démarre. Les échanges sont gratuits et illimités.` },
   { q: ["réaction", "réagir", "emoji", "like message"], r: "Appuyez longuement sur un message pour ouvrir le menu de réactions. Une seule réaction par message est autorisée : choisir une nouvelle réaction remplace automatiquement l'ancienne." },
-  { q: ["insulte", "bloqué", "interdit", "avertissement", "modération"], r: "Moyo bloque automatiquement les insultes, menaces, arnaques et contenus inappropriés. Un avertissement s'affiche et un signalement est transmis à notre équipe. Les comportements répétés entraînent la suppression du compte." },
+  { q: ["insulte", "bloqué", "interdit", "avertissement", "modération"], r: "Moyo Business bloque automatiquement les insultes, menaces, arnaques et contenus inappropriés. Un avertissement s'affiche et un signalement est transmis à notre équipe. Les comportements répétés entraînent la suppression du compte." },
   { q: ["numéro", "numero", "whatsapp", "contact", "téléphone", "coordonnées"], r: "Les professionnels peuvent afficher leurs coordonnées publiques (WhatsApp, téléphone, réseaux) sur leur fiche pour être contactés facilement. Restez vigilant face aux arnaques : ne communiquez jamais d'informations bancaires." },
   { q: ["suspendu", "suspension", "banni temporaire", "décompte", "temporaire", "réactiver"], r: "Une suspension temporaire affiche un décompte : à la fin, tu peux te reconnecter automatiquement, rien à faire. Une suspension définitive nécessite de contacter l'assistance pour toute réclamation." },
   { q: ["photo", "image", "profil", "modifier"], r: "Allez dans l'onglet Profil → Modifier ma photo. Un outil de recadrage s'ouvre pour cadrer votre photo parfaitement." },
@@ -3096,7 +3096,7 @@ const BOT_FAQ = [
   { q: ["supprimer message", "effacer message", "pour moi", "pour tous"], r: "Appuyez longuement sur un message → Supprimer pour tous (efface le message des deux côtés) ou Supprimer pour moi (masque le message uniquement de votre côté)." },
   { q: ["avertissement", "sanction", "notification officielle", "banni", "suspension"], r: "Un avertissement est une notification officielle MOYO qui apparaît à votre connexion. Vous devez cliquer \"OK, j\'ai compris\" pour continuer. Plusieurs avertissements peuvent entraîner la suspension du compte." },
   { q: ["confirmer", "confirmation", "email confirmation", "activer compte", "lien email"], r: "L'inscription est gratuite. Votre compte est actif immédiatement après les 3 étapes d'inscription. Pas besoin de confirmer votre email." },
-  { q: ["pas reçu", "email introuvable", "spam", "confirmation pas reçue"], r: "Vérifiez vos spams ou courriers indésirables. Si vous ne trouvez toujours pas l'email, contactez notre équipe via l'Assistant Moyo avec votre adresse email." },
+  { q: ["pas reçu", "email introuvable", "spam", "confirmation pas reçue"], r: "Vérifiez vos spams ou courriers indésirables. Si vous ne trouvez toujours pas l'email, contactez notre équipe via l'Assistant Moyo Business avec votre adresse email." },
 ];
 
 function getBotResponse(input: string): string {
@@ -3186,7 +3186,7 @@ function BotFloat({ onOpen, G }: { onOpen: () => void; G: any }) {
 function BotWidget({ onClose, auth }: { onClose: () => void; auth: Auth }) {
   const [mode, setMode] = useState<"home" | "chat" | "report">("home");
   const [msgs, setMsgs] = useState<{ from: "bot" | "user"; text: string }[]>([
-    { from: "bot", text: `Bonjour ${auth.name || ""} ! Je suis l'assistant Moyo. Comment puis-je t'aider ?` }
+    { from: "bot", text: `Bonjour ${auth.name || ""} ! Je suis l'assistant Moyo Business. Comment puis-je t'aider ?` }
   ]);
   const [input, setInput] = useState("");
   const [reportText, setReportText] = useState("");
@@ -3239,7 +3239,7 @@ function BotWidget({ onClose, auth }: { onClose: () => void; auth: Auth }) {
             </svg>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 700, fontSize: "0.92rem", color: "#fff" }}>{mode === "report" ? "Assistance Moyo" : "Assistant Moyo"}</div>
+            <div style={{ fontWeight: 700, fontSize: "0.92rem", color: "#fff" }}>{mode === "report" ? "Assistance Moyo Business" : "Assistant Moyo Business"}</div>
             <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.75)" }}>{mode === "chat" ? "Répond instantanément" : mode === "report" ? "Répond sous 24h" : "Équipe officielle"}</div>
           </div>
           <div onClick={onClose} style={{ cursor: "pointer", opacity: 0.7 }}>
@@ -3266,7 +3266,7 @@ function BotWidget({ onClose, auth }: { onClose: () => void; auth: Auth }) {
               </div>
               <div>
                 <div style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun }}>Contacter notre équipe</div>
-                <div style={{ fontSize: "0.75rem", color: G.brunLight }}>Écrire directement à l’assistance Moyo</div>
+                <div style={{ fontSize: "0.75rem", color: G.brunLight }}>Écrire directement à l’assistance Moyo Business</div>
               </div>
             </div>
           </div>
@@ -3303,11 +3303,11 @@ function BotWidget({ onClose, auth }: { onClose: () => void; auth: Auth }) {
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <div style={{ fontWeight: 700, color: G.brun, marginBottom: 6 }}>Message envoyé</div>
-                <div style={{ fontSize: "0.82rem", color: G.brunLight }}>L’assistance Moyo vous répondra directement dans votre messagerie.</div>
+                <div style={{ fontSize: "0.82rem", color: G.brunLight }}>L’assistance Moyo Business vous répondra directement dans votre messagerie.</div>
               </div>
             ) : (
               <>
-                <p style={{ fontSize: "0.85rem", color: G.brunLight, marginBottom: 14 }}>Écris ton message à l’équipe Moyo. La réponse apparaîtra ensuite dans ta messagerie.</p>
+                <p style={{ fontSize: "0.85rem", color: G.brunLight, marginBottom: 14 }}>Écris ton message à l’équipe Moyo Business. La réponse apparaîtra ensuite dans ta messagerie.</p>
                 <textarea value={reportText} onChange={e => setReportText(e.target.value)} placeholder="Ex : Bonjour, j’ai une question concernant mon compte..." style={{ width: "100%", minHeight: 100, padding: "12px", borderRadius: 12, border: `1px solid ${G.gris}`, fontSize: "0.85rem", resize: "none", outline: "none", marginBottom: 12 }} />
                 <div style={{ display: "flex", gap: 10 }}>
                   <Btn variant="ghost" onClick={() => setMode("home")} style={{ flex: 1 }}>Retour</Btn>
@@ -3337,7 +3337,7 @@ const openAdminPanel = (fallback: () => void) => {
 
 // ─── Admin Desktop page (mounted when ?admin=1) ───────────────────────────────
 // ── Composants helpers pour le off-canvas ──
-// Modale de confirmation au style Moyo (bottom sheet réutilisable : icône ronde teintée, titre, message, bouton principal + Annuler).
+// Modale de confirmation au style Moyo Business (bottom sheet réutilisable : icône ronde teintée, titre, message, bouton principal + Annuler).
 // L'icône, la teinte, le titre, le texte et les libellés s'adaptent à chaque situation via `preset` ou via les props directes.
 type ConfirmTone = "danger" | "gold" | "green" | "blue" | "neutral";
 const CONFIRM_TONES: Record<ConfirmTone, { tint: string; solid: string; stroke: string }> = {
@@ -3445,8 +3445,8 @@ function InstallButtons({ variant = "light" }: { variant?: "light" | "dark" }) {
                 </div>
               </div>
               <div style={{ padding: "22px", textAlign: "center" }}>
-                <div style={{ fontWeight: 800, fontSize: "1.2rem", color: G.brun, marginBottom: 10 }}>Installe l'app Moyo !</div>
-                <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.6, marginBottom: 20 }}>Accède rapidement à Moyo depuis ton écran d'accueil — rapide, pratique et sans passer par le navigateur !</p>
+                <div style={{ fontWeight: 800, fontSize: "1.2rem", color: G.brun, marginBottom: 10 }}>Installe l'app Moyo Business !</div>
+                <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.6, marginBottom: 20 }}>Accède rapidement à Moyo Business depuis ton écran d'accueil — rapide, pratique et sans passer par le navigateur !</p>
                 <button onClick={launchAndroidPrompt} style={{ width: "100%", background: `linear-gradient(135deg,${G.rouge},${G.rougeDark})`, color: "#fff", border: "none", borderRadius: 50, padding: "14px", fontSize: "0.95rem", fontWeight: 700, cursor: "pointer", marginBottom: 10, boxShadow: "0 4px 14px rgba(212,168,67,0.35)" }}>Installer l'app</button>
                 <button onClick={() => setModal(null)} style={{ width: "100%", background: G.blanc, color: G.brunLight, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "13px", fontSize: "0.9rem", fontWeight: 700, cursor: "pointer" }}>OK</button>
               </div>
@@ -3456,7 +3456,7 @@ function InstallButtons({ variant = "light" }: { variant?: "light" | "dark" }) {
               {modal === "ios" ? (
                 <>
                   <div style={{ fontSize: "2.4rem", marginBottom: 10 }}>📲</div>
-                  <div style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun, marginBottom: 8 }}>Installer Moyo sur iPhone</div>
+                  <div style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun, marginBottom: 8 }}>Installer Moyo Business sur iPhone</div>
                   <div style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: 12, margin: "14px 0 20px" }}>
                     <div style={{ display: "flex", gap: 10, alignItems: "center" }}><div style={{ width: 26, height: 26, borderRadius: "50%", background: G.vert, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.8rem", flexShrink: 0 }}>1</div><div style={{ fontSize: "0.84rem", color: G.brun }}>Appuie sur <b>Partager</b> en bas de Safari</div></div>
                     <div style={{ display: "flex", gap: 10, alignItems: "center" }}><div style={{ width: 26, height: 26, borderRadius: "50%", background: G.vert, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.8rem", flexShrink: 0 }}>2</div><div style={{ fontSize: "0.84rem", color: G.brun }}>Choisis <b>« Sur l'écran d'accueil »</b></div></div>
@@ -3467,12 +3467,12 @@ function InstallButtons({ variant = "light" }: { variant?: "light" | "dark" }) {
                 <>
                   <div style={{ fontSize: "2.4rem", marginBottom: 10 }}>✅</div>
                   <div style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun, marginBottom: 8 }}>Déjà installée !</div>
-                  <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.6, marginBottom: 20 }}>Moyo est déjà sur ton appareil. Lance-la depuis ton écran d'accueil.</p>
+                  <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.6, marginBottom: 20 }}>Moyo Business est déjà sur ton appareil. Lance-la depuis ton écran d'accueil.</p>
                 </>
               ) : (
                 <>
                   <div style={{ fontSize: "2.4rem", marginBottom: 10 }}>📲</div>
-                  <div style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun, marginBottom: 8 }}>Installer Moyo</div>
+                  <div style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun, marginBottom: 8 }}>Installer Moyo Business</div>
                   <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.6, marginBottom: 20 }}>Ouvre ce site dans <b>Chrome</b> (Android) ou <b>Safari</b> (iPhone), puis « Ajouter à l'écran d'accueil ».</p>
                 </>
               )}
@@ -3534,7 +3534,7 @@ function AdminDesktopPage() {
   const [checked, setChecked] = React.useState(false);
   const [rulesMenuOpen, setRulesMenuOpen] = React.useState(false);
   const [modalTexts, setModalTexts] = React.useState({
-    premiumDefault: "Passe Premium pour débloquer toutes les fonctionnalités de Moyo !",
+    premiumDefault: "Passe Premium pour débloquer toutes les fonctionnalités de Moyo Business !",
     signupSuccess: "Ton compte est prêt ! Connecte-toi maintenant.",
   });
   const [editingModal, setEditingModal] = React.useState<string | null>(null);
@@ -3555,7 +3555,7 @@ function AdminDesktopPage() {
     featureStatuses: "true",
     featureAssistant: "true",
     maintenanceMode: "false",
-    maintenanceMessage: "Moyo est en maintenance. Nous revenons très vite ! 🔧",
+    maintenanceMessage: "Moyo Business est en maintenance. Nous revenons très vite ! 🔧",
     customBannedWords: "",
     contactBannedWords: "",
     autoModContactReply: AUTO_MOD_CONTACT_REPLY,
@@ -3982,7 +3982,7 @@ function AdminDesktopPage() {
                   setEditingConfig(null);
                 }} />
               <div style={{ fontSize: "0.74rem", color: G.brunLight, margin: "16px 0 10px", lineHeight: 1.5, borderTop: `1px solid ${G.gris}`, paddingTop: 14 }}>
-                <b>Message automatique de l'Assistant Moyo.</b> Envoyé automatiquement à un membre gratuit dès qu'il tente de partager des coordonnées. Il s'affiche dans sa conversation avec l'Assistant Moyo.
+                <b>Message automatique de l'Assistant Moyo Business.</b> Envoyé automatiquement à un membre gratuit dès qu'il tente de partager des coordonnées. Il s'affiche dans sa conversation avec l'Assistant Moyo Business.
               </div>
               <EditableRow label="Message auto (tentative de contact)" value={appConfig.autoModContactReply || "(par défaut)"} open={editingConfig === "auto_mod_contact_reply"}
                 onOpen={() => { setEditingConfig(editingConfig === "auto_mod_contact_reply" ? null : "auto_mod_contact_reply"); setEditingConfigValue(appConfig.autoModContactReply); }}
@@ -4519,8 +4519,8 @@ function SiteInfoConfig({ auth, group }: { auth: Auth; group: "contacts" | "soci
 }
 
 function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void }) {
-  const [modalTexts, setModalTexts] = React.useState({ signupSuccess: "Ton compte est prêt ! Connecte-toi maintenant.", premiumDefault: "Passe Premium pour débloquer toutes les fonctionnalités de Moyo !" });
-  const [appConfig, setAppConfig] = React.useState({ limitLikes: "5",  limitStatusBoosts: "2", limitPhotoSizeMb: "5",  premiumPriceFcfa: "3500", premiumPriceEur: "10", eurToFcfaRate: "655.957", premiumDurationDays: "31", premiumPriceWeekFcfa: "1200", premiumPrice2monthFcfa: "5900", premiumDaysWeek: "7", premiumDays2month: "62", boostPrice1: "500", boostPrice2: "1000", boostPrice3: "2000", sponsorPrice1: "2000", sponsorPrice2: "5000", sponsorPrice3: "9000", likesNotifDelayHours: "24", featureStatuses: "true", featureAssistant: "true", maintenanceMode: "false", maintenanceMessage: "Moyo est en maintenance. Nous revenons très vite ! 🔧", customBannedWords: "", contactBannedWords: "", autoModContactReply: AUTO_MOD_CONTACT_REPLY });
+  const [modalTexts, setModalTexts] = React.useState({ signupSuccess: "Ton compte est prêt ! Connecte-toi maintenant.", premiumDefault: "Passe Premium pour débloquer toutes les fonctionnalités de Moyo Business !" });
+  const [appConfig, setAppConfig] = React.useState({ limitLikes: "5",  limitStatusBoosts: "2", limitPhotoSizeMb: "5",  premiumPriceFcfa: "3500", premiumPriceEur: "10", eurToFcfaRate: "655.957", premiumDurationDays: "31", premiumPriceWeekFcfa: "1200", premiumPrice2monthFcfa: "5900", premiumDaysWeek: "7", premiumDays2month: "62", boostPrice1: "500", boostPrice2: "1000", boostPrice3: "2000", sponsorPrice1: "2000", sponsorPrice2: "5000", sponsorPrice3: "9000", likesNotifDelayHours: "24", featureStatuses: "true", featureAssistant: "true", maintenanceMode: "false", maintenanceMessage: "Moyo Business est en maintenance. Nous revenons très vite ! 🔧", customBannedWords: "", contactBannedWords: "", autoModContactReply: AUTO_MOD_CONTACT_REPLY });
   const [editingModal, setEditingModal] = React.useState<string | null>(null);
   const [editingValue, setEditingValue] = React.useState("");
   const [editingConfig, setEditingConfig] = React.useState<string | null>(null);
@@ -4612,7 +4612,7 @@ function MobileAdminConfig({ auth, onClose }: { auth: Auth; onClose: () => void 
             setEditingConfig(null);
           }} />
         <div style={{ fontSize: "0.74rem", color: G.brunLight, margin: "16px 0 10px", lineHeight: 1.5, borderTop: `1px solid ${G.gris}`, paddingTop: 14 }}>
-          <b>Message automatique de l'Assistant Moyo.</b> Envoyé automatiquement à un membre gratuit dès qu'il tente de partager des coordonnées. Il s'affiche dans sa conversation avec l'Assistant Moyo.
+          <b>Message automatique de l'Assistant Moyo Business.</b> Envoyé automatiquement à un membre gratuit dès qu'il tente de partager des coordonnées. Il s'affiche dans sa conversation avec l'Assistant Moyo Business.
         </div>
         <EditableRow label="Message auto (tentative de contact)" value={appConfig.autoModContactReply || "(par défaut)"} open={editingConfig === "auto_mod_contact_reply"}
           onOpen={() => { setEditingConfig(editingConfig === "auto_mod_contact_reply" ? null : "auto_mod_contact_reply"); setEditingConfigValue(appConfig.autoModContactReply); }}
@@ -4860,8 +4860,8 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
         "Vos coordonnées ne sont partagées qu'avec les membres que vous contactez vous-même.",
         "Pour supprimer votre compte : Profil puis Supprimer mon compte. Cette action est définitive et irréversible.",
       ] },
-    { title: "Assistant Moyo", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 10 4a2 2 0 0 1 2-2z"/><path d="M5 14v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4"/></svg>, items: [
-        "L'icône verte en forme de robot, à côté du bouton Guide, ouvre l'Assistant Moyo.",
+    { title: "Assistant Moyo Business", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 10 4a2 2 0 0 1 2-2z"/><path d="M5 14v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4"/></svg>, items: [
+        "L'icône verte en forme de robot, à côté du bouton Guide, ouvre l'Assistant Moyo Business.",
         "Deux options : Besoin d'aide (réponses à vos questions sur l'application) et Signaler un problème. Les signalements sont traités sous 24h.",
       ] },
   ];
@@ -4901,7 +4901,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
       <div className={`moyo-sidebar${isFullscreen ? " fullscreen-blur" : ""}`}>
         <div className="moyo-sidebar-logo">
           <div style={{ fontSize: "1.6rem", fontWeight: 800, letterSpacing: "-0.02em" }}>
-            <span style={{ color: G.rouge }}>Mo</span><span style={{ color: G.or }}>yo</span>
+            <span style={{ color: G.rouge }}>Mo</span><span style={{ color: G.or }}>yo</span> <span style={{ color: G.brunLight, fontSize: "1.1rem", fontWeight: 800 }}>Business</span>
           </div>
         </div>
         <nav className="moyo-sidebar-nav">
@@ -5019,7 +5019,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
           <div onClick={() => setShowGuide(false)} style={{ position: "absolute", top: 14, right: 16, cursor: "pointer", opacity: 0.8 }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </div>
-          <div style={{ fontSize: "1.6rem", color: "#fff", fontWeight: 800 }}>Guide <span style={{ color: G.brun }}>Moyo</span></div>
+          <div style={{ fontSize: "1.6rem", color: "#fff", fontWeight: 800 }}>Guide <span style={{ color: G.brun }}>Moyo Business</span></div>
           <div style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.82rem", marginTop: 4 }}>Tout ce que vous devez savoir</div>
         </div>
         {/* Accordéon */}
@@ -5507,7 +5507,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const statusInputRef = useRef<HTMLInputElement>(null);
   const openRef = useRef<Match | null>(null);
-  const supportProfile: Profile = { id: SUPPORT_TEAM_ID, name: SUPPORT_TEAM_NAME, age: 0, city: "Brazzaville · Congo", gender: "", bio: "Assistance officielle Moyo", photo_url: SUPPORT_TEAM_PHOTO || null, is_premium: true, is_admin: true, is_verified: true };
+  const supportProfile: Profile = { id: SUPPORT_TEAM_ID, name: SUPPORT_TEAM_NAME, age: 0, city: "Brazzaville · Congo", gender: "", bio: "Assistance officielle Moyo Business", photo_url: SUPPORT_TEAM_PHOTO || null, is_premium: true, is_admin: true, is_verified: true };
   const supportMatch: Match = { id: "__support__", user1: auth.userId, user2: SUPPORT_TEAM_ID, partner: supportProfile };
 
   useEffect(() => { openRef.current = open; }, [open]);
@@ -5732,8 +5732,8 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
       const mine = await Promise.all((Array.isArray(mineRaw) ? mineRaw : []).map(async st => ({ ...st, profile: { ...ownProfile, is_premium: ownProfile.is_premium ?? auth.isPremium }, image_url: await resolveStatusImageUrl(auth.token, st.image_url) })));
       setMyStatuses(mine);
 
-      // ── Statuts officiels Moyo : visibles par TOUT LE MONDE (gratuits inclus), regroupés sous "Moyo" ──
-      const moyoProfile: Profile = { id: "moyo-official", name: "Moyo", age: 0, city: "", gender: "", bio: "", photo_url: SUPPORT_TEAM_PHOTO || null, is_premium: true, is_verified: true };
+      // ── Statuts officiels Moyo Business : visibles par TOUT LE MONDE (gratuits inclus), regroupés sous "Moyo Business" ──
+      const moyoProfile: Profile = { id: "moyo-official", name: "Moyo Business", age: 0, city: "", gender: "", bio: "", photo_url: SUPPORT_TEAM_PHOTO || null, is_premium: true, is_verified: true };
       const officialRaw = await sb.query<StatusPost>(auth.token, "statuses", `?is_official=eq.true&expires_at=gt.${encodeURIComponent(now)}&order=created_at.desc`).catch(() => [] as StatusPost[]);
       const officialEnriched = await Promise.all((Array.isArray(officialRaw) ? officialRaw : []).map(async st => ({ ...st, user_id: "moyo-official", profile: moyoProfile, image_url: await resolveStatusImageUrl(auth.token, st.image_url) })));
 
@@ -5945,16 +5945,16 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
     try {
       const isOfficialOrFeature = st.is_official || st.user_id === "moyo-official";
       if (isOfficialOrFeature) {
-        // Réponse à un statut Moyo officiel / mise en avant → arrive dans la Messagerie admin (système support)
-        const reason = `${SUPPORT_PREFIX_USER} ↩ Statut Moyo [#${st.id}] : ${content}`;
+        // Réponse à un statut Moyo Business officiel / mise en avant → arrive dans la Messagerie admin (système support)
+        const reason = `${SUPPORT_PREFIX_USER} ↩ Statut Moyo Business [#${st.id}] : ${content}`;
         await sb.insert(auth.token, "reports", { reporter_id: auth.userId, reported_id: null, reason, status: "pending" });
         setStatusReplyText("");
         setStatusPaused(false);
-        setToast({ msg: "Réponse envoyée à l'équipe Moyo.", type: "success" });
+        setToast({ msg: "Réponse envoyée à l'équipe Moyo Business.", type: "success" });
       } else {
         const match = getMatchWithUser(st.user_id);
         if (!match) { setToast({ msg: "Vous devez avoir une mise en relation active pour répondre à ce statut.", type: "error" }); setStatusActionLoading(false); return; }
-        const prefix = `[↩ Statut Moyo : ${st.caption || "Photo"}]\n`;
+        const prefix = `[↩ Statut Moyo Business : ${st.caption || "Photo"}]\n`;
         await sb.insert<Message>(auth.token, "messages", { match_id: match.id, sender_id: auth.userId, content: prefix + content, is_read: false });
         setStatusReplyText("");
         setStatusPaused(false);
@@ -6221,7 +6221,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
           reason: `[AUTO-MOD CONTACT] Tentative de partage de contact (gratuit)${open.partner?.name ? ` vers ${open.partner.name}` : ""} : ${text.trim().substring(0, 120)} · Réponse auto envoyée`,
           status: "pending",
         });
-        // ── Réponse automatique de l'Assistant Moyo à l'auteur (apparaît dans SA messagerie support) ──
+        // ── Réponse automatique de l'Assistant Moyo Business à l'auteur (apparaît dans SA messagerie support) ──
         await sb.insert(auth.token, "reports", {
           reporter_id: auth.userId,
           reported_id: auth.userId,
@@ -6432,7 +6432,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
               const isSupport = c.id === "__support__";
               return (
               <div key={c.id} style={{ position: "relative", overflow: "hidden" }}>
-                {/* Fond révélé pendant le swipe (couleur Moyo + étoile) */}
+                {/* Fond révélé pendant le swipe (couleur Moyo Business + étoile) */}
                 {!isSupport && dx > 0 && (
                   <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", paddingLeft: 22, background: `linear-gradient(90deg, ${isFav ? "#9aa0a6" : G.or}, ${isFav ? "#7c8085" : "#B8860B"})`, color: "#fff", zIndex: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, opacity: Math.min(dx / 64, 1), transform: `scale(${0.7 + Math.min(dx / 64, 1) * 0.3})` }}>
@@ -7243,7 +7243,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
           <Avatar url={statusPreview.profile?.photo_url} gender={statusPreview.profile?.gender} size={44} premium={statusPreview.profile?.is_premium} />
           <div style={{ minWidth: 0 }}>
             <div style={{ fontWeight: 900, fontSize: "1.02rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>{statusPreview.profile?.name || "Statut"}{(statusPreview.profile?.id === "moyo-official" || statusPreview.is_official) && <VerifiedBadge size={15} />}</div>
-            <div style={{ fontSize: "0.78rem", opacity: 0.82, display: "flex", alignItems: "center", gap: 6 }}>{(statusPreview.is_official) ? "Statut officiel" : "Statut Moyo"}{statusPreview.is_sponsored && <span style={{ background: "rgba(255,255,255,0.2)", borderRadius: 6, padding: "1px 7px", fontSize: "0.68rem", fontWeight: 700 }}>Sponsorisé</span>}</div>
+            <div style={{ fontSize: "0.78rem", opacity: 0.82, display: "flex", alignItems: "center", gap: 6 }}>{(statusPreview.is_official) ? "Statut officiel" : "Statut Moyo Business"}{statusPreview.is_sponsored && <span style={{ background: "rgba(255,255,255,0.2)", borderRadius: 6, padding: "1px 7px", fontSize: "0.68rem", fontWeight: 700 }}>Sponsorisé</span>}</div>
           </div>
           {statusPreview.user_id === auth.userId && (
             <button
@@ -8008,7 +8008,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
     if (id === "invite") {
       const refLink = `https://moyo-congo.com?ref=${auth.userId}`;
       const msg = encodeURIComponent(`Découvrez MOYO, l'annuaire des pros du Congo.\nCréez votre compte gratuitement ici : ${refLink}`);
-      if (navigator.share) navigator.share({ title: "Moyo Congo", text: "Rejoins-moi sur Moyo !", url: refLink });
+      if (navigator.share) navigator.share({ title: "Moyo Congo", text: "Rejoins-moi sur Moyo Business !", url: refLink });
       else window.open(`https://wa.me/?text=${msg}`, "_blank");
       return;
     }
@@ -8566,10 +8566,10 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
               </div>
               <div style={{ background: "rgba(212,168,67,0.08)", border: "1px solid rgba(212,168,67,0.25)", borderRadius: 12, padding: "12px 14px", fontSize: "0.8rem", color: G.brunLight, lineHeight: 1.7 }}>
                 Pour recevoir les notifications sur iPhone :<br />
-                1. Ouvrez Moyo dans <b>Safari</b> (pas Chrome)<br />
+                1. Ouvrez Moyo Business dans <b>Safari</b> (pas Chrome)<br />
                 2. Touchez l'icône <b>Partager</b> <span style={{ fontSize: "0.9rem" }}>⬆️</span> en bas de l'écran<br />
                 3. Choisissez <b>« Sur l'écran d'accueil »</b><br />
-                4. Ouvrez Moyo depuis la nouvelle icône → le bouton Notifications apparaîtra.
+                4. Ouvrez Moyo Business depuis la nouvelle icône → le bouton Notifications apparaîtra.
               </div>
             </div>
           );
@@ -8613,7 +8613,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun }}>
-              {ratingSubmitted ? "Ton avis Moyo" : "Noter Moyo"}
+              {ratingSubmitted ? "Ton avis Moyo Business" : "Noter Moyo Business"}
             </div>
             <div style={{ fontSize: "0.82rem", color: G.brunLight, marginTop: 2 }}>
               {ratingSubmitted
@@ -8650,7 +8650,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                 </div>
               ) : (
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, marginBottom: 4, textAlign: "center" }}>Comment tu trouves Moyo ?</div>
+                  <div style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, marginBottom: 4, textAlign: "center" }}>Comment tu trouves Moyo Business ?</div>
                   <div style={{ fontSize: "0.78rem", color: G.brunLight, marginBottom: 14, textAlign: "center" }}>Ton avis nous aide à améliorer l'application</div>
                   <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 4 }}>
                     {[1,2,3,4,5].map(star => (
@@ -8769,7 +8769,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
         {/* ── Boutons d'installation de l'app ── */}
         {(!isWideProfile || ["logout","delete","main"].includes(activeSection)) && (
           <div style={{ marginTop: 14, background: `linear-gradient(135deg,${G.vert},#0D2E1C)`, borderRadius: 16, padding: "16px 14px", textAlign: "center" }}>
-            <div style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.78rem", fontWeight: 600, marginBottom: 10 }}>Installe l'application Moyo</div>
+            <div style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.78rem", fontWeight: 600, marginBottom: 10 }}>Installe l'application Moyo Business</div>
             <InstallButtons variant="dark" />
           </div>
         )}
@@ -8830,7 +8830,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
       )}
 
       {showLogout && (
-        <ConfirmModal preset="logout" tone="neutral" title="Se déconnecter ?" message="Tu seras redirigé vers la page d'accueil. À bientôt sur Moyo !" confirmLabel="Se déconnecter" onConfirm={() => { sb.signOut(auth.token); onLogout(); }} onCancel={() => setShowLogout(false)} />
+        <ConfirmModal preset="logout" tone="neutral" title="Se déconnecter ?" message="Tu seras redirigé vers la page d'accueil. À bientôt sur Moyo Business !" confirmLabel="Se déconnecter" onConfirm={() => { sb.signOut(auth.token); onLogout(); }} onCancel={() => setShowLogout(false)} />
       )}
 
       {showDelete && (
@@ -8875,7 +8875,7 @@ function UserWarningModal({ warning, onAcknowledge }: {
           </svg>
           <div style={{ marginBottom: 10, display: "flex", justifyContent: "center" }}><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#e67e22" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
           <div style={{ color: "#fff", fontWeight: 900, fontSize: "1.3rem", letterSpacing: "0.01em", textShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>Vous avez un cadeau !</div>
-          <div style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.78rem", marginTop: 6 }}>Quelqu'un pense à vous sur Moyo 💛</div>
+          <div style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.78rem", marginTop: 6 }}>Quelqu'un pense à vous sur Moyo Business 💛</div>
         </div>
         {/* Body */}
         <div style={{ padding: "22px 22px 26px", textAlign: "center" }}>
@@ -8903,7 +8903,7 @@ function UserWarningModal({ warning, onAcknowledge }: {
               : <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#f39c12" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             }
           </div>
-          <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, letterSpacing: "0.01em" }}>{isInfo ? "Information Moyo" : "Avertissement de modération"}</div>
+          <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, letterSpacing: "0.01em" }}>{isInfo ? "Information Moyo Business" : "Avertissement de modération"}</div>
           {!isInfo && <div style={{ fontSize: "0.72rem", color: "#e67e22", fontWeight: 600, marginTop: 5, background: "rgba(243,156,18,0.15)", borderRadius: 50, padding: "3px 12px", display: "inline-block" }}>Avertissement n°{warning.warning_number}</div>}
         </div>
         <div style={{ padding: "20px 22px 24px" }}>
@@ -9209,7 +9209,7 @@ function MsgModal({ user, msgText, setMsgText, msgHistory, msgHistoryLoading, ms
 }) {
   const isWide = window.innerWidth >= 768;
   const msgTemplates = [
-    `${user.name}, bienvenue sur Moyo ! Nous vous conseillons de liker les profils qui vous intéressent. Si une personne vous like en retour, le match se débloque automatiquement pour discuter et voir ses stories. Moyo 100% Congolais !!!!`,
+    `${user.name}, bienvenue sur Moyo Business ! Nous vous conseillons de liker les profils qui vous intéressent. Si une personne vous like en retour, le match se débloque automatiquement pour discuter et voir ses stories. Moyo Business 100% Congolais !!!!`,
     "Votre abonnement Premium est maintenant actif ! Actualisez l'application pour profiter de toutes les fonctionnalités Premium 🌟",
     "Votre abonnement Premium expire dans [X] jours.",
     "Votre demande de vérification est en cours d'examen. Merci de patienter.",
@@ -9222,7 +9222,7 @@ function MsgModal({ user, msgText, setMsgText, msgHistory, msgHistoryLoading, ms
     "Votre compte a été suspendu car votre nom de profil n'est pas conforme. Vous pouvez créer un nouveau compte gratuitement avec des informations valides.",
     "Les insultes, menaces et comportements irrespectueux sont interdits sur la plateforme. Toute récidive entraînera une suppression définitive du compte.",
     "Pour garantir la sécurité des utilisateurs, les faux profils sont supprimés automatiquement.",
-    "Votre compte a été signalé. Merci de respecter les règles de la communauté Moyo.",
+    "Votre compte a été signalé. Merci de respecter les règles de la communauté Moyo Business.",
     "Profitez de -50% sur le Premium ce weekend uniquement !",
   ];
 
@@ -9380,9 +9380,9 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
   const [reviewsSubTab, setReviewsSubTab] = useState<"avis" | "sondage">("avis");
   // ── SONDAGES ──
   const DEFAULT_SURVEY_QUESTIONS = [
-    { id: "q1", text: "Êtes-vous satisfait(e) de votre expérience sur Moyo ?", type: "single", options: ["Très satisfait(e)", "Satisfait(e)", "Moyen", "Insatisfait(e)"] },
+    { id: "q1", text: "Êtes-vous satisfait(e) de votre expérience sur Moyo Business ?", type: "single", options: ["Très satisfait(e)", "Satisfait(e)", "Moyen", "Insatisfait(e)"] },
     { id: "q2", text: "Quelles fonctionnalités utilisez-vous le plus ?", type: "multi", options: ["Annuaire", "Messagerie", "Statuts", "Mise en relation", "Premium"] },
-    { id: "q3", text: "Recommanderiez-vous Moyo à un ami ?", type: "single", options: ["Oui, sûrement", "Peut-être", "Non"] },
+    { id: "q3", text: "Recommanderiez-vous Moyo Business à un ami ?", type: "single", options: ["Oui, sûrement", "Peut-être", "Non"] },
   ];
   const [surveys, setSurveys] = useState<any[]>([]);
   const [surveysLoading, setSurveysLoading] = useState(false);
@@ -9404,8 +9404,8 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     } catch { showToast("Erreur de chargement des sondages.", "error"); }
     setSurveysLoading(false);
   };
-  const newSurveyDraft = () => setSurveyEditor({ title: "", intro_message: "Votre avis nous intéresse ! Aidez-nous à améliorer Moyo en répondant à quelques questions rapides.", target: "all|all", status: "active", questions: [] });
-  const loadDefaultSurvey = () => setSurveyEditor({ title: "Votre satisfaction Moyo", intro_message: "Votre avis nous intéresse ! Aidez-nous à améliorer Moyo en répondant à quelques questions rapides.", target: "all|all", status: "active", questions: JSON.parse(JSON.stringify(DEFAULT_SURVEY_QUESTIONS)) });
+  const newSurveyDraft = () => setSurveyEditor({ title: "", intro_message: "Votre avis nous intéresse ! Aidez-nous à améliorer Moyo Business en répondant à quelques questions rapides.", target: "all|all", status: "active", questions: [] });
+  const loadDefaultSurvey = () => setSurveyEditor({ title: "Votre satisfaction Moyo Business", intro_message: "Votre avis nous intéresse ! Aidez-nous à améliorer Moyo Business en répondant à quelques questions rapides.", target: "all|all", status: "active", questions: JSON.parse(JSON.stringify(DEFAULT_SURVEY_QUESTIONS)) });
   const saveSurvey = async () => {
     if (!surveyEditor) return;
     if (!surveyEditor.title.trim()) { showToast("Donnez un titre au sondage.", "error"); return; }
@@ -9680,7 +9680,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
         if (Array.isArray(d) && d[0]?.name) giftSenderName = d[0].name;
       } catch {}
     }
-    await fetch(`${SUPABASE_URL}/rest/v1/user_warnings`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=representation" }, body: JSON.stringify({ user_id: targetId, admin_id: auth.userId, reason: p.gift_for ? `🎁 Vous avez reçu 1 mois de Premium en cadeau offert par ${giftSenderName || "un membre Moyo"} ! Actualisez l'application pour profiter de toutes les fonctionnalités Premium 🌟` : "Votre abonnement Premium est maintenant actif ! Actualisez l'application pour profiter de toutes les fonctionnalités Premium 🌟", warning_number: 0, acknowledged: false }) });
+    await fetch(`${SUPABASE_URL}/rest/v1/user_warnings`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=representation" }, body: JSON.stringify({ user_id: targetId, admin_id: auth.userId, reason: p.gift_for ? `🎁 Vous avez reçu 1 mois de Premium en cadeau offert par ${giftSenderName || "un membre Moyo Business"} ! Actualisez l'application pour profiter de toutes les fonctionnalités Premium 🌟` : "Votre abonnement Premium est maintenant actif ! Actualisez l'application pour profiter de toutes les fonctionnalités Premium 🌟", warning_number: 0, acknowledged: false }) });
     // Si cadeau, notifier aussi l'acheteur
     if (p.gift_for) {
       await fetch(`${SUPABASE_URL}/rest/v1/user_warnings`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "return=representation" }, body: JSON.stringify({ user_id: p.user_id, admin_id: auth.userId, reason: `Votre cadeau Premium pour ${p.gift_for_name || "votre contact"} a bien été activé !`, warning_number: 0, acknowledged: false }) });
@@ -10333,10 +10333,10 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
   const [archiveTypeFilter, setArchiveTypeFilter] = useState<"all" | "messaging" | "system" | "profile">("all");
   const [archiveActionFilter, setArchiveActionFilter] = useState<"all" | "reviewed" | "rejected" | "banned" | "archived">("all");
   const [archivePage, setArchivePage] = useState(1);
-  // ── Modèles de réponse (Assistant Moyo) ──
+  // ── Modèles de réponse (Assistant Moyo Business) ──
   const TEMPLATE_CATS = ["Accueil", "Abonnement", "Paiement", "Sécurité", "Fonctionnalités", "Signalements", "Mise en avant", "Autre"];
   const DEFAULT_SUPPORT_TEMPLATES = [
-    { id: "t1", category: "Accueil", title: "Accueil - Message de bienvenue", content: "Bonjour 👋 Merci de contacter Moyo. Comment pouvons-nous vous aider aujourd'hui ?" },
+    { id: "t1", category: "Accueil", title: "Accueil - Message de bienvenue", content: "Bonjour 👋 Merci de contacter Moyo Business. Comment pouvons-nous vous aider aujourd'hui ?" },
     { id: "t2", category: "Abonnement", title: "Abonnement - Annulation", content: "Oui, vous pouvez annuler votre abonnement Premium à tout moment depuis vos paramètres. L'accès Premium reste actif jusqu'à la fin de votre période en cours." },
     { id: "t3", category: "Abonnement", title: "Abonnement - Activation", content: "Votre abonnement Premium est maintenant actif ! Actualisez l'application pour profiter de toutes les fonctionnalités Premium 🌟" },
     { id: "t4", category: "Paiement", title: "Paiement - Échec de paiement", content: "Votre paiement a malheureusement échoué. Veuillez vérifier vos informations et réessayer, ou essayer un autre moyen de paiement." },
@@ -10345,9 +10345,9 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     { id: "t7", category: "Sécurité", title: "Sécurité - Photo non conforme", content: "Votre photo de profil ne respecte pas nos conditions. Merci d'utiliser une photo claire de votre visage, sinon votre compte pourra être suspendu." },
     { id: "t8", category: "Fonctionnalités", title: "Fonctionnalité - Explication", content: "Cette fonctionnalité vous permet de [description]. N'hésitez pas si vous avez d'autres questions !" },
     { id: "t9", category: "Fonctionnalités", title: "Fonctionnalité - Mises en relation", content: "Pour échanger avec un professionnel, contactez-le depuis sa fiche. La conversation s'ouvre automatiquement dans Messages." },
-    { id: "t10", category: "Signalements", title: "Signalement - Suivi", content: "Votre signalement a bien été pris en compte. Merci de contribuer à la sécurité de la communauté Moyo." },
-    { id: "t11", category: "Mise en avant", title: "Mise en avant - Validée", content: "Votre demande de mise en avant a été acceptée ! Votre profil apparaîtra dans les Statuts Moyo pendant 24h." },
-    { id: "t12", category: "Autre", title: "Autre - Remerciement", content: "Merci beaucoup de nous avoir contactés. Belle journée sur Moyo ! 💛" },
+    { id: "t10", category: "Signalements", title: "Signalement - Suivi", content: "Votre signalement a bien été pris en compte. Merci de contribuer à la sécurité de la communauté Moyo Business." },
+    { id: "t11", category: "Mise en avant", title: "Mise en avant - Validée", content: "Votre demande de mise en avant a été acceptée ! Votre profil apparaîtra dans les Statuts Moyo Business pendant 24h." },
+    { id: "t12", category: "Autre", title: "Autre - Remerciement", content: "Merci beaucoup de nous avoir contactés. Belle journée sur Moyo Business ! 💛" },
   ];
   const [supportTemplates, setSupportTemplates] = useState<{ id: string; category: string; title: string; content: string }[]>(DEFAULT_SUPPORT_TEMPLATES);
   const [templateSearch, setTemplateSearch] = useState("");
@@ -10385,7 +10385,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
   };
   const deleteTemplate = (id: string) => { setTplMenu(null); persistTemplates(supportTemplates.filter(t => t.id !== id)); showToast("Modèle supprimé", "success"); };
 
-  // ── Statuts officiels Moyo (publiés depuis l'onglet Marketing) ──
+  // ── Statuts officiels Moyo Business (publiés depuis l'onglet Marketing) ──
   const [officialStatuses, setOfficialStatuses] = useState<(StatusPost & { _views?: number; _replies?: number })[]>([]);
   const [pendingDelReview, setPendingDelReview] = useState<any | null>(null);
   const [confirmDeleteStatus, setConfirmDeleteStatus] = useState<StatusPost | null>(null);
@@ -10452,7 +10452,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
         caption: stCaption.trim() || null, is_official: true, is_sponsored: stSponsored,
         link_url: linkUrl, expires_at,
       });
-      showToast("Statut Moyo publié pour 24h.", "success");
+      showToast("Statut Moyo Business publié pour 24h.", "success");
       setStFile(null); setStPreview(null); setStCaption(""); setStSponsored(false); setStLink(""); setStCtaType("none"); setStPhone("");
       if (stFileRef.current) stFileRef.current.value = "";
       loadOfficialStatuses();
@@ -11347,9 +11347,9 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 12000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <div style={{ background: G.blanc, borderRadius: 20, width: "100%", maxWidth: 420, padding: 20, boxShadow: "0 20px 60px rgba(0,0,0,0.25)" }}>
             <h3 style={{ fontSize: "1rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>Répondre via {SUPPORT_TEAM_NAME}</h3>
-            <p style={{ fontSize: "0.78rem", color: G.brunLight, lineHeight: 1.5, marginBottom: 12 }}>La réponse apparaîtra directement dans la messagerie de l’utilisateur comme une conversation avec l’assistance Moyo.</p>
+            <p style={{ fontSize: "0.78rem", color: G.brunLight, lineHeight: 1.5, marginBottom: 12 }}>La réponse apparaîtra directement dans la messagerie de l’utilisateur comme une conversation avec l’assistance Moyo Business.</p>
             <div style={{ background: "rgba(26,92,58,0.06)", border: "1px solid rgba(26,92,58,0.15)", borderRadius: 12, padding: 10, fontSize: "0.78rem", color: G.brun, lineHeight: 1.5, marginBottom: 12 }}>{cleanSupportReason(supportReply.report.reason)}</div>
-            <textarea value={supportReplyText} onChange={e => setSupportReplyText(e.target.value)} placeholder="Écrire la réponse de l’assistance Moyo..." style={{ width: "100%", minHeight: 110, boxSizing: "border-box", border: `1px solid ${G.gris}`, borderRadius: 12, padding: 12, fontSize: "0.86rem", outline: "none", resize: "vertical", marginBottom: 12 }} />
+            <textarea value={supportReplyText} onChange={e => setSupportReplyText(e.target.value)} placeholder="Écrire la réponse de l’assistance Moyo Business..." style={{ width: "100%", minHeight: 110, boxSizing: "border-box", border: `1px solid ${G.gris}`, borderRadius: 12, padding: 12, fontSize: "0.86rem", outline: "none", resize: "vertical", marginBottom: 12 }} />
             <div style={{ display: "flex", gap: 10 }}>
               <Btn variant="ghost" onClick={() => { setSupportReply(null); setSupportReplyText(""); }} style={{ flex: 1 }}>Annuler</Btn>
               <Btn variant="primary" onClick={sendSupportReply} disabled={!supportReplyText.trim()} style={{ flex: 2 }}>Envoyer</Btn>
@@ -11443,16 +11443,16 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             <div style={{ padding: "16px 20px 20px" }}>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
                 {[
-                  "Moyo est en maintenance ce soir de [H] à [H]. Merci de votre compréhension.",
+                  "Moyo Business est en maintenance ce soir de [H] à [H]. Merci de votre compréhension.",
                   "Nouvelle fonctionnalité disponible : [PRÉCISION]",
                   "Une mise à jour est disponible. Rechargez l'application pour en profiter.",
                   "Un incident technique a été résolu. Tout fonctionne normalement.",
                   "Profitez de -50% sur le Premium ce weekend uniquement !",
                   "Offre spéciale : 1 mois Premium offert pour tout parrainage !",
-                  "Rappel : Moyo est une plateforme professionnelle respectueuse. Soyons bienveillants.",
-                  "La communauté Moyo grandit ! Invitez vos amis à nous rejoindre.",
+                  "Rappel : Moyo Business est une plateforme professionnelle respectueuse. Soyons bienveillants.",
+                  "La communauté Moyo Business grandit ! Invitez vos amis à nous rejoindre.",
                   "Pour votre sécurité, ne partagez jamais vos informations personnelles.",
-                  "Moyo ne vous demandera jamais d'argent. Signalez toute tentative d'arnaque.",
+                  "Moyo Business ne vous demandera jamais d'argent. Signalez toute tentative d'arnaque.",
                 ].map(t => (
                   <button key={t} onClick={() => setBroadcastText(t)} style={{ fontSize: "0.72rem", background: broadcastText === t ? "rgba(230,126,34,0.12)" : G.creme, border: `1.5px solid ${broadcastText === t ? "#e67e22" : "transparent"}`, borderRadius: 8, padding: "5px 8px", cursor: "pointer", color: G.brun, textAlign: "left", lineHeight: 1.3 }}>{t.length > 48 ? t.slice(0, 48) + "…" : t}</button>
                 ))}
@@ -11670,7 +11670,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   {mailSending === "send-bienvenue" ? "Envoi en cours..." : "Email de bienvenue"}
                 </div>
                 <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#D4A843", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Inscription incomplète</div>
-                <div onClick={() => sendMailTemplate("send-inscription-incomplete", "Finalisez votre inscription", "Finalisez votre inscription Moyo", `Bonjour,\n\nVotre inscription sur Moyo n'a pas abouti car votre profil n'avait pas été complété à 100 %.\n\nVous pouvez vous réinscrire avec les mêmes identifiants (e-mail et mot de passe) sur : 👉 https://moyo-congo.com\n\nPensez à compléter votre profil jusqu'au bout pour apparaître dans les résultats.\n\nÀ bientôt sur Moyo !\n\nMoyo Brazzaville - République du Congo\ncontact@moyo-congo.com | WhatsApp : +242 06 513 20 12`, mailModal.user)} style={{ padding: "12px 14px", borderRadius: 12, cursor: mailSending === "send-inscription-incomplete" ? "not-allowed" : "pointer", background: mailSending === "send-inscription-incomplete" ? "#fdeaea" : "#fff5f5", border: `1.5px solid ${mailSending === "send-inscription-incomplete" ? "#f0b4b4" : "#f5d5d5"}`, fontSize: "0.83rem", color: G.brun, lineHeight: 1.4, display: "flex", alignItems: "center", gap: 10, marginBottom: 12, opacity: mailSending && mailSending !== "send-inscription-incomplete" ? 0.5 : 1 }}>
+                <div onClick={() => sendMailTemplate("send-inscription-incomplete", "Finalisez votre inscription", "Finalisez votre inscription Moyo Business", `Bonjour,\n\nVotre inscription sur Moyo Business n'a pas abouti car votre profil n'avait pas été complété à 100 %.\n\nVous pouvez vous réinscrire avec les mêmes identifiants (e-mail et mot de passe) sur : 👉 https://moyo-congo.com\n\nPensez à compléter votre profil jusqu'au bout pour apparaître dans les résultats.\n\nÀ bientôt sur Moyo Business !\n\nMoyo Business Brazzaville - République du Congo\ncontact@moyo-congo.com | WhatsApp : +242 06 513 20 12`, mailModal.user)} style={{ padding: "12px 14px", borderRadius: 12, cursor: mailSending === "send-inscription-incomplete" ? "not-allowed" : "pointer", background: mailSending === "send-inscription-incomplete" ? "#fdeaea" : "#fff5f5", border: `1.5px solid ${mailSending === "send-inscription-incomplete" ? "#f0b4b4" : "#f5d5d5"}`, fontSize: "0.83rem", color: G.brun, lineHeight: 1.4, display: "flex", alignItems: "center", gap: 10, marginBottom: 12, opacity: mailSending && mailSending !== "send-inscription-incomplete" ? 0.5 : 1 }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#D4A843", flexShrink: 0 }} />
                   {mailSending === "send-inscription-incomplete" ? "Envoi en cours..." : "Finalisez votre inscription"}
                 </div>
@@ -11704,7 +11704,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <input
                 value={mailCustomSubject}
                 onChange={e => setMailCustomSubject(e.target.value)}
-                placeholder="Ex: Votre compte Moyo"
+                placeholder="Ex: Votre compte Moyo Business"
                 style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 10, border: "1.5px solid #e8d5f5", fontSize: "0.85rem", outline: "none", fontFamily: "inherit", marginBottom: 12, background: G.blanc }}
               />
               <div style={{ fontWeight: 600, fontSize: "0.75rem", color: G.brunLight, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.05em" }}>Message</div>
@@ -12145,7 +12145,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     ["Sélection multiple", "Cochez les cases à gauche de chaque profil pour les sélectionner. Utilisez 'Tout sélectionner' pour sélectionner d'un coup tous les profils affichés. Idéal combiné avec le filtre 'Incomplets'."],
                     ["Suppression en masse", "Une fois des profils sélectionnés, le bouton 🗑 Supprimer (X) apparaît. Cette action supprime définitivement les comptes sélectionnés de la base de données. Irréversible."],
                     ["Rendre Premium / Retirer Premium", "Attribue 30 jours de Premium ou retire l'accès aux fonctionnalités payantes. Si l'utilisateur a le Premium à vie, le bouton affiche '- À vie' à la place."],
-                    ["★ À vie", "Attribue le Premium permanent à un utilisateur (date d'expiration fixée à 2099). Réservé aux employés et collaborateurs Moyo. L'utilisateur voit le symbole ∞ sur son profil. Un badge ♾️ À vie (doré foncé) apparaît directement sur sa carte dans l'Admin. Le bouton est grisé si l'utilisateur a déjà le Premium à vie."],
+                    ["★ À vie", "Attribue le Premium permanent à un utilisateur (date d'expiration fixée à 2099). Réservé aux employés et collaborateurs Moyo Business. L'utilisateur voit le symbole ∞ sur son profil. Un badge ♾️ À vie (doré foncé) apparaît directement sur sa carte dans l'Admin. Le bouton est grisé si l'utilisateur a déjà le Premium à vie."],
                     ["- À vie", "Retire le Premium à vie d'un utilisateur. Ce bouton remplace '- Premium' lorsque l'utilisateur possède le Premium permanent. L'utilisateur repasse en compte gratuit."],
                     ["Rendre Admin / Retirer Admin", "Accorde ou révoque les droits d'administration. À utiliser avec la plus grande prudence."],
                     ["Vérifier / Retirer vérification", "Attribue ou retire le badge bleu de vérification du profil."],
@@ -12172,7 +12172,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     ["En attente (tous)", "Vue par défaut. Affiche tous les signalements non encore traités. Le badge rouge indique le nombre en attente."],
                     ["Profils", "Filtre les signalements manuels d'utilisateurs contre d'autres profils. À examiner en priorité."],
                     ["Système", "Signalements générés automatiquement par la modération (insultes, arnaques, contenus sexuels, alertes techniques)."],
-                    ["Messagerie", "Boîte de réception regroupant tous les échanges avec les utilisateurs (signalements + support). Chaque conversation est groupée par utilisateur avec photo, nom, dernier message et badge non lu. Le bouton Répondre ouvre une modale pour répondre directement — le message arrive dans la messagerie de l'utilisateur sous le nom Assistance Moyo (\"Répond sous 24h\")."],
+                    ["Messagerie", "Boîte de réception regroupant tous les échanges avec les utilisateurs (signalements + support). Chaque conversation est groupée par utilisateur avec photo, nom, dernier message et badge non lu. Le bouton Répondre ouvre une modale pour répondre directement — le message arrive dans la messagerie de l'utilisateur sous le nom Assistance Moyo Business (\"Répond sous 24h\")."],
                     ["Archives", "Tous les signalements traités, rejetés, ayant entraîné un bannissement ou archivés. La page offre une recherche, des filtres par type (Messagerie / Auto-modération / Signalement) et par action (Traité / Rejeté / Banni / Archivé), un regroupement par date (Aujourd'hui, Hier…) et une pagination (10 par page). Chaque ligne peut être dépliée (Voir les détails) ou supprimée. 'Tout supprimer' nettoie toutes les archives d'un coup."],
                     ["Modération auto des contacts", "Quand un utilisateur gratuit tente de partager ou demander un numéro, un réseau social ou un lien (dans un message OU dans son profil), l'envoi est bloqué et un signalement automatique [AUTO-MOD CONTACT] est créé dans la catégorie Système. La détection couvre les numéros même très espacés, écrits en lettres ou avec des caractères intercalés."],
                   ] as [string, string][]).map(([label, desc]) => (
@@ -12213,9 +12213,9 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {([
-                    ["Signalé par (bleu)", "Bloc bleu en haut de la carte : photo + nom + âge + ville de la personne qui a fait le signalement. Le bouton 'Répondre' envoie un message directement dans sa messagerie Assistance Moyo."],
+                    ["Signalé par (bleu)", "Bloc bleu en haut de la carte : photo + nom + âge + ville de la personne qui a fait le signalement. Le bouton 'Répondre' envoie un message directement dans sa messagerie Assistance Moyo Business."],
                     ["Profil signalé (rouge)", "Bloc rouge : photo + nom + âge + ville du profil accusé. Un badge ⚠️ x/3 s'affiche si ce profil a déjà des avertissements. Un badge 'Banni' s'affiche s'il est déjà banni."],
-                    ["Bouton Répondre", "Sur le bloc 'Signalé par' — ouvre une modale pour écrire un message à la personne qui a signalé. Elle reçoit la réponse dans Messages → Assistance Moyo."],
+                    ["Bouton Répondre", "Sur le bloc 'Signalé par' — ouvre une modale pour écrire un message à la personne qui a signalé. Elle reçoit la réponse dans Messages → Assistance Moyo Business."],
                     ["Bouton Voir profil", "Ouvre la fiche complète du profil concerné (signalé ou support selon le contexte)."],
                     ["Bouton Avertir", "Envoie un avertissement officiel au profil signalé. Il voit un modal à sa prochaine connexion."],
                     ["Bouton Traité / Rejeter / Bannir", "Actions finales sur le signalement. Traité = pris en charge. Rejeter = sans suite. Bannir = interdit d'accès."],
@@ -12264,7 +12264,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {([
-                    ["Assistant Moyo", "Centre de support. À gauche : la conversation avec l'utilisateur (infos, historique, zone de réponse, Archiver). À droite : la bibliothèque de Modèles de réponse."],
+                    ["Assistant Moyo Business", "Centre de support. À gauche : la conversation avec l'utilisateur (infos, historique, zone de réponse, Archiver). À droite : la bibliothèque de Modèles de réponse."],
                     ["Modèles de réponse", "Réponses prédéfinies pour répondre plus vite. Créez-en (titre, catégorie, contenu), modifiez/supprimez via le menu ⋮, recherchez et filtrez par catégorie. Le bouton Copier place le texte dans le presse-papiers (notification 'Modèle copié') pour le coller dans la conversation. Les modèles sont partagés entre tous les admins."],
                     ["Diffusion générale", "Envoie une annonce (bannière) aux utilisateurs. Vous choisissez le message, un modèle rapide, la cible (Genre : tout le monde / femmes / hommes × Abonnement : tous / premium / gratuits) et une date d'expiration. L'audience estimée et la liste des diffusions actives sont affichées ; chaque diffusion peut être prévisualisée ou arrêtée."],
                   ] as [string, string][]).map(([label, desc]) => (
@@ -12284,7 +12284,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {([
-                    ["Statuts Moyo", "Publiez des statuts officiels (sponsorisés) visibles par les membres, avec une option de bouton d'action (lien ou numéro WhatsApp/appel). Gérez les statuts actifs et leur durée de vie."],
+                    ["Statuts Moyo Business", "Publiez des statuts officiels (sponsorisés) visibles par les membres, avec une option de bouton d'action (lien ou numéro WhatsApp/appel). Gérez les statuts actifs et leur durée de vie."],
                     ["Événement Premium", "Offrez le Premium gratuitement à tous les utilisateurs pour un événement (lancement, promo, fête). Les vrais abonnés ne sont pas affectés ; à la date d'expiration choisie, le Premium est retiré automatiquement aux non-abonnés."],
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
@@ -12327,7 +12327,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     ["Bouton ✉ Message", "Dans l'onglet Membres, chaque carte possède un bouton bleu '✉ Message' dans la section Modération. Il permet d'envoyer un message privé directement à cet utilisateur."],
                     ["Raccourcis disponibles", "La modale propose des messages pré-rédigés : expiration Premium, activation Premium, vérification en cours, profil vérifié, promotion -50%, signalement. Cliquez dessus pour pré-remplir le champ, puis modifiez si besoin."],
                     ["Champ libre", "Vous pouvez aussi rédiger un message entièrement personnalisé dans le champ texte."],
-                    ["Réception côté utilisateur", "Le message apparaît sous forme de modal bleu 'Information Moyo' à la prochaine connexion de l'utilisateur. Il doit cliquer 'OK, J'AI COMPRIS' pour continuer."],
+                    ["Réception côté utilisateur", "Le message apparaît sous forme de modal bleu 'Information Moyo Business' à la prochaine connexion de l'utilisateur. Il doit cliquer 'OK, J'AI COMPRIS' pour continuer."],
                     ["Cas d'usage typiques", "Informer un utilisateur que son Premium est actif, qu'il doit se reconnecter, qu'il a été signalé, ou tout autre communication officielle."],
                   ] as [string, string][]).map(([label, desc]) => (
                     <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: G.creme, borderRadius: 10, padding: "9px 12px" }}>
@@ -12347,7 +12347,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {([
                     ["Accès", "Dans l'onglet Membres, le bouton orange '📢 Diffusion générale' se trouve au-dessus de la liste des utilisateurs."],
-                    ["Fonctionnement", "Un seul message est enregistré en base. À leur prochaine connexion, tous les utilisateurs qui n'ont pas encore vu ce message reçoivent le modal bleu 'Information Moyo'."],
+                    ["Fonctionnement", "Un seul message est enregistré en base. À leur prochaine connexion, tous les utilisateurs qui n'ont pas encore vu ce message reçoivent le modal bleu 'Information Moyo Business'."],
                     ["Raccourcis disponibles", "Maintenance, mise à jour, incident résolu, promotions, rappels de bienveillance, sécurité. Cliquez pour pré-remplir, modifiez si besoin."],
                     ["À utiliser pour", "Annonces de maintenance, nouvelles fonctionnalités, promotions temporaires, rappels communautaires importants."],
                     ["Important", "Chaque nouvelle diffusion écrase la précédente. Un utilisateur déjà connecté après la diffusion ne la reverra pas."],
@@ -12582,7 +12582,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <div style={{ fontSize: "0.7rem", color: G.brunLight, letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600 }}>Conçu et développé par</div>
                 <div style={{ fontSize: "1rem", fontWeight: 800, color: G.brun, letterSpacing: "0.01em" }}>Roméo GUEBO</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 2, alignItems: "center" }}>
-                  <span style={{ fontSize: "0.75rem", fontWeight: 700, color: G.rouge }}>CEO Moyo</span>
+                  <span style={{ fontSize: "0.75rem", fontWeight: 700, color: G.rouge }}>CEO Moyo Business</span>
                   {[
                     "Chargé de communication et marketing",
                     "Responsable marketing et développement commercial",
@@ -13279,7 +13279,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
       {activeTab === "messagerie" && (
         <div style={{ padding: "16px 16px 0" }}>
           <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 2 }}>
-            {([["assistant", "Assistant Moyo", <svg key="i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>], ["broadcast", "Diffusion générale", <svg key="i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>]] as [("assistant" | "broadcast"), string, React.ReactElement][]).map(([k, lbl, ico]) => (
+            {([["assistant", "Assistant Moyo Business", <svg key="i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>], ["broadcast", "Diffusion générale", <svg key="i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>]] as [("assistant" | "broadcast"), string, React.ReactElement][]).map(([k, lbl, ico]) => (
               <button key={k} onClick={() => setMsgSubTab(k)} style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 7, padding: "9px 18px", borderRadius: 999, cursor: "pointer", fontSize: "0.82rem", fontWeight: 800, background: msgSubTab === k ? G.rouge : "#fff", color: msgSubTab === k ? "#fff" : "#555", border: msgSubTab === k ? "none" : `1.5px solid ${G.gris}`, boxShadow: msgSubTab === k ? "0 4px 12px rgba(212,168,67,0.25)" : "none" }}>{ico}{lbl}</button>
             ))}
           </div>
@@ -13307,12 +13307,12 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 <div style={{ fontSize: "0.74rem", color: G.brunLight, margin: "3px 0 12px" }}>Cliquez sur un modèle pour préremplir le message.</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(115px, 1fr))", gap: 8 }}>
                   {([
-                    { lbl: "Maintenance", col: "#E67E22", txt: "Moyo est en maintenance ce soir de [H] à [H]. Merci de votre compréhension.", ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> },
+                    { lbl: "Maintenance", col: "#E67E22", txt: "Moyo Business est en maintenance ce soir de [H] à [H]. Merci de votre compréhension.", ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> },
                     { lbl: "Nouvelle fonctionnalité", col: "#8e44ad", txt: "Nouvelle fonctionnalité disponible : [PRÉCISION]", ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg> },
                     { lbl: "Mise à jour disponible", col: "#2980b9", txt: "Une mise à jour est disponible. Rechargez l'application pour en profiter.", ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> },
                     { lbl: "Promo Premium", col: "#E67E22", txt: "Profitez de -50% sur le Premium ce weekend uniquement !", ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> },
                     { lbl: "Rappel événement", col: "#c0392b", txt: "Rappel : [ÉVÉNEMENT] aura lieu le [DATE]. Ne manquez pas ça !", ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
-                    { lbl: "Communauté", col: "#16a085", txt: "La communauté Moyo grandit ! Invitez vos amis à nous rejoindre.", ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+                    { lbl: "Communauté", col: "#16a085", txt: "La communauté Moyo Business grandit ! Invitez vos amis à nous rejoindre.", ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
                     { lbl: "Sécurité", col: "#27ae60", txt: "Pour votre sécurité, ne partagez jamais vos informations personnelles.", ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
                   ]).map(m => (
                     <button key={m.lbl} onClick={() => setBroadcastText(m.txt)} style={{ display: "flex", alignItems: "center", gap: 8, background: broadcastText === m.txt ? "rgba(212,168,67,0.06)" : "#fff", border: `1.5px solid ${broadcastText === m.txt ? G.rouge : G.gris}`, borderRadius: 12, padding: "10px 11px", cursor: "pointer", textAlign: "left" }}>
@@ -14182,7 +14182,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
       {activeTab === "marketing" && (
         <div style={{ padding: "16px" }}>
           <div style={{ display: "flex", gap: 10, marginBottom: 16, overflowX: "auto", paddingBottom: 2 }}>
-            {([["statuts", "Statuts Moyo", <svg key="i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>], ["event", "Campagnes Premium", <svg key="i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>]] as [("statuts" | "event"), string, React.ReactElement][]).map(([k, lbl, ico]) => (
+            {([["statuts", "Statuts Moyo Business", <svg key="i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>], ["event", "Campagnes Premium", <svg key="i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>]] as [("statuts" | "event"), string, React.ReactElement][]).map(([k, lbl, ico]) => (
               <button key={k} onClick={() => setMktTab(k)} style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 7, padding: "9px 18px", borderRadius: 999, cursor: "pointer", fontSize: "0.82rem", fontWeight: 800, background: mktTab === k ? "#E67E22" : "#fff", color: mktTab === k ? "#fff" : "#555", border: mktTab === k ? "none" : `1.5px solid ${G.gris}`, boxShadow: mktTab === k ? "0 4px 12px rgba(230,126,34,0.25)" : "none" }}>{ico}{lbl}</button>
             ))}
           </div>
@@ -14226,7 +14226,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           {s.image_url ? <img src={s.image_url} alt="" style={{ width: 58, height: 50, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} /> : <div style={{ width: 58, height: 50, borderRadius: 10, background: G.creme, flexShrink: 0 }} />}
                           <div style={{ flex: "1 1 170px", minWidth: 0 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                              <span style={{ fontSize: "0.9rem", fontWeight: 800, color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 230 }}>{s.caption || "Statut Moyo"}</span>
+                              <span style={{ fontSize: "0.9rem", fontWeight: 800, color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 230 }}>{s.caption || "Statut Moyo Business"}</span>
                               {s.is_sponsored && <span style={{ background: "rgba(212,168,67,0.1)", color: G.rouge, borderRadius: 50, padding: "2px 9px", fontSize: "0.64rem", fontWeight: 800 }}>Sponsorisé</span>}
                             </div>
                             <div style={{ fontSize: "0.72rem", color: G.brunLight, marginTop: 3 }}>Publié le {new Date(s.created_at || Date.now()).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })} à {new Date(s.created_at || Date.now()).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</div>
@@ -14369,7 +14369,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     <div style={{ fontSize: "0.72rem", color: G.brunLight, margin: "6px 0 20px" }}>À la date sélectionnée, le Premium sera retiré automatiquement.</div>
 
                     <div style={{ fontWeight: 800, fontSize: "0.84rem", color: G.brun, marginBottom: 8 }}>4. Message affiché aux bénéficiaires <span style={{ color: G.brunLight, fontWeight: 500 }}>(optionnel)</span></div>
-                    <textarea value={campMessage} onChange={e => setCampMessage(e.target.value.slice(0, 200))} rows={3} placeholder="🎉 Moyo vous offre le Premium pour célébrer un événement. Profitez-en !" style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${G.gris}`, borderRadius: 10, padding: "11px 13px", fontSize: "0.84rem", outline: "none", resize: "vertical", fontFamily: "inherit" }} />
+                    <textarea value={campMessage} onChange={e => setCampMessage(e.target.value.slice(0, 200))} rows={3} placeholder="🎉 Moyo Business vous offre le Premium pour célébrer un événement. Profitez-en !" style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${G.gris}`, borderRadius: 10, padding: "11px 13px", fontSize: "0.84rem", outline: "none", resize: "vertical", fontFamily: "inherit" }} />
                     <div style={{ textAlign: "right", fontSize: "0.7rem", color: G.brunLight, marginTop: 4 }}>{campMessage.length}/200</div>
 
                     <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 18 }}>
@@ -14671,7 +14671,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
               <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: G.brun, marginBottom: 6 }}>Titre du sondage</label>
-              <input value={surveyEditor.title} onChange={e => setSurveyEditor((s: any) => ({ ...s, title: e.target.value }))} placeholder="Ex : Votre satisfaction Moyo" style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.84rem", outline: "none", boxSizing: "border-box", marginBottom: 14 }} />
+              <input value={surveyEditor.title} onChange={e => setSurveyEditor((s: any) => ({ ...s, title: e.target.value }))} placeholder="Ex : Votre satisfaction Moyo Business" style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.84rem", outline: "none", boxSizing: "border-box", marginBottom: 14 }} />
               <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: G.brun, marginBottom: 6 }}>Message d'invitation (affiché au membre)</label>
               <textarea value={surveyEditor.intro_message} onChange={e => setSurveyEditor((s: any) => ({ ...s, intro_message: e.target.value }))} rows={2} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1.5px solid ${G.gris}`, fontSize: "0.84rem", outline: "none", boxSizing: "border-box", resize: "vertical", fontFamily: "inherit", marginBottom: 14 }} />
               <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: G.brun, marginBottom: 6 }}>Destinataires</label>
@@ -16899,19 +16899,6 @@ function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: ()
   const [loading, setLoading] = useState(true);
   const [boostTarget, setBoostTarget] = useState<Publication | null>(null);
   const [detail, setDetail] = useState<Publication | null>(null);
-  // Ouverture d'une annonce depuis un lien partagé (?pub=<id>).
-  useEffect(() => {
-    if (!initialPubId) return;
-    let alive = true;
-    (async () => {
-      try {
-        const rows = await sb.query<Publication>(auth.token, "publications", `?id=eq.${initialPubId}&limit=1`, auth.refreshToken);
-        if (alive && rows && rows[0]) setDetail(rows[0]);
-      } catch {}
-      onPubConsumed?.();
-    })();
-    return () => { alive = false; };
-  }, [initialPubId]);
   const [toast, setToast] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -17775,19 +17762,35 @@ export default function App() {
     if (wantPage === "login" || wantPage === "signup") {
       setPage(wantPage);
       try { window.history.replaceState({}, "", window.location.pathname + window.location.search); } catch {}
+    } else {
+      // Lien partagé ouvert sans session : aller à la connexion (la cible s'ouvre après login/inscription).
+      try { if (localStorage.getItem("moyo_pending_target")) setPage("login"); } catch {}
     }
     setSessionLoaded(true);
   }, []);
 
-  // Lien partagé (?pro=/?pub=) pour un utilisateur déjà connecté : ouvrir la cible mémorisée.
+  // Ouvre la cible d'un lien partagé (?pro=<id> ou ?pub=<id>).
+  // Pour une annonce, on résout son auteur et on ouvre sa fiche (il n'y a pas de page d'annonce publique).
+  const applySharedTarget = async (target: any) => {
+    if (!target || !target.id) return;
+    if (target.kind === "pro") { setPendingProId(target.id); setTab("discover"); return; }
+    if (target.kind === "pub") {
+      try {
+        const a = authRef.current;
+        const rows = await sb.query<any>(a?.token || "", "publications", `?id=eq.${target.id}&select=user_id&limit=1`, a?.refreshToken);
+        if (rows && rows[0] && rows[0].user_id) { setPendingProId(rows[0].user_id); setTab("discover"); return; }
+      } catch {}
+      setTab("publications");
+    }
+  };
+  // Utilisateur déjà connecté : appliquer la cible mémorisée d'un lien partagé.
   useEffect(() => {
     if (!sessionLoaded || page !== "app" || !auth) return;
     let target: any = null;
     try { const t = localStorage.getItem("moyo_pending_target"); if (t) target = JSON.parse(t); } catch {}
     if (!target || !target.id) return;
     try { localStorage.removeItem("moyo_pending_target"); } catch {}
-    if (target.kind === "pro") { setPendingProId(target.id); setTab("discover"); }
-    else if (target.kind === "pub") { setPendingPubId(target.id); setTab("publications"); }
+    applySharedTarget(target);
   }, [sessionLoaded, page, auth]);
 
   const handleAuth = (a: Auth) => {
@@ -17796,12 +17799,8 @@ export default function App() {
     // Redirection vers la cible choisie sur la landing (besoin ou pro) avant connexion.
     let target: { kind?: string; id?: string } | null = null;
     try { const t = localStorage.getItem("moyo_pending_target"); if (t) target = JSON.parse(t); localStorage.removeItem("moyo_pending_target"); } catch {}
-    if (target && target.kind === "pro" && target.id) {
-      setPendingProId(target.id);
-      setTab("discover");
-    } else if (target && target.kind === "pub" && target.id) {
-      setPendingPubId(target.id);
-      setTab("publications");
+    if (target && target.id) {
+      applySharedTarget(target);
     } else {
       setTab("publications");
     }
@@ -17824,7 +17823,7 @@ export default function App() {
       const t = setTimeout(() => {
         Notification.requestPermission().then(permission => {
           if (permission === "granted") {
-            showMoyoNotification("Moyo - Notifications activées !", "Vous recevrez des alertes pour vos nouveaux messages.");
+            showMoyoNotification("Moyo Business - Notifications activées !", "Vous recevrez des alertes pour vos nouveaux messages.");
             subscribeToPush(auth);
           }
         }).catch(() => {});
@@ -18153,7 +18152,7 @@ export default function App() {
         if (activeTab3 === 'messages' || msgJustSeen) { lastUnreadRef.current = 0; setUnreadCount(0); return; }
         // Ne notifier que si le nombre AUGMENTE après le 1er relevé (jamais au tout 1er chargement)
         if (lastUnreadRef.current !== null && count > lastUnreadRef.current && 'Notification' in window && Notification.permission === 'granted') {
-          showMoyoNotification('Moyo - Nouveau message', 'Vous avez reçu un nouveau message !');
+          showMoyoNotification('Moyo Business - Nouveau message', 'Vous avez reçu un nouveau message !');
         }
         lastUnreadRef.current = count;
         setUnreadCount(count);
@@ -18298,14 +18297,14 @@ export default function App() {
         </div>
         {/* Contenu */}
         <div style={{ padding: "22px 24px 24px", textAlign: "center" }}>
-          <h3 style={{ fontSize: "1.15rem", fontWeight: 700, color: G.brun, marginBottom: 8 }}>Installe l'app Moyo !</h3>
+          <h3 style={{ fontSize: "1.15rem", fontWeight: 700, color: G.brun, marginBottom: 8 }}>Installe l'app Moyo Business !</h3>
           {isIos ? (
             <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.6, marginBottom: 20 }}>
               Appuie sur <strong style={{ color: G.rouge }}>Partager</strong> en bas de ton navigateur, puis <strong style={{ color: G.rouge }}>Sur l'écran d'accueil</strong>
             </p>
           ) : (
             <p style={{ fontSize: "0.85rem", color: G.brunLight, lineHeight: 1.6, marginBottom: 20 }}>
-              Accède rapidement à Moyo depuis ton écran d'accueil - rapide, pratique et sans passer par le navigateur !
+              Accède rapidement à Moyo Business depuis ton écran d'accueil - rapide, pratique et sans passer par le navigateur !
             </p>
           )}
           {!isIos && (
@@ -18370,7 +18369,7 @@ export default function App() {
             Ton abonnement <strong style={{ color: "#B8860B" }}>Premium</strong> est désormais actif ! Tu peux maintenant contacter les clients, partager tes coordonnées dans le chat, envoyer des photos et bien plus encore.
           </div>
           <button onClick={() => setPremiumSuccess(false)} style={{ width: "100%", background: "linear-gradient(135deg,#D4A843,#B8860B)", color: "#fff", border: "none", borderRadius: 50, padding: "14px", fontSize: "0.95rem", fontWeight: 800, cursor: "pointer", boxShadow: "0 4px 14px rgba(184,134,11,0.35)" }}>
-            Découvrir Moyo Premium
+            Découvrir Moyo Business Premium
           </button>
         </div>
       </div>
@@ -18389,8 +18388,8 @@ export default function App() {
             <div style={{ color: "#fff", fontWeight: 800, fontSize: "1.1rem" }}>Votre avis nous intéresse</div>
           </div>
           <div style={{ padding: "20px 22px 24px" }}>
-            <p style={{ fontSize: "0.88rem", color: G.brunLight, lineHeight: 1.55, textAlign: "center", marginBottom: 20 }}>{activeSurvey.intro_message || "Aidez-nous à améliorer Moyo en répondant à quelques questions rapides."}</p>
-            <button onClick={() => { setSurveyAnswers({}); setSurveyStep(0); setShowSurveyInvite(true); }} style={{ width: "100%", background: "#2980b9", color: "#fff", border: "none", borderRadius: 50, padding: "14px", fontSize: "0.92rem", fontWeight: 800, cursor: "pointer", marginBottom: 8 }}>J'aide Moyo ({(activeSurvey.questions || []).length} questions)</button>
+            <p style={{ fontSize: "0.88rem", color: G.brunLight, lineHeight: 1.55, textAlign: "center", marginBottom: 20 }}>{activeSurvey.intro_message || "Aidez-nous à améliorer Moyo Business en répondant à quelques questions rapides."}</p>
+            <button onClick={() => { setSurveyAnswers({}); setSurveyStep(0); setShowSurveyInvite(true); }} style={{ width: "100%", background: "#2980b9", color: "#fff", border: "none", borderRadius: 50, padding: "14px", fontSize: "0.92rem", fontWeight: 800, cursor: "pointer", marginBottom: 8 }}>J'aide Moyo Business ({(activeSurvey.questions || []).length} questions)</button>
             <button onClick={() => { persistDismissedSurvey(activeSurvey.id); setActiveSurvey(null); }} style={{ width: "100%", background: "transparent", color: G.brunLight, border: "none", padding: "8px", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" }}>Plus tard</button>
           </div>
         </div>
