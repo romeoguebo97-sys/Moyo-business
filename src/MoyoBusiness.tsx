@@ -1534,7 +1534,7 @@ function ResetPassword({ onNav }: { onNav: (p: string) => void }) {
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
       <div style={{ textAlign: "center", marginBottom: 28 }}>
         <div style={{  fontSize: "2rem", color: G.rouge, fontWeight: 700 }}>
-          <span>Mo</span><span style={{ color: G.or }}>yo</span>
+          <span>Mo</span><span style={{ color: G.or }}>yo</span><span style={{ color: G.brunLight, fontWeight: 800 }}> Business</span>
         </div>
         <h2 style={{  fontSize: "1.5rem", fontWeight: 700, marginTop: 8 }}>Nouveau mot de passe</h2>
         <p style={{ color: G.brunLight, fontSize: "0.85rem", marginTop: 4 }}>Choisis un nouveau mot de passe sécurisé</p>
@@ -2562,9 +2562,9 @@ function Login({ onNav, onAuth }: { onNav: (p: string) => void; onAuth: (a: Auth
   };
 
   if (tempBanUntil) return <BanScreen until={tempBanUntil} onExpire={() => setTempBanUntil(null)} />;
-  if (showForgot) return <AuthLayout onBack={() => onNav("landing")}><ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />{toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}<div style={{ textAlign: "center", marginBottom: 24 }}><div style={{  fontSize: "2rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span></div><h2 style={{  fontSize: "1.4rem", fontWeight: 700, marginTop: 8 }}>Mot de passe oublié</h2></div>{forgotSent ? <div style={{ textAlign: "center" }}><div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(212,168,67,0.08)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><p style={{ color: "#555", fontSize: "0.88rem", marginBottom: 20 }}>Email envoyé ! Vérifie ta boîte mail.</p><Btn variant="ghost" onClick={() => { setShowForgot(false); setForgotSent(false); }}>← Retour à la connexion</Btn></div> : <><Input label="Ton email" type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder="ton@email.com" icon="email" /><Btn variant="primary" onClick={handleForgot} style={{ width: "100%", marginBottom: 12 }}>Envoyer le lien</Btn><div style={{ textAlign: "center" }}><span onClick={() => setShowForgot(false)} style={{ fontSize: "0.85rem", color: "#555", cursor: "pointer" }}>← Retour</span></div></>}</AuthLayout>;
+  if (showForgot) return <AuthLayout onBack={() => onNav("landing")}><ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />{toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}<div style={{ textAlign: "center", marginBottom: 24 }}><div style={{  fontSize: "2rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span><span style={{ color: G.brunLight, fontWeight: 800 }}> Business</span></div><h2 style={{  fontSize: "1.4rem", fontWeight: 700, marginTop: 8 }}>Mot de passe oublié</h2></div>{forgotSent ? <div style={{ textAlign: "center" }}><div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(212,168,67,0.08)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><p style={{ color: "#555", fontSize: "0.88rem", marginBottom: 20 }}>Email envoyé ! Vérifie ta boîte mail.</p><Btn variant="ghost" onClick={() => { setShowForgot(false); setForgotSent(false); }}>← Retour à la connexion</Btn></div> : <><Input label="Ton email" type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder="ton@email.com" icon="email" /><Btn variant="primary" onClick={handleForgot} style={{ width: "100%", marginBottom: 12 }}>Envoyer le lien</Btn><div style={{ textAlign: "center" }}><span onClick={() => setShowForgot(false)} style={{ fontSize: "0.85rem", color: "#555", cursor: "pointer" }}>← Retour</span></div></>}</AuthLayout>;
 
-  return <AuthLayout onBack={() => onNav("landing")}><ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />{toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}<div style={{ textAlign: "center", marginBottom: 28 }}><div style={{  fontSize: "2rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span></div><h2 style={{  fontSize: "1.6rem", fontWeight: 700, marginTop: 6 }}>Bon retour !</h2><p style={{ color: "#555", fontSize: "0.85rem", marginTop: 4 }}>Échangez avec vos contacts</p></div><Input label="Email" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="ton@email.com" icon="email" /><Input label="Mot de passe" type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="••••••••" icon="lock" /><div style={{ textAlign: "right", marginBottom: 20, marginTop: -8 }}><span onClick={() => setShowForgot(true)} style={{ fontSize: "0.82rem", color: G.rouge, cursor: "pointer", fontWeight: 500 }}>Mot de passe oublié ?</span></div><Btn variant="primary" onClick={handleLogin} loading={loading} style={{ width: "100%" }} disabled={!form.email || !form.password}>Se connecter →</Btn><p style={{ textAlign: "center", marginTop: 20, fontSize: "0.85rem", color: "#555" }}>Pas encore de compte ? <span style={{ color: G.rouge, cursor: "pointer", fontWeight: 600 }} onClick={() => onNav("signup")}>S'inscrire</span></p></AuthLayout>;
+  return <AuthLayout onBack={() => onNav("landing")}><ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />{toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}<div style={{ textAlign: "center", marginBottom: 28 }}><div style={{  fontSize: "2rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span><span style={{ color: G.brunLight, fontWeight: 800 }}> Business</span></div><h2 style={{  fontSize: "1.6rem", fontWeight: 700, marginTop: 6 }}>Bon retour !</h2><p style={{ color: "#555", fontSize: "0.85rem", marginTop: 4 }}>Échangez avec vos contacts</p></div><Input label="Email" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="ton@email.com" icon="email" /><Input label="Mot de passe" type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="••••••••" icon="lock" /><div style={{ textAlign: "right", marginBottom: 20, marginTop: -8 }}><span onClick={() => setShowForgot(true)} style={{ fontSize: "0.82rem", color: G.rouge, cursor: "pointer", fontWeight: 500 }}>Mot de passe oublié ?</span></div><Btn variant="primary" onClick={handleLogin} loading={loading} style={{ width: "100%" }} disabled={!form.email || !form.password}>Se connecter →</Btn><p style={{ textAlign: "center", marginTop: 20, fontSize: "0.85rem", color: "#555" }}>Pas encore de compte ? <span style={{ color: G.rouge, cursor: "pointer", fontWeight: 600 }} onClick={() => onNav("signup")}>S'inscrire</span></p></AuthLayout>;
 }
 
 function SignUp({ onNav }: { onNav: (p: string) => void }) {
@@ -2884,7 +2884,7 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
 
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 20 }}>
-        <div style={{ fontSize: "2rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span></div>
+        <div style={{ fontSize: "2rem", color: G.rouge, fontWeight: 700 }}><span>Mo</span><span style={{ color: G.or }}>yo</span><span style={{ color: G.brunLight, fontWeight: 800 }}> Business</span></div>
         <h2 style={{ fontSize: "1.5rem", fontWeight: 700, marginTop: 6 }}>Crée ton compte</h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 10, background: "rgba(212,168,67,0.08)", border: `1.5px solid rgba(212,168,67,0.2)`, borderRadius: 50, padding: "6px 16px" }}>
           <div style={{ width: 22, height: 22, borderRadius: "50%", background: G.rouge, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 800, color: "#fff" }}>{step}</div>
@@ -4950,7 +4950,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
         <div className="moyo-topbar-wide">
           <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, letterSpacing: "-0.2px" }}>{tabs.find(t => t.id === tab)?.label || "Moyo Business"}</div>
           <div onClick={() => setShowGuide(true)} style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, background: G.blanc, borderRadius: 12, padding: "9px 16px", cursor: "pointer", border: `1.5px solid ${G.gris}`, display: "flex", alignItems: "center", gap: 7 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: G.brun }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
             Guide
           </div>
         </div>
@@ -4965,8 +4965,8 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
             <div style={{ fontSize: "0.95rem", color: G.brunLight, fontWeight: 800, letterSpacing: "-0.2px" }}>Business</div>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginRight: 4 }}>
-            <div onClick={() => setShowGuide(true)} style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, background: "white", borderRadius: 12, padding: "9px 16px", cursor: "pointer", border: `1.5px solid ${G.gris}`, display: "flex", alignItems: "center", gap: 7 }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            <div onClick={() => setShowGuide(true)} style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, background: G.blanc, borderRadius: 12, padding: "9px 16px", cursor: "pointer", border: `1.5px solid ${G.gris}`, display: "flex", alignItems: "center", gap: 7 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: G.brun }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               Guide
             </div>
           </div>
@@ -11366,7 +11366,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }} />
               <div style={{ position: "absolute", bottom: 16, left: 18, right: 18, color: "#fff" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: "1.4rem", fontWeight: 800 }}>{viewPaymentProfile.name}, {viewPaymentProfile.age} ans</span>
+                  <span style={{ fontSize: "1.4rem", fontWeight: 800 }}>{viewPaymentProfile.name}</span>
                   {viewPaymentProfile.is_premium && <PremiumBadge size={16} />}
                   {viewPaymentProfile.is_verified && <VerifiedBadge size={16} />}
                 </div>
@@ -11782,7 +11782,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: "0.88rem" }}>{p.name}</div>
-                    <div style={{ fontSize: "0.72rem", color: G.brunLight }}>{p.age} ans · {p.city}</div>
+                    <div style={{ fontSize: "0.72rem", color: G.brunLight }}>{p.city}</div>
                   </div>
                   <div style={{ fontSize: "0.68rem", color: "#D4A843", fontWeight: 700, textAlign: "right", flexShrink: 0 }}>
                     {p.premium_until ? `Expire le\n${new Date(p.premium_until).toLocaleDateString("fr-FR")}` : "Premium"}
@@ -12001,7 +12001,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
               </div>
               <div style={{ fontWeight: 800, fontSize: "1.1rem", color: "#fff" }}>{reportProfilePreview.name}</div>
               <div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.8)", marginTop: 3 }}>
-                {reportProfilePreview.age} ans · {reportProfilePreview.city}
+                {reportProfilePreview.city}
               </div>
             </div>
             {/* Body */}
@@ -12836,7 +12836,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         <div style={{ fontWeight: 600, fontSize: "0.85rem", display: "flex", alignItems: "center", gap: 5, color: G.brun }}>
                           {u.name}{u.is_premium && <IcoStar />}
                         </div>
-                        <div style={{ fontSize: "0.72rem", color: G.brunLight }}>{u.city} · {u.age} ans</div>
+                        <div style={{ fontSize: "0.72rem", color: G.brunLight }}>{u.city}</div>
                       </div>
                       <div style={{ fontSize: "0.68rem", color: G.brunLight }}>{formatDate(u.created_at)}</div>
                     </div>
@@ -12866,7 +12866,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
                   }
                   <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "40px 16px 14px", background: "linear-gradient(transparent, rgba(0,0,0,0.75))" }}>
-                    <div style={{ color: "#fff", fontWeight: 800, fontSize: "1.3rem" }}>{adminViewedProfile.name}, {adminViewedProfile.age} ans</div>
+                    <div style={{ color: "#fff", fontWeight: 800, fontSize: "1.3rem" }}>{adminViewedProfile.name}</div>
                     <div style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.8rem", marginTop: 3 }}>{adminViewedProfile.city}</div>
                   </div>
                   <div onClick={() => setAdminViewedProfile(null)} style={{ position: "absolute", top: 12, right: 12, width: 34, height: 34, borderRadius: "50%", background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
@@ -13035,7 +13035,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                             {u.name} {isSelf && <span style={{ fontSize: "0.60rem", color: G.vert, fontWeight: 700 }}>(Vous)</span>}
                             {u.name === "..." && <span style={{ fontSize: "0.60rem", color: "#e74c3c", fontWeight: 700, marginLeft: 3 }}>Incomplet</span>}
                           </div>
-                          <div style={{ fontSize: "0.67rem", color: G.brunLight }}>{u.age} ans · {u.city}</div>
+                          <div style={{ fontSize: "0.67rem", color: G.brunLight }}>{u.city}</div>
                         </div>
                         {/* Badges statuts */}
                         <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>
@@ -13124,7 +13124,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                           })()}
                         </div>
                         <div style={{ fontSize: "0.75rem", color: G.brunLight, marginTop: 2 }}>
-                          {u.age} ans · {u.city}
+                          {u.city}
                           {u.created_at && <span> · inscrit le {formatDate(u.created_at)}</span>}
                         </div>
                         {/* Badges statuts */}
@@ -13680,7 +13680,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                             <span style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun }}>
-                              {userProfile ? `${userProfile.name}, ${userProfile.age} ans` : conv.userId.slice(0, 10) + "…"}
+                              {userProfile ? `${userProfile.name}` : conv.userId.slice(0, 10) + "…"}
                             </span>
                             {unread > 0 && <span style={{ background: G.rouge, color: "#fff", borderRadius: 50, padding: "1px 7px", fontSize: "0.62rem", fontWeight: 800 }}>{unread}</span>}
                           </div>
@@ -13737,7 +13737,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                 if (isCollapsed) {
                   const who = (() => {
                     const p = reportProfilesCache[r.reporter_id];
-                    return p ? `${p.name}, ${p.age} ans` : (r.reporter_id ? `${r.reporter_id.slice(0, 10)}…` : "—");
+                    return p ? `${p.name}` : (r.reporter_id ? `${r.reporter_id.slice(0, 10)}…` : "—");
                   })();
                   return (
                     <div key={r.id || i} onClick={() => toggleArchived(r.id || String(i))} style={{ padding: "11px 0", borderBottom: i < filteredReports.length - 1 ? `1px solid ${G.gris}` : "none", display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
@@ -13789,7 +13789,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: "0.65rem", color: "#2980b9", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>Signalé par</div>
                               <div style={{ fontSize: "0.78rem", fontWeight: 700, color: G.brun, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                {reporterP ? `${reporterP.name}, ${reporterP.age} ans · ${reporterP.city}` : `${r.reporter_id?.slice(0, 14)}…`}
+                                {reporterP ? `${reporterP.name} · ${reporterP.city}` : `${r.reporter_id?.slice(0, 14)}…`}
                               </div>
                             </div>
                             {!isSupport && reporterP && (
@@ -13810,7 +13810,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: "0.65rem", color: G.rouge, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>Profil signalé</div>
                                 <div style={{ fontSize: "0.78rem", fontWeight: 700, color: G.brun, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                  {reportedP ? `${reportedP.name}, ${reportedP.age} ans · ${reportedP.city}` : `${r.reported_id?.slice(0, 14)}…`}
+                                  {reportedP ? `${reportedP.name} · ${reportedP.city}` : `${r.reported_id?.slice(0, 14)}…`}
                                 </div>
                               </div>
                               {reportedP?.is_banned && <span style={{ fontSize: "0.6rem", background: "rgba(212,168,67,0.12)", color: G.rouge, borderRadius: 4, padding: "2px 6px", fontWeight: 700, flexShrink: 0 }}>Banni</span>}
@@ -16208,7 +16208,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
       <span style={{ display: "flex", flexShrink: 0 }}>{icon}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: "0.74rem", color: G.brunLight, fontWeight: 600 }}>{label}</div>
-        <div style={{ fontSize: "0.95rem", color: value ? "#1A1A1A" : "#9AA0A6", fontWeight: value ? 700 : 500 }}>{value || placeholder}</div>
+        <div style={{ fontSize: "0.95rem", color: value ? G.brun : G.brunLight, fontWeight: value ? 700 : 500 }}>{value || placeholder}</div>
       </div>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
       <select value={value} onChange={e => onChange(e.target.value)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
@@ -16233,7 +16233,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
       ) : (
         <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
           {(["cherche", "propose"] as const).map(t => (
-            <div key={t} onClick={() => setType(t)} style={{ flex: 1, padding: "13px 10px", borderRadius: 12, cursor: "pointer", textAlign: "center", border: `1.5px solid ${type === t ? (t === "propose" ? G.vert : "#111") : G.gris}`, background: type === t ? (t === "propose" ? G.vert : "#111") : G.blanc, color: type === t ? "#fff" : "#111" }}>
+            <div key={t} onClick={() => setType(t)} style={{ flex: 1, padding: "13px 10px", borderRadius: 12, cursor: "pointer", textAlign: "center", border: `1.5px solid ${type === t ? (t === "propose" ? G.vert : "#111") : G.gris}`, background: type === t ? (t === "propose" ? G.vert : "#111") : G.blanc, color: type === t ? "#fff" : G.brun }}>
               <b style={{ display: "block", fontSize: 14 }}>{t === "cherche" ? "Je cherche" : "Je propose"}</b>
               <small style={{ fontSize: 11, opacity: 0.8 }}>{t === "cherche" ? "un professionnel" : "mes services"}</small>
             </div>
@@ -16577,6 +16577,23 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
   const [showPublish, setShowPublish] = useState(false);
   const [boostTarget, setBoostTarget] = useState<Publication | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  // Annonce ouverte depuis un lien partagé (?pub=<id>) — affichée en plein écran.
+  const [sharedPub, setSharedPub] = useState<Publication | null>(null);
+  useEffect(() => {
+    if (!initialPubId) return;
+    let alive = true;
+    (async () => {
+      try {
+        const rows = await sb.query<Publication>(auth.token, "publications", `?id=eq.${initialPubId}&select=*,author:profiles(id,name,photo_url,city,profession,is_verified)&limit=1`, auth.refreshToken);
+        if (alive && rows && rows[0]) {
+          setSharedPub(rows[0]);
+          if (rows[0].user_id !== auth.userId) incrementPubStat(auth.token, initialPubId, "view");
+        } else if (alive) setToast("Cette annonce n'est plus disponible.");
+      } catch { if (alive) setToast("Impossible d'ouvrir l'annonce."); }
+      onPubConsumed?.();
+    })();
+    return () => { alive = false; };
+  }, [initialPubId]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -16710,7 +16727,7 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
             {[{ id: "", label: "Tout" }, ...((ARRONDISSEMENTS[city] || []).map(a => ({ id: a, label: a })))].map(qc => {
               const on = quartier === qc.id;
               return (
-                <button key={qc.id || "tout"} onClick={() => setQuartier(qc.id)} style={{ flex: "0 0 auto", display: "flex", alignItems: "center", gap: 6, border: on ? "1px solid #08080D" : `1px solid ${G.gris}`, background: on ? "#08080D" : G.blanc, color: on ? "#fff" : "#1A1A1A", borderRadius: 50, padding: "9px 16px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+                <button key={qc.id || "tout"} onClick={() => setQuartier(qc.id)} style={{ flex: "0 0 auto", display: "flex", alignItems: "center", gap: 6, border: on ? "1px solid #08080D" : `1px solid ${G.gris}`, background: on ? "#08080D" : G.blanc, color: on ? "#fff" : G.brun, borderRadius: 50, padding: "9px 16px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
                   {qc.label}
                 </button>
               );
@@ -16769,6 +16786,21 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
       {showPublish && <PublishModal auth={auth} onClose={() => setShowPublish(false)} onPublished={(np) => { setShowPublish(false); setCat(np.category); setToast("Annonce publiée ✓"); load(); setTimeout(() => setBoostTarget(np), 600); }} />}
       {boostTarget && <BoostModal auth={auth} pub={boostTarget} onClose={() => setBoostTarget(null)} onBoosted={() => { setBoostTarget(null); setToast("Annonce mise en avant ✓"); load(); }} />}
       {openFiche && <ProFiche auth={auth} pro={openFiche} onClose={() => setOpenFiche(null)} onGoMessages={onGoMessages} onToast={(m) => setToast(m)} isFav={false} onToggleFav={() => {}} />}
+      {sharedPub && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 120, background: G.creme, overflowY: "auto", overscrollBehavior: "contain" }}>
+          <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
+            <div style={{ position: "sticky", top: 0, zIndex: 5, background: G.creme, display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", borderBottom: `1px solid ${G.gris}` }}>
+              <button onClick={() => setSharedPub(null)} aria-label="Retour" style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: G.blanc, boxShadow: "0 1px 4px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ color: G.brun }}><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0, color: G.brun }}>Annonce</h3>
+            </div>
+            <div style={{ padding: "14px 16px 90px" }}>
+              <PubCard pub={sharedPub} me={auth.userId} onContact={() => contact(sharedPub)} onBoost={() => setBoostTarget(sharedPub)} onViewProfile={() => openAuthor(sharedPub)} />
+            </div>
+          </div>
+        </div>
+      )}
       {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
     </div>
   );
@@ -17770,18 +17802,11 @@ export default function App() {
   }, []);
 
   // Ouvre la cible d'un lien partagé (?pro=<id> ou ?pub=<id>).
-  // Pour une annonce, on résout son auteur et on ouvre sa fiche (il n'y a pas de page d'annonce publique).
+  // Un lien d'annonce ouvre l'annonce elle-même ; un lien de carte pro ouvre la fiche.
   const applySharedTarget = async (target: any) => {
     if (!target || !target.id) return;
     if (target.kind === "pro") { setPendingProId(target.id); setTab("discover"); return; }
-    if (target.kind === "pub") {
-      try {
-        const a = authRef.current;
-        const rows = await sb.query<any>(a?.token || "", "publications", `?id=eq.${target.id}&select=user_id&limit=1`, a?.refreshToken);
-        if (rows && rows[0] && rows[0].user_id) { setPendingProId(rows[0].user_id); setTab("discover"); return; }
-      } catch {}
-      setTab("publications");
-    }
+    if (target.kind === "pub") { setPendingPubId(target.id); setTab("publications"); return; }
   };
   // Utilisateur déjà connecté : appliquer la cible mémorisée d'un lien partagé.
   useEffect(() => {
