@@ -16025,9 +16025,12 @@ function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: 
       <div onClick={onOpen} style={{ cursor: onOpen ? "pointer" : "default" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
         <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, padding: "5px 10px", borderRadius: 7, background: isProp ? "rgba(22,163,74,0.12)" : "rgba(212,168,67,0.18)", color: isProp ? "#16A34A" : "#8B6914" }}>{pub.category}</span>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
-          {pub.is_boosted && <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: G.or, color: "#fff", fontSize: 10.5, fontWeight: 800, padding: "4px 9px", borderRadius: 7, letterSpacing: 0.3 }}>★ EN AVANT</span>}
-          <span style={{ fontSize: 11.5, color: G.brunLight }}>{timeAgo(pub.created_at)}</span>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
+            {pub.is_boosted && <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: G.or, color: "#fff", fontSize: 10.5, fontWeight: 800, padding: "4px 9px", borderRadius: 7, letterSpacing: 0.3 }}>★ EN AVANT</span>}
+            <span style={{ fontSize: 11.5, color: G.brunLight }}>{timeAgo(pub.created_at)}</span>
+          </div>
+          <ShareButton compact shareUrl={makeShareUrl("pub", pub.id)} shareTitle={`Moyo Business — ${pub.title}`} shareText={`${pub.title}${(pub.location || pub.city) ? " · " + (pub.location || pub.city) : ""} — découvrez cette annonce sur Moyo Business`} />
         </div>
       </div>
       <div style={{ fontSize: 16, fontWeight: 800, color: G.brun, marginBottom: 5, lineHeight: 1.3 }}>{pub.title}</div>
@@ -16559,7 +16562,7 @@ async function incrementPubStat(token: string, pubId: string, kind: "view" | "re
   } catch {}
 }
 
-function Publications({ auth, accountType, onGoMessages, onShowPremium, publishNonce }: { auth: Auth; accountType?: string; onGoMessages: (partnerId: string) => void; onShowPremium?: (r: string) => void; publishNonce?: number }) {
+function Publications({ auth, accountType, onGoMessages, onShowPremium, publishNonce, initialPubId, onPubConsumed }: { auth: Auth; accountType?: string; onGoMessages: (partnerId: string) => void; onShowPremium?: (r: string) => void; publishNonce?: number; initialPubId?: string | null; onPubConsumed?: () => void }) {
   const type: "cherche" | "propose" = accountType === "client" ? "propose" : "cherche";
   const [cat, setCat] = useState("all");
   const [metier, setMetier] = useState("");
@@ -16826,6 +16829,7 @@ function PubDetail({ auth, pub: initialPub, onBack, onChanged }: { auth: Auth; p
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Mon annonce</h3>
+        <div style={{ marginLeft: "auto" }}><ShareButton compact shareUrl={makeShareUrl("pub", pub.id)} shareTitle={`Moyo Business — ${pub.title}`} shareText={`${pub.title} — découvrez cette annonce sur Moyo Business`} /></div>
       </div>
 
       <div style={{ padding: "18px 18px 110px" }}>
@@ -16895,6 +16899,19 @@ function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: ()
   const [loading, setLoading] = useState(true);
   const [boostTarget, setBoostTarget] = useState<Publication | null>(null);
   const [detail, setDetail] = useState<Publication | null>(null);
+  // Ouverture d'une annonce depuis un lien partagé (?pub=<id>).
+  useEffect(() => {
+    if (!initialPubId) return;
+    let alive = true;
+    (async () => {
+      try {
+        const rows = await sb.query<Publication>(auth.token, "publications", `?id=eq.${initialPubId}&limit=1`, auth.refreshToken);
+        if (alive && rows && rows[0]) setDetail(rows[0]);
+      } catch {}
+      onPubConsumed?.();
+    })();
+    return () => { alive = false; };
+  }, [initialPubId]);
   const [toast, setToast] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -17060,6 +17077,9 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
         <button onClick={onClose} aria-label="Retour" style={{ position: "absolute", top: 14, left: 14, width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.16)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.25)" }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
+        <div style={{ position: "absolute", top: 14, right: mine ? 14 : 60, zIndex: 3 }}>
+          <ShareButton onBanner shareUrl={makeShareUrl("pro", pro.id)} shareTitle={`Moyo Business — ${pro.company || pro.name}`} shareText={`${pro.company || pro.name}${pro.metier ? " · " + pro.metier : ""}${pro.city ? " · " + pro.city : ""} — découvrez ce professionnel sur Moyo Business`} />
+        </div>
         {!mine && <button onClick={onToggleFav} aria-label={isFav ? "Retirer des favoris" : "Ajouter aux favoris"} style={{ position: "absolute", top: 14, right: 14, width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.16)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.25)" }}>
           <svg width="19" height="19" viewBox="0 0 24 24" fill={isFav ? G.or : "none"} stroke={isFav ? G.or : "#fff"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         </button>}
@@ -17348,6 +17368,65 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
 }
 
 
+// ─── Partage (lien vers une annonce ou un profil pro) ───
+function makeShareUrl(kind: "pro" | "pub", id: string): string {
+  const base = (typeof window !== "undefined") ? (window.location.origin + window.location.pathname) : "https://business.moyo-congo.com/";
+  return `${base}?${kind}=${id}`;
+}
+
+function ShareButton({ shareUrl, shareTitle, shareText, compact, onBanner, label = "Partager" }: { shareUrl: string; shareTitle: string; shareText: string; compact?: boolean; onBanner?: boolean; label?: string }) {
+  const [open, setOpen] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
+  const full = shareText ? `${shareText}\n${shareUrl}` : shareUrl;
+  const enc = encodeURIComponent;
+  const opts = [
+    { label: "WhatsApp", color: "#25D366", href: `https://wa.me/?text=${enc(full)}` },
+    { label: "SMS", color: "#34B7F1", href: `sms:?&body=${enc(full)}` },
+    { label: "Telegram", color: "#229ED9", href: `https://t.me/share/url?url=${enc(shareUrl)}&text=${enc(shareText || shareTitle)}` },
+    { label: "Facebook", color: "#1877F2", href: `https://www.facebook.com/sharer/sharer.php?u=${enc(shareUrl)}` },
+    { label: "E-mail", color: "#6B7280", href: `mailto:?subject=${enc(shareTitle)}&body=${enc(full)}` },
+  ];
+  const onClick = async (e: any) => {
+    e?.stopPropagation?.();
+    const nav: any = (typeof navigator !== "undefined") ? navigator : null;
+    if (nav && nav.share) {
+      try { await nav.share({ title: shareTitle, text: shareText, url: shareUrl }); return; }
+      catch (err: any) { if (err && err.name === "AbortError") return; }
+    }
+    setOpen(o => !o);
+  };
+  const copy = async (e: any) => {
+    e?.stopPropagation?.();
+    try { await navigator.clipboard.writeText(shareUrl); setCopied(true); setTimeout(() => setCopied(false), 1600); }
+    catch { try { const t = document.createElement("textarea"); t.value = shareUrl; document.body.appendChild(t); t.select(); document.execCommand("copy"); document.body.removeChild(t); setCopied(true); setTimeout(() => setCopied(false), 1600); } catch {} }
+  };
+  const shareIcon = <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>;
+  return (
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <button onClick={onClick} aria-label="Partager" style={onBanner
+        ? { display: "inline-flex", alignItems: "center", justifyContent: "center", width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.16)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", color: "#fff", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.25)", flexShrink: 0 }
+        : compact
+        ? { display: "inline-flex", alignItems: "center", justifyContent: "center", width: 38, height: 38, borderRadius: "50%", border: `1px solid ${G.gris}`, background: G.blanc, color: G.brun, cursor: "pointer", flexShrink: 0 }
+        : { display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 16px", borderRadius: 12, border: `1px solid ${G.gris}`, background: G.blanc, color: G.brun, fontWeight: 700, fontSize: "0.9rem", cursor: "pointer" }}>
+        {shareIcon}{!compact && !onBanner && <span>{label}</span>}
+      </button>
+      {open && (<>
+        <div onClick={(e) => { e.stopPropagation(); setOpen(false); }} style={{ position: "fixed", inset: 0, zIndex: 998 }} />
+        <div onClick={(e) => e.stopPropagation()} style={{ position: "absolute", right: 0, top: "calc(100% + 6px)", zIndex: 999, background: G.blanc, border: `1px solid ${G.gris}`, borderRadius: 14, boxShadow: "0 14px 44px rgba(0,0,0,0.22)", padding: 8, minWidth: 210 }}>
+          {opts.map(o => (
+            <a key={o.label} href={o.href} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 11, padding: "10px 12px", borderRadius: 10, textDecoration: "none", color: G.brun, fontWeight: 600, fontSize: "0.88rem" }}>
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: o.color, flexShrink: 0 }} />{o.label}
+            </a>
+          ))}
+          <button onClick={copy} style={{ width: "100%", display: "flex", alignItems: "center", gap: 11, padding: "10px 12px", borderRadius: 10, border: "none", background: "transparent", color: G.brun, fontWeight: 600, fontSize: "0.88rem", cursor: "pointer", textAlign: "left" }}>
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: G.or, flexShrink: 0 }} />{copied ? "Lien copié ✓" : "Copier le lien"}
+          </button>
+        </div>
+      </>)}
+    </div>
+  );
+}
+
 export default function App() {
   const [page, setPage] = useState("landing");
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("moyo_dark") === "1");
@@ -17419,6 +17498,7 @@ export default function App() {
   const [showInstall, setShowInstall] = useState(false);
   const [openConvPartnerId, setOpenConvPartnerId] = useState<string | null>(null);
   const [pendingProId, setPendingProId] = useState<string | null>(null);
+  const [pendingPubId, setPendingPubId] = useState<string | null>(null);
   const [inConv, setInConv] = useState(false);
   const [adminBadgeCount, setAdminBadgeCount] = useState(0);
   const [sessionLoaded, setSessionLoaded] = useState(false);
@@ -17588,6 +17668,17 @@ export default function App() {
     // Vérifier si c'est un lien de reset password ou confirmation email
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.replace("#", "?"));
+    // Lien de partage : ?pro=<id> ou ?pub=<id> → mémoriser la cible (appliquée après auth) puis nettoyer l'URL.
+    try {
+      const sp0 = new URLSearchParams(window.location.search);
+      const proId = sp0.get("pro"); const pubId = sp0.get("pub");
+      if (proId || pubId) {
+        localStorage.setItem("moyo_pending_target", JSON.stringify(proId ? { kind: "pro", id: proId } : { kind: "pub", id: pubId }));
+        sp0.delete("pro"); sp0.delete("pub");
+        const qs = sp0.toString();
+        window.history.replaceState({}, "", window.location.pathname + (qs ? "?" + qs : ""));
+      }
+    } catch {}
     // Retour d'un paiement carte réussi (success_url Stripe = ...?paiement=reussi)
     try {
       const sp = new URLSearchParams(window.location.search);
@@ -17688,6 +17779,17 @@ export default function App() {
     setSessionLoaded(true);
   }, []);
 
+  // Lien partagé (?pro=/?pub=) pour un utilisateur déjà connecté : ouvrir la cible mémorisée.
+  useEffect(() => {
+    if (!sessionLoaded || page !== "app" || !auth) return;
+    let target: any = null;
+    try { const t = localStorage.getItem("moyo_pending_target"); if (t) target = JSON.parse(t); } catch {}
+    if (!target || !target.id) return;
+    try { localStorage.removeItem("moyo_pending_target"); } catch {}
+    if (target.kind === "pro") { setPendingProId(target.id); setTab("discover"); }
+    else if (target.kind === "pub") { setPendingPubId(target.id); setTab("publications"); }
+  }, [sessionLoaded, page, auth]);
+
   const handleAuth = (a: Auth) => {
     authRef.current = a;
     setAuth(a); setPage("app");
@@ -17697,6 +17799,9 @@ export default function App() {
     if (target && target.kind === "pro" && target.id) {
       setPendingProId(target.id);
       setTab("discover");
+    } else if (target && target.kind === "pub" && target.id) {
+      setPendingPubId(target.id);
+      setTab("publications");
     } else {
       setTab("publications");
     }
@@ -18244,7 +18349,7 @@ export default function App() {
       if (t === "visitors") { setViewsReceived(0); try { localStorage.setItem(`moyo_visitors_seen_${auth!.userId}`, new Date().toISOString()); } catch {} }
     }} unreadCount={unreadCount} notifCount={notifCount} likesReceived={likesReceived} viewsReceived={viewsReceived} auth={auth} accountType={meType} adminBadgeCount={adminBadgeCount} showAdminConfig={showAdminConfig} setShowAdminConfig={setShowAdminConfig} inConv={inConv} onPublish={() => { setTab("publier"); }} assistantEnabled={assistantEnabled}>
       <div key={tab} className="page-anim" style={{ width: "100%", height: "100%" }}>
-      {tab === "publications" && <Publications auth={auth} accountType={meType} onShowPremium={showPremium} publishNonce={publishNonce} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
+      {tab === "publications" && <Publications auth={auth} accountType={meType} onShowPremium={showPremium} publishNonce={publishNonce} initialPubId={pendingPubId} onPubConsumed={() => setPendingPubId(null)} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "publier" && <PublierHub auth={auth} accountType={meType} onGoFeed={() => setTab("publications")} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "discover" && <Annuaire auth={auth} accountType={meType} myCategory={meCategory} initialProId={pendingProId} onProConsumed={() => setPendingProId(null)} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "messages" && <Messages auth={auth} accountType={meType} onUnreadCount={setUnreadCount} onShowPremium={showPremium} initialPartnerId={openConvPartnerId} onConvOpen={setInConv} />}
