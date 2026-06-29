@@ -445,6 +445,26 @@ type Auth = {
 type Profile = { id: string; name: string; age: number; city: string; gender: string; bio: string; religion?: string; profession?: string; hobbies?: string; phone?: string | null; photo_url?: string | null; is_premium: boolean; is_admin?: boolean; is_visible?: boolean; is_verified?: boolean; is_certified?: boolean; last_seen?: string; hide_online_status?: boolean; warning_count?: number; is_banned?: boolean; ban_until?: string | null; account_type?: string; company?: string | null; metier?: string | null; category?: string | null; whatsapp?: string | null; public_phone?: string | null; zone?: string | null; hours?: string | null; socials?: Record<string, string> | null; gallery?: string[] | null; rating_avg?: number; rating_count?: number; is_sponsored?: boolean; sponsored_until?: string | null };
 type Match = { id: string; user1: string; user2: string; partner?: Profile; lastMsg?: Message; unreadCount?: number; created_at?: string };
 type Message = { id?: string; match_id: string; sender_id: string; content: string; is_read: boolean; is_delivered?: boolean; is_edited?: boolean; created_at?: string; reactions?: Record<string, string[]>; is_view_once?: boolean; viewed_at?: string | null; is_destroyed?: boolean; destroyed_at?: string | null };
+
+// ── Système de vente (catalogue / panier / commande) ──────────────────────────
+type CatalogItem = { id: string; seller_id: string; name: string; description?: string | null; price?: number | null; currency?: string | null; category?: string | null; availability?: string | null; delay?: string | null; photos?: string[] | null; is_active?: boolean; sort_order?: number; created_at?: string };
+type CartLine = { item_id: string; name: string; price: number; qty: number; photo?: string; currency?: string };
+type Order = { id: string; buyer_id: string; seller_id: string; match_id?: string | null; items: CartLine[]; total: number; currency?: string; note?: string | null; status: string; created_at?: string; updated_at?: string };
+const ORDER_STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
+  sent: { label: "Envoyée", color: "#B8860B", bg: "rgba(212,168,67,0.16)" },
+  discussion: { label: "En discussion", color: "#2563EB", bg: "rgba(37,99,235,0.12)" },
+  confirmed: { label: "Confirmée", color: "#1A5C3A", bg: "rgba(26,92,58,0.14)" },
+  done: { label: "Terminée", color: "#555", bg: "rgba(0,0,0,0.07)" },
+  cancelled: { label: "Annulée", color: "#e74c3c", bg: "rgba(231,76,60,0.12)" },
+};
+const fmtMoney = (n: number, cur?: string | null) => `${Math.round(n || 0).toLocaleString("fr-FR")} ${cur || "FCFA"}`;
+const cartTotal = (lines: CartLine[]) => lines.reduce((s, l) => s + (l.price || 0) * (l.qty || 0), 0);
+const cartCount = (lines: CartLine[]) => lines.reduce((s, l) => s + (l.qty || 0), 0);
+const CART_KEY = (sellerId: string) => `moyo_cart_${sellerId}`;
+const loadCart = (sellerId: string): CartLine[] => { try { return JSON.parse(localStorage.getItem(CART_KEY(sellerId)) || "[]"); } catch { return []; } };
+const saveCart = (sellerId: string, lines: CartLine[]) => { try { lines.length ? localStorage.setItem(CART_KEY(sellerId), JSON.stringify(lines)) : localStorage.removeItem(CART_KEY(sellerId)); } catch {} };
+const isOrderMsg = (content: string) => content.startsWith("[order]") && content.endsWith("[/order]");
+const orderIdFromMsg = (content: string) => content.slice(7, -8);
 // Ciblage des diffusions générales : décide si une diffusion (target) concerne un utilisateur donné.
 // target peut être composite "genre|abonnement" (ex. "femmes|premium") ou une ancienne valeur simple.
 const broadcastTargetsUser = (target: string | null | undefined, isPremium: boolean, gender: string): boolean => {
@@ -5367,7 +5387,7 @@ const ReplyBanner = React.memo(function ReplyBanner({ replyTo, partnerName, myId
   const accent = isMine ? G.vert : G.rouge;
   const isImg = replyTo.content.startsWith("[img]") && !replyTo.is_view_once && !replyTo.is_destroyed;
   const raw = replyTo.content.replace(/^\[↩.*?\]\n/, "");
-  const preview = replyTo.is_destroyed ? "Photo détruite" : replyTo.is_view_once ? "Photo vue unique" : (!isImg && raw.length > 80 ? raw.slice(0, 80) + "…" : raw);
+  const preview = replyTo.is_destroyed ? "Photo détruite" : replyTo.is_view_once ? "Photo vue unique" : isOrderMsg(replyTo.content) ? "Demande de commande" : (!isImg && raw.length > 80 ? raw.slice(0, 80) + "…" : raw);
   return (
     // ── ReplyBanner v2 : visible, robuste iOS, sans overflow caché ──
     <div style={{
@@ -5449,6 +5469,28 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
     setTimeout(() => { setOpen(null); loadConvs(); setDragX(0); }, 230);
   };
   const [msgs, setMsgs] = useState<Message[]>([]);
+  // ── Commandes (cartes panier) présentes dans la conversation ──
+  const [ordersMap, setOrdersMap] = useState<Record<string, Order>>({});
+  const [orderBusy, setOrderBusy] = useState<string | null>(null);
+  useEffect(() => {
+    const ids = Array.from(new Set(msgs.filter(m => isOrderMsg(m.content)).map(m => orderIdFromMsg(m.content)).filter(Boolean)));
+    if (!ids.length) return;
+    (async () => {
+      try {
+        const rows = await sb.query<Order>(auth.token, "orders", `?id=in.(${ids.join(",")})`, auth.refreshToken);
+        if (rows.length) setOrdersMap(prev => { const next = { ...prev }; rows.forEach(o => { next[o.id] = o; }); return next; });
+      } catch {}
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [msgs]);
+  const updateOrder = async (orderId: string, status: string) => {
+    setOrderBusy(orderId);
+    try {
+      await sb.update(auth.token, "orders", orderId, { status, updated_at: new Date().toISOString() }, auth.refreshToken);
+      setOrdersMap(prev => ({ ...prev, [orderId]: { ...prev[orderId], status } }));
+    } catch {}
+    setOrderBusy(null);
+  };
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
   const [msgCount, setMsgCount] = useState(0);
@@ -6269,7 +6311,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
       onShowPremium("Pour partager tes coordonnées, passe à Premium. Cela protège aussi ta sécurité !");
       return;
     }
-    const rawQuoted = replyTo ? (replyTo.is_destroyed ? "Photo détruite" : replyTo.is_view_once ? "Photo vue unique" : replyTo.content.startsWith("[img]") ? "Photo" : replyTo.content) : "";
+    const rawQuoted = replyTo ? (replyTo.is_destroyed ? "Photo détruite" : replyTo.is_view_once ? "Photo vue unique" : isOrderMsg(replyTo.content) ? "Demande de commande" : replyTo.content.startsWith("[img]") ? "Photo" : replyTo.content) : "";
     // Supprimer la citation imbriquée si le message cité est lui-même une réponse
     const cleanQuoted = rawQuoted.replace(/^\[↩ .+? : .+?\]\n/, "").replace(/\]/g, "）").substring(0, 60);
     const prefix = replyTo ? `[↩ ${replyTo.sender_id === auth.userId ? "Toi" : open.partner?.name} : ${cleanQuoted}]\n` : "";
@@ -6529,6 +6571,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
                         {(() => {
                           const lm = c.lastMsg; const ct = lm?.content;
                           if (!ct) return "Présentez-vous !";
+                          if (isOrderMsg(ct)) return <span style={{ display: "inline-flex", alignItems: "center", gap: 5, verticalAlign: "middle" }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><span>Demande de commande</span></span>;
                           const isPhoto = ct.startsWith("[img]") && ct.endsWith("[/img]");
                           if (isPhoto || lm?.is_destroyed || lm?.is_view_once) {
                             let label = "Photo";
@@ -6614,6 +6657,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
         {msgs.map((m, i) => {
           const isMine = m.sender_id === auth.userId;
           const isImg = isImage(m.content);
+          const isOrder = isOrderMsg(m.content);
           const time = m.created_at ? new Date(m.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "";
           const reactions = m.reactions || {};
           const reactionEntries = Object.entries(reactions).filter(([, users]) => users.length > 0);
@@ -6732,6 +6776,16 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
                         ))}
                       </div>
                     )}
+                  </div>
+                </div>
+              ) : isOrder ? (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: isMine ? "flex-end" : "flex-start", width: "100%" }}>
+                  {ordersMap[orderIdFromMsg(m.content)]
+                    ? <OrderCard order={ordersMap[orderIdFromMsg(m.content)]} me={auth.userId} busy={orderBusy === orderIdFromMsg(m.content)} onUpdate={(s) => updateOrder(orderIdFromMsg(m.content), s)} />
+                    : <div style={{ background: G.blanc, border: `1px solid ${G.gris}`, borderRadius: 14, padding: "14px 18px", color: G.brunLight, fontSize: "0.82rem", maxWidth: 280 }}>Chargement de la commande…</div>}
+                  <div style={{ display: "flex", alignItems: "center", gap: 3, marginTop: 3, justifyContent: isMine ? "flex-end" : "flex-start" }}>
+                    <span style={{ fontSize: "0.62rem", color: G.brunLight }}>{time}</span>
+                    {isMine && <TickIcon read={m.is_read} isPremium={auth.isPremium} />}
                   </div>
                 </div>
               ) : (
@@ -7671,6 +7725,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
   const [blockedUsers, setBlockedUsers] = useState<Array<{ id: string; blocked_id: string; profile?: Profile }>>([]);
   const [showBlocked, setShowBlocked] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showCatalog, setShowCatalog] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -8285,6 +8340,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           onToggleFav={() => {}}
         />
       )}
+      {showCatalog && <CatalogManager auth={auth} onClose={() => setShowCatalog(false)} />}
       {(!isWideProfile || ["main","premium","parrainage","verification","blocklist","darkmode","rating","logout","delete"].includes(activeSection)) && <div style={{ background: G.creme, position: "relative" }}>
         {(!isWideProfile || activeSection === "main") && <svg viewBox="0 0 500 40" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: 40, marginTop: -1 }}><path d="M0,0 Q125,40 250,40 Q375,40 500,0 L500,0 L0,0 Z" style={{ fill: G.blanc }}/></svg>}
 
@@ -8314,7 +8370,19 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           </div>
         )}
 
-        {/* CTA Premium - rouge si gratuit, doré si actif, rouge si expiré */}
+        {/* Mon catalogue — professionnels uniquement */}
+        {(!isWideProfile || activeSection === "main") && profile?.account_type === "pro" && (
+          <div onClick={() => setShowCatalog(true)} style={{ background: G.blanc, borderRadius: 18, padding: "16px 20px", cursor: "pointer", boxShadow: "0 4px 16px rgba(212,168,67,0.12)", display: "flex", alignItems: "center", gap: 14, border: "1.5px solid rgba(212,168,67,0.2)" }}>
+            <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(212,168,67,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: "1rem", color: G.brun, marginBottom: 3 }}>Mon catalogue</div>
+              <div style={{ fontSize: "0.78rem", color: "#888", lineHeight: 1.4 }}>Gérez vos produits et services en vente</div>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        )}
         {(!isWideProfile || ["premium","main"].includes(activeSection)) && (() => {
           if (FREE_LAUNCH_MODE) return null; // Mode lancement gratuit : aucun bandeau de paiement.
           const stored = localStorage.getItem(`moyo_premium_until_${auth.userId}`);
@@ -17209,6 +17277,472 @@ function ProCard({ pro, onOpen, isFav, onToggleFav }: { pro: Profile; onOpen: ()
   );
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// SYSTÈME DE VENTE — Catalogue (pro), Boutique + Panier (visiteur), Carte commande
+// ════════════════════════════════════════════════════════════════════════════
+
+const CATALOG_AVAIL = ["En stock", "Sur commande", "Sur rendez-vous", "Rupture"];
+
+async function uploadCatalogPhoto(token: string, userId: string, file: File): Promise<string | null> {
+  try {
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${userId}/catalog/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
+    const r = await fetch(`${SUPABASE_URL}/storage/v1/object/avatars/${path}`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}`, "Content-Type": file.type || "image/jpeg", "x-upsert": "true", "Cache-Control": "3600" },
+      body: file,
+    });
+    if (!r.ok) return null;
+    return `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;
+  } catch { return null; }
+}
+
+// ── Gestion du catalogue par le professionnel (CRUD) ──
+function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) {
+  const [items, setItems] = useState<CatalogItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<CatalogItem | null>(null);
+  const [missingTable, setMissingTable] = useState(false);
+  const [toast, setToast] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const rows = await sb.query<CatalogItem>(auth.token, "catalog_items", `?seller_id=eq.${auth.userId}&order=sort_order.asc,created_at.desc`, auth.refreshToken);
+      setItems(rows);
+    } catch (e: any) {
+      if (String(e?.message || "").match(/catalog_items|relation|does not exist|schema cache/i)) setMissingTable(true);
+    }
+    setLoading(false);
+  }, [auth.token, auth.userId, auth.refreshToken]);
+  useEffect(() => { load(); }, [load]);
+
+  const blank: CatalogItem = { id: "", seller_id: auth.userId, name: "", description: "", price: null, currency: "FCFA", category: "", availability: "En stock", delay: "", photos: [], is_active: true };
+  const [form, setForm] = useState<CatalogItem>(blank);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const startEdit = (it: CatalogItem | null) => { setForm(it ? { ...it, photos: it.photos || [] } : { ...blank }); setEditing(it || blank); };
+
+  const onPickPhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []); if (!files.length) return;
+    setUploading(true);
+    const current = form.photos || [];
+    const room = Math.max(0, 5 - current.length);
+    const urls: string[] = [];
+    for (const f of files.slice(0, room)) { const u = await uploadCatalogPhoto(auth.token, auth.userId, f); if (u) urls.push(u); }
+    setForm(p => ({ ...p, photos: [...(p.photos || []), ...urls] }));
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const save = async () => {
+    if (!form.name.trim()) { setToast("Le nom est obligatoire."); return; }
+    setSaving(true);
+    const payload = {
+      seller_id: auth.userId,
+      name: form.name.trim(),
+      description: (form.description || "").trim() || null,
+      price: form.price === null || form.price === undefined || (form.price as any) === "" ? null : Number(form.price),
+      currency: form.currency || "FCFA",
+      category: (form.category || "").trim() || null,
+      availability: form.availability || null,
+      delay: (form.delay || "").trim() || null,
+      photos: form.photos || [],
+      is_active: form.is_active !== false,
+    };
+    try {
+      if (form.id) await sb.update(auth.token, "catalog_items", form.id, payload, auth.refreshToken);
+      else await sb.insert<CatalogItem>(auth.token, "catalog_items", payload, auth.refreshToken);
+      setEditing(null); await load();
+    } catch (e: any) {
+      if (String(e?.message || "").match(/catalog_items|relation|does not exist|schema cache/i)) setMissingTable(true);
+      else setToast("Erreur lors de l'enregistrement.");
+    }
+    setSaving(false);
+  };
+
+  const remove = async (it: CatalogItem) => {
+    if (!confirm(`Supprimer « ${it.name} » du catalogue ?`)) return;
+    try { await sb.delete(auth.token, "catalog_items", `?id=eq.${it.id}`, auth.refreshToken); setItems(p => p.filter(x => x.id !== it.id)); } catch { setToast("Suppression impossible."); }
+  };
+  const toggleActive = async (it: CatalogItem) => {
+    try { await sb.update(auth.token, "catalog_items", it.id, { is_active: !(it.is_active !== false) }, auth.refreshToken); setItems(p => p.map(x => x.id === it.id ? { ...x, is_active: !(x.is_active !== false) } : x)); } catch {}
+  };
+
+  const L: React.CSSProperties = { display: "block", fontSize: "0.78rem", fontWeight: 700, color: G.brun, marginBottom: 5 };
+  const INP: React.CSSProperties = { width: "100%", padding: "11px 13px", borderRadius: 11, border: `1.5px solid ${G.gris}`, fontSize: "0.9rem", boxSizing: "border-box", background: G.blanc, color: G.brun };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 9997, background: G.fond, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+      {/* En-tête */}
+      <div style={{ position: "sticky", top: 0, zIndex: 2, background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+        <div onClick={() => editing ? setEditing(null) : onClose()} style={{ width: 36, height: 36, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </div>
+        <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, flex: 1 }}>{editing ? (form.id ? "Modifier l'article" : "Nouvel article") : "Mon catalogue"}</div>
+        {!editing && !missingTable && <button onClick={() => startEdit(null)} style={{ background: G.or, color: "#fff", border: "none", borderRadius: 50, padding: "9px 16px", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button>}
+      </div>
+
+      {toast && <div style={{ position: "fixed", top: 70, left: "50%", transform: "translateX(-50%)", background: G.brun, color: "#fff", padding: "10px 18px", borderRadius: 50, fontSize: "0.82rem", zIndex: 5, boxShadow: "0 4px 14px rgba(0,0,0,0.2)" }} onAnimationEnd={() => setToast("")}>{toast}</div>}
+
+      <div style={{ maxWidth: 560, margin: "0 auto", padding: "16px" }}>
+        {missingTable ? (
+          <div style={{ background: "rgba(243,156,18,0.08)", border: "1.5px solid rgba(243,156,18,0.4)", borderRadius: 14, padding: 16 }}>
+            <div style={{ fontWeight: 800, color: "#e67e22", marginBottom: 6 }}>⚙ Table « catalog_items » manquante</div>
+            <div style={{ fontSize: "0.85rem", color: G.brun, lineHeight: 1.6 }}>Le catalogue a besoin de deux tables Supabase (catalog_items et orders). Exécute le script SQL fourni dans Supabase, puis recharge cette page.</div>
+          </div>
+        ) : editing ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {/* Photos */}
+            <div>
+              <label style={L}>Photos <span style={{ color: G.brunLight, fontWeight: 400 }}>({(form.photos || []).length}/5)</span></label>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {(form.photos || []).map((u, i) => (
+                  <div key={i} style={{ position: "relative", width: 76, height: 76, borderRadius: 12, overflow: "hidden", border: `1px solid ${G.gris}` }}>
+                    <img src={u} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <div onClick={() => setForm(p => ({ ...p, photos: (p.photos || []).filter((_, j) => j !== i) }))} style={{ position: "absolute", top: 3, right: 3, width: 20, height: 20, borderRadius: "50%", background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </div>
+                  </div>
+                ))}
+                {(form.photos || []).length < 5 && (
+                  <div onClick={() => fileRef.current?.click()} style={{ width: 76, height: 76, borderRadius: 12, border: `1.5px dashed ${G.gris}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", background: G.blanc, gap: 3 }}>
+                    {uploading ? <span style={{ fontSize: "0.7rem", color: G.brunLight }}>…</span> : <><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></>}
+                  </div>
+                )}
+              </div>
+              <input ref={fileRef} type="file" accept="image/*" multiple onChange={onPickPhotos} style={{ display: "none" }} />
+            </div>
+            <div><label style={L}>Nom du produit / service *</label><input style={INP} value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Ex : Robe wax sur mesure" /></div>
+            <div><label style={L}>Description</label><textarea style={{ ...INP, minHeight: 80, resize: "vertical" }} value={form.description || ""} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Détails, matières, options…" /></div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ flex: 2 }}><label style={L}>Prix</label><input style={INP} type="number" inputMode="numeric" value={form.price ?? ""} onChange={e => setForm(p => ({ ...p, price: e.target.value === "" ? null : Number(e.target.value) }))} placeholder="0" /></div>
+              <div style={{ flex: 1 }}><label style={L}>Devise</label><input style={INP} value={form.currency || "FCFA"} onChange={e => setForm(p => ({ ...p, currency: e.target.value }))} /></div>
+            </div>
+            <div><label style={L}>Catégorie</label><input style={INP} value={form.category || ""} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} placeholder="Ex : Prêt-à-porter" /></div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ flex: 1 }}><label style={L}>Disponibilité</label>
+                <select style={INP} value={form.availability || "En stock"} onChange={e => setForm(p => ({ ...p, availability: e.target.value }))}>{CATALOG_AVAIL.map(a => <option key={a} value={a}>{a}</option>)}</select>
+              </div>
+              <div style={{ flex: 1 }}><label style={L}>Délai</label><input style={INP} value={form.delay || ""} onChange={e => setForm(p => ({ ...p, delay: e.target.value }))} placeholder="Ex : 3 jours" /></div>
+            </div>
+            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: "0.85rem", color: G.brun, fontWeight: 600 }}>
+              <input type="checkbox" checked={form.is_active !== false} onChange={e => setForm(p => ({ ...p, is_active: e.target.checked }))} style={{ width: 18, height: 18 }} />
+              Visible dans ma boutique
+            </label>
+            <button onClick={save} disabled={saving || uploading} style={{ background: saving || uploading ? G.gris : G.or, color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontWeight: 800, fontSize: "0.95rem", cursor: saving ? "default" : "pointer", marginTop: 4 }}>{saving ? "Enregistrement…" : (form.id ? "Enregistrer" : "Ajouter au catalogue")}</button>
+          </div>
+        ) : loading ? (
+          <div style={{ textAlign: "center", padding: 40, color: G.brunLight }}>Chargement…</div>
+        ) : items.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "50px 20px" }}>
+            <div style={{ width: 70, height: 70, borderRadius: "50%", background: "rgba(212,168,67,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <div style={{ fontWeight: 700, color: G.brun, marginBottom: 6 }}>Votre catalogue est vide</div>
+            <div style={{ fontSize: "0.85rem", color: G.brunLight, marginBottom: 18 }}>Ajoutez vos produits ou services pour que vos clients puissent les commander.</div>
+            <button onClick={() => startEdit(null)} style={{ background: G.or, color: "#fff", border: "none", borderRadius: 50, padding: "12px 24px", fontWeight: 700, cursor: "pointer" }}>+ Ajouter mon premier article</button>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {items.map(it => (
+              <div key={it.id} style={{ background: G.blanc, borderRadius: 14, border: `1px solid ${G.gris}`, padding: 10, display: "flex", gap: 11, alignItems: "center", opacity: it.is_active === false ? 0.55 : 1 }}>
+                <div style={{ width: 60, height: 60, borderRadius: 10, background: G.creme, flexShrink: 0, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {it.photos && it.photos[0] ? <img src={it.photos[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.9rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{it.name}</div>
+                  <div style={{ fontSize: "0.82rem", color: G.or, fontWeight: 700 }}>{it.price != null ? fmtMoney(it.price, it.currency) : "Prix sur demande"}</div>
+                  <div style={{ fontSize: "0.7rem", color: G.brunLight }}>{it.availability}{it.is_active === false ? " · masqué" : ""}</div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                  <button onClick={() => startEdit(it)} style={{ background: G.creme, border: `1px solid ${G.gris}`, borderRadius: 8, padding: "6px 10px", fontSize: "0.74rem", fontWeight: 700, color: G.brun, cursor: "pointer" }}>Modifier</button>
+                  <div style={{ display: "flex", gap: 5 }}>
+                    <button onClick={() => toggleActive(it)} title={it.is_active === false ? "Afficher" : "Masquer"} style={{ flex: 1, background: G.blanc, border: `1px solid ${G.gris}`, borderRadius: 8, padding: "5px", cursor: "pointer", fontSize: "0.72rem" }}>{it.is_active === false ? "👁" : "🚫"}</button>
+                    <button onClick={() => remove(it)} style={{ flex: 1, background: "rgba(231,76,60,0.08)", border: "1px solid rgba(231,76,60,0.3)", borderRadius: 8, padding: "5px", cursor: "pointer", color: "#e74c3c", fontWeight: 800 }}>🗑</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Carte « commande » affichée dans la conversation ──
+function OrderCard({ order, me, onUpdate, busy }: { order: Order; me: string; onUpdate: (status: string) => void; busy?: boolean }) {
+  const meta = ORDER_STATUS_META[order.status] || ORDER_STATUS_META.sent;
+  const isSeller = me === order.seller_id;
+  const terminal = order.status === "done" || order.status === "cancelled";
+  const cur = order.currency || "FCFA";
+  return (
+    <div style={{ width: "100%", maxWidth: 320, background: G.blanc, borderRadius: 16, border: `1px solid ${G.gris}`, overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,0.08)" }}>
+      {/* En-tête */}
+      <div style={{ background: "linear-gradient(135deg, #1e293b, #334155)", padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span style={{ color: "#fff", fontWeight: 800, fontSize: "0.85rem" }}>Demande de commande</span>
+        </div>
+        <span style={{ background: meta.bg, color: meta.color, borderRadius: 50, padding: "3px 9px", fontSize: "0.68rem", fontWeight: 800 }}>{meta.label}</span>
+      </div>
+      {/* Articles */}
+      <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 9 }}>
+        {order.items.map((l, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 9 }}>
+            <div style={{ width: 42, height: 42, borderRadius: 9, background: G.creme, flexShrink: 0, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {l.photo ? <img src={l.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: "0.8rem", fontWeight: 600, color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.name}</div>
+              <div style={{ fontSize: "0.72rem", color: G.brunLight }}>{l.qty} × {l.price != null ? fmtMoney(l.price, cur) : "—"}</div>
+            </div>
+            {l.price != null && <div style={{ fontSize: "0.8rem", fontWeight: 700, color: G.brun, flexShrink: 0 }}>{fmtMoney(l.price * l.qty, cur)}</div>}
+          </div>
+        ))}
+      </div>
+      {/* Note */}
+      {order.note && <div style={{ margin: "0 12px 8px", background: G.creme, borderRadius: 9, padding: "7px 10px", fontSize: "0.76rem", color: G.brun }}><span style={{ color: G.brunLight, fontWeight: 700 }}>Note : </span>{order.note}</div>}
+      {/* Total */}
+      <div style={{ borderTop: `1px solid ${G.gris}`, padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontSize: "0.74rem", color: G.brunLight, fontWeight: 700 }}>Total estimé</span>
+        <span style={{ fontSize: "1rem", fontWeight: 900, color: G.or }}>{fmtMoney(order.total, cur)}</span>
+      </div>
+      {/* Actions selon le rôle et le statut */}
+      {!terminal && (
+        <div style={{ borderTop: `1px solid ${G.gris}`, padding: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {isSeller ? <>
+            {order.status === "sent" && <button disabled={busy} onClick={() => onUpdate("discussion")} style={obtn("#2563EB")}>Prendre en charge</button>}
+            {(order.status === "sent" || order.status === "discussion") && <button disabled={busy} onClick={() => onUpdate("confirmed")} style={obtn("#1A5C3A")}>Confirmer</button>}
+            {order.status === "confirmed" && <button disabled={busy} onClick={() => onUpdate("done")} style={obtn("#555")}>Terminer</button>}
+            <button disabled={busy} onClick={() => onUpdate("cancelled")} style={obtn("#e74c3c", true)}>Annuler</button>
+          </> : <>
+            <span style={{ fontSize: "0.72rem", color: G.brunLight, flex: 1, alignSelf: "center" }}>{order.status === "sent" ? "En attente de réponse du pro" : order.status === "discussion" ? "Le pro a pris en charge votre demande" : "Commande confirmée par le pro"}</span>
+            <button disabled={busy} onClick={() => onUpdate("cancelled")} style={obtn("#e74c3c", true)}>Annuler</button>
+          </>}
+        </div>
+      )}
+    </div>
+  );
+}
+function obtn(color: string, outline?: boolean): React.CSSProperties {
+  return { flex: outline ? "0 0 auto" : 1, background: outline ? "transparent" : color, color: outline ? color : "#fff", border: outline ? `1.5px solid ${color}` : "none", borderRadius: 9, padding: "8px 12px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", minWidth: 80 };
+}
+
+// ── Boutique + panier affichés sur la fiche d'un professionnel ──
+function CatalogShop({ auth, pro, mine, onGoMessages, onToast }: { auth: Auth; pro: Profile; mine: boolean; onGoMessages: (pid: string) => void; onToast: (m: string) => void }) {
+  const [items, setItems] = useState<CatalogItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [cart, setCart] = useState<CartLine[]>(() => loadCart(pro.id));
+  const [openItem, setOpenItem] = useState<CatalogItem | null>(null);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [note, setNote] = useState("");
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const rows = await sb.query<CatalogItem>(auth.token, "catalog_items", `?seller_id=eq.${pro.id}&is_active=eq.true&order=sort_order.asc,created_at.desc`, auth.refreshToken);
+        if (alive) setItems(rows);
+      } catch { /* table absente → on n'affiche rien */ }
+      if (alive) setLoading(false);
+    })();
+    return () => { alive = false; };
+  }, [auth.token, auth.refreshToken, pro.id]);
+
+  const setAndSave = (next: CartLine[]) => { setCart(next); saveCart(pro.id, next); };
+  const qtyOf = (id: string) => cart.find(l => l.item_id === id)?.qty || 0;
+  const addToCart = (it: CatalogItem) => {
+    const existing = cart.find(l => l.item_id === it.id);
+    if (existing) setAndSave(cart.map(l => l.item_id === it.id ? { ...l, qty: l.qty + 1 } : l));
+    else setAndSave([...cart, { item_id: it.id, name: it.name, price: Number(it.price || 0), qty: 1, photo: it.photos?.[0], currency: it.currency || "FCFA" }]);
+  };
+  const setQty = (id: string, qty: number) => { if (qty <= 0) setAndSave(cart.filter(l => l.item_id !== id)); else setAndSave(cart.map(l => l.item_id === id ? { ...l, qty } : l)); };
+  const clear = () => setAndSave([]);
+
+  const sendCart = async () => {
+    if (!cart.length || sending) return;
+    setSending(true);
+    try {
+      // 1) S'assurer qu'une conversation existe
+      const [a, b] = await Promise.all([
+        sb.query<{ id: string }>(auth.token, "matches", `?user1=eq.${auth.userId}&user2=eq.${pro.id}&select=id&limit=1`, auth.refreshToken),
+        sb.query<{ id: string }>(auth.token, "matches", `?user1=eq.${pro.id}&user2=eq.${auth.userId}&select=id&limit=1`, auth.refreshToken),
+      ]);
+      let matchId = a[0]?.id || b[0]?.id || null;
+      if (!matchId) { const [m] = await sb.insert<{ id: string }>(auth.token, "matches", { user1: auth.userId, user2: pro.id }, auth.refreshToken); matchId = m?.id || null; }
+      // 2) Créer la commande
+      const total = cartTotal(cart);
+      const [order] = await sb.insert<Order>(auth.token, "orders", {
+        buyer_id: auth.userId, seller_id: pro.id, match_id: matchId,
+        items: cart, total, currency: cart[0]?.currency || "FCFA",
+        note: note.trim() || null, status: "sent",
+      }, auth.refreshToken);
+      if (!order?.id) throw new Error("order");
+      // 3) Poster la carte commande dans la conversation
+      if (matchId) await sb.insert(auth.token, "messages", { match_id: matchId, sender_id: auth.userId, content: `[order]${order.id}[/order]`, is_read: false }, auth.refreshToken);
+      clear(); setNote(""); setCartOpen(false);
+      onToast("Panier envoyé au professionnel ✅");
+      onGoMessages(pro.id);
+    } catch (e: any) {
+      if (String(e?.message || "").match(/orders|catalog|relation|does not exist|schema cache/i)) onToast("Système de commande non configuré (table orders manquante).");
+      else onToast("Envoi impossible, réessayez.");
+    }
+    setSending(false);
+  };
+
+  if (loading) return null;
+  if (items.length === 0) {
+    if (mine) return (
+      <div style={{ background: G.blanc, border: `1.5px dashed ${G.gris}`, borderRadius: 14, padding: 18, marginBottom: 14, textAlign: "center" }}>
+        <div style={{ fontSize: "0.85rem", color: G.brunLight }}>Votre catalogue est vide. Ajoutez des produits depuis <b>Profil → Mon catalogue</b> pour les afficher ici.</div>
+      </div>
+    );
+    return null;
+  }
+
+  const count = cartCount(cart), total = cartTotal(cart);
+
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+        <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5 }}>Catalogue</div>
+        <div style={{ fontSize: "0.72rem", color: G.brunLight }}>{items.length} article{items.length > 1 ? "s" : ""}</div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        {items.map(it => {
+          const q = qtyOf(it.id);
+          return (
+            <div key={it.id} style={{ background: G.blanc, borderRadius: 14, border: `1px solid ${G.gris}`, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+              <div onClick={() => setOpenItem(it)} style={{ position: "relative", paddingBottom: "75%", background: G.creme, cursor: "pointer" }}>
+                {it.photos && it.photos[0]
+                  ? <img src={it.photos[0]} alt={it.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>}
+                {it.availability && it.availability !== "En stock" && <span style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.6)", color: "#fff", borderRadius: 50, padding: "2px 8px", fontSize: "0.62rem", fontWeight: 700 }}>{it.availability}</span>}
+              </div>
+              <div style={{ padding: "8px 10px 10px", display: "flex", flexDirection: "column", flex: 1 }}>
+                <div onClick={() => setOpenItem(it)} style={{ fontWeight: 700, fontSize: "0.83rem", color: G.brun, cursor: "pointer", lineHeight: 1.25, marginBottom: 3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{it.name}</div>
+                <div style={{ fontSize: "0.85rem", color: G.or, fontWeight: 800, marginBottom: 8 }}>{it.price != null ? fmtMoney(it.price, it.currency) : "Sur demande"}</div>
+                <div style={{ marginTop: "auto" }}>
+                  {mine ? <div style={{ fontSize: "0.7rem", color: G.brunLight, textAlign: "center" }}>Aperçu</div>
+                    : q === 0
+                      ? <button onClick={() => addToCart(it)} style={{ width: "100%", background: G.or, color: "#fff", border: "none", borderRadius: 9, padding: "8px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>Ajouter</button>
+                      : <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: G.creme, borderRadius: 9, padding: "3px" }}>
+                          <button onClick={() => setQty(it.id, q - 1)} style={qbtn}>−</button>
+                          <span style={{ fontWeight: 800, fontSize: "0.85rem", color: G.brun }}>{q}</span>
+                          <button onClick={() => setQty(it.id, q + 1)} style={qbtn}>+</button>
+                        </div>}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Barre panier flottante */}
+      {!mine && count > 0 && !cartOpen && !openItem && (
+        <div onClick={() => setCartOpen(true)} style={{ position: "fixed", bottom: 100, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 468, background: G.or, color: "#fff", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", zIndex: 95, boxShadow: "0 6px 20px rgba(212,168,67,0.45)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ position: "relative" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              <span style={{ position: "absolute", top: -7, right: -8, background: "#fff", color: G.or, borderRadius: "50%", minWidth: 17, height: 17, fontSize: "0.62rem", fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>{count}</span>
+            </div>
+            <span style={{ fontWeight: 700, fontSize: "0.88rem" }}>Voir le panier</span>
+          </div>
+          <span style={{ fontWeight: 900, fontSize: "0.95rem" }}>{fmtMoney(total, cart[0]?.currency)}</span>
+        </div>
+      )}
+
+      {/* Détail article */}
+      {openItem && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 9996, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={() => setOpenItem(null)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: G.blanc, borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 500, maxHeight: "85vh", overflowY: "auto" }}>
+            <div style={{ display: "flex", gap: 8, overflowX: "auto", padding: 12 }}>
+              {(openItem.photos && openItem.photos.length ? openItem.photos : [""]).map((u, i) => (
+                <div key={i} style={{ flexShrink: 0, width: openItem.photos && openItem.photos.length > 1 ? "78%" : "100%", paddingBottom: "60%", position: "relative", borderRadius: 14, overflow: "hidden", background: G.creme }}>
+                  {u ? <img src={u} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>}
+                </div>
+              ))}
+            </div>
+            <div style={{ padding: "0 16px 20px" }}>
+              <div style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun }}>{openItem.name}</div>
+              <div style={{ fontSize: "1rem", color: G.or, fontWeight: 800, margin: "4px 0 10px" }}>{openItem.price != null ? fmtMoney(openItem.price, openItem.currency) : "Prix sur demande"}</div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+                {openItem.category && <span style={chip}>{openItem.category}</span>}
+                {openItem.availability && <span style={chip}>{openItem.availability}</span>}
+                {openItem.delay && <span style={chip}>Délai : {openItem.delay}</span>}
+              </div>
+              {openItem.description && <div style={{ fontSize: "0.9rem", color: G.brun, lineHeight: 1.6, marginBottom: 16, whiteSpace: "pre-wrap" }}>{openItem.description}</div>}
+              {!mine && (qtyOf(openItem.id) === 0
+                ? <button onClick={() => { addToCart(openItem); }} style={{ width: "100%", background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer" }}>Ajouter au panier</button>
+                : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, background: G.creme, borderRadius: 12, padding: "8px" }}>
+                    <button onClick={() => setQty(openItem.id, qtyOf(openItem.id) - 1)} style={{ ...qbtn, width: 40, height: 40, fontSize: "1.3rem" }}>−</button>
+                    <span style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun }}>{qtyOf(openItem.id)}</span>
+                    <button onClick={() => setQty(openItem.id, qtyOf(openItem.id) + 1)} style={{ ...qbtn, width: 40, height: 40, fontSize: "1.3rem" }}>+</button>
+                  </div>)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Panier complet */}
+      {cartOpen && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 9996, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={() => setCartOpen(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: G.creme, borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 500, maxHeight: "88vh", display: "flex", flexDirection: "column" }}>
+            <div style={{ padding: "14px 16px", borderBottom: `1px solid ${G.gris}`, display: "flex", alignItems: "center", justifyContent: "space-between", background: G.blanc, borderRadius: "20px 20px 0 0" }}>
+              <div style={{ fontWeight: 800, color: G.brun }}>Mon panier <span style={{ color: G.brunLight, fontWeight: 600 }}>({count})</span></div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                {cart.length > 0 && <span onClick={clear} style={{ fontSize: "0.78rem", color: "#e74c3c", fontWeight: 700, cursor: "pointer" }}>Vider</span>}
+                <div onClick={() => setCartOpen(false)} style={{ cursor: "pointer" }}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.4" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+              </div>
+            </div>
+            <div style={{ flex: 1, overflowY: "auto", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+              {cart.length === 0 ? <div style={{ textAlign: "center", color: G.brunLight, padding: 30 }}>Votre panier est vide.</div> : cart.map(l => (
+                <div key={l.item_id} style={{ background: G.blanc, borderRadius: 12, border: `1px solid ${G.gris}`, padding: 9, display: "flex", gap: 10, alignItems: "center" }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 9, background: G.creme, flexShrink: 0, overflow: "hidden" }}>{l.photo && <img src={l.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: "0.85rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.name}</div>
+                    <div style={{ fontSize: "0.78rem", color: G.or, fontWeight: 700 }}>{fmtMoney(l.price, l.currency)}</div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <button onClick={() => setQty(l.item_id, l.qty - 1)} style={qbtn}>−</button>
+                    <span style={{ fontWeight: 800, fontSize: "0.85rem", minWidth: 16, textAlign: "center" }}>{l.qty}</span>
+                    <button onClick={() => setQty(l.item_id, l.qty + 1)} style={qbtn}>+</button>
+                  </div>
+                </div>
+              ))}
+              {cart.length > 0 && (
+                <div>
+                  <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: G.brun, margin: "4px 0 5px" }}>Note pour le professionnel (facultatif)</label>
+                  <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Taille, couleur, adresse de livraison, date souhaitée…" style={{ width: "100%", minHeight: 64, padding: "10px 12px", borderRadius: 11, border: `1.5px solid ${G.gris}`, fontSize: "0.86rem", boxSizing: "border-box", resize: "vertical", background: G.blanc, color: G.brun }} />
+                </div>
+              )}
+            </div>
+            {cart.length > 0 && (
+              <div style={{ padding: 14, borderTop: `1px solid ${G.gris}`, background: G.blanc }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                  <span style={{ color: G.brunLight, fontWeight: 700, fontSize: "0.85rem" }}>Total estimé</span>
+                  <span style={{ fontWeight: 900, fontSize: "1.1rem", color: G.or }}>{fmtMoney(total, cart[0]?.currency)}</span>
+                </div>
+                <button onClick={sendCart} disabled={sending} style={{ width: "100%", background: sending ? G.gris : G.or, color: "#fff", border: "none", borderRadius: 12, padding: "15px", fontWeight: 800, fontSize: "0.95rem", cursor: sending ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  {sending ? "Envoi…" : "Envoyer le panier"}
+                </button>
+                <div style={{ fontSize: "0.68rem", color: G.brunLight, textAlign: "center", marginTop: 8 }}>Aucun paiement en ligne. Vous finalisez la vente par messagerie.</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+const qbtn: React.CSSProperties = { width: 30, height: 30, borderRadius: 8, border: "none", background: G.blanc, color: G.brun, fontSize: "1.1rem", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" };
+const chip: React.CSSProperties = { background: G.creme, borderRadius: 8, padding: "4px 10px", fontSize: "0.74rem", color: G.brun, fontWeight: 600 };
+
 function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFav }: { auth: Auth; pro: Profile; onClose: () => void; onGoMessages: (pid: string) => void; onToast: (m: string) => void; isFav: boolean; onToggleFav: () => void }) {
   const cat = PUB_CATS.find(c => c.id === pro.category)?.label || pro.category;
   const soc = (pro.socials as Record<string, string>) || {};
@@ -17364,6 +17898,9 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
           <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>À propos</div>
           <div style={{ fontSize: "0.9rem", color: G.brun, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{pro.bio}</div>
         </div>}
+
+        {/* Catalogue + panier (professionnels uniquement) */}
+        {!isClient && <CatalogShop auth={auth} pro={pro} mine={mine} onGoMessages={onGoMessages} onToast={onToast} />}
 
         {/* Galerie */}
         {gallery.length > 0 && <div style={{ marginBottom: 14 }}>
