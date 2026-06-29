@@ -7725,7 +7725,6 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
   const [blockedUsers, setBlockedUsers] = useState<Array<{ id: string; blocked_id: string; profile?: Profile }>>([]);
   const [showBlocked, setShowBlocked] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [showCatalog, setShowCatalog] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -8340,7 +8339,6 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           onToggleFav={() => {}}
         />
       )}
-      {showCatalog && <CatalogManager auth={auth} onClose={() => setShowCatalog(false)} />}
       {(!isWideProfile || ["main","premium","parrainage","verification","blocklist","darkmode","rating","logout","delete"].includes(activeSection)) && <div style={{ background: G.creme, position: "relative" }}>
         {(!isWideProfile || activeSection === "main") && <svg viewBox="0 0 500 40" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: 40, marginTop: -1 }}><path d="M0,0 Q125,40 250,40 Q375,40 500,0 L500,0 L0,0 Z" style={{ fill: G.blanc }}/></svg>}
 
@@ -8370,19 +8368,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           </div>
         )}
 
-        {/* Mon catalogue — professionnels uniquement */}
-        {(!isWideProfile || activeSection === "main") && profile?.account_type === "pro" && (
-          <div onClick={() => setShowCatalog(true)} style={{ background: G.blanc, borderRadius: 18, padding: "16px 20px", cursor: "pointer", boxShadow: "0 4px 16px rgba(212,168,67,0.12)", display: "flex", alignItems: "center", gap: 14, border: "1.5px solid rgba(212,168,67,0.2)" }}>
-            <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(212,168,67,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: "1rem", color: G.brun, marginBottom: 3 }}>Mon catalogue</div>
-              <div style={{ fontSize: "0.78rem", color: "#888", lineHeight: 1.4 }}>Gérez vos produits et services en vente</div>
-            </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </div>
-        )}
+        {/* « Mon catalogue » a été déplacé dans l'onglet Publier (réservé aux professionnels). */}
         {(!isWideProfile || ["premium","main"].includes(activeSection)) && (() => {
           if (FREE_LAUNCH_MODE) return null; // Mode lancement gratuit : aucun bandeau de paiement.
           const stored = localStorage.getItem(`moyo_premium_until_${auth.userId}`);
@@ -16484,7 +16470,8 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
       </div>
 
       {lbl(isPropose ? "Nom de votre service" : "Titre de l'annonce")}
-      <input value={title} onChange={e => setTitle(e.target.value)} placeholder={isPropose ? "Ex : Travaux de maçonnerie générale" : "Ex : Recherche maçon pour une dalle"} style={{ ...fieldInput, marginBottom: 18 }} />
+      <input value={title} maxLength={80} onChange={e => setTitle(e.target.value.slice(0, 80))} placeholder={isPropose ? "Ex : Travaux de maçonnerie générale" : "Ex : Recherche maçon pour une dalle"} style={{ ...fieldInput, marginBottom: 4 }} />
+      <div style={{ textAlign: "right", fontSize: "0.72rem", fontWeight: 600, color: title.length >= 80 ? G.rouge : G.brunLight, marginBottom: 14 }}>{title.length}/80 caractères</div>
 
       {lbl("Description")}
       <div style={{ position: "relative", marginBottom: 18 }}>
@@ -17197,7 +17184,7 @@ function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: ()
 }
 
 function PublierHub({ auth, accountType, onGoFeed, onGoMessages }: { auth: Auth; accountType?: string; onGoFeed: () => void; onGoMessages: (pid: string) => void }) {
-  const [view, setView] = useState<"menu" | "cherche" | "propose" | "mes">("menu");
+  const [view, setView] = useState<"menu" | "cherche" | "propose" | "mes" | "catalogue">("menu");
   const isPro = accountType === "pro";
 
   if (view === "cherche" || view === "propose") {
@@ -17206,8 +17193,11 @@ function PublierHub({ auth, accountType, onGoFeed, onGoMessages }: { auth: Auth;
   if (view === "mes") {
     return <MyPublications auth={auth} onBack={() => setView("menu")} onGoMessages={onGoMessages} />;
   }
+  if (view === "catalogue") {
+    return <CatalogManager auth={auth} onClose={() => setView("menu")} />;
+  }
 
-  const allItems: { key: "cherche" | "propose" | "mes"; title: string; sub: string; tint: string; bg: string; icon: React.ReactNode }[] = [
+  const allItems: { key: "cherche" | "propose" | "mes" | "catalogue"; title: string; sub: string; tint: string; bg: string; icon: React.ReactNode }[] = [
     {
       key: "cherche", title: "Je cherche un professionnel", sub: "Publiez un besoin et recevez des propositions", tint: "var(--c-brun)", bg: "rgba(17,17,17,0.08)",
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>,
@@ -17220,9 +17210,14 @@ function PublierHub({ auth, accountType, onGoFeed, onGoMessages }: { auth: Auth;
       key: "mes", title: isPro ? "Voir mes services publiés" : "Voir mes besoins publiés", sub: "Gérez et boostez vos annonces", tint: G.or, bg: "rgba(212,168,67,0.16)",
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
     },
+    {
+      key: "catalogue", title: "Mon catalogue de produits / services", sub: "Gérez les articles en vente sur votre fiche", tint: G.or, bg: "rgba(212,168,67,0.16)",
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
+    },
   ];
-  // L'app connaît le type de compte : on n'affiche que l'action pertinente (pas de question superflue).
-  const items = allItems.filter(it => it.key === "mes" || (isPro ? it.key === "propose" : it.key === "cherche"));
+  // L'app connaît le type de compte : on n'affiche que les actions pertinentes (pas de question superflue).
+  // Le catalogue est réservé aux professionnels.
+  const items = allItems.filter(it => it.key === "mes" || (isPro ? (it.key === "propose" || it.key === "catalogue") : it.key === "cherche"));
 
   return (
     <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", boxSizing: "border-box", overflowX: "hidden", padding: "22px 16px 24px" }}>
@@ -17282,6 +17277,7 @@ function ProCard({ pro, onOpen, isFav, onToggleFav }: { pro: Profile; onOpen: ()
 // ════════════════════════════════════════════════════════════════════════════
 
 const CATALOG_AVAIL = ["En stock", "Sur commande", "Sur rendez-vous", "Rupture"];
+const CATALOG_DELAYS = ["24h", "3 jours", "5 jours", "7 jours", "14 jours", "1 mois"];
 
 async function uploadCatalogPhoto(token: string, userId: string, file: File): Promise<string | null> {
   try {
@@ -17344,7 +17340,7 @@ function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) 
       name: form.name.trim(),
       description: (form.description || "").trim() || null,
       price: form.price === null || form.price === undefined || (form.price as any) === "" ? null : Number(form.price),
-      currency: form.currency || "FCFA",
+      currency: "FCFA",
       category: (form.category || "").trim() || null,
       availability: form.availability || null,
       delay: (form.delay || "").trim() || null,
@@ -17418,14 +17414,19 @@ function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) 
             <div><label style={L}>Description</label><textarea style={{ ...INP, minHeight: 80, resize: "vertical" }} value={form.description || ""} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Détails, matières, options…" /></div>
             <div style={{ display: "flex", gap: 10 }}>
               <div style={{ flex: 2 }}><label style={L}>Prix</label><input style={INP} type="number" inputMode="numeric" value={form.price ?? ""} onChange={e => setForm(p => ({ ...p, price: e.target.value === "" ? null : Number(e.target.value) }))} placeholder="0" /></div>
-              <div style={{ flex: 1 }}><label style={L}>Devise</label><input style={INP} value={form.currency || "FCFA"} onChange={e => setForm(p => ({ ...p, currency: e.target.value }))} /></div>
+              <div style={{ flex: 1 }}><label style={L}>Devise</label><input style={{ ...INP, background: G.creme, color: G.brunLight, cursor: "not-allowed" }} value="FCFA" disabled readOnly /></div>
             </div>
             <div><label style={L}>Catégorie</label><input style={INP} value={form.category || ""} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} placeholder="Ex : Prêt-à-porter" /></div>
             <div style={{ display: "flex", gap: 10 }}>
               <div style={{ flex: 1 }}><label style={L}>Disponibilité</label>
                 <select style={INP} value={form.availability || "En stock"} onChange={e => setForm(p => ({ ...p, availability: e.target.value }))}>{CATALOG_AVAIL.map(a => <option key={a} value={a}>{a}</option>)}</select>
               </div>
-              <div style={{ flex: 1 }}><label style={L}>Délai</label><input style={INP} value={form.delay || ""} onChange={e => setForm(p => ({ ...p, delay: e.target.value }))} placeholder="Ex : 3 jours" /></div>
+              <div style={{ flex: 1 }}><label style={L}>Délai</label>
+                <select style={INP} value={form.delay || ""} onChange={e => setForm(p => ({ ...p, delay: e.target.value }))}>
+                  <option value="">Non précisé</option>
+                  {CATALOG_DELAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
             </div>
             <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: "0.85rem", color: G.brun, fontWeight: 600 }}>
               <input type="checkbox" checked={form.is_active !== false} onChange={e => setForm(p => ({ ...p, is_active: e.target.checked }))} style={{ width: 18, height: 18 }} />
@@ -17531,15 +17532,13 @@ function obtn(color: string, outline?: boolean): React.CSSProperties {
   return { flex: outline ? "0 0 auto" : 1, background: outline ? "transparent" : color, color: outline ? color : "#fff", border: outline ? `1.5px solid ${color}` : "none", borderRadius: 9, padding: "8px 12px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", minWidth: 80 };
 }
 
-// ── Boutique + panier affichés sur la fiche d'un professionnel ──
-function CatalogShop({ auth, pro, mine, onGoMessages, onToast }: { auth: Auth; pro: Profile; mine: boolean; onGoMessages: (pid: string) => void; onToast: (m: string) => void }) {
+// ── Boutique (grille catalogue) affichée sur la fiche d'un professionnel ──
+// Le panier est géré au niveau de ProFiche (carte récap sous les CTA + écran plein dédié).
+// Ce composant se limite désormais à la grille des articles et au détail d'un article.
+function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty }: { auth: Auth; pro: Profile; mine: boolean; qtyOf: (id: string) => number; addToCart: (it: CatalogItem) => void; setQty: (id: string, qty: number) => void }) {
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cart, setCart] = useState<CartLine[]>(() => loadCart(pro.id));
   const [openItem, setOpenItem] = useState<CatalogItem | null>(null);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [note, setNote] = useState("");
-  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -17553,58 +17552,15 @@ function CatalogShop({ auth, pro, mine, onGoMessages, onToast }: { auth: Auth; p
     return () => { alive = false; };
   }, [auth.token, auth.refreshToken, pro.id]);
 
-  const setAndSave = (next: CartLine[]) => { setCart(next); saveCart(pro.id, next); };
-  const qtyOf = (id: string) => cart.find(l => l.item_id === id)?.qty || 0;
-  const addToCart = (it: CatalogItem) => {
-    const existing = cart.find(l => l.item_id === it.id);
-    if (existing) setAndSave(cart.map(l => l.item_id === it.id ? { ...l, qty: l.qty + 1 } : l));
-    else setAndSave([...cart, { item_id: it.id, name: it.name, price: Number(it.price || 0), qty: 1, photo: it.photos?.[0], currency: it.currency || "FCFA" }]);
-  };
-  const setQty = (id: string, qty: number) => { if (qty <= 0) setAndSave(cart.filter(l => l.item_id !== id)); else setAndSave(cart.map(l => l.item_id === id ? { ...l, qty } : l)); };
-  const clear = () => setAndSave([]);
-
-  const sendCart = async () => {
-    if (!cart.length || sending) return;
-    setSending(true);
-    try {
-      // 1) S'assurer qu'une conversation existe
-      const [a, b] = await Promise.all([
-        sb.query<{ id: string }>(auth.token, "matches", `?user1=eq.${auth.userId}&user2=eq.${pro.id}&select=id&limit=1`, auth.refreshToken),
-        sb.query<{ id: string }>(auth.token, "matches", `?user1=eq.${pro.id}&user2=eq.${auth.userId}&select=id&limit=1`, auth.refreshToken),
-      ]);
-      let matchId = a[0]?.id || b[0]?.id || null;
-      if (!matchId) { const [m] = await sb.insert<{ id: string }>(auth.token, "matches", { user1: auth.userId, user2: pro.id }, auth.refreshToken); matchId = m?.id || null; }
-      // 2) Créer la commande
-      const total = cartTotal(cart);
-      const [order] = await sb.insert<Order>(auth.token, "orders", {
-        buyer_id: auth.userId, seller_id: pro.id, match_id: matchId,
-        items: cart, total, currency: cart[0]?.currency || "FCFA",
-        note: note.trim() || null, status: "sent",
-      }, auth.refreshToken);
-      if (!order?.id) throw new Error("order");
-      // 3) Poster la carte commande dans la conversation
-      if (matchId) await sb.insert(auth.token, "messages", { match_id: matchId, sender_id: auth.userId, content: `[order]${order.id}[/order]`, is_read: false }, auth.refreshToken);
-      clear(); setNote(""); setCartOpen(false);
-      onToast("Panier envoyé au professionnel ✅");
-      onGoMessages(pro.id);
-    } catch (e: any) {
-      if (String(e?.message || "").match(/orders|catalog|relation|does not exist|schema cache/i)) onToast("Système de commande non configuré (table orders manquante).");
-      else onToast("Envoi impossible, réessayez.");
-    }
-    setSending(false);
-  };
-
   if (loading) return null;
   if (items.length === 0) {
     if (mine) return (
       <div style={{ background: G.blanc, border: `1.5px dashed ${G.gris}`, borderRadius: 14, padding: 18, marginBottom: 14, textAlign: "center" }}>
-        <div style={{ fontSize: "0.85rem", color: G.brunLight }}>Votre catalogue est vide. Ajoutez des produits depuis <b>Profil → Mon catalogue</b> pour les afficher ici.</div>
+        <div style={{ fontSize: "0.85rem", color: G.brunLight }}>Votre catalogue est vide. Ajoutez des produits depuis <b>Publier → Mon catalogue</b> pour les afficher ici.</div>
       </div>
     );
     return null;
   }
-
-  const count = cartCount(cart), total = cartTotal(cart);
 
   return (
     <div style={{ marginBottom: 14 }}>
@@ -17642,20 +17598,6 @@ function CatalogShop({ auth, pro, mine, onGoMessages, onToast }: { auth: Auth; p
         })}
       </div>
 
-      {/* Barre panier flottante */}
-      {!mine && count > 0 && !cartOpen && !openItem && (
-        <div onClick={() => setCartOpen(true)} style={{ position: "fixed", bottom: 100, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 468, background: G.or, color: "#fff", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", zIndex: 95, boxShadow: "0 6px 20px rgba(212,168,67,0.45)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ position: "relative" }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-              <span style={{ position: "absolute", top: -7, right: -8, background: "#fff", color: G.or, borderRadius: "50%", minWidth: 17, height: 17, fontSize: "0.62rem", fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>{count}</span>
-            </div>
-            <span style={{ fontWeight: 700, fontSize: "0.88rem" }}>Voir le panier</span>
-          </div>
-          <span style={{ fontWeight: 900, fontSize: "0.95rem" }}>{fmtMoney(total, cart[0]?.currency)}</span>
-        </div>
-      )}
-
       {/* Détail article */}
       {openItem && (
         <div style={{ position: "fixed", inset: 0, zIndex: 9996, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={() => setOpenItem(null)}>
@@ -17687,56 +17629,6 @@ function CatalogShop({ auth, pro, mine, onGoMessages, onToast }: { auth: Auth; p
           </div>
         </div>
       )}
-
-      {/* Panier complet */}
-      {cartOpen && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9996, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={() => setCartOpen(false)}>
-          <div onClick={e => e.stopPropagation()} style={{ background: G.creme, borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 500, maxHeight: "88vh", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "14px 16px", borderBottom: `1px solid ${G.gris}`, display: "flex", alignItems: "center", justifyContent: "space-between", background: G.blanc, borderRadius: "20px 20px 0 0" }}>
-              <div style={{ fontWeight: 800, color: G.brun }}>Mon panier <span style={{ color: G.brunLight, fontWeight: 600 }}>({count})</span></div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                {cart.length > 0 && <span onClick={clear} style={{ fontSize: "0.78rem", color: "#e74c3c", fontWeight: 700, cursor: "pointer" }}>Vider</span>}
-                <div onClick={() => setCartOpen(false)} style={{ cursor: "pointer" }}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.4" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
-              </div>
-            </div>
-            <div style={{ flex: 1, overflowY: "auto", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-              {cart.length === 0 ? <div style={{ textAlign: "center", color: G.brunLight, padding: 30 }}>Votre panier est vide.</div> : cart.map(l => (
-                <div key={l.item_id} style={{ background: G.blanc, borderRadius: 12, border: `1px solid ${G.gris}`, padding: 9, display: "flex", gap: 10, alignItems: "center" }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 9, background: G.creme, flexShrink: 0, overflow: "hidden" }}>{l.photo && <img src={l.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: "0.85rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.name}</div>
-                    <div style={{ fontSize: "0.78rem", color: G.or, fontWeight: 700 }}>{fmtMoney(l.price, l.currency)}</div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <button onClick={() => setQty(l.item_id, l.qty - 1)} style={qbtn}>−</button>
-                    <span style={{ fontWeight: 800, fontSize: "0.85rem", minWidth: 16, textAlign: "center" }}>{l.qty}</span>
-                    <button onClick={() => setQty(l.item_id, l.qty + 1)} style={qbtn}>+</button>
-                  </div>
-                </div>
-              ))}
-              {cart.length > 0 && (
-                <div>
-                  <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: G.brun, margin: "4px 0 5px" }}>Note pour le professionnel (facultatif)</label>
-                  <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Taille, couleur, adresse de livraison, date souhaitée…" style={{ width: "100%", minHeight: 64, padding: "10px 12px", borderRadius: 11, border: `1.5px solid ${G.gris}`, fontSize: "0.86rem", boxSizing: "border-box", resize: "vertical", background: G.blanc, color: G.brun }} />
-                </div>
-              )}
-            </div>
-            {cart.length > 0 && (
-              <div style={{ padding: 14, borderTop: `1px solid ${G.gris}`, background: G.blanc }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                  <span style={{ color: G.brunLight, fontWeight: 700, fontSize: "0.85rem" }}>Total estimé</span>
-                  <span style={{ fontWeight: 900, fontSize: "1.1rem", color: G.or }}>{fmtMoney(total, cart[0]?.currency)}</span>
-                </div>
-                <button onClick={sendCart} disabled={sending} style={{ width: "100%", background: sending ? G.gris : G.or, color: "#fff", border: "none", borderRadius: 12, padding: "15px", fontWeight: 800, fontSize: "0.95rem", cursor: sending ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                  {sending ? "Envoi…" : "Envoyer le panier"}
-                </button>
-                <div style={{ fontSize: "0.68rem", color: G.brunLight, textAlign: "center", marginTop: 8 }}>Aucun paiement en ligne. Vous finalisez la vente par messagerie.</div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -17765,6 +17657,52 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
     return () => { body.style.overflow = prevB; html.style.overflow = prevH; (body.style as any).overscrollBehavior = prevOB; };
   }, []);
   const [sponsorOpen, setSponsorOpen] = useState(false);
+
+  // ── Panier (remonté ici : carte récap sous les CTA + écran plein dédié) ──
+  const [cart, setCart] = useState<CartLine[]>(() => (!mine && !isClient) ? loadCart(pro.id) : []);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cartNote, setCartNote] = useState("");
+  const [cartSending, setCartSending] = useState(false);
+  const setAndSaveCart = (next: CartLine[]) => { setCart(next); saveCart(pro.id, next); };
+  const cartQtyOf = (id: string) => cart.find(l => l.item_id === id)?.qty || 0;
+  const addToCart = (it: CatalogItem) => {
+    const existing = cart.find(l => l.item_id === it.id);
+    if (existing) setAndSaveCart(cart.map(l => l.item_id === it.id ? { ...l, qty: l.qty + 1 } : l));
+    else setAndSaveCart([...cart, { item_id: it.id, name: it.name, price: Number(it.price || 0), qty: 1, photo: it.photos?.[0], currency: it.currency || "FCFA" }]);
+  };
+  const setCartQty = (id: string, qty: number) => { if (qty <= 0) setAndSaveCart(cart.filter(l => l.item_id !== id)); else setAndSaveCart(cart.map(l => l.item_id === id ? { ...l, qty } : l)); };
+  const clearCart = () => setAndSaveCart([]);
+  const cartItemsCount = cartCount(cart), cartTotalAmount = cartTotal(cart);
+  const sendCart = async () => {
+    if (!cart.length || cartSending) return;
+    setCartSending(true);
+    try {
+      // 1) S'assurer qu'une conversation existe
+      const [a, b] = await Promise.all([
+        sb.query<{ id: string }>(auth.token, "matches", `?user1=eq.${auth.userId}&user2=eq.${pro.id}&select=id&limit=1`, auth.refreshToken),
+        sb.query<{ id: string }>(auth.token, "matches", `?user1=eq.${pro.id}&user2=eq.${auth.userId}&select=id&limit=1`, auth.refreshToken),
+      ]);
+      let matchId = a[0]?.id || b[0]?.id || null;
+      if (!matchId) { const [m] = await sb.insert<{ id: string }>(auth.token, "matches", { user1: auth.userId, user2: pro.id }, auth.refreshToken); matchId = m?.id || null; }
+      // 2) Créer la commande
+      const total = cartTotal(cart);
+      const [order] = await sb.insert<Order>(auth.token, "orders", {
+        buyer_id: auth.userId, seller_id: pro.id, match_id: matchId,
+        items: cart, total, currency: cart[0]?.currency || "FCFA",
+        note: cartNote.trim() || null, status: "sent",
+      }, auth.refreshToken);
+      if (!order?.id) throw new Error("order");
+      // 3) Poster la carte commande dans la conversation
+      if (matchId) await sb.insert(auth.token, "messages", { match_id: matchId, sender_id: auth.userId, content: `[order]${order.id}[/order]`, is_read: false }, auth.refreshToken);
+      clearCart(); setCartNote(""); setCartOpen(false);
+      onToast("Panier envoyé au professionnel ✅");
+      onGoMessages(pro.id);
+    } catch (e: any) {
+      if (String(e?.message || "").match(/orders|catalog|relation|does not exist|schema cache/i)) onToast("Système de commande non configuré (table orders manquante).");
+      else onToast("Envoi impossible, réessayez.");
+    }
+    setCartSending(false);
+  };
   // ── Carte « À propos » du client : date d'inscription + nombre de besoins publiés ──
   const [besoinsCount, setBesoinsCount] = useState<number | null>(null);
   const [memberSince, setMemberSince] = useState<string | null>((pro as any).created_at || null);
@@ -17874,6 +17812,26 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
         </div>
       ))}
 
+      {/* Carte récap panier — sous les CTA, avant « À propos » (pro uniquement, panier non vide) */}
+      {!mine && !isClient && cartItemsCount > 0 && (
+        <div style={{ padding: "0 16px 4px" }}>
+          <div onClick={() => setCartOpen(true)} style={{ background: "rgba(212,168,67,0.10)", border: "1.5px solid rgba(212,168,67,0.35)", borderRadius: 16, padding: "13px 16px", display: "flex", alignItems: "center", gap: 13, cursor: "pointer" }}>
+            <div style={{ width: 46, height: 46, borderRadius: "50%", background: G.or, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 800, fontSize: "1rem", color: G.brun }}>Mon panier</div>
+              <div style={{ fontSize: "0.82rem", color: G.brunLight }}>{cartItemsCount} article{cartItemsCount > 1 ? "s" : ""}</div>
+            </div>
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div style={{ fontSize: "0.72rem", color: G.brunLight, fontWeight: 600 }}>Total</div>
+              <div style={{ fontSize: "1rem", fontWeight: 900, color: G.or }}>{fmtMoney(cartTotalAmount, cart[0]?.currency)}</div>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+      )}
+
       {sponsorOpen && <SponsorModal auth={auth} profileId={pro.id} onClose={() => setSponsorOpen(false)} />}
 
       <div style={{ padding: "4px 16px 40px" }}>
@@ -17900,7 +17858,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
         </div>}
 
         {/* Catalogue + panier (professionnels uniquement) */}
-        {!isClient && <CatalogShop auth={auth} pro={pro} mine={mine} onGoMessages={onGoMessages} onToast={onToast} />}
+        {!isClient && <CatalogShop auth={auth} pro={pro} mine={mine} qtyOf={cartQtyOf} addToCart={addToCart} setQty={setCartQty} />}
 
         {/* Galerie */}
         {gallery.length > 0 && <div style={{ marginBottom: 14 }}>
@@ -17939,6 +17897,65 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
         </div>
       </div>
     </div>
+
+    {/* Écran plein — Mon panier (ouvert depuis la carte récap sous les CTA) */}
+    {cartOpen && (
+      <div style={{ position: "fixed", inset: 0, zIndex: 9998, background: G.fond, display: "flex", flexDirection: "column" }}>
+        {/* En-tête */}
+        <div style={{ background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+          <div onClick={() => setCartOpen(false)} style={{ width: 36, height: 36, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </div>
+          <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, flex: 1 }}>Mon panier <span style={{ color: G.brunLight, fontWeight: 600 }}>({cartItemsCount})</span></div>
+          {cart.length > 0 && <span onClick={clearCart} style={{ fontSize: "0.82rem", color: "#e74c3c", fontWeight: 700, cursor: "pointer" }}>Vider</span>}
+        </div>
+        {/* Corps */}
+        <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", padding: 16 }}>
+          <div style={{ maxWidth: 560, margin: "0 auto", display: "flex", flexDirection: "column", gap: 10 }}>
+            {cart.length === 0 ? (
+              <div style={{ textAlign: "center", color: G.brunLight, padding: "50px 20px" }}>Votre panier est vide.</div>
+            ) : (
+              <>
+                {cart.map(l => (
+                  <div key={l.item_id} style={{ background: G.blanc, borderRadius: 12, border: `1px solid ${G.gris}`, padding: 10, display: "flex", gap: 11, alignItems: "center" }}>
+                    <div style={{ width: 52, height: 52, borderRadius: 10, background: G.creme, flexShrink: 0, overflow: "hidden" }}>{l.photo && <img src={l.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: "0.88rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.name}</div>
+                      <div style={{ fontSize: "0.8rem", color: G.or, fontWeight: 700 }}>{fmtMoney(l.price, l.currency)}</div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <button onClick={() => setCartQty(l.item_id, l.qty - 1)} style={qbtn}>−</button>
+                      <span style={{ fontWeight: 800, fontSize: "0.88rem", minWidth: 18, textAlign: "center" }}>{l.qty}</span>
+                      <button onClick={() => setCartQty(l.item_id, l.qty + 1)} style={qbtn}>+</button>
+                    </div>
+                  </div>
+                ))}
+                <div style={{ marginTop: 4 }}>
+                  <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: G.brun, marginBottom: 6 }}>Note pour le professionnel (facultatif)</label>
+                  <textarea value={cartNote} onChange={e => setCartNote(e.target.value)} placeholder="Taille, couleur, adresse de livraison, date souhaitée…" style={{ width: "100%", minHeight: 72, padding: "11px 13px", borderRadius: 11, border: `1.5px solid ${G.gris}`, fontSize: "0.88rem", boxSizing: "border-box", resize: "vertical", background: G.blanc, color: G.brun }} />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        {/* Barre du bas */}
+        {cart.length > 0 && (
+          <div style={{ padding: 16, borderTop: `1px solid ${G.gris}`, background: G.blanc, flexShrink: 0 }}>
+            <div style={{ maxWidth: 560, margin: "0 auto" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+                <span style={{ color: G.brunLight, fontWeight: 700, fontSize: "0.88rem" }}>Total estimé</span>
+                <span style={{ fontWeight: 900, fontSize: "1.15rem", color: G.or }}>{fmtMoney(cartTotalAmount, cart[0]?.currency)}</span>
+              </div>
+              <button onClick={sendCart} disabled={cartSending} style={{ width: "100%", background: cartSending ? G.gris : G.or, color: "#fff", border: "none", borderRadius: 12, padding: "15px", fontWeight: 800, fontSize: "0.95rem", cursor: cartSending ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                {cartSending ? "Envoi…" : "Envoyer le panier"}
+              </button>
+              <div style={{ fontSize: "0.7rem", color: G.brunLight, textAlign: "center", marginTop: 8 }}>Aucun paiement en ligne. Vous finalisez la vente par messagerie.</div>
+            </div>
+          </div>
+        )}
+      </div>
+    )}
     </>
   );
 }
