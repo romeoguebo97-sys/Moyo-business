@@ -8082,7 +8082,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
     { id: "main", label: "Mon profil", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
     { id: "edit", label: "Modifier mon profil", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
     { id: "photo", label: "Modifier ma photo", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> },
-    ...(FREE_LAUNCH_MODE ? [] : [{ id: "premium", label: "Premium", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, badge: auth.isPremium ? "✓" : null }]),
+    ...((FREE_LAUNCH_MODE || profile?.account_type !== "pro") ? [] : [{ id: "premium", label: "Premium", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, badge: auth.isPremium ? "✓" : null }]),
     { id: "parrainage", label: "Parrainer un ami", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
     { id: "verification", label: "Vérification", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, badge: profile?.is_verified ? "✓" : null },
     { id: "blocklist", label: "Liste noire", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> },
@@ -8374,6 +8374,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
         {/* « Mon catalogue » a été déplacé dans l'onglet Publier (réservé aux professionnels). */}
         {(!isWideProfile || ["premium","main"].includes(activeSection)) && (() => {
           if (FREE_LAUNCH_MODE) return null; // Mode lancement gratuit : aucun bandeau de paiement.
+          if (profile?.account_type !== "pro") return null; // Premium réservé aux professionnels.
           const stored = localStorage.getItem(`moyo_premium_until_${auth.userId}`);
           const daysLeft = stored ? Math.floor((new Date(stored).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : -1;
           const isLifetime = stored && new Date(stored).getFullYear() >= 2090;
@@ -16166,13 +16167,13 @@ const timeAgo = (iso?: string) => {
 
 function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(8,8,13,0.55)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: G.creme, width: "100%", maxWidth: 500, borderRadius: "20px 20px 0 0", maxHeight: "92vh", overflowY: "auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 20px 14px", position: "sticky", top: 0, background: G.creme, borderBottom: `1px solid ${G.gris}` }}>
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(8,8,13,0.55)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: G.creme, width: "100%", maxWidth: 500, borderRadius: "20px 20px 0 0", maxHeight: "calc(100vh - env(safe-area-inset-top) - 8px)", overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 20px 14px", position: "sticky", top: 0, background: G.creme, borderBottom: `1px solid ${G.gris}`, zIndex: 2 }}>
           <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>{title}</h3>
-          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: "50%", border: "none", background: G.gris, fontSize: 18, cursor: "pointer" }}>×</button>
+          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: "50%", border: "none", background: G.gris, fontSize: 18, cursor: "pointer", flexShrink: 0 }}>×</button>
         </div>
-        <div style={{ padding: "18px 20px 24px" }}>{children}</div>
+        <div style={{ padding: "18px 20px calc(28px + env(safe-area-inset-bottom))" }}>{children}</div>
       </div>
     </div>
   );
@@ -17864,7 +17865,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
 
   return (
     <>
-    <div style={{ position: "fixed", top: isWideFiche ? 0 : 64, bottom: isWideFiche ? 0 : 88, left: 0, right: 0, margin: "0 auto", maxWidth: isWideFiche ? 560 : 500, zIndex: 90, background: G.creme, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", boxSizing: "border-box", boxShadow: isWideFiche ? "0 0 60px rgba(0,0,0,0.18)" : undefined }}>
+    <div style={{ position: "fixed", top: isWideFiche ? 0 : 64, bottom: isWideFiche ? 0 : 88, left: 0, right: 0, margin: "0 auto", maxWidth: isWideFiche ? 560 : 500, zIndex: 9990, background: G.creme, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", boxSizing: "border-box", boxShadow: isWideFiche ? "0 0 60px rgba(0,0,0,0.18)" : undefined }}>
       {/* Header */}
       <div style={{ position: "relative", background: `linear-gradient(rgba(8,8,13,0.82), rgba(8,8,13,0.90)), url(${FICHE_HERO_BG}) center/cover no-repeat`, padding: "16px 16px 22px" }}>
         <button onClick={onClose} aria-label="Retour" style={{ position: "absolute", top: 14, left: 14, width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.16)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.25)" }}>
