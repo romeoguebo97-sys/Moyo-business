@@ -1338,10 +1338,10 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
   // ════════ ÉCRAN 1 : OFFRE ════════
   if (step === "offer") return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(20,16,10,0.55)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", zIndex: 99990, display: "flex", alignItems: "flex-end", justifyContent: "center", overscrollBehavior: "contain", touchAction: "none" }}>
+      <div onClick={onClose} style={{ position: "absolute", top: "calc(12px + env(safe-area-inset-top))", right: 16, cursor: "pointer", background: "#eceae5", borderRadius: "50%", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10, boxShadow: "0 2px 8px rgba(0,0,0,0.18)" }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+      </div>
       <div onClick={e => e.stopPropagation()} style={{ background: G.creme, borderRadius: 0, width: "100%", maxWidth: 460, height: "100%", maxHeight: "100vh", overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", touchAction: "pan-y", boxShadow: "0 30px 80px rgba(0,0,0,0.4)", position: "relative", padding: "calc(18px + env(safe-area-inset-top)) 20px 16px" }}>
-        <div onClick={onClose} style={{ position: "absolute", top: "calc(14px + env(safe-area-inset-top))", right: 16, cursor: "pointer", background: "#eceae5", borderRadius: "50%", width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2 }}>
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#777" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-        </div>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 8, position: "relative" }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill={gold} style={{ position: "absolute", left: "28%", top: 4, opacity: 0.7 }}><polygon points="12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10" /></svg>
           <svg width="11" height="11" viewBox="0 0 24 24" fill={gold} style={{ position: "absolute", right: "28%", top: 10, opacity: 0.6 }}><polygon points="12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10" /></svg>
@@ -17581,11 +17581,38 @@ function obtn(color: string, outline?: boolean): React.CSSProperties {
 // Sur la fiche : un carrousel horizontal (on glisse pour voir le reste) + un lien « Voir tout ».
 // « Voir tout » ouvre une grille plein écran ; cliquer un article ouvre un détail plein écran propre.
 // Le panier est géré au niveau de ProFiche (carte récap sous les CTA + écran plein dédié).
-function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty, onHasItems }: { auth: Auth; pro: Profile; mine: boolean; qtyOf: (id: string) => number; addToCart: (it: CatalogItem) => void; setQty: (id: string, qty: number) => void; onHasItems?: (has: boolean) => void }) {
+// Carte article du catalogue, réutilisée par le carrousel (fiche) et la grille « Voir tout ».
+function CatCard({ it, carousel, mine, qtyOf, onAdd, onSetQty, onOpen }: { it: CatalogItem; carousel: boolean; mine: boolean; qtyOf: (id: string) => number; onAdd: (it: CatalogItem) => void; onSetQty: (id: string, qty: number) => void; onOpen: (it: CatalogItem) => void }) {
+  const q = qtyOf(it.id);
+  const ctrl = mine
+    ? <div style={{ fontSize: "0.7rem", color: G.brunLight, textAlign: "center" }}>Aperçu</div>
+    : q === 0
+      ? <button onClick={e => { e.stopPropagation(); onAdd(it); }} style={{ width: "100%", background: G.or, color: "#fff", border: "none", borderRadius: 9, padding: "8px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>Ajouter</button>
+      : <div onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: G.creme, borderRadius: 9, padding: "3px" }}>
+          <button onClick={() => onSetQty(it.id, q - 1)} style={qbtn}>−</button>
+          <span style={{ fontWeight: 800, fontSize: "0.85rem", color: G.brun }}>{q}</span>
+          <button onClick={() => onSetQty(it.id, q + 1)} style={qbtn}>+</button>
+        </div>;
+  return (
+    <div style={{ ...(carousel ? { flex: "0 0 150px", scrollSnapAlign: "start" } : {}), background: G.blanc, borderRadius: 14, border: `1px solid ${G.gris}`, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+      <div onClick={() => onOpen(it)} style={{ position: "relative", paddingBottom: "75%", background: G.creme, cursor: "pointer" }}>
+        {it.photos && it.photos[0]
+          ? <img src={it.photos[0]} alt={it.name} loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+          : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>}
+        {it.availability && it.availability !== "En stock" && <span style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.6)", color: "#fff", borderRadius: 50, padding: "2px 8px", fontSize: "0.62rem", fontWeight: 700 }}>{it.availability}</span>}
+      </div>
+      <div style={{ padding: "8px 10px 10px", display: "flex", flexDirection: "column", flex: 1 }}>
+        <div onClick={() => onOpen(it)} style={{ fontWeight: 700, fontSize: "0.83rem", color: G.brun, cursor: "pointer", lineHeight: 1.25, marginBottom: 3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minHeight: "2.1em" }}>{it.name}</div>
+        <div style={{ fontSize: "0.85rem", color: G.or, fontWeight: 800, marginBottom: 8 }}>{it.price != null ? fmtMoney(it.price, it.currency) : "À discuter"}</div>
+        <div style={{ marginTop: "auto" }}>{ctrl}</div>
+      </div>
+    </div>
+  );
+}
+
+function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty, onHasItems, onOpenItem, onShowAll }: { auth: Auth; pro: Profile; mine: boolean; qtyOf: (id: string) => number; addToCart: (it: CatalogItem) => void; setQty: (id: string, qty: number) => void; onHasItems?: (has: boolean) => void; onOpenItem: (it: CatalogItem) => void; onShowAll: (items: CatalogItem[]) => void }) {
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [openItem, setOpenItem] = useState<CatalogItem | null>(null);
-  const [showAll, setShowAll] = useState(false);
   // Le catalogue n'est PUBLIÉ (visible des clients) que si le pro est Premium. Sinon il reste en brouillon
   // (visible seulement par le pro lui-même en aperçu). En mode lancement gratuit, effectivePremium() = vrai.
   const proPremium = effectivePremium(pro.is_premium);
@@ -17614,36 +17641,6 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty, onHasItems }: 
     return null;
   }
 
-  // Contrôle Ajouter / quantité réutilisé par les cartes
-  const addCtrl = (it: CatalogItem) => {
-    const q = qtyOf(it.id);
-    if (mine) return <div style={{ fontSize: "0.7rem", color: G.brunLight, textAlign: "center" }}>Aperçu</div>;
-    return q === 0
-      ? <button onClick={e => { e.stopPropagation(); addToCart(it); }} style={{ width: "100%", background: G.or, color: "#fff", border: "none", borderRadius: 9, padding: "8px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>Ajouter</button>
-      : <div onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: G.creme, borderRadius: 9, padding: "3px" }}>
-          <button onClick={() => setQty(it.id, q - 1)} style={qbtn}>−</button>
-          <span style={{ fontWeight: 800, fontSize: "0.85rem", color: G.brun }}>{q}</span>
-          <button onClick={() => setQty(it.id, q + 1)} style={qbtn}>+</button>
-        </div>;
-  };
-
-  // Carte article (utilisée dans le carrousel et dans la grille « Voir tout »)
-  const card = (it: CatalogItem, carousel: boolean) => (
-    <div key={it.id} style={{ ...(carousel ? { flex: "0 0 150px", scrollSnapAlign: "start" } : {}), background: G.blanc, borderRadius: 14, border: `1px solid ${G.gris}`, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-      <div onClick={() => setOpenItem(it)} style={{ position: "relative", paddingBottom: "75%", background: G.creme, cursor: "pointer" }}>
-        {it.photos && it.photos[0]
-          ? <img src={it.photos[0]} alt={it.name} loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-          : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>}
-        {it.availability && it.availability !== "En stock" && <span style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.6)", color: "#fff", borderRadius: 50, padding: "2px 8px", fontSize: "0.62rem", fontWeight: 700 }}>{it.availability}</span>}
-      </div>
-      <div style={{ padding: "8px 10px 10px", display: "flex", flexDirection: "column", flex: 1 }}>
-        <div onClick={() => setOpenItem(it)} style={{ fontWeight: 700, fontSize: "0.83rem", color: G.brun, cursor: "pointer", lineHeight: 1.25, marginBottom: 3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minHeight: "2.1em" }}>{it.name}</div>
-        <div style={{ fontSize: "0.85rem", color: G.or, fontWeight: 800, marginBottom: 8 }}>{it.price != null ? fmtMoney(it.price, it.currency) : "À discuter"}</div>
-        <div style={{ marginTop: "auto" }}>{addCtrl(it)}</div>
-      </div>
-    </div>
-  );
-
   return (
     <div style={{ marginBottom: 14 }}>
       {/* Le pro voit son catalogue en aperçu ; tant qu'il n'est pas Premium, il reste un brouillon non publié. */}
@@ -17657,80 +17654,14 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty, onHasItems }: 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
         <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5 }}>Catalogue</div>
         {items.length > 3
-          ? <span onClick={() => setShowAll(true)} style={{ fontSize: "0.8rem", fontWeight: 800, color: G.or, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 3 }}>Voir tout <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+          ? <span onClick={() => onShowAll(items)} style={{ fontSize: "0.8rem", fontWeight: 800, color: G.or, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 3 }}>Voir tout <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
           : <span style={{ fontSize: "0.72rem", color: G.brunLight }}>{items.length} article{items.length > 1 ? "s" : ""}</span>}
       </div>
 
       {/* Carrousel horizontal — on glisse vers la gauche/droite pour voir le reste */}
       <div style={{ display: "flex", gap: 10, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", paddingBottom: 4, margin: "0 -16px", padding: "0 16px 4px" }}>
-        {items.map(it => card(it, true))}
+        {items.map(it => <CatCard key={it.id} it={it} carousel mine={mine} qtyOf={qtyOf} onAdd={addToCart} onSetQty={setQty} onOpen={onOpenItem} />)}
       </div>
-
-      {/* « Voir tout » — grille plein écran */}
-      {showAll && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9990, background: G.fond, display: "flex", flexDirection: "column" }}>
-          <div style={{ background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-            <div onClick={() => setShowAll(false)} style={{ width: 36, height: 36, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            </div>
-            <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, flex: 1 }}>Catalogue <span style={{ color: G.brunLight, fontWeight: 600 }}>({items.length})</span></div>
-          </div>
-          <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", padding: 16 }}>
-            <div style={{ maxWidth: 560, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              {items.map(it => card(it, false))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Détail article — plein écran dédié, images avec arrière-plan flou type WhatsApp */}
-      {openItem && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9994, background: G.fond, display: "flex", flexDirection: "column" }}>
-          <div style={{ background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-            <div onClick={() => setOpenItem(null)} style={{ width: 36, height: 36, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            </div>
-            <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Détails</div>
-          </div>
-          <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
-            {/* Galerie photos pleine largeur — image entière (contain) sur fond flou */}
-            <div style={{ display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", background: "#0d0d12" }}>
-              {(openItem.photos && openItem.photos.length ? openItem.photos : [""]).map((u, i) => (
-                <div key={i} style={{ flex: "0 0 100%", scrollSnapAlign: "center", position: "relative", height: "min(56vh, 440px)", overflow: "hidden", background: "#0d0d12" }}>
-                  {u ? <>
-                    <img aria-hidden src={u} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "blur(26px)", transform: "scale(1.25)", opacity: 0.85 }} />
-                    <img src={u} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", zIndex: 1 }} />
-                  </> : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>}
-                </div>
-              ))}
-            </div>
-            <div style={{ maxWidth: 560, margin: "0 auto", padding: "16px 16px 28px" }}>
-              <div style={{ fontWeight: 800, fontSize: "1.25rem", color: G.brun, lineHeight: 1.3 }}>{openItem.name}</div>
-              <div style={{ fontSize: "1.1rem", color: G.or, fontWeight: 900, margin: "6px 0 12px" }}>{openItem.price != null ? fmtMoney(openItem.price, openItem.currency) : "À discuter"}</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
-                {openItem.category && <span style={chip}>{openItem.category}</span>}
-                {openItem.availability && <span style={chip}>{openItem.availability}</span>}
-                {openItem.delay && <span style={chip}>Délai : {openItem.delay}</span>}
-              </div>
-              {openItem.description && <div style={{ fontSize: "0.92rem", color: G.brun, lineHeight: 1.65, whiteSpace: "pre-wrap", overflowWrap: "anywhere", wordBreak: "break-word" }}>{openItem.description}</div>}
-            </div>
-          </div>
-          {/* Barre du bas : ajouter au panier */}
-          {!mine && (
-            <div style={{ padding: 16, borderTop: `1px solid ${G.gris}`, background: G.blanc, flexShrink: 0 }}>
-              <div style={{ maxWidth: 560, margin: "0 auto" }}>
-                {qtyOf(openItem.id) === 0
-                  ? <button onClick={() => addToCart(openItem)} style={{ width: "100%", background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "15px", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer" }}>Ajouter au panier</button>
-                  : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, background: G.creme, borderRadius: 12, padding: "9px" }}>
-                      <button onClick={() => setQty(openItem.id, qtyOf(openItem.id) - 1)} style={{ ...qbtn, width: 42, height: 42, fontSize: "1.4rem" }}>−</button>
-                      <span style={{ fontWeight: 800, fontSize: "1.15rem", color: G.brun, minWidth: 24, textAlign: "center" }}>{qtyOf(openItem.id)}</span>
-                      <button onClick={() => setQty(openItem.id, qtyOf(openItem.id) + 1)} style={{ ...qbtn, width: 42, height: 42, fontSize: "1.4rem" }}>+</button>
-                    </div>}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -17773,6 +17704,10 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
   // ── Panier (remonté ici : carte récap sous les CTA + écran plein dédié) ──
   const [cart, setCart] = useState<CartLine[]>(() => (!mine && !isClient) ? loadCart(pro.id) : []);
   const [cartOpen, setCartOpen] = useState(false);
+  // Overlays catalogue remontés ici (HORS du conteneur scrollable de la fiche) pour éviter le bug iOS
+  // « position:fixed dans un conteneur à scroll tactile » qui rendait l'écran visible mais non tactile.
+  const [catDetail, setCatDetail] = useState<CatalogItem | null>(null);
+  const [catAll, setCatAll] = useState<CatalogItem[] | null>(null);
   const [cartNote, setCartNote] = useState("");
   const [cartSending, setCartSending] = useState(false);
   const setAndSaveCart = (next: CartLine[]) => { setCart(next); saveCart(pro.id, next); };
@@ -17947,7 +17882,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
         </div>
       )}
 
-      {sponsorOpen && <SponsorModal auth={auth} profileId={pro.id} onClose={() => setSponsorOpen(false)} />}
+      {/* SponsorModal rendu hors du conteneur scrollable (voir plus bas) */}
 
       <div style={{ padding: "4px 16px 40px" }}>
         {/* À propos — client : 2 colonnes (membre depuis · besoins publiés) */}
@@ -17973,7 +17908,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
         </div>}
 
         {/* Catalogue + panier (professionnels uniquement) */}
-        {!isClient && <CatalogShop auth={auth} pro={pro} mine={mine} qtyOf={cartQtyOf} addToCart={addToCart} setQty={setCartQty} onHasItems={setHasCatalog} />}
+        {!isClient && <CatalogShop auth={auth} pro={pro} mine={mine} qtyOf={cartQtyOf} addToCart={addToCart} setQty={setCartQty} onHasItems={setHasCatalog} onOpenItem={setCatDetail} onShowAll={setCatAll} />}
 
         {/* Galerie */}
         {/* Galerie « Réalisations » — repliée par défaut si le pro a un catalogue (pour ne pas le noyer) */}
@@ -18018,6 +17953,8 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
     </div>
 
     {/* Écran plein — Mon panier (ouvert depuis la carte récap sous les CTA) */}
+    {sponsorOpen && <SponsorModal auth={auth} profileId={pro.id} onClose={() => setSponsorOpen(false)} />}
+
     {cartOpen && (
       <div style={{ position: "fixed", inset: 0, zIndex: 9998, background: G.fond, display: "flex", flexDirection: "column" }}>
         {/* En-tête */}
@@ -18070,6 +18007,70 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
                 {cartSending ? "Envoi…" : "Envoyer le panier"}
               </button>
               <div style={{ fontSize: "0.7rem", color: G.brunLight, textAlign: "center", marginTop: 8 }}>Aucun paiement en ligne. Vous finalisez la vente par messagerie.</div>
+            </div>
+          </div>
+        )}
+      </div>
+    )}
+
+    {/* Grille « Voir tout » — HORS du conteneur scrollable de la fiche (sinon piégé par le scroll iOS) */}
+    {catAll && (
+      <div style={{ position: "fixed", inset: 0, zIndex: 9994, background: G.fond, display: "flex", flexDirection: "column" }}>
+        <div style={{ background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "calc(12px + env(safe-area-inset-top)) 16px 12px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+          <div onClick={() => setCatAll(null)} style={{ width: 36, height: 36, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </div>
+          <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, flex: 1 }}>Catalogue <span style={{ color: G.brunLight, fontWeight: 600 }}>({catAll.length})</span></div>
+        </div>
+        <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", padding: 16 }}>
+          <div style={{ maxWidth: 560, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {catAll.map(it => <CatCard key={it.id} it={it} carousel={false} mine={mine} qtyOf={cartQtyOf} onAdd={addToCart} onSetQty={setCartQty} onOpen={setCatDetail} />)}
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Détail article — HORS du conteneur scrollable, images sur fond flou type WhatsApp */}
+    {catDetail && (
+      <div style={{ position: "fixed", inset: 0, zIndex: 9996, background: G.fond, display: "flex", flexDirection: "column" }}>
+        <div style={{ background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "calc(12px + env(safe-area-inset-top)) 16px 12px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+          <div onClick={() => setCatDetail(null)} style={{ width: 36, height: 36, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </div>
+          <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Détails</div>
+        </div>
+        <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div style={{ display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", background: "#0d0d12" }}>
+            {(catDetail.photos && catDetail.photos.length ? catDetail.photos : [""]).map((u, i) => (
+              <div key={i} style={{ flex: "0 0 100%", scrollSnapAlign: "center", position: "relative", height: "min(56vh, 440px)", overflow: "hidden", background: "#0d0d12" }}>
+                {u ? <>
+                  <img aria-hidden src={u} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "blur(26px)", transform: "scale(1.25)", opacity: 0.85 }} />
+                  <img src={u} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", zIndex: 1 }} />
+                </> : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>}
+              </div>
+            ))}
+          </div>
+          <div style={{ maxWidth: 560, margin: "0 auto", padding: "16px 16px 28px" }}>
+            <div style={{ fontWeight: 800, fontSize: "1.25rem", color: G.brun, lineHeight: 1.3 }}>{catDetail.name}</div>
+            <div style={{ fontSize: "1.1rem", color: G.or, fontWeight: 900, margin: "6px 0 12px" }}>{catDetail.price != null ? fmtMoney(catDetail.price, catDetail.currency) : "À discuter"}</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+              {catDetail.category && <span style={chip}>{catDetail.category}</span>}
+              {catDetail.availability && <span style={chip}>{catDetail.availability}</span>}
+              {catDetail.delay && <span style={chip}>Délai : {catDetail.delay}</span>}
+            </div>
+            {catDetail.description && <div style={{ fontSize: "0.92rem", color: G.brun, lineHeight: 1.65, whiteSpace: "pre-wrap", overflowWrap: "anywhere", wordBreak: "break-word" }}>{catDetail.description}</div>}
+          </div>
+        </div>
+        {!mine && (
+          <div style={{ padding: "16px 16px calc(16px + env(safe-area-inset-bottom))", borderTop: `1px solid ${G.gris}`, background: G.blanc, flexShrink: 0 }}>
+            <div style={{ maxWidth: 560, margin: "0 auto" }}>
+              {cartQtyOf(catDetail.id) === 0
+                ? <button onClick={() => addToCart(catDetail)} style={{ width: "100%", background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "15px", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer" }}>Ajouter au panier</button>
+                : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, background: G.creme, borderRadius: 12, padding: "9px" }}>
+                    <button onClick={() => setCartQty(catDetail.id, cartQtyOf(catDetail.id) - 1)} style={{ ...qbtn, width: 42, height: 42, fontSize: "1.4rem" }}>−</button>
+                    <span style={{ fontWeight: 800, fontSize: "1.15rem", color: G.brun, minWidth: 24, textAlign: "center" }}>{cartQtyOf(catDetail.id)}</span>
+                    <button onClick={() => setCartQty(catDetail.id, cartQtyOf(catDetail.id) + 1)} style={{ ...qbtn, width: 42, height: 42, fontSize: "1.4rem" }}>+</button>
+                  </div>}
             </div>
           </div>
         )}
