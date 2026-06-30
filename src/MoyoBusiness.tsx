@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
-import { createPortal } from "react-dom";
 
 const SUPABASE_URL = "https://hqqqlwrphcsouovcrlrs.supabase.co";
 const SUPABASE_KEY = "sb_publishable_wqDI700hCPDXsf5vIdvovg_sAr16IJJ";
@@ -1850,7 +1849,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
     title: p.title || "",
     desc: p.description || "",
     loc: p.location || p.city || "",
-    prix: p.budget ? `${Number(p.budget).toLocaleString("fr-FR")} FCFA` : "À négocier",
+    prix: p.budget ? `${Number(p.budget).toLocaleString("fr-FR")} FCFA` : "À discuter",
     ini: ((CATS.find(c => c.id === p.category)?.label) || "?").slice(0, 2).toUpperCase(),
     name: "Client",
   }));
@@ -15990,6 +15989,12 @@ const BUSINESS_CATEGORIES: BusinessCategory[] = [
     "Artisan d'art", "Bijoutier", "Cordonnier", "Décorateur", "Ébéniste",
     "Fabricant de meubles", "Sculpteur", "Tapissier",
   ] },
+  { id: "Espaces & Locations", name: "Espaces & Locations", icon: "🏢", order: 21.5, metiers: [
+    "Salle de fête", "Salle de conférence", "Salle de réunion", "Salle de répétition",
+    "Salle de spectacle", "Salle de culte", "Espace événementiel", "Studio d'enregistrement",
+    "Studio photo", "Studio vidéo", "Bureau à louer", "Local commercial", "Entrepôt / Dépôt",
+    "Espace de coworking", "Appartement meublé", "Villa", "Maison d'hôtes", "Hôtel",
+  ] },
 ];
 
 // Normalisation d'une liste de métiers : nettoyage, dédoublonnage (insensible
@@ -16219,7 +16224,7 @@ function PhotoLightbox({ photos, index, onClose, onIndex }: { photos: string[]; 
 function PubCard({ pub, me, onContact, onBoost, onViewProfile, onOpen }: { pub: Publication; me: string; onContact: () => void; onBoost: () => void; onViewProfile?: () => void; onOpen?: () => void }) {
   const isProp = pub.type === "propose";
   const mine = pub.user_id === me;
-  const priceTxt = isProp ? (pub.budget ? "À partir de " + fmtFCFA(pub.budget) : "Tarif à discuter") : "Budget : " + fmtFCFA(pub.budget);
+  const priceTxt = isProp ? (pub.budget ? "À partir de " + fmtFCFA(pub.budget) : "Tarif à discuter") : (pub.budget ? "Budget : " + fmtFCFA(pub.budget) : "Budget : à discuter");
   const photos = pub.photos || [];
   const [lightbox, setLightbox] = useState<number | null>(null);
   return (
@@ -16325,6 +16330,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
   const [title, setTitle] = useState(editPub?.title || "");
   const [desc, setDesc] = useState(editPub?.description || "");
   const [budget, setBudget] = useState(editPub?.budget ? String(editPub.budget) : "");
+  const [budgetTBD, setBudgetTBD] = useState(editPub ? !editPub.budget : false);
   const [city, setCity] = useState<string>(editPub?.city || "Brazzaville");
   const [arrond, setArrond] = useState<string>(() => editPub?.arrondissement || (editPub?.location ? (editPub.location.split(" · ")[0] || "") : ""));
   const [quartier, setQuartier] = useState<string>(() => editPub?.location ? (editPub.location.split(" · ")[1] || "") : "");
@@ -16339,7 +16345,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
   const hasArr = arrOptions.length > 0;
   const isPropose = type === "propose";
   const okLoc = isPropose ? (!!city && (!hasArr || !!arrond)) : !!city;
-  const ok = !!(title.trim() && desc.trim() && budget && cat && metier && okLoc);
+  const ok = !!(title.trim() && desc.trim() && (budget || budgetTBD) && cat && metier && okLoc);
 
   // Quand la catégorie change, on réaligne le métier sur la liste de cette catégorie.
   useEffect(() => {
@@ -16377,7 +16383,7 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
     const locParts = [arrond, isPropose ? quartier : ""].filter(x => x && x !== "Autre");
     const base = {
       user_id: auth.userId, type, category: cat, title: title.trim(), description: desc.trim(),
-      budget: parseInt(budget, 10) || null, city, location: locParts.join(" · ") || null, status: editPub?.status || "active",
+      budget: budgetTBD ? null : (parseInt(budget, 10) || null), city, location: locParts.join(" · ") || null, status: editPub?.status || "active",
       metier: metier || null, arrondissement: arrond || null,
     };
     // `metier` et `arrondissement` ont des colonnes dédiées. `photos` peut ne pas exister encore :
@@ -16484,13 +16490,17 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
       </div>
 
       {lbl(isPropose ? "Tarif indicatif (FCFA)" : "Budget (FCFA)")}
-      <div style={{ position: "relative", marginBottom: 18 }}>
+      <div style={{ position: "relative", marginBottom: 8 }}>
         {iconLeft(isPropose
           ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="M21 12a2 2 0 0 0-2-2h-4a2 2 0 0 0 0 4h4a2 2 0 0 0 2-2z"/></svg>)}
-        <input type="number" inputMode="numeric" value={budget} onChange={e => setBudget(e.target.value)} placeholder={isPropose ? "Ex : à partir de 50 000" : "300000"} style={{ ...fieldSel, cursor: "text", padding: "15px 64px 15px 48px", fontWeight: 500 }} />
+        <input type="number" inputMode="numeric" value={budgetTBD ? "" : budget} disabled={budgetTBD} onChange={e => setBudget(e.target.value)} placeholder={budgetTBD ? "À discuter" : (isPropose ? "Ex : à partir de 50 000" : "300000")} style={{ ...fieldSel, cursor: budgetTBD ? "not-allowed" : "text", padding: "15px 64px 15px 48px", fontWeight: 500, opacity: budgetTBD ? 0.6 : 1 }} />
         <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", color: G.brunLight, fontSize: 14, fontWeight: 700, pointerEvents: "none" }}>FCFA</span>
       </div>
+      <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18, cursor: "pointer", fontSize: "0.9rem", color: G.brun }}>
+        <input type="checkbox" checked={budgetTBD} onChange={e => { setBudgetTBD(e.target.checked); if (e.target.checked) setBudget(""); }} style={{ width: 18, height: 18, flexShrink: 0 }} />
+        À discuter <span style={{ color: G.brunLight, fontSize: "0.82rem" }}>(ne pas indiquer de {isPropose ? "tarif" : "budget"})</span>
+      </label>
 
       {isPropose ? (
         <>
@@ -16999,7 +17009,7 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
 
       {showPublish && <PublishModal auth={auth} onClose={() => setShowPublish(false)} onPublished={(np) => { setShowPublish(false); setCat(np.category); setToast("Annonce publiée ✓"); load(); setTimeout(() => setBoostTarget(np), 600); }} />}
       {boostTarget && <BoostModal auth={auth} pub={boostTarget} onClose={() => setBoostTarget(null)} onBoosted={() => { setBoostTarget(null); setToast("Annonce mise en avant ✓"); load(); }} />}
-      {openFiche && <ProFiche auth={auth} pro={openFiche} onClose={() => setOpenFiche(null)} onGoMessages={onGoMessages} onToast={(m) => setToast(m)} isFav={false} onToggleFav={() => {}} />}
+      {openFiche && <ProFiche auth={auth} pro={openFiche} onClose={() => setOpenFiche(null)} onGoMessages={onGoMessages} onToast={(m) => setToast(m)} isFav={false} onToggleFav={() => {}} viewerType={accountType} onShowPremium={onShowPremium} />}
       {sharedPub && (
         <div style={{ position: "fixed", inset: 0, zIndex: 120, background: G.creme, overflowY: "auto", overscrollBehavior: "contain" }}>
           <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
@@ -17036,7 +17046,7 @@ function PubDetail({ auth, pub: initialPub, onBack, onChanged }: { auth: Auth; p
 
   const isProp = pub.type === "propose";
   const paused = pub.status === "paused";
-  const priceTxt = isProp ? (pub.budget ? "À partir de " + fmtFCFA(pub.budget) : "Tarif à discuter") : "Budget : " + fmtFCFA(pub.budget);
+  const priceTxt = isProp ? (pub.budget ? "À partir de " + fmtFCFA(pub.budget) : "Tarif à discuter") : (pub.budget ? "Budget : " + fmtFCFA(pub.budget) : "Budget : à discuter");
   const vues = Number((pub as { views?: number }).views ?? 0);
   const reponses = Number((pub as { responses?: number }).responses ?? 0);
   const longDesc = (pub.description || "").length > 120;
@@ -17187,7 +17197,7 @@ function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: ()
   );
 }
 
-function PublierHub({ auth, accountType, onGoFeed, onGoMessages }: { auth: Auth; accountType?: string; onGoFeed: () => void; onGoMessages: (pid: string) => void }) {
+function PublierHub({ auth, accountType, onGoFeed, onGoMessages, onShowPremium }: { auth: Auth; accountType?: string; onGoFeed: () => void; onGoMessages: (pid: string) => void; onShowPremium?: (r: string) => void }) {
   const [view, setView] = useState<"menu" | "cherche" | "propose" | "mes" | "catalogue">("menu");
   const isPro = accountType === "pro";
 
@@ -17198,7 +17208,7 @@ function PublierHub({ auth, accountType, onGoFeed, onGoMessages }: { auth: Auth;
     return <MyPublications auth={auth} onBack={() => setView("menu")} onGoMessages={onGoMessages} />;
   }
   if (view === "catalogue") {
-    return <CatalogManager auth={auth} onClose={() => setView("menu")} />;
+    return <CatalogManager auth={auth} onClose={() => setView("menu")} onShowPremium={onShowPremium} />;
   }
 
   const allItems: { key: "cherche" | "propose" | "mes" | "catalogue"; title: string; sub: string; tint: string; bg: string; icon: React.ReactNode }[] = [
@@ -17298,12 +17308,14 @@ async function uploadCatalogPhoto(token: string, userId: string, file: File): Pr
 }
 
 // ── Gestion du catalogue par le professionnel (CRUD) ──
-function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) {
+function CatalogManager({ auth, onClose, onShowPremium }: { auth: Auth; onClose: () => void; onShowPremium?: (r: string) => void }) {
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<CatalogItem | null>(null);
   const [missingTable, setMissingTable] = useState(false);
   const [toast, setToast] = useState("");
+  const [pendingDel, setPendingDel] = useState<CatalogItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
@@ -17362,9 +17374,13 @@ function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) 
     setSaving(false);
   };
 
-  const remove = async (it: CatalogItem) => {
-    if (!confirm(`Supprimer « ${it.name} » du catalogue ?`)) return;
-    try { await sb.delete(auth.token, "catalog_items", `?id=eq.${it.id}`, auth.refreshToken); setItems(p => p.filter(x => x.id !== it.id)); } catch { setToast("Suppression impossible."); }
+  const remove = (it: CatalogItem) => setPendingDel(it);
+  const doRemove = async () => {
+    if (!pendingDel) return;
+    setDeleting(true);
+    try { await sb.delete(auth.token, "catalog_items", `?id=eq.${pendingDel.id}`, auth.refreshToken); setItems(p => p.filter(x => x.id !== pendingDel.id)); }
+    catch { setToast("Suppression impossible."); }
+    setDeleting(false); setPendingDel(null);
   };
   const toggleActive = async (it: CatalogItem) => {
     try { await sb.update(auth.token, "catalog_items", it.id, { is_active: !(it.is_active !== false) }, auth.refreshToken); setItems(p => p.map(x => x.id === it.id ? { ...x, is_active: !(x.is_active !== false) } : x)); } catch {}
@@ -17389,6 +17405,20 @@ function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) 
       {toast && <div style={{ position: "fixed", top: 70, left: "50%", transform: "translateX(-50%)", background: G.brun, color: "#fff", padding: "10px 18px", borderRadius: 50, fontSize: "0.82rem", zIndex: 5, boxShadow: "0 4px 14px rgba(0,0,0,0.2)" }} onAnimationEnd={() => setToast("")}>{toast}</div>}
 
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "16px" }}>
+        {!missingTable && !editing && (auth.isPremium ? (
+          <div style={{ background: "rgba(22,163,74,0.08)", border: "1.5px solid rgba(22,163,74,0.35)", borderRadius: 12, padding: "12px 14px", marginBottom: 14, display: "flex", gap: 10, alignItems: "center" }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
+            <div style={{ fontSize: "0.82rem", color: G.brun, lineHeight: 1.5 }}><b>Catalogue publié.</b> Vos articles sont visibles par vos clients sur votre fiche.</div>
+          </div>
+        ) : (
+          <div style={{ background: "rgba(212,168,67,0.10)", border: "1.5px solid rgba(212,168,67,0.35)", borderRadius: 12, padding: "13px 14px", marginBottom: 14 }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <div style={{ fontSize: "0.82rem", color: G.brun, lineHeight: 1.5 }}><b>Catalogue en brouillon.</b> Créez et prévisualisez vos articles librement. Pour le <b>publier</b> et le rendre visible par vos clients, passez Premium.</div>
+            </div>
+            <button onClick={() => onShowPremium?.("Passez Premium pour publier votre catalogue et le rendre visible par vos clients.")} style={{ width: "100%", background: `linear-gradient(135deg,${G.or},#B8860B)`, color: "#fff", border: "none", borderRadius: 10, padding: "11px", fontWeight: 800, fontSize: "0.86rem", cursor: "pointer" }}>Passer Premium pour publier</button>
+          </div>
+        ))}
         {missingTable ? (
           <div style={{ background: "rgba(243,156,18,0.08)", border: "1.5px solid rgba(243,156,18,0.4)", borderRadius: 14, padding: 16 }}>
             <div style={{ fontWeight: 800, color: "#e67e22", marginBottom: 6 }}>⚙ Table « catalog_items » manquante</div>
@@ -17398,7 +17428,7 @@ function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) 
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {/* Photos */}
             <div>
-              <label style={L}>Photos <span style={{ color: G.brunLight, fontWeight: 400 }}>({(form.photos || []).length}/5)</span></label>
+              <label style={L}>Photos <span style={{ color: G.brunLight, fontWeight: 400 }}>({(form.photos || []).length}/3)</span></label>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {(form.photos || []).map((u, i) => (
                   <div key={i} style={{ position: "relative", width: 76, height: 76, borderRadius: 12, overflow: "hidden", border: `1px solid ${G.gris}` }}>
@@ -17481,6 +17511,8 @@ function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) 
           </div>
         )}
       </div>
+
+      {pendingDel && <ConfirmModal preset="delete" title="Supprimer l'article ?" message={`« ${pendingDel.name} » sera définitivement retiré de votre catalogue. Cette action est irréversible.`} confirmLabel="Supprimer" loading={deleting} onConfirm={doRemove} onCancel={() => setPendingDel(null)} />}
     </div>
   );
 }
@@ -17553,13 +17585,16 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty, onHasItems }: 
   const [loading, setLoading] = useState(true);
   const [openItem, setOpenItem] = useState<CatalogItem | null>(null);
   const [showAll, setShowAll] = useState(false);
+  // Le catalogue n'est PUBLIÉ (visible des clients) que si le pro est Premium. Sinon il reste en brouillon
+  // (visible seulement par le pro lui-même en aperçu). En mode lancement gratuit, effectivePremium() = vrai.
+  const proPremium = effectivePremium(pro.is_premium);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
         const rows = await sb.query<CatalogItem>(auth.token, "catalog_items", `?seller_id=eq.${pro.id}&is_active=eq.true&order=sort_order.asc,created_at.desc`, auth.refreshToken);
-        if (alive) { setItems(rows); onHasItems?.(rows.length > 0); }
+        if (alive) { setItems(rows); onHasItems?.(rows.length > 0 && (proPremium || mine)); }
       } catch { /* table absente → on n'affiche rien */ }
       if (alive) setLoading(false);
     })();
@@ -17567,6 +17602,8 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty, onHasItems }: 
   }, [auth.token, auth.refreshToken, pro.id]);
 
   if (loading) return null;
+  // Visiteur : si le pro n'est pas Premium, son catalogue (brouillon) n'apparaît pas.
+  if (!proPremium && !mine) return null;
   if (items.length === 0) {
     if (mine) return (
       <div style={{ background: G.blanc, border: `1.5px dashed ${G.gris}`, borderRadius: 14, padding: 18, marginBottom: 14, textAlign: "center" }}>
@@ -17608,6 +17645,13 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty, onHasItems }: 
 
   return (
     <div style={{ marginBottom: 14 }}>
+      {/* Le pro voit son catalogue en aperçu ; tant qu'il n'est pas Premium, il reste un brouillon non publié. */}
+      {mine && !proPremium && (
+        <div style={{ background: "rgba(212,168,67,0.10)", border: "1.5px solid rgba(212,168,67,0.35)", borderRadius: 12, padding: "12px 14px", marginBottom: 12, display: "flex", gap: 10, alignItems: "flex-start" }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <div style={{ fontSize: "0.82rem", color: G.brun, lineHeight: 1.5 }}><b>Catalogue en brouillon.</b> Il n'est pas encore visible par vos clients. Passez Premium pour le publier.</div>
+        </div>
+      )}
       {/* En-tête : titre + Voir tout */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
         <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5 }}>Catalogue</div>
@@ -17621,8 +17665,8 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty, onHasItems }: 
         {items.map(it => card(it, true))}
       </div>
 
-      {/* « Voir tout » — grille plein écran (portal : échappe au transform de la fiche) */}
-      {showAll && createPortal(
+      {/* « Voir tout » — grille plein écran */}
+      {showAll && (
         <div style={{ position: "fixed", inset: 0, zIndex: 9990, background: G.fond, display: "flex", flexDirection: "column" }}>
           <div style={{ background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
             <div onClick={() => setShowAll(false)} style={{ width: 36, height: 36, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
@@ -17635,10 +17679,11 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty, onHasItems }: 
               {items.map(it => card(it, false))}
             </div>
           </div>
-        </div>, document.body)}
+        </div>
+      )}
 
-      {/* Détail article — plein écran dédié (portal), images avec arrière-plan flou type WhatsApp */}
-      {openItem && createPortal(
+      {/* Détail article — plein écran dédié, images avec arrière-plan flou type WhatsApp */}
+      {openItem && (
         <div style={{ position: "fixed", inset: 0, zIndex: 9994, background: G.fond, display: "flex", flexDirection: "column" }}>
           <div style={{ background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
             <div onClick={() => setOpenItem(null)} style={{ width: 36, height: 36, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
@@ -17683,14 +17728,15 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty, onHasItems }: 
               </div>
             </div>
           )}
-        </div>, document.body)}
+        </div>
+      )}
     </div>
   );
 }
 const qbtn: React.CSSProperties = { width: 30, height: 30, borderRadius: 8, border: "none", background: G.blanc, color: G.brun, fontSize: "1.1rem", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" };
 const chip: React.CSSProperties = { background: G.creme, borderRadius: 8, padding: "4px 10px", fontSize: "0.74rem", color: G.brun, fontWeight: 600 };
 
-function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFav }: { auth: Auth; pro: Profile; onClose: () => void; onGoMessages: (pid: string) => void; onToast: (m: string) => void; isFav: boolean; onToggleFav: () => void }) {
+function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFav, viewerType, onShowPremium }: { auth: Auth; pro: Profile; onClose: () => void; onGoMessages: (pid: string) => void; onToast: (m: string) => void; isFav: boolean; onToggleFav: () => void; viewerType?: string; onShowPremium?: (r: string) => void }) {
   const cat = PUB_CATS.find(c => c.id === pro.category)?.label || pro.category;
   const soc = (pro.socials as Record<string, string>) || {};
   const gallery = (pro.gallery as string[]) || [];
@@ -17699,6 +17745,13 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
   const callNum = (pro.public_phone || pro.whatsapp || pro.phone || "").replace(/[^0-9+]/g, "");
   const mine = pro.id === auth.userId;
   const isClient = pro.account_type !== "pro";
+  // Premium « effectif » du pro affiché : en mode gratuit, toujours vrai.
+  // Si le pro n'est pas Premium, son numéro et son WhatsApp n'apparaissent pas (seule la messagerie interne reste).
+  const proIsPremium = effectivePremium(pro.is_premium);
+  // Verrou paiement : un PRO doit être Premium pour contacter un CLIENT (message, appel, WhatsApp).
+  // En mode lancement gratuit, auth.isPremium est toujours vrai → aucun verrou.
+  const lockProToClient = PRO_PREMIUM_FOR_CLIENT && viewerType === "pro" && isClient && !mine && !auth.isPremium;
+  const premiumGate = () => onShowPremium?.("Passez Premium pour contacter les clients et décrocher des missions.");
   // Le cœur (favori) n'a de sens que pour les professionnels : ils figurent dans l'Annuaire
   // et la vue « Favoris ». Un client n'a pas de page « clients favoris » → on masque le cœur.
   const showFav = !mine && !isClient;
@@ -17790,6 +17843,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
 
   async function contactPro() {
     if (mine) return;
+    if (lockProToClient) { premiumGate(); return; }
     try {
       const [a, b] = await Promise.all([
         sb.query<{ id: string }>(auth.token, "matches", `?user1=eq.${auth.userId}&user2=eq.${pro.id}&select=id&limit=1`, auth.refreshToken),
@@ -17810,7 +17864,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
 
   return (
     <>
-    <div style={{ position: "fixed", top: isWideFiche ? 0 : 64, bottom: isWideFiche ? 0 : 88, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: isWideFiche ? 560 : 500, zIndex: 90, background: G.creme, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", boxSizing: "border-box", boxShadow: isWideFiche ? "0 0 60px rgba(0,0,0,0.18)" : undefined }}>
+    <div style={{ position: "fixed", top: isWideFiche ? 0 : 64, bottom: isWideFiche ? 0 : 88, left: 0, right: 0, margin: "0 auto", maxWidth: isWideFiche ? 560 : 500, zIndex: 90, background: G.creme, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", boxSizing: "border-box", boxShadow: isWideFiche ? "0 0 60px rgba(0,0,0,0.18)" : undefined }}>
       {/* Header */}
       <div style={{ position: "relative", background: `linear-gradient(rgba(8,8,13,0.82), rgba(8,8,13,0.90)), url(${FICHE_HERO_BG}) center/cover no-repeat`, padding: "16px 16px 22px" }}>
         <button onClick={onClose} aria-label="Retour" style={{ position: "absolute", top: 14, left: 14, width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.16)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.25)" }}>
@@ -17858,15 +17912,17 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
           <button className="moyo-btn-primary" onClick={contactPro} style={{ flex: 1, minWidth: 0, background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "14px", textAlign: "center", fontWeight: 700, fontSize: "0.92rem", cursor: "pointer", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Message
           </button>
-          {callNum
+          {lockProToClient
+            ? <button onClick={premiumGate} style={{ flex: 1, minWidth: 0, background: G.vert, color: "#fff", border: "none", borderRadius: 12, padding: "14px", textAlign: "center", fontWeight: 700, fontSize: "0.92rem", cursor: "pointer", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Appeler</button>
+            : callNum
             ? <a href={`tel:${callNum}`} style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: G.vert, color: "#fff", borderRadius: 12, padding: "14px", textAlign: "center", fontWeight: 700, fontSize: "0.92rem", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Appeler</div></a>
             : <button onClick={() => onToast("Numéro non disponible")} style={{ flex: 1, minWidth: 0, background: G.vert, color: "#fff", border: "none", borderRadius: 12, padding: "14px", textAlign: "center", fontWeight: 700, fontSize: "0.92rem", cursor: "pointer", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: 0.7 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Appeler</button>}
         </div>
       ) : (
         <div style={{ padding: "16px", display: "flex", gap: 8 }}>
           <button className="moyo-btn-primary" onClick={contactPro} style={{ flex: 1, minWidth: 0, background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", boxSizing: "border-box", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>Message</button>
-          {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: "#25D366", color: "#fff", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>WhatsApp</div></a>}
-          {tel && <a href={`tel:${tel}`} style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, color: G.brun, borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>Appeler</div></a>}
+          {proIsPremium && wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: "#25D366", color: "#fff", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>WhatsApp</div></a>}
+          {proIsPremium && tel && <a href={`tel:${tel}`} style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, color: G.brun, borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>Appeler</div></a>}
         </div>
       ))}
 
@@ -18152,7 +18208,7 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
         {/* Catégorie (client uniquement) + Métier */}
         <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
           {!isPro && (
-            <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", gap: 9, borderRadius: 14, padding: "10px 12px", border: `1px solid ${G.gris}`, background: G.blanc }}>
+            <div style={{ position: "relative", flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 9, borderRadius: 14, padding: "10px 12px", border: `1px solid ${G.gris}`, background: G.blanc }}>
               <div style={{ width: 32, height: 32, flexShrink: 0, borderRadius: "50%", background: "rgba(212,168,67,0.14)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
               </div>
@@ -18167,7 +18223,7 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
               </select>
             </div>
           )}
-          <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", gap: 9, borderRadius: 14, padding: "10px 12px", border: `1px solid ${G.gris}`, background: G.blanc }}>
+          <div style={{ position: "relative", flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 9, borderRadius: 14, padding: "10px 12px", border: `1px solid ${G.gris}`, background: G.blanc }}>
             <div style={{ width: 32, height: 32, flexShrink: 0, borderRadius: "50%", background: "rgba(212,168,67,0.14)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
             </div>
@@ -18212,7 +18268,7 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
         {!loading && displayList.map(pro => <ProCard key={pro.id} pro={pro} onOpen={() => setOpenFiche(pro)} isFav={favs.has(pro.id)} onToggleFav={() => toggleFav(pro.id)} />)}
       </div>
 
-      {openFiche && <ProFiche auth={auth} pro={openFiche} onClose={() => setOpenFiche(null)} onGoMessages={onGoMessages} onToast={m => setToast(m)} isFav={favs.has(openFiche.id)} onToggleFav={() => toggleFav(openFiche.id)} />}
+      {openFiche && <ProFiche auth={auth} pro={openFiche} onClose={() => setOpenFiche(null)} onGoMessages={onGoMessages} onToast={m => setToast(m)} isFav={favs.has(openFiche.id)} onToggleFav={() => toggleFav(openFiche.id)} viewerType={accountType} />}
       {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
     </div>
   );
@@ -18281,6 +18337,14 @@ function ShareButton({ shareUrl, shareTitle, shareText, compact, onBanner, label
 export default function App() {
   const [page, setPage] = useState("landing");
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("moyo_dark") === "1");
+  // Couleur de la zone barre d'état (safe-area iOS) : navy uniquement sur la landing (hero de marque),
+  // sinon blanc en mode clair et sombre en mode sombre — plus de bandeau bleu derrière les écrans.
+  useEffect(() => {
+    const color = page === "landing" ? "#0E1326" : (darkMode ? "#08080D" : "#FFFFFF");
+    let meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+    if (!meta) { meta = document.createElement("meta"); meta.setAttribute("name", "theme-color"); document.head.appendChild(meta); }
+    meta.setAttribute("content", color);
+  }, [page, darkMode]);
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
     if (!document.getElementById("moyo-theme-vars")) {
@@ -19206,7 +19270,7 @@ export default function App() {
     }} unreadCount={unreadCount} notifCount={notifCount} likesReceived={likesReceived} viewsReceived={viewsReceived} auth={auth} accountType={meType} adminBadgeCount={adminBadgeCount} showAdminConfig={showAdminConfig} setShowAdminConfig={setShowAdminConfig} inConv={inConv} onPublish={() => { setTab("publier"); }} assistantEnabled={assistantEnabled}>
       <div key={tab} className="page-anim" style={{ width: "100%", height: "100%" }}>
       {tab === "publications" && <Publications auth={auth} accountType={meType} onShowPremium={showPremium} publishNonce={publishNonce} initialPubId={pendingPubId} onPubConsumed={() => setPendingPubId(null)} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
-      {tab === "publier" && <PublierHub auth={auth} accountType={meType} onGoFeed={() => setTab("publications")} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
+      {tab === "publier" && <PublierHub auth={auth} accountType={meType} onGoFeed={() => setTab("publications")} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} onShowPremium={showPremium} />}
       {tab === "discover" && <Annuaire auth={auth} accountType={meType} myCategory={meCategory} initialProId={pendingProId} onProConsumed={() => setPendingProId(null)} onGoMessages={(pid) => { setOpenConvPartnerId(pid || null); setTab("messages"); }} />}
       {tab === "messages" && <Messages auth={auth} accountType={meType} onUnreadCount={setUnreadCount} onShowPremium={showPremium} initialPartnerId={openConvPartnerId} onConvOpen={setInConv} />}
       {tab === "profile" && <Profile auth={auth} onLogout={handleLogout} onShowPremium={showPremium} darkMode={darkMode} onToggleDark={() => { const v = !darkMode; setDarkMode(v); localStorage.setItem("moyo_dark", v ? "1" : "0"); }} onOpenAdmin={auth.isAdmin ? () => openAdminPanel(() => setTab("admin")) : undefined} adminBadgeCount={adminBadgeCount} assistantEnabled={assistantEnabled} onToggleAssistant={toggleAssistant} />}
