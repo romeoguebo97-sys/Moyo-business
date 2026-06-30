@@ -3105,14 +3105,9 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Numéro de téléphone <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
             <input value={form.phone} onChange={e => upd("phone", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
+            <div style={{ fontSize: "0.74rem", color: G.brunLight, lineHeight: 1.5, marginTop: 6 }}>Nécessaire pour que les professionnels puissent vous contacter.</div>
           </div>
-          {/* Bio */}
-          <div style={{ marginBottom: 18 }}>
-            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Bio <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
-            <textarea value={form.bio} onChange={e => upd("bio", e.target.value.slice(0, 200))} placeholder="Parlez un peu de vous…" rows={3} maxLength={200} style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none", resize: "none" }} />
-            <div style={{ textAlign: "right", fontSize: "0.75rem", color: form.bio.length >= 190 ? G.rouge : "#aaa", marginTop: 4 }}>{form.bio.length}/200</div>
-          </div>
-          <Btn variant="primary" onClick={handleSubmit} loading={loading} style={{ width: "100%" }} disabled={!photoFile || !form.name || !form.city || !form.phone}>Créer mon compte</Btn>
+          <Btn variant="primary" onClick={handleSubmit} loading={loading} style={{ width: "100%" }} disabled={!photoFile || !form.name || !form.city || !form.phone.trim()}>Créer mon compte</Btn>
         </>}
       </>}
 
@@ -7836,6 +7831,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
   };
   const saveProfile = async () => {
     const isPro = (form.account_type ?? profile?.account_type) === "pro";
+    if (!isPro && !(form.phone || "").trim()) { setToast({ msg: "Le numéro de téléphone est obligatoire." }); return; }
     const payload: any = {
       name: form.name,
       city: form.city,
@@ -8036,9 +8032,11 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           <input value={form.hours || ""} onChange={e => setForm(f => ({ ...f, hours: e.target.value.slice(0, 80) }))} placeholder="Ex : Lun-Sam 8h-18h" style={I} />
         </>}
 
-        <label style={L}>{isPro ? "Description de l'activité" : "Bio"}</label>
-        <textarea value={form.bio || ""} onChange={e => setForm(f => ({ ...f, bio: e.target.value.slice(0, 300) }))} rows={3} maxLength={300} placeholder={isPro ? "Présentez vos services, votre expérience…" : "Parlez un peu de vous…"} style={{ ...I, resize: "none", marginBottom: 4 }} />
-        <div style={{ textAlign: "right", fontSize: "0.75rem", color: (form.bio || "").length >= 290 ? G.rouge : "#aaa", marginBottom: 16 }}>{(form.bio || "").length}/300</div>
+        {isPro && <>
+          <label style={L}>Description de l'activité</label>
+          <textarea value={form.bio || ""} onChange={e => setForm(f => ({ ...f, bio: e.target.value.slice(0, 300) }))} rows={3} maxLength={300} placeholder="Présentez vos services, votre expérience…" style={{ ...I, resize: "none", marginBottom: 4 }} />
+          <div style={{ textAlign: "right", fontSize: "0.75rem", color: (form.bio || "").length >= 290 ? G.rouge : "#aaa", marginBottom: 16 }}>{(form.bio || "").length}/300</div>
+        </>}
 
         {isPro && <>
           <div style={{ height: 1, background: G.gris, margin: "4px 0 18px" }} />
@@ -8060,9 +8058,15 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           <div style={{ height: 1, background: G.gris, margin: "4px 0 18px" }} />
         </>}
 
-        <label style={L}>Téléphone privé <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(récupération du compte)</span></label>
-        <input value={form.phone || ""} onChange={e => setForm(f => ({ ...f, phone: e.target.value.slice(0, 25) }))} placeholder="+242 06 513 20 12" style={{ ...I, marginBottom: 6 }} />
-        <div style={{ fontSize: "0.74rem", color: G.brunLight, lineHeight: 1.5, marginBottom: 16 }}>Jamais affiché publiquement. Sert à la récupération du compte et aux notifications.</div>
+        {isPro ? <>
+          <label style={L}>Téléphone privé <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(récupération du compte)</span></label>
+          <input value={form.phone || ""} onChange={e => setForm(f => ({ ...f, phone: e.target.value.slice(0, 25) }))} placeholder="+242 06 513 20 12" style={{ ...I, marginBottom: 6 }} />
+          <div style={{ fontSize: "0.74rem", color: G.brunLight, lineHeight: 1.5, marginBottom: 16 }}>Jamais affiché publiquement. Sert à la récupération du compte et aux notifications.</div>
+        </> : <>
+          <label style={L}>Téléphone <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+          <input value={form.phone || ""} onChange={e => setForm(f => ({ ...f, phone: e.target.value.slice(0, 25) }))} placeholder="+242 06 513 20 12" style={{ ...I, marginBottom: 6 }} />
+          <div style={{ fontSize: "0.74rem", color: G.brunLight, lineHeight: 1.5, marginBottom: 16 }}>Nécessaire pour que les professionnels puissent vous contacter.</div>
+        </>}
 
         <div style={{ display: "flex", gap: 10 }}>
           <Btn variant="ghost" onClick={() => setEditing(false)} style={{ flex: 1 }}>Annuler</Btn>
@@ -8261,7 +8265,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
               </span>
             </div>
           )}
-          {profile?.bio && (
+          {profile?.account_type === "pro" && profile?.bio && (
             <div style={{ display: "inline-block", background: "rgba(0,0,0,0.04)", borderRadius: 14, padding: "10px 18px", maxWidth: 280 }}>
               <div style={{ fontSize: "0.85rem", color: G.brunLight, fontStyle: "italic", lineHeight: 1.6 }}>"{profile.bio}"</div>
             </div>
@@ -16470,8 +16474,8 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
       </div>
 
       {lbl(isPropose ? "Nom de votre service" : "Titre de l'annonce")}
-      <input value={title} maxLength={80} onChange={e => setTitle(e.target.value.slice(0, 80))} placeholder={isPropose ? "Ex : Travaux de maçonnerie générale" : "Ex : Recherche maçon pour une dalle"} style={{ ...fieldInput, marginBottom: 4 }} />
-      <div style={{ textAlign: "right", fontSize: "0.72rem", fontWeight: 600, color: title.length >= 80 ? G.rouge : G.brunLight, marginBottom: 14 }}>{title.length}/80 caractères</div>
+      <input value={title} maxLength={50} onChange={e => setTitle(e.target.value.slice(0, 50))} placeholder={isPropose ? "Ex : Travaux de maçonnerie générale" : "Ex : Recherche maçon pour une dalle"} style={{ ...fieldInput, marginBottom: 4 }} />
+      <div style={{ textAlign: "right", fontSize: "0.72rem", fontWeight: 600, color: title.length >= 50 ? G.rouge : G.brunLight, marginBottom: 14 }}>{title.length}/50 caractères</div>
 
       {lbl("Description")}
       <div style={{ position: "relative", marginBottom: 18 }}>
@@ -17852,7 +17856,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
         </div>}
 
         {/* Description */}
-        {pro.bio && <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 16, marginBottom: 14 }}>
+        {!isClient && pro.bio && <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 16, marginBottom: 14 }}>
           <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>À propos</div>
           <div style={{ fontSize: "0.9rem", color: G.brun, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{pro.bio}</div>
         </div>}
