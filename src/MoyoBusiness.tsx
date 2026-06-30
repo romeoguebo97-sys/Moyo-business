@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { createPortal } from "react-dom";
 
 const SUPABASE_URL = "https://hqqqlwrphcsouovcrlrs.supabase.co";
 const SUPABASE_KEY = "sb_publishable_wqDI700hCPDXsf5vIdvovg_sAr16IJJ";
@@ -17418,7 +17419,13 @@ function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) 
             <div><label style={L}>Nom du produit / service *</label><input style={INP} value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Ex : Robe wax sur mesure" /></div>
             <div><label style={L}>Description</label><textarea style={{ ...INP, minHeight: 80, resize: "vertical" }} value={form.description || ""} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Détails, matières, options…" /></div>
             <div style={{ display: "flex", gap: 10 }}>
-              <div style={{ flex: 2 }}><label style={L}>Prix</label><input style={INP} type="number" inputMode="numeric" value={form.price ?? ""} onChange={e => setForm(p => ({ ...p, price: e.target.value === "" ? null : Number(e.target.value) }))} placeholder="0" /></div>
+              <div style={{ flex: 2 }}><label style={L}>Prix</label>
+                <input style={INP} type="number" inputMode="numeric" value={form.price ?? ""} onChange={e => setForm(p => ({ ...p, price: e.target.value === "" ? null : Number(e.target.value) }))} placeholder={form.price === null ? "À discuter" : "0"} />
+                <label style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 8, fontSize: "0.82rem", color: G.brun, cursor: "pointer" }}>
+                  <input type="checkbox" checked={form.price === null} onChange={e => setForm(p => ({ ...p, price: e.target.checked ? null : 0 }))} style={{ width: 16, height: 16, flexShrink: 0 }} />
+                  À discuter <span style={{ color: G.brunLight }}>(aucun prix affiché)</span>
+                </label>
+              </div>
               <div style={{ flex: 1 }}><label style={L}>Devise</label><input style={{ ...INP, background: G.creme, color: G.brunLight, cursor: "not-allowed" }} value="FCFA" disabled readOnly /></div>
             </div>
             <div><label style={L}>Catégorie</label><input style={INP} value={form.category || ""} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} placeholder="Ex : Prêt-à-porter" /></div>
@@ -17459,7 +17466,7 @@ function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) 
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 700, fontSize: "0.9rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{it.name}</div>
-                  <div style={{ fontSize: "0.82rem", color: G.or, fontWeight: 700 }}>{it.price != null ? fmtMoney(it.price, it.currency) : "Prix sur demande"}</div>
+                  <div style={{ fontSize: "0.82rem", color: G.or, fontWeight: 700 }}>{it.price != null ? fmtMoney(it.price, it.currency) : "À discuter"}</div>
                   <div style={{ fontSize: "0.7rem", color: G.brunLight }}>{it.availability}{it.is_active === false ? " · masqué" : ""}</div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
@@ -17541,7 +17548,7 @@ function obtn(color: string, outline?: boolean): React.CSSProperties {
 // Sur la fiche : un carrousel horizontal (on glisse pour voir le reste) + un lien « Voir tout ».
 // « Voir tout » ouvre une grille plein écran ; cliquer un article ouvre un détail plein écran propre.
 // Le panier est géré au niveau de ProFiche (carte récap sous les CTA + écran plein dédié).
-function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty }: { auth: Auth; pro: Profile; mine: boolean; qtyOf: (id: string) => number; addToCart: (it: CatalogItem) => void; setQty: (id: string, qty: number) => void }) {
+function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty, onHasItems }: { auth: Auth; pro: Profile; mine: boolean; qtyOf: (id: string) => number; addToCart: (it: CatalogItem) => void; setQty: (id: string, qty: number) => void; onHasItems?: (has: boolean) => void }) {
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [openItem, setOpenItem] = useState<CatalogItem | null>(null);
@@ -17552,7 +17559,7 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty }: { auth: Auth
     (async () => {
       try {
         const rows = await sb.query<CatalogItem>(auth.token, "catalog_items", `?seller_id=eq.${pro.id}&is_active=eq.true&order=sort_order.asc,created_at.desc`, auth.refreshToken);
-        if (alive) setItems(rows);
+        if (alive) { setItems(rows); onHasItems?.(rows.length > 0); }
       } catch { /* table absente → on n'affiche rien */ }
       if (alive) setLoading(false);
     })();
@@ -17593,7 +17600,7 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty }: { auth: Auth
       </div>
       <div style={{ padding: "8px 10px 10px", display: "flex", flexDirection: "column", flex: 1 }}>
         <div onClick={() => setOpenItem(it)} style={{ fontWeight: 700, fontSize: "0.83rem", color: G.brun, cursor: "pointer", lineHeight: 1.25, marginBottom: 3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minHeight: "2.1em" }}>{it.name}</div>
-        <div style={{ fontSize: "0.85rem", color: G.or, fontWeight: 800, marginBottom: 8 }}>{it.price != null ? fmtMoney(it.price, it.currency) : "Sur demande"}</div>
+        <div style={{ fontSize: "0.85rem", color: G.or, fontWeight: 800, marginBottom: 8 }}>{it.price != null ? fmtMoney(it.price, it.currency) : "À discuter"}</div>
         <div style={{ marginTop: "auto" }}>{addCtrl(it)}</div>
       </div>
     </div>
@@ -17614,8 +17621,8 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty }: { auth: Auth
         {items.map(it => card(it, true))}
       </div>
 
-      {/* « Voir tout » — grille plein écran */}
-      {showAll && (
+      {/* « Voir tout » — grille plein écran (portal : échappe au transform de la fiche) */}
+      {showAll && createPortal(
         <div style={{ position: "fixed", inset: 0, zIndex: 9990, background: G.fond, display: "flex", flexDirection: "column" }}>
           <div style={{ background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
             <div onClick={() => setShowAll(false)} style={{ width: 36, height: 36, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
@@ -17628,37 +17635,38 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty }: { auth: Auth
               {items.map(it => card(it, false))}
             </div>
           </div>
-        </div>
-      )}
+        </div>, document.body)}
 
-      {/* Détail article — plein écran propre (au-dessus de la grille) */}
-      {openItem && (
+      {/* Détail article — plein écran dédié (portal), images avec arrière-plan flou type WhatsApp */}
+      {openItem && createPortal(
         <div style={{ position: "fixed", inset: 0, zIndex: 9994, background: G.fond, display: "flex", flexDirection: "column" }}>
           <div style={{ background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
             <div onClick={() => setOpenItem(null)} style={{ width: 36, height: 36, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             </div>
-            <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{openItem.name}</div>
+            <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Détails</div>
           </div>
           <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
-            <div style={{ maxWidth: 560, margin: "0 auto" }}>
-              <div style={{ display: "flex", gap: 8, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: 12 }}>
-                {(openItem.photos && openItem.photos.length ? openItem.photos : [""]).map((u, i) => (
-                  <div key={i} style={{ flexShrink: 0, scrollSnapAlign: "start", width: openItem.photos && openItem.photos.length > 1 ? "82%" : "100%", paddingBottom: "62%", position: "relative", borderRadius: 14, overflow: "hidden", background: G.creme }}>
-                    {u ? <img src={u} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>}
-                  </div>
-                ))}
-              </div>
-              <div style={{ padding: "4px 16px 24px" }}>
-                <div style={{ fontWeight: 800, fontSize: "1.2rem", color: G.brun }}>{openItem.name}</div>
-                <div style={{ fontSize: "1.05rem", color: G.or, fontWeight: 900, margin: "5px 0 12px" }}>{openItem.price != null ? fmtMoney(openItem.price, openItem.currency) : "Prix sur demande"}</div>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
-                  {openItem.category && <span style={chip}>{openItem.category}</span>}
-                  {openItem.availability && <span style={chip}>{openItem.availability}</span>}
-                  {openItem.delay && <span style={chip}>Délai : {openItem.delay}</span>}
+            {/* Galerie photos pleine largeur — image entière (contain) sur fond flou */}
+            <div style={{ display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", background: "#0d0d12" }}>
+              {(openItem.photos && openItem.photos.length ? openItem.photos : [""]).map((u, i) => (
+                <div key={i} style={{ flex: "0 0 100%", scrollSnapAlign: "center", position: "relative", height: "min(56vh, 440px)", overflow: "hidden", background: "#0d0d12" }}>
+                  {u ? <>
+                    <img aria-hidden src={u} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "blur(26px)", transform: "scale(1.25)", opacity: 0.85 }} />
+                    <img src={u} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", zIndex: 1 }} />
+                  </> : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>}
                 </div>
-                {openItem.description && <div style={{ fontSize: "0.92rem", color: G.brun, lineHeight: 1.65, whiteSpace: "pre-wrap" }}>{openItem.description}</div>}
+              ))}
+            </div>
+            <div style={{ maxWidth: 560, margin: "0 auto", padding: "16px 16px 28px" }}>
+              <div style={{ fontWeight: 800, fontSize: "1.25rem", color: G.brun, lineHeight: 1.3 }}>{openItem.name}</div>
+              <div style={{ fontSize: "1.1rem", color: G.or, fontWeight: 900, margin: "6px 0 12px" }}>{openItem.price != null ? fmtMoney(openItem.price, openItem.currency) : "À discuter"}</div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+                {openItem.category && <span style={chip}>{openItem.category}</span>}
+                {openItem.availability && <span style={chip}>{openItem.availability}</span>}
+                {openItem.delay && <span style={chip}>Délai : {openItem.delay}</span>}
               </div>
+              {openItem.description && <div style={{ fontSize: "0.92rem", color: G.brun, lineHeight: 1.65, whiteSpace: "pre-wrap", overflowWrap: "anywhere", wordBreak: "break-word" }}>{openItem.description}</div>}
             </div>
           </div>
           {/* Barre du bas : ajouter au panier */}
@@ -17675,8 +17683,7 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty }: { auth: Auth
               </div>
             </div>
           )}
-        </div>
-      )}
+        </div>, document.body)}
     </div>
   );
 }
@@ -17705,6 +17712,9 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
     return () => { body.style.overflow = prevB; html.style.overflow = prevH; (body.style as any).overscrollBehavior = prevOB; };
   }, []);
   const [sponsorOpen, setSponsorOpen] = useState(false);
+  const [hasCatalog, setHasCatalog] = useState(false);
+  const [galOpen, setGalOpen] = useState(false);
+  const [galTouched, setGalTouched] = useState(false);
 
   // ── Panier (remonté ici : carte récap sous les CTA + écran plein dédié) ──
   const [cart, setCart] = useState<CartLine[]>(() => (!mine && !isClient) ? loadCart(pro.id) : []);
@@ -17906,19 +17916,30 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
         </div>}
 
         {/* Catalogue + panier (professionnels uniquement) */}
-        {!isClient && <CatalogShop auth={auth} pro={pro} mine={mine} qtyOf={cartQtyOf} addToCart={addToCart} setQty={setCartQty} />}
+        {!isClient && <CatalogShop auth={auth} pro={pro} mine={mine} qtyOf={cartQtyOf} addToCart={addToCart} setQty={setCartQty} onHasItems={setHasCatalog} />}
 
         {/* Galerie */}
-        {gallery.length > 0 && <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Réalisations</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
-            {gallery.map((url, i) => (
-              <div key={i} style={{ position: "relative", paddingBottom: "100%", borderRadius: 10, overflow: "hidden", border: `1px solid ${G.gris}` }}>
-                <img src={url} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+        {/* Galerie « Réalisations » — repliée par défaut si le pro a un catalogue (pour ne pas le noyer) */}
+        {gallery.length > 0 && (() => {
+          const showGal = galTouched ? galOpen : !hasCatalog;
+          return (
+            <div style={{ marginBottom: 14 }}>
+              <div onClick={() => { setGalTouched(true); setGalOpen(!showGal); }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", marginBottom: showGal ? 8 : 0, userSelect: "none" }}>
+                <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5 }}>Réalisations <span style={{ color: G.gris }}>({gallery.length})</span></div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.brunLight} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showGal ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-            ))}
-          </div>
-        </div>}
+              {showGal && (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
+                  {gallery.map((url, i) => (
+                    <div key={i} style={{ position: "relative", paddingBottom: "100%", borderRadius: 10, overflow: "hidden", border: `1px solid ${G.gris}` }}>
+                      <img src={url} alt="" loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Infos pratiques */}
         {(pro.hours || pro.zone) && <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 16, marginBottom: 14 }}>
