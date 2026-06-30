@@ -2632,7 +2632,7 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
   const [step, setStep] = useState(1);
   const [tempToken, setTempToken] = useState<string | null>(isResume ? resumeToken : sessionStorage.getItem("moyo_signup_token"));
   const [tempUserId, setTempUserId] = useState<string | null>(isResume ? resumeUid : sessionStorage.getItem("moyo_signup_uid"));
-  const [form, setForm] = useState({ email: "", password: "", name: "", age: "", city: "", gender: "", bio: "", religion: "", profession: "", hobbies: "", phone: "", account_type: "", company: "", metier: "", category: "", whatsapp: "" });
+  const [form, setForm] = useState({ email: "", password: "", name: "", age: "", city: "", gender: "", bio: "", religion: "", profession: "", hobbies: "", phone: "", account_type: "", company: "", metier: "", category: "", whatsapp: "", public_phone: "", hours: "" });
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
@@ -2823,8 +2823,8 @@ setLoading(false);
     const isPro = form.account_type === "pro";
     if (!form.account_type) { setErrorMsg("Veuillez choisir un type de compte."); setLoading(false); return; }
     if (isPro) {
-      if (!form.company.trim() || !form.category || !form.metier.trim() || !form.city || !form.phone.trim() || !form.bio.trim()) {
-        setErrorMsg("Veuillez renseigner le nom de votre activité, votre catégorie, votre métier, votre ville, votre numéro et la présentation de votre activité."); setLoading(false); return;
+      if (!form.company.trim() || !form.name.trim() || !form.category || !form.metier.trim() || !form.city || !form.public_phone.trim() || !form.bio.trim()) {
+        setErrorMsg("Veuillez renseigner le nom de votre entreprise, le responsable, la catégorie, le métier, la ville, le téléphone public et la description de votre activité."); setLoading(false); return;
       }
     } else {
       if (!form.name.trim() || !form.city || !form.phone.trim()) {
@@ -2853,7 +2853,7 @@ setLoading(false);
     }
     if (!token || !userId) { setErrorMsg("Erreur de session. Recommencez."); setLoading(false); return; }
     const isProAcc = form.account_type === "pro";
-    const displayName = (isProAcc ? form.company : form.name).trim();
+    const displayName = form.name.trim();
     // Upload de la photo si l'utilisateur en a choisi une et qu'elle n'est pas encore en ligne
     let finalPhotoUrl = photoUrl;
     if (photoFile && !finalPhotoUrl) {
@@ -2891,6 +2891,8 @@ setLoading(false);
       company: form.company.trim() || null,
       category: form.category || null,
       whatsapp: form.whatsapp.trim() || null,
+      public_phone: form.public_phone.trim() || null,
+      hours: form.hours.trim() || null,
     } : {}),
     ...((() => { 
       const ref = new URLSearchParams(window.location.search).get("ref"); 
@@ -3041,12 +3043,17 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
         </div>
 
         {isPro ? <>
-          {/* Nom de l'activité */}
+          {/* 1 · Nom de l'entreprise / activité */}
           <div style={{ marginBottom: 18 }}>
-            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Nom de votre activité ou entreprise <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Nom de votre entreprise ou activité <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
             <input value={form.company} onChange={e => upd("company", e.target.value.slice(0, 60))} placeholder="ex : Royal Beauty" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
           </div>
-          {/* Catégorie */}
+          {/* 2 · Nom du responsable */}
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Nom du responsable <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <input value={form.name} onChange={e => upd("name", e.target.value.slice(0, 60))} placeholder="ex : Romeo Massamba" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
+          </div>
+          {/* 3 · Catégorie */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Catégorie <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
             <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value, metier: "" }))} style={{ width: "100%", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }}>
@@ -3054,7 +3061,7 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
               {PUB_CATS.filter(c => c.id !== "all").map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
             </select>
           </div>
-          {/* Métier */}
+          {/* 4 · Métier */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Métier <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
             <select value={form.metier} disabled={!form.category} onChange={e => upd("metier", e.target.value)} style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: form.category ? G.blanc : G.gris, color: G.brun, outline: "none", cursor: form.category ? "pointer" : "not-allowed" }}>
@@ -3062,31 +3069,36 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
               {(form.category ? metiersForCategory(form.category) : []).map(m => <option key={m} value={m}>{m}</option>)}
             </select>
           </div>
-          {/* Ville */}
+          {/* 5 · Ville d'intervention */}
           <div style={{ marginBottom: 18 }}>
-            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Ville <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Ville d'intervention <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
             <select value={form.city} onChange={e => upd("city", e.target.value)} style={{ width: "100%", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }}>
               <option value="">Sélectionnez votre ville</option>
               {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
-          {/* Téléphone */}
+          {/* 6 · Horaires (optionnel) */}
           <div style={{ marginBottom: 18 }}>
-            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Numéro de téléphone <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
-            <input value={form.phone} onChange={e => upd("phone", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Horaires <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
+            <input value={form.hours} onChange={e => upd("hours", e.target.value.slice(0, 80))} placeholder="Ex : Lun-Sam 8h-18h" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
           </div>
-          {/* WhatsApp public */}
+          {/* 7 · WhatsApp public (optionnel) */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>WhatsApp public <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
             <input value={form.whatsapp} onChange={e => upd("whatsapp", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
           </div>
-          {/* Présentation de l'activité */}
+          {/* 8 · Téléphone public (obligatoire) */}
           <div style={{ marginBottom: 18 }}>
-            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Présentation de votre activité <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Téléphone public <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+            <input value={form.public_phone} onChange={e => upd("public_phone", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
+          </div>
+          {/* 9 · Description de l'activité */}
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Description de votre activité <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
             <textarea value={form.bio} onChange={e => upd("bio", e.target.value.slice(0, 300))} placeholder="Décrivez vos services…" rows={3} maxLength={300} style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none", resize: "none" }} />
             <div style={{ textAlign: "right", fontSize: "0.75rem", color: form.bio.length >= 290 ? G.rouge : "#aaa", marginTop: 4 }}>{form.bio.length}/300</div>
           </div>
-          <Btn variant="primary" onClick={handleSubmit} loading={loading} style={{ width: "100%" }} disabled={!photoFile || !form.company || !form.category || !form.metier || !form.city || !form.phone || !form.bio.trim()}>Créer mon compte professionnel</Btn>
+          <Btn variant="primary" onClick={handleSubmit} loading={loading} style={{ width: "100%" }} disabled={!photoFile || !form.company.trim() || !form.name.trim() || !form.category || !form.metier || !form.city || !form.public_phone.trim() || !form.bio.trim()}>Créer mon compte professionnel</Btn>
         </> : <>
           {/* Nom complet */}
           <div style={{ marginBottom: 18 }}>
@@ -7832,6 +7844,9 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
   const saveProfile = async () => {
     const isPro = (form.account_type ?? profile?.account_type) === "pro";
     if (!isPro && !(form.phone || "").trim()) { setToast({ msg: "Le numéro de téléphone est obligatoire." }); return; }
+    if (isPro && (!(form.company || "").trim() || !(form.name || "").trim() || !form.category || !(form.metier || "").trim() || !form.city || !(form.public_phone || "").trim() || !(form.bio || "").trim())) {
+      setToast({ msg: "Merci de remplir tous les champs obligatoires (*)." }); return;
+    }
     const payload: any = {
       name: form.name,
       city: form.city,
@@ -7857,13 +7872,13 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
     setToast({ msg: "Fiche mise à jour !" });
   };
 
-  // ── Galerie photos (jusqu'à 10) — persistées immédiatement ──
+  // ── Galerie photos (jusqu'à 3) — persistées immédiatement ──
   const galleryRef = useRef<HTMLInputElement>(null);
   const addGalleryPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
     e.target.value = "";
     const current: string[] = (form.gallery as string[]) || (profile?.gallery as string[]) || [];
-    if (current.length >= 10) { setToast({ msg: "Maximum 10 photos." }); return; }
+    if (current.length >= 3) { setToast({ msg: "Maximum 3 photos." }); return; }
     setUploadLoading(true);
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -7982,7 +7997,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
       <div style={{ padding: "20px 16px" }}>
 
         {isPro && <>
-          <label style={L}>Galerie photos <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>({gal.length}/10)</span></label>
+          <label style={L}>Galerie photos <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>({gal.length}/3)</span></label>
           <input ref={galleryRef} type="file" accept="image/*" onChange={addGalleryPhoto} style={{ display: "none" }} />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 18 }}>
             {gal.map(url => (
@@ -7991,7 +8006,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                 <div onClick={() => removeGalleryPhoto(url)} style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: "50%", background: "rgba(0,0,0,0.6)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, cursor: "pointer" }}>×</div>
               </div>
             ))}
-            {gal.length < 10 && (
+            {gal.length < 3 && (
               <div onClick={() => galleryRef.current?.click()} style={{ paddingBottom: "100%", position: "relative", borderRadius: 10, border: `2px dashed rgba(212,168,67,0.55)`, cursor: "pointer", background: G.blanc, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
                 <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: G.rouge, fontSize: 28, fontWeight: 400 }}>+</div>
               </div>
@@ -7999,70 +8014,54 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           </div>
         </>}
 
-        <label style={L}>{isPro ? "Nom du responsable" : "Prénom"}</label>
-        <input value={form.name || ""} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={I} />
+        {isPro ? <>
+          {/* Informations professionnelles — structure simplifiée */}
+          <label style={L}>Nom de votre entreprise ou activité <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+          <input value={form.company || ""} onChange={e => setForm(f => ({ ...f, company: e.target.value.slice(0, 60) }))} placeholder="Ex : Royal Beauty" style={I} />
 
-        {isPro && <>
-          <label style={L}>Catégorie</label>
+          <label style={L}>Nom du responsable <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+          <input value={form.name || ""} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={I} />
+
+          <label style={L}>Catégorie <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
           <select value={form.category || ""} onChange={e => setForm(f => ({ ...f, category: e.target.value, metier: "" }))} style={I}>
             <option value="">Sélectionne une catégorie</option>
             {PUB_CATS.filter(c => c.id !== "all").map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
           </select>
-          <label style={L}>Métier</label>
+
+          <label style={L}>Métier <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
           <select value={form.metier || ""} disabled={!form.category} onChange={e => setForm(f => ({ ...f, metier: e.target.value }))} style={{ ...I, background: form.category ? (I as any).background : "#F3F4F6", cursor: form.category ? "pointer" : "not-allowed" }}>
             <option value="">{form.category ? "Sélectionne un métier" : "Choisis d'abord une catégorie"}</option>
             {(form.category ? metiersForCategory(form.category) : []).map(m => <option key={m} value={m}>{m}</option>)}
           </select>
-          <label style={L}>Entreprise <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
-          <input value={form.company || ""} onChange={e => setForm(f => ({ ...f, company: e.target.value.slice(0, 60) }))} placeholder="Nom de l'entreprise" style={I} />
-        </>}
 
-        <label style={L}>Ville</label>
-        <select value={form.city || ""} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} style={I}>
-          {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
-        </select>
-
-        {isPro && <>
-          <label style={L}>Zone d'intervention <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
-          <select value={form.zone || ""} onChange={e => setForm(f => ({ ...f, zone: e.target.value }))} style={I}>
-            <option value="">— Choisir —</option>
+          <label style={L}>Ville d'intervention <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+          <select value={form.city || ""} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} style={I}>
+            <option value="">Sélectionne ta ville</option>
             {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
           </select>
+
           <label style={L}>Horaires <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
           <input value={form.hours || ""} onChange={e => setForm(f => ({ ...f, hours: e.target.value.slice(0, 80) }))} placeholder="Ex : Lun-Sam 8h-18h" style={I} />
-        </>}
 
-        {isPro && <>
-          <label style={L}>Description de l'activité</label>
+          <label style={L}>WhatsApp public <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
+          <input value={form.whatsapp || ""} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value.slice(0, 25) }))} placeholder="+242 06 000 00 00" style={I} />
+
+          <label style={L}>Téléphone public <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
+          <input value={form.public_phone || ""} onChange={e => setForm(f => ({ ...f, public_phone: e.target.value.slice(0, 25) }))} placeholder="+242 06 000 00 00" style={I} />
+
+          <label style={L}>Description de votre activité <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
           <textarea value={form.bio || ""} onChange={e => setForm(f => ({ ...f, bio: e.target.value.slice(0, 300) }))} rows={3} maxLength={300} placeholder="Présentez vos services, votre expérience…" style={{ ...I, resize: "none", marginBottom: 4 }} />
           <div style={{ textAlign: "right", fontSize: "0.75rem", color: (form.bio || "").length >= 290 ? G.rouge : "#aaa", marginBottom: 16 }}>{(form.bio || "").length}/300</div>
-        </>}
-
-        {isPro && <>
-          <div style={{ height: 1, background: G.gris, margin: "4px 0 18px" }} />
-          <div style={{ fontWeight: 700, fontSize: "0.95rem", color: G.brun, marginBottom: 14 }}>Coordonnées publiques</div>
-          <label style={L}>WhatsApp public</label>
-          <input value={form.whatsapp || ""} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value.slice(0, 25) }))} placeholder="+242 06 000 00 00" style={I} />
-          <label style={L}>Téléphone public</label>
-          <input value={form.public_phone || ""} onChange={e => setForm(f => ({ ...f, public_phone: e.target.value.slice(0, 25) }))} placeholder="+242 06 000 00 00" style={I} />
-          <label style={L}>Site web</label>
-          <input value={soc.website || ""} onChange={e => updSocial("website", e.target.value)} placeholder="https://…" style={I} />
-          <label style={L}>Facebook</label>
-          <input value={soc.facebook || ""} onChange={e => updSocial("facebook", e.target.value)} placeholder="facebook.com/…" style={I} />
-          <label style={L}>Instagram</label>
-          <input value={soc.instagram || ""} onChange={e => updSocial("instagram", e.target.value)} placeholder="@votrecompte" style={I} />
-          <label style={L}>TikTok</label>
-          <input value={soc.tiktok || ""} onChange={e => updSocial("tiktok", e.target.value)} placeholder="@votrecompte" style={I} />
-          <label style={L}>LinkedIn</label>
-          <input value={soc.linkedin || ""} onChange={e => updSocial("linkedin", e.target.value)} placeholder="linkedin.com/in/…" style={I} />
-          <div style={{ height: 1, background: G.gris, margin: "4px 0 18px" }} />
-        </>}
-
-        {isPro ? <>
-          <label style={L}>Téléphone privé <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(récupération du compte)</span></label>
-          <input value={form.phone || ""} onChange={e => setForm(f => ({ ...f, phone: e.target.value.slice(0, 25) }))} placeholder="+242 06 513 20 12" style={{ ...I, marginBottom: 6 }} />
-          <div style={{ fontSize: "0.74rem", color: G.brunLight, lineHeight: 1.5, marginBottom: 16 }}>Jamais affiché publiquement. Sert à la récupération du compte et aux notifications.</div>
         </> : <>
+          {/* Client : prénom · ville · téléphone */}
+          <label style={L}>Prénom</label>
+          <input value={form.name || ""} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={I} />
+
+          <label style={L}>Ville</label>
+          <select value={form.city || ""} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} style={I}>
+            {VILLES.map(c => c.startsWith("──") ? <option key={c} disabled>{c}</option> : <option key={c} value={c}>{c}</option>)}
+          </select>
+
           <label style={L}>Téléphone <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
           <input value={form.phone || ""} onChange={e => setForm(f => ({ ...f, phone: e.target.value.slice(0, 25) }))} placeholder="+242 06 513 20 12" style={{ ...I, marginBottom: 6 }} />
           <div style={{ fontSize: "0.74rem", color: G.brunLight, lineHeight: 1.5, marginBottom: 16 }}>Nécessaire pour que les professionnels puissent vous contacter.</div>
@@ -17322,13 +17321,13 @@ function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) 
   const [form, setForm] = useState<CatalogItem>(blank);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const startEdit = (it: CatalogItem | null) => { setForm(it ? { ...it, photos: it.photos || [] } : { ...blank }); setEditing(it || blank); };
+  const startEdit = (it: CatalogItem | null) => { if (!it && items.length >= 10) return; setForm(it ? { ...it, photos: it.photos || [] } : { ...blank }); setEditing(it || blank); };
 
   const onPickPhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []); if (!files.length) return;
     setUploading(true);
     const current = form.photos || [];
-    const room = Math.max(0, 5 - current.length);
+    const room = Math.max(0, 3 - current.length);
     const urls: string[] = [];
     for (const f of files.slice(0, room)) { const u = await uploadCatalogPhoto(auth.token, auth.userId, f); if (u) urls.push(u); }
     setForm(p => ({ ...p, photos: [...(p.photos || []), ...urls] }));
@@ -17381,7 +17380,9 @@ function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) 
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </div>
         <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, flex: 1 }}>{editing ? (form.id ? "Modifier l'article" : "Nouvel article") : "Mon catalogue"}</div>
-        {!editing && !missingTable && <button onClick={() => startEdit(null)} style={{ background: G.or, color: "#fff", border: "none", borderRadius: 50, padding: "9px 16px", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button>}
+        {!editing && !missingTable && (items.length >= 10
+          ? <span style={{ background: G.creme, color: G.brunLight, border: `1px solid ${G.gris}`, borderRadius: 50, padding: "9px 14px", fontWeight: 700, fontSize: "0.8rem", flexShrink: 0 }}>10/10 max</span>
+          : <button onClick={() => startEdit(null)} style={{ background: G.or, color: "#fff", border: "none", borderRadius: 50, padding: "9px 16px", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button>)}
       </div>
 
       {toast && <div style={{ position: "fixed", top: 70, left: "50%", transform: "translateX(-50%)", background: G.brun, color: "#fff", padding: "10px 18px", borderRadius: 50, fontSize: "0.82rem", zIndex: 5, boxShadow: "0 4px 14px rgba(0,0,0,0.2)" }} onAnimationEnd={() => setToast("")}>{toast}</div>}
@@ -17406,7 +17407,7 @@ function CatalogManager({ auth, onClose }: { auth: Auth; onClose: () => void }) 
                     </div>
                   </div>
                 ))}
-                {(form.photos || []).length < 5 && (
+                {(form.photos || []).length < 3 && (
                   <div onClick={() => fileRef.current?.click()} style={{ width: 76, height: 76, borderRadius: 12, border: `1.5px dashed ${G.gris}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", background: G.blanc, gap: 3 }}>
                     {uploading ? <span style={{ fontSize: "0.7rem", color: G.brunLight }}>…</span> : <><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></>}
                   </div>
@@ -17536,13 +17537,15 @@ function obtn(color: string, outline?: boolean): React.CSSProperties {
   return { flex: outline ? "0 0 auto" : 1, background: outline ? "transparent" : color, color: outline ? color : "#fff", border: outline ? `1.5px solid ${color}` : "none", borderRadius: 9, padding: "8px 12px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", minWidth: 80 };
 }
 
-// ── Boutique (grille catalogue) affichée sur la fiche d'un professionnel ──
+// ── Boutique affichée sur la fiche d'un professionnel ──
+// Sur la fiche : un carrousel horizontal (on glisse pour voir le reste) + un lien « Voir tout ».
+// « Voir tout » ouvre une grille plein écran ; cliquer un article ouvre un détail plein écran propre.
 // Le panier est géré au niveau de ProFiche (carte récap sous les CTA + écran plein dédié).
-// Ce composant se limite désormais à la grille des articles et au détail d'un article.
 function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty }: { auth: Auth; pro: Profile; mine: boolean; qtyOf: (id: string) => number; addToCart: (it: CatalogItem) => void; setQty: (id: string, qty: number) => void }) {
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [openItem, setOpenItem] = useState<CatalogItem | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -17566,71 +17569,112 @@ function CatalogShop({ auth, pro, mine, qtyOf, addToCart, setQty }: { auth: Auth
     return null;
   }
 
+  // Contrôle Ajouter / quantité réutilisé par les cartes
+  const addCtrl = (it: CatalogItem) => {
+    const q = qtyOf(it.id);
+    if (mine) return <div style={{ fontSize: "0.7rem", color: G.brunLight, textAlign: "center" }}>Aperçu</div>;
+    return q === 0
+      ? <button onClick={e => { e.stopPropagation(); addToCart(it); }} style={{ width: "100%", background: G.or, color: "#fff", border: "none", borderRadius: 9, padding: "8px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>Ajouter</button>
+      : <div onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: G.creme, borderRadius: 9, padding: "3px" }}>
+          <button onClick={() => setQty(it.id, q - 1)} style={qbtn}>−</button>
+          <span style={{ fontWeight: 800, fontSize: "0.85rem", color: G.brun }}>{q}</span>
+          <button onClick={() => setQty(it.id, q + 1)} style={qbtn}>+</button>
+        </div>;
+  };
+
+  // Carte article (utilisée dans le carrousel et dans la grille « Voir tout »)
+  const card = (it: CatalogItem, carousel: boolean) => (
+    <div key={it.id} style={{ ...(carousel ? { flex: "0 0 150px", scrollSnapAlign: "start" } : {}), background: G.blanc, borderRadius: 14, border: `1px solid ${G.gris}`, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+      <div onClick={() => setOpenItem(it)} style={{ position: "relative", paddingBottom: "75%", background: G.creme, cursor: "pointer" }}>
+        {it.photos && it.photos[0]
+          ? <img src={it.photos[0]} alt={it.name} loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+          : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>}
+        {it.availability && it.availability !== "En stock" && <span style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.6)", color: "#fff", borderRadius: 50, padding: "2px 8px", fontSize: "0.62rem", fontWeight: 700 }}>{it.availability}</span>}
+      </div>
+      <div style={{ padding: "8px 10px 10px", display: "flex", flexDirection: "column", flex: 1 }}>
+        <div onClick={() => setOpenItem(it)} style={{ fontWeight: 700, fontSize: "0.83rem", color: G.brun, cursor: "pointer", lineHeight: 1.25, marginBottom: 3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minHeight: "2.1em" }}>{it.name}</div>
+        <div style={{ fontSize: "0.85rem", color: G.or, fontWeight: 800, marginBottom: 8 }}>{it.price != null ? fmtMoney(it.price, it.currency) : "Sur demande"}</div>
+        <div style={{ marginTop: "auto" }}>{addCtrl(it)}</div>
+      </div>
+    </div>
+  );
+
   return (
     <div style={{ marginBottom: 14 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+      {/* En-tête : titre + Voir tout */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
         <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5 }}>Catalogue</div>
-        <div style={{ fontSize: "0.72rem", color: G.brunLight }}>{items.length} article{items.length > 1 ? "s" : ""}</div>
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-        {items.map(it => {
-          const q = qtyOf(it.id);
-          return (
-            <div key={it.id} style={{ background: G.blanc, borderRadius: 14, border: `1px solid ${G.gris}`, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-              <div onClick={() => setOpenItem(it)} style={{ position: "relative", paddingBottom: "75%", background: G.creme, cursor: "pointer" }}>
-                {it.photos && it.photos[0]
-                  ? <img src={it.photos[0]} alt={it.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>}
-                {it.availability && it.availability !== "En stock" && <span style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.6)", color: "#fff", borderRadius: 50, padding: "2px 8px", fontSize: "0.62rem", fontWeight: 700 }}>{it.availability}</span>}
-              </div>
-              <div style={{ padding: "8px 10px 10px", display: "flex", flexDirection: "column", flex: 1 }}>
-                <div onClick={() => setOpenItem(it)} style={{ fontWeight: 700, fontSize: "0.83rem", color: G.brun, cursor: "pointer", lineHeight: 1.25, marginBottom: 3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{it.name}</div>
-                <div style={{ fontSize: "0.85rem", color: G.or, fontWeight: 800, marginBottom: 8 }}>{it.price != null ? fmtMoney(it.price, it.currency) : "Sur demande"}</div>
-                <div style={{ marginTop: "auto" }}>
-                  {mine ? <div style={{ fontSize: "0.7rem", color: G.brunLight, textAlign: "center" }}>Aperçu</div>
-                    : q === 0
-                      ? <button onClick={() => addToCart(it)} style={{ width: "100%", background: G.or, color: "#fff", border: "none", borderRadius: 9, padding: "8px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>Ajouter</button>
-                      : <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: G.creme, borderRadius: 9, padding: "3px" }}>
-                          <button onClick={() => setQty(it.id, q - 1)} style={qbtn}>−</button>
-                          <span style={{ fontWeight: 800, fontSize: "0.85rem", color: G.brun }}>{q}</span>
-                          <button onClick={() => setQty(it.id, q + 1)} style={qbtn}>+</button>
-                        </div>}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {items.length > 3
+          ? <span onClick={() => setShowAll(true)} style={{ fontSize: "0.8rem", fontWeight: 800, color: G.or, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 3 }}>Voir tout <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={G.or} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+          : <span style={{ fontSize: "0.72rem", color: G.brunLight }}>{items.length} article{items.length > 1 ? "s" : ""}</span>}
       </div>
 
-      {/* Détail article */}
-      {openItem && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9996, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={() => setOpenItem(null)}>
-          <div onClick={e => e.stopPropagation()} style={{ background: G.blanc, borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 500, maxHeight: "85vh", overflowY: "auto" }}>
-            <div style={{ display: "flex", gap: 8, overflowX: "auto", padding: 12 }}>
-              {(openItem.photos && openItem.photos.length ? openItem.photos : [""]).map((u, i) => (
-                <div key={i} style={{ flexShrink: 0, width: openItem.photos && openItem.photos.length > 1 ? "78%" : "100%", paddingBottom: "60%", position: "relative", borderRadius: 14, overflow: "hidden", background: G.creme }}>
-                  {u ? <img src={u} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>}
-                </div>
-              ))}
+      {/* Carrousel horizontal — on glisse vers la gauche/droite pour voir le reste */}
+      <div style={{ display: "flex", gap: 10, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", paddingBottom: 4, margin: "0 -16px", padding: "0 16px 4px" }}>
+        {items.map(it => card(it, true))}
+      </div>
+
+      {/* « Voir tout » — grille plein écran */}
+      {showAll && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 9990, background: G.fond, display: "flex", flexDirection: "column" }}>
+          <div style={{ background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+            <div onClick={() => setShowAll(false)} style={{ width: 36, height: 36, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             </div>
-            <div style={{ padding: "0 16px 20px" }}>
-              <div style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun }}>{openItem.name}</div>
-              <div style={{ fontSize: "1rem", color: G.or, fontWeight: 800, margin: "4px 0 10px" }}>{openItem.price != null ? fmtMoney(openItem.price, openItem.currency) : "Prix sur demande"}</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-                {openItem.category && <span style={chip}>{openItem.category}</span>}
-                {openItem.availability && <span style={chip}>{openItem.availability}</span>}
-                {openItem.delay && <span style={chip}>Délai : {openItem.delay}</span>}
-              </div>
-              {openItem.description && <div style={{ fontSize: "0.9rem", color: G.brun, lineHeight: 1.6, marginBottom: 16, whiteSpace: "pre-wrap" }}>{openItem.description}</div>}
-              {!mine && (qtyOf(openItem.id) === 0
-                ? <button onClick={() => { addToCart(openItem); }} style={{ width: "100%", background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer" }}>Ajouter au panier</button>
-                : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, background: G.creme, borderRadius: 12, padding: "8px" }}>
-                    <button onClick={() => setQty(openItem.id, qtyOf(openItem.id) - 1)} style={{ ...qbtn, width: 40, height: 40, fontSize: "1.3rem" }}>−</button>
-                    <span style={{ fontWeight: 800, fontSize: "1.1rem", color: G.brun }}>{qtyOf(openItem.id)}</span>
-                    <button onClick={() => setQty(openItem.id, qtyOf(openItem.id) + 1)} style={{ ...qbtn, width: 40, height: 40, fontSize: "1.3rem" }}>+</button>
-                  </div>)}
+            <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, flex: 1 }}>Catalogue <span style={{ color: G.brunLight, fontWeight: 600 }}>({items.length})</span></div>
+          </div>
+          <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", padding: 16 }}>
+            <div style={{ maxWidth: 560, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              {items.map(it => card(it, false))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Détail article — plein écran propre (au-dessus de la grille) */}
+      {openItem && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 9994, background: G.fond, display: "flex", flexDirection: "column" }}>
+          <div style={{ background: G.blanc, borderBottom: `1px solid ${G.gris}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+            <div onClick={() => setOpenItem(null)} style={{ width: 36, height: 36, borderRadius: "50%", background: G.creme, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </div>
+            <div style={{ fontWeight: 800, fontSize: "1.05rem", color: G.brun, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{openItem.name}</div>
+          </div>
+          <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+            <div style={{ maxWidth: 560, margin: "0 auto" }}>
+              <div style={{ display: "flex", gap: 8, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: 12 }}>
+                {(openItem.photos && openItem.photos.length ? openItem.photos : [""]).map((u, i) => (
+                  <div key={i} style={{ flexShrink: 0, scrollSnapAlign: "start", width: openItem.photos && openItem.photos.length > 1 ? "82%" : "100%", paddingBottom: "62%", position: "relative", borderRadius: 14, overflow: "hidden", background: G.creme }}>
+                    {u ? <img src={u} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>}
+                  </div>
+                ))}
+              </div>
+              <div style={{ padding: "4px 16px 24px" }}>
+                <div style={{ fontWeight: 800, fontSize: "1.2rem", color: G.brun }}>{openItem.name}</div>
+                <div style={{ fontSize: "1.05rem", color: G.or, fontWeight: 900, margin: "5px 0 12px" }}>{openItem.price != null ? fmtMoney(openItem.price, openItem.currency) : "Prix sur demande"}</div>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+                  {openItem.category && <span style={chip}>{openItem.category}</span>}
+                  {openItem.availability && <span style={chip}>{openItem.availability}</span>}
+                  {openItem.delay && <span style={chip}>Délai : {openItem.delay}</span>}
+                </div>
+                {openItem.description && <div style={{ fontSize: "0.92rem", color: G.brun, lineHeight: 1.65, whiteSpace: "pre-wrap" }}>{openItem.description}</div>}
+              </div>
+            </div>
+          </div>
+          {/* Barre du bas : ajouter au panier */}
+          {!mine && (
+            <div style={{ padding: 16, borderTop: `1px solid ${G.gris}`, background: G.blanc, flexShrink: 0 }}>
+              <div style={{ maxWidth: 560, margin: "0 auto" }}>
+                {qtyOf(openItem.id) === 0
+                  ? <button onClick={() => addToCart(openItem)} style={{ width: "100%", background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "15px", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer" }}>Ajouter au panier</button>
+                  : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, background: G.creme, borderRadius: 12, padding: "9px" }}>
+                      <button onClick={() => setQty(openItem.id, qtyOf(openItem.id) - 1)} style={{ ...qbtn, width: 42, height: 42, fontSize: "1.4rem" }}>−</button>
+                      <span style={{ fontWeight: 800, fontSize: "1.15rem", color: G.brun, minWidth: 24, textAlign: "center" }}>{qtyOf(openItem.id)}</span>
+                      <button onClick={() => setQty(openItem.id, qtyOf(openItem.id) + 1)} style={{ ...qbtn, width: 42, height: 42, fontSize: "1.4rem" }}>+</button>
+                    </div>}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -17773,11 +17817,11 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
           {pro.photo_url
             ? <img src={pro.photo_url} alt="" style={{ width: 96, height: 96, borderRadius: 20, objectFit: "cover", border: `2px solid ${G.or}` }} />
             : <div style={{ width: 96, height: 96, borderRadius: 20, background: "#121218", color: G.or, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, fontWeight: 800 }}>{(pro.company || pro.name || "?").charAt(0).toUpperCase()}</div>}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12 }}>
-            <span style={{ fontSize: "1.3rem", fontWeight: 900, color: "#fff" }}>{pro.company || pro.name}</span>
-            {pro.is_verified && <VerifiedBadge size={18} />}
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12, maxWidth: "88vw" }}>
+            <span style={{ fontSize: "1.3rem", fontWeight: 900, color: "#fff", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pro.company || pro.name}</span>
+            {pro.is_verified && <span style={{ flexShrink: 0, display: "inline-flex" }}><VerifiedBadge size={18} /></span>}
           </div>
-          {pro.company && pro.name && <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", marginTop: 2 }}>{pro.name}</div>}
+          {pro.company && pro.name && <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", marginTop: 2, maxWidth: "88vw", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pro.name}</div>}
           <div style={{ fontSize: "0.92rem", color: G.or, fontWeight: 700, marginTop: 4 }}>{pro.metier}</div>
           <div style={{ display: "flex", gap: 7, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
             {cat && <span style={{ background: "rgba(212,168,75,0.2)", color: G.or, borderRadius: 50, padding: "3px 11px", fontSize: "0.72rem", fontWeight: 700 }}>{cat}</span>}
@@ -17856,9 +17900,9 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
         </div>}
 
         {/* Description */}
-        {!isClient && pro.bio && <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 16, marginBottom: 14 }}>
+        {!isClient && pro.bio && <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 16, marginBottom: 14, overflow: "hidden" }}>
           <div style={{ fontSize: "0.72rem", fontWeight: 800, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>À propos</div>
-          <div style={{ fontSize: "0.9rem", color: G.brun, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{pro.bio}</div>
+          <div style={{ fontSize: "0.9rem", color: G.brun, lineHeight: 1.6, whiteSpace: "pre-wrap", overflowWrap: "anywhere", wordBreak: "break-word" }}>{pro.bio}</div>
         </div>}
 
         {/* Catalogue + panier (professionnels uniquement) */}
@@ -17883,14 +17927,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
           {pro.zone && <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.86rem", color: G.brun }}><PinIcon color="#9AA0A6" size={14} />Zone : {pro.zone}</div>}
         </div>}
 
-        {/* Réseaux */}
-        {socialLinks.length > 0 && <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
-          {socialLinks.map(s => (
-            <a key={s.k} href={s.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
-              <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 50, padding: "8px 14px", fontSize: "0.8rem", fontWeight: 600, color: G.brun }}>{s.label}</div>
-            </a>
-          ))}
-        </div>}
+        {/* Réseaux sociaux retirés volontairement : on garde l'utilisateur sur Moyo Business. */}
 
         {/* Avis (préparation étape 6) */}
         <div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, borderRadius: 14, padding: 16 }}>
