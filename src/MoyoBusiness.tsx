@@ -1777,15 +1777,15 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         .mb-btitle{font-size:15px;font-weight:800;margin-bottom:5px;line-height:1.3;}
         .mb-bdesc{font-size:13px;color:var(--gris);line-height:1.5;margin-bottom:12px;}
         .mb-bmeta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:13px;font-size:12px;color:var(--gris);font-weight:600;}
-        .mb-bfoot{display:flex;justify-content:space-between;align-items:center;}
-        .mb-av{width:28px;height:28px;border-radius:50%;background:var(--nuit);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--or);}
-        .mb-aw{display:flex;align-items:center;gap:8px;}
-        .mb-an{font-size:12px;font-weight:700;}
-        .mb-bbtn{background:var(--or);color:var(--nuit);border:none;cursor:pointer;font-size:12px;font-weight:800;padding:7px 14px;border-radius:7px;font-family:inherit;}
+        .mb-bfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+        .mb-av{width:28px;height:28px;border-radius:50%;background:var(--nuit);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--or);flex-shrink:0;}
+        .mb-aw{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
+        .mb-an{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+        .mb-bbtn{background:var(--or);color:var(--nuit);border:none;cursor:pointer;font-size:12px;font-weight:800;padding:7px 14px;border-radius:7px;font-family:inherit;flex-shrink:0;}
         .mb-pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;max-width:860px;margin:0 auto;}
-        .mb-pcard{background:var(--creme);border:1.5px solid var(--gris-clair);border-radius:14px;padding:18px;text-align:center;}
+        .mb-pcard{background:var(--creme);border:1.5px solid var(--gris-clair);border-radius:14px;padding:18px;text-align:center;overflow:hidden;}
         .mb-pav{width:54px;height:54px;border-radius:50%;background:var(--nuit);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:var(--or);}
-        .mb-pname{font-size:14px;font-weight:800;margin-bottom:3px;}
+        .mb-pname{font-size:14px;font-weight:800;margin-bottom:3px;overflow-wrap:anywhere;word-break:break-word;}
         .mb-pmet{font-size:12px;color:var(--gris);margin-bottom:6px;}
         .mb-pville{font-size:11px;color:var(--gris);}
         .mb-pverif{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--vert);background:rgba(74,124,40,0.1);padding:3px 8px;border-radius:100px;margin-top:8px;}
@@ -4764,9 +4764,9 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
       .moyo-nav-badge-gold { background: ${G.or}; color: #111; }
       .moyo-sidebar-bottom { padding: 12px 14px; border-top: 1px solid ${G.gris}; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s; }
       .moyo-sidebar-bottom:hover { background: ${G.creme}; }
-      .moyo-main-area { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; overflow: hidden; }
+      .moyo-main-area { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100vh; overflow: hidden; }
       .moyo-topbar-wide { padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; background: ${G.blanc}; border-bottom: 1px solid ${G.gris}; flex-shrink: 0; }
-      .moyo-content-wide { flex: 1; overflow-y: auto; padding: 24px 28px 72px; }
+      .moyo-content-wide { flex: 1; min-height: 0; overflow-y: auto; padding: 24px 28px 72px; }
       .moyo-content-wide .page-anim { width: 100%; }
       .moyo-content-wide .page-anim > * { max-width: 1120px !important; margin-left: auto !important; margin-right: auto !important; }
       .moyo-content-wide .dgrid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; align-items: start; }
