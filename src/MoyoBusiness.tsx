@@ -71,6 +71,10 @@ const CONTACT_PATTERNS = [
   /fais.?moi.?un.?appel/i,
   // ── Anciens motifs conservés ──
   /(mon num|mon numero|mon numéro|appelle.?moi|contacte.?moi|écris.?moi.?sur|ecris.?moi.?sur|rejoins.?moi.?sur|mon contact\b|mon tel\b)/i,
+  // ── Nom d'utilisateur WhatsApp (contournement du numéro) ──
+  /(mon|le)\s*(nom d.?utilisateur|username|pseudo|id)\s*(whatsapp)?/i,
+  /whatsapp.{0,10}(nom d.?utilisateur|username|pseudo|c.?est|:)/i,
+  /trouve.?moi.{0,10}(sur whatsapp|sous le nom)/i,
 ];
 // Mots interdits "contacts" (gratuit uniquement) — ajoutés par l'admin depuis Configuration → Sécurité
 let CONTACT_BANNED_REGEX: RegExp | null = null;
@@ -430,7 +434,7 @@ type Auth = {
   refreshToken?: string;
   expiresAt?: number;
 };
-type Profile = { id: string; name: string; age: number; city: string; gender: string; bio: string; religion?: string; profession?: string; hobbies?: string; phone?: string | null; photo_url?: string | null; is_premium: boolean; is_admin?: boolean; is_visible?: boolean; is_verified?: boolean; is_certified?: boolean; last_seen?: string; hide_online_status?: boolean; warning_count?: number; is_banned?: boolean; ban_until?: string | null; account_type?: string; company?: string | null; metier?: string | null; category?: string | null; whatsapp?: string | null; public_phone?: string | null; zone?: string | null; hours?: string | null; socials?: Record<string, string> | null; gallery?: string[] | null; rating_avg?: number; rating_count?: number; is_sponsored?: boolean; sponsored_until?: string | null };
+type Profile = { id: string; name: string; age: number; city: string; gender: string; bio: string; religion?: string; profession?: string; hobbies?: string; phone?: string | null; photo_url?: string | null; is_premium: boolean; is_admin?: boolean; is_visible?: boolean; is_verified?: boolean; is_certified?: boolean; last_seen?: string; hide_online_status?: boolean; warning_count?: number; is_banned?: boolean; ban_until?: string | null; account_type?: string; company?: string | null; metier?: string | null; category?: string | null; whatsapp?: string | null; whatsapp_username?: string | null; public_phone?: string | null; zone?: string | null; hours?: string | null; socials?: Record<string, string> | null; gallery?: string[] | null; rating_avg?: number; rating_count?: number; is_sponsored?: boolean; sponsored_until?: string | null };
 type Match = { id: string; user1: string; user2: string; partner?: Profile; lastMsg?: Message; unreadCount?: number; created_at?: string };
 type Message = { id?: string; match_id: string; sender_id: string; content: string; is_read: boolean; is_delivered?: boolean; is_edited?: boolean; created_at?: string; reactions?: Record<string, string[]>; is_view_once?: boolean; viewed_at?: string | null; is_destroyed?: boolean; destroyed_at?: string | null };
 
@@ -1462,6 +1466,8 @@ const METIER_SUGGESTIONS: { label: string; keys: string[] }[] = [
   { label: "Commerçant", keys: ["commerce", "boutique", "vente", "grossiste", "magasin", "vendeur"] },
 ];
 
+const MOYO_BUSINESS_LOGO_LANDING = "data:image/png;base64,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";
+
 function Landing({ onNav }: { onNav: (p: string) => void }) {
   const [tab, setTab] = React.useState<"besoins" | "profils">("besoins");
   const [activeCat, setActiveCat] = React.useState("BTP");
@@ -1841,8 +1847,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
       {/* NAV */}
       <header className="mb-nav">
         <div className="mb-logo" onClick={() => onNav("landing")}>
-          <div className="mb-logo-ic"><svg width="20" height="20" style={{ color: G.brun }}><use href="#mbi-biz"/></svg></div>
-          <span className="mb-logo-tx">Moyo <span>Business</span></span>
+          <img src={MOYO_BUSINESS_LOGO_LANDING} alt="Moyo Business" style={{ height: 34, width: "auto", display: "block" }} />
         </div>
         <div className="mb-nav-r">
           <button className="mb-nav-a hide-m" onClick={() => onNav("about")}>Qui sommes-nous</button>
@@ -1859,7 +1864,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         <div className={`mb-menu-ov${menuOpen ? " open" : ""}`} onClick={() => setMenuOpen(false)} />
         <div className={`mb-drawer${menuOpen ? " open" : ""}`} role="dialog" aria-hidden={!menuOpen}>
           <div className="mb-drawer-top">
-            <span className="mb-logo-tx" style={{ fontSize: 17 }}>Moyo <span>Business</span></span>
+            <img src={MOYO_BUSINESS_LOGO_LANDING} alt="Moyo Business" style={{ height: 28, width: "auto", display: "block" }} />
             <button className="mb-drawer-x" aria-label="Fermer" onClick={() => setMenuOpen(false)}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -2437,7 +2442,7 @@ function SignUp({ onNav }: { onNav: (p: string) => void }) {
   const [step, setStep] = useState(1);
   const [tempToken, setTempToken] = useState<string | null>(isResume ? resumeToken : sessionStorage.getItem("moyo_signup_token"));
   const [tempUserId, setTempUserId] = useState<string | null>(isResume ? resumeUid : sessionStorage.getItem("moyo_signup_uid"));
-  const [form, setForm] = useState({ email: "", password: "", name: "", age: "", city: "", gender: "", bio: "", religion: "", profession: "", hobbies: "", phone: "", account_type: "", company: "", metier: "", category: "", whatsapp: "", public_phone: "", hours: "" });
+  const [form, setForm] = useState({ email: "", password: "", name: "", age: "", city: "", gender: "", bio: "", religion: "", profession: "", hobbies: "", phone: "", account_type: "", company: "", metier: "", category: "", whatsapp: "", whatsapp_username: "", public_phone: "", hours: "" });
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
@@ -2696,6 +2701,7 @@ setLoading(false);
       company: form.company.trim() || null,
       category: form.category || null,
       whatsapp: form.whatsapp.trim() || null,
+      whatsapp_username: form.whatsapp_username.trim() || null,
       public_phone: form.public_phone.trim() || null,
       hours: form.hours.trim() || null,
     } : {}),
@@ -2891,6 +2897,12 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>WhatsApp public <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
             <input value={form.whatsapp} onChange={e => upd("whatsapp", e.target.value.slice(0, 25))} placeholder="+242 06 513 20 12" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
+          </div>
+          {/* 7bis · Nom d'utilisateur WhatsApp (optionnel) — même visibilité que le numéro : réservé aux membres Premium sur la fiche publique */}
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Nom d'utilisateur WhatsApp <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
+            <input value={form.whatsapp_username} onChange={e => upd("whatsapp_username", e.target.value.replace(/[^a-zA-Z0-9_.]/g, "").slice(0, 30))} placeholder="Ex : R2G_officiel" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
+            <div style={{ fontSize: "0.74rem", color: "#aaa", marginTop: 5 }}>Visible sur ta fiche uniquement si tu es Premium, comme ton numéro.</div>
           </div>
           {/* 8 · Téléphone public (obligatoire) */}
           <div style={{ marginBottom: 18 }}>
@@ -4759,8 +4771,8 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
       .moyo-content-wide .dgrid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; align-items: start; }
       .moyo-content-wide .dspan { grid-column: 1 / -1; }
       .moyo-content-wide .page-anim > .dfull { max-width: none !important; margin: 0 !important; height: 100% !important; }
-      .moyo-content-wide:has(.dfull) { padding: 0 !important; overflow: hidden !important; }
-      .moyo-content-wide:has(.dfull) .page-anim { height: 100%; }
+      .moyo-content-wide.moyo-content-full { padding: 0 !important; overflow: hidden !important; }
+      .moyo-content-wide.moyo-content-full .page-anim { height: 100%; }
     `}</style>
 
     {/* ── SIDEBAR (desktop/tablette) ── */}
@@ -4821,7 +4833,7 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
             Guide
           </div>
         </div>
-        <div className="moyo-content-wide">{children}</div>
+        <div className={`moyo-content-wide${tab === "messages" ? " moyo-content-full" : ""}`}>{children}</div>
       </div>
     ) : (
       <>
@@ -6256,14 +6268,14 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
         </div>
-        <div onClick={() => setShowPartnerProfile(true)} style={{ cursor: "pointer" }}>
+        <div onClick={() => setShowPartnerProfile(true)} style={{ cursor: "pointer", flexShrink: 0 }}>
           <Avatar url={open.partner?.photo_url} gender={open.partner?.gender} size={38} premium={open.partner?.is_premium} />
         </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: "0.92rem", color: G.brun }}>{open.partner?.name}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: "0.92rem", color: G.brun, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{open.partner?.name}</div>
           {open.partner?.id === SUPPORT_TEAM_ID ? <div style={{ fontSize: "0.7rem", color: "#27ae60", fontWeight: 600 }}>● Répond sous 24h</div> : open.partner?.hide_online_status ? null : (() => { const s = getOnlineStatus(open.partner?.last_seen); return <div style={{ fontSize: "0.7rem", color: s.color, fontWeight: 600 }}>● {s.label}</div>; })()}
         </div>
-        <div onClick={() => setShowDeleteConv(true)} style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(180,60,60,0.08)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }} title="Supprimer la conversation">
+        <div onClick={() => setShowDeleteConv(true)} style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(180,60,60,0.08)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }} title="Supprimer la conversation">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
           </svg>
@@ -7476,6 +7488,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
         company: (form.company || "").trim() || null,
         category: form.category || null,
         whatsapp: (form.whatsapp || "").trim() || null,
+        whatsapp_username: (form.whatsapp_username || "").trim() || null,
         public_phone: (form.public_phone || "").trim() || null,
         zone: (form.zone || "").trim() || null,
         hours: (form.hours || "").trim() || null,
@@ -7661,6 +7674,10 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
 
           <label style={L}>WhatsApp public <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
           <input value={form.whatsapp || ""} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value.slice(0, 25) }))} placeholder="+242 06 000 00 00" style={I} />
+
+          <label style={L}>Nom d'utilisateur WhatsApp <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
+          <input value={form.whatsapp_username || ""} onChange={e => setForm(f => ({ ...f, whatsapp_username: e.target.value.replace(/[^a-zA-Z0-9_.]/g, "").slice(0, 30) }))} placeholder="Ex : R2G_officiel" style={I} />
+          <div style={{ fontSize: "0.74rem", color: G.brunLight, marginTop: -10, marginBottom: 4 }}>Visible sur ta fiche uniquement si tu es Premium, comme ton numéro.</div>
 
           <label style={L}>Téléphone public <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
           <input value={form.public_phone || ""} onChange={e => setForm(f => ({ ...f, public_phone: e.target.value.slice(0, 25) }))} placeholder="+242 06 000 00 00" style={I} />
@@ -9087,6 +9104,7 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     zone?: string | null;
     hours?: string | null;
     whatsapp?: string | null;
+    whatsapp_username?: string | null;
     public_phone?: string | null;
     socials?: Record<string, string> | null;
     gallery?: string[] | null;
@@ -9184,19 +9202,40 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
   const [adminViewedProfile, setAdminViewedProfile] = useState<AdminProfile | null>(null);
   // Stats détaillées de la fiche admin ouverte (nombre de publications/annonces)
   const [adminViewedStats, setAdminViewedStats] = useState<{ pubCount: number | null }>({ pubCount: null });
+  // Annonces/besoins et catalogue de l'utilisateur affiché dans la fiche admin
+  const [adminViewedPubs, setAdminViewedPubs] = useState<Publication[]>([]);
+  const [adminViewedPubsLoading, setAdminViewedPubsLoading] = useState(false);
+  const [adminViewedCatalog, setAdminViewedCatalog] = useState<CatalogItem[]>([]);
+  const [adminViewedCatalogLoading, setAdminViewedCatalogLoading] = useState(false);
   const openAdminProfile = async (userId: string) => {
     try {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=id,name,age,city,gender,bio,photo_url,is_premium,premium_until,is_verified,is_admin,admin_level,is_banned,ban_until,warning_count,is_visible,hide_online_status,email,account_type,phone,whatsapp,public_phone,company,metier,category,zone,hours,socials,gallery,rating_avg,rating_count,religion,profession,hobbies,created_at,last_seen`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` } });
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=id,name,age,city,gender,bio,photo_url,is_premium,premium_until,is_verified,is_admin,admin_level,is_banned,ban_until,warning_count,is_visible,hide_online_status,email,account_type,phone,whatsapp,whatsapp_username,public_phone,company,metier,category,zone,hours,socials,gallery,rating_avg,rating_count,religion,profession,hobbies,created_at,last_seen`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}` } });
       const data = await r.json().catch(() => []);
       if (Array.isArray(data) && data[0]) {
         setAdminViewedStats({ pubCount: null });
         setAdminViewedProfile(data[0]);
+        setAdminViewedPubs([]);
+        setAdminViewedCatalog([]);
         // Nombre de publications/annonces de l'utilisateur
         try {
           const pr = await fetch(`${SUPABASE_URL}/rest/v1/publications?user_id=eq.${userId}&select=id`, { method: "HEAD", headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${auth.token}`, "Prefer": "count=exact", "Range": "0-0" } });
           const cr = pr.headers.get("content-range");
           setAdminViewedStats({ pubCount: cr ? parseInt(cr.split("/")[1] || "0", 10) : 0 });
         } catch { setAdminViewedStats({ pubCount: 0 }); }
+        // Annonces / besoins publiés — aperçu carte complet
+        setAdminViewedPubsLoading(true);
+        try {
+          const pubs = await sb.query<Publication>(auth.token, "publications", `?user_id=eq.${userId}&order=created_at.desc&select=id,user_id,type,category,title,description,budget,city,location,metier,photos,is_boosted,boosted_until,status,created_at&limit=20`, auth.refreshToken);
+          setAdminViewedPubs(Array.isArray(pubs) ? pubs : []);
+        } catch { setAdminViewedPubs([]); }
+        setAdminViewedPubsLoading(false);
+        // Catalogue — mini-grille de vignettes
+        setAdminViewedCatalogLoading(true);
+        try {
+          const items = await sb.query<CatalogItem>(auth.token, "catalog_items", `?seller_id=eq.${userId}&order=sort_order.asc,created_at.desc&limit=30`, auth.refreshToken);
+          setAdminViewedCatalog(Array.isArray(items) ? items : []);
+        } catch { setAdminViewedCatalog([]); }
+        setAdminViewedCatalogLoading(false);
       }
     } catch {}
   };
@@ -11079,13 +11118,13 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
             <ActionBtn label="+ Premium" color="#D4A843" disabled={isLoading}
               onClick={() => confirm(`Rendre ${u.name} Premium ?`, () => adminAction(u.id, { is_premium: true, premium_until: new Date(Date.now() + PREMIUM_30_DAYS_MS).toISOString() }, `${u.name} est maintenant Premium.`))} />
           ) : isLifetimePremium(u) ? (
-            <ActionBtn label="- À vie" color="var(--c-goldText)" disabled={isLoading}
+            <ActionBtn label="- À vie" color="#8B6914" disabled={isLoading}
               onClick={() => confirm(`Retirer le Premium À VIE de ${u.name} ?`, () => adminAction(u.id, { is_premium: false, premium_until: undefined }, `Premium à vie retiré pour ${u.name}.`))} />
           ) : (
             <ActionBtn label="- Premium" color="#B8860B" disabled={isLoading}
               onClick={() => confirm(`Retirer le Premium de ${u.name} ?`, () => adminAction(u.id, { is_premium: false, premium_until: undefined }, `Premium retiré pour ${u.name}.`))} />
           )}
-          <ActionBtn label="★ À vie" color="var(--c-goldText)" disabled={isLoading || isLifetimePremium(u)}
+          <ActionBtn label="★ À vie" color="#8B6914" disabled={isLoading || isLifetimePremium(u)}
             onClick={() => confirm(`Donner le Premium À VIE à ${u.name} ? Cette action est permanente.`, () => adminAction(u.id, { is_premium: true, premium_until: LIFETIME_PREMIUM_UNTIL }, `${u.name} a maintenant le Premium à vie. ♾️`))} />
           {auth.userId === SUPER_ADMIN_ID && !isSelf && (() => {
             const isSuperAdmin = (u as any).admin_level === "superadmin";
@@ -12663,12 +12702,12 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 600, fontSize: "0.85rem", display: "flex", alignItems: "center", gap: 5, color: G.brun }}>
-                          {u.name}{u.is_premium && <IcoStar />}
+                        <div style={{ fontWeight: 600, fontSize: "0.85rem", display: "flex", alignItems: "center", gap: 5, color: G.brun, minWidth: 0 }}>
+                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{u.name}</span>{u.is_premium && <IcoStar />}
                         </div>
-                        <div style={{ fontSize: "0.72rem", color: G.brunLight }}>{u.city}</div>
+                        <div style={{ fontSize: "0.72rem", color: G.brunLight, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.city}</div>
                       </div>
-                      <div style={{ fontSize: "0.68rem", color: G.brunLight }}>{formatDate(u.created_at)}</div>
+                      <div style={{ fontSize: "0.68rem", color: G.brunLight, flexShrink: 0 }}>{formatDate(u.created_at)}</div>
                     </div>
                   ))}
                 </div>
@@ -12726,7 +12765,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   </div>
                   <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "44px 16px 14px", background: "linear-gradient(transparent, rgba(0,0,0,0.78))" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
-                      <span style={{ color: "#fff", fontWeight: 800, fontSize: "1.3rem" }}>{isPro && av.company ? av.company : av.name}</span>
+                      <span style={{ color: "#fff", fontWeight: 800, fontSize: "1.3rem", wordBreak: "break-word", overflowWrap: "anywhere", minWidth: 0 }}>{isPro && av.company ? av.company : av.name}</span>
                       {av.is_verified && <span style={{ background: "rgba(255,255,255,0.22)", color: "#fff", borderRadius: 50, padding: "2px 8px", fontSize: "0.66rem", fontWeight: 700 }}>✓ Vérifié</span>}
                     </div>
                     {isPro && av.company && av.name && av.name !== av.company && <div style={{ color: "rgba(255,255,255,0.78)", fontSize: "0.78rem", marginTop: 2 }}>{av.name}</div>}
@@ -12772,12 +12811,13 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                   </div>
 
                   {/* Coordonnées */}
-                  {(av.phone || av.whatsapp || av.public_phone || av.email) && (
+                  {(av.phone || av.whatsapp || av.whatsapp_username || av.public_phone || av.email) && (
                     <div style={{ marginBottom: 14 }}>
                       <div style={{ fontSize: "0.7rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Coordonnées</div>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                         {av.phone && tile("Téléphone", <a href={`tel:${av.phone}`} style={{ color: "#2563EB", textDecoration: "none" }}>{av.phone}</a>)}
                         {av.whatsapp && tile("WhatsApp", av.whatsapp)}
+                        {av.whatsapp_username && tile("Nom d'utilisateur WhatsApp", `@${av.whatsapp_username}`)}
                         {av.public_phone && tile("Tél. public", av.public_phone)}
                         {av.email && tile("Email", <a href={`mailto:${av.email}`} style={{ color: "#2563EB", textDecoration: "none" }}>{av.email}</a>, !av.phone && !av.whatsapp && !av.public_phone)}
                       </div>
@@ -12827,6 +12867,53 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                       <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
                         {gal.map((g, i) => <img key={i} src={g} alt="" style={{ width: 70, height: 70, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} />)}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Annonces / besoins publiés — aperçu carte complet */}
+                  {(adminViewedPubsLoading || adminViewedPubs.length > 0) && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: "0.7rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
+                        {isPro ? "Annonces" : "Besoins"} {!adminViewedPubsLoading && `(${adminViewedPubs.length})`}
+                      </div>
+                      {adminViewedPubsLoading ? (
+                        <div style={{ textAlign: "center", padding: 16 }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "pulse 0.8s ease-in-out infinite" }}><circle cx="12" cy="12" r="10"/></svg>
+                        </div>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                          {adminViewedPubs.map(p => <AdminPubCard key={p.id} pub={p} />)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Catalogue — mini-grille de vignettes (photo + prix) */}
+                  {(adminViewedCatalogLoading || adminViewedCatalog.length > 0) && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: "0.7rem", fontWeight: 700, color: G.brunLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
+                        Catalogue {!adminViewedCatalogLoading && `(${adminViewedCatalog.length})`}
+                      </div>
+                      {adminViewedCatalogLoading ? (
+                        <div style={{ textAlign: "center", padding: 16 }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={G.rouge} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "pulse 0.8s ease-in-out infinite" }}><circle cx="12" cy="12" r="10"/></svg>
+                        </div>
+                      ) : (
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+                          {adminViewedCatalog.map(it => (
+                            <div key={it.id} style={{ background: G.creme, borderRadius: 10, overflow: "hidden", opacity: it.is_active === false ? 0.5 : 1 }}>
+                              <div style={{ width: "100%", aspectRatio: "1", background: G.gris, position: "relative" }}>
+                                {it.photos?.[0] ? <img src={it.photos[0]} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /> : null}
+                                {it.is_active === false && <span style={{ position: "absolute", top: 4, left: 4, background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: 8.5, fontWeight: 700, borderRadius: 5, padding: "1px 5px" }}>Inactif</span>}
+                              </div>
+                              <div style={{ padding: "6px 7px" }}>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: G.brun, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{it.name}</div>
+                                <div style={{ fontSize: 10.5, color: G.or, fontWeight: 800, marginTop: 1 }}>{typeof it.price === "number" ? fmtFCFA(it.price) : "—"}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -12997,7 +13084,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                         {/* Infos : nom · ville · date · activité */}
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                            <span style={{ fontWeight: 700, fontSize: "0.86rem", color: (u.name === "..." || !u.name) ? "#e74c3c" : G.brun, whiteSpace: "nowrap" }}>{u.name || "..."}</span>
+                            <span style={{ fontWeight: 700, fontSize: "0.86rem", color: (u.name === "..." || !u.name) ? "#e74c3c" : G.brun, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 170 }}>{u.name || "..."}</span>
                             {u.account_type === "pro"
                               ? <span style={{ background: "rgba(37,99,235,0.12)", color: "#2563EB", borderRadius: 50, padding: "1px 7px", fontSize: "0.6rem", fontWeight: 700, flexShrink: 0 }}>💼 Pro</span>
                               : <span style={{ background: "rgba(212,168,67,0.16)", color: "var(--c-goldText)", borderRadius: 50, padding: "1px 7px", fontSize: "0.6rem", fontWeight: 700, flexShrink: 0 }}>🙋 Client</span>}
@@ -13044,7 +13131,7 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
                     {/* Nom · type · activité · ville · date */}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                        <span style={{ fontWeight: 700, fontSize: "0.95rem", color: (u.name === "..." || !u.name) ? "#e74c3c" : G.brun }}>{u.name || "..."}</span>
+                        <span style={{ fontWeight: 700, fontSize: "0.95rem", color: (u.name === "..." || !u.name) ? "#e74c3c" : G.brun, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 190 }}>{u.name || "..."}</span>
                         {u.account_type === "pro"
                           ? <span style={{ fontSize: "0.65rem", background: "rgba(37,99,235,0.12)", color: "#2563EB", borderRadius: 50, padding: "1px 8px", fontWeight: 700 }}>💼 Pro</span>
                           : <span style={{ fontSize: "0.65rem", background: "rgba(212,168,67,0.16)", color: "var(--c-goldText)", borderRadius: 50, padding: "1px 8px", fontWeight: 700 }}>🙋 Client</span>}
@@ -15520,7 +15607,8 @@ const BUSINESS_CATEGORIES: BusinessCategory[] = [
     "Atelier de couture", "Broderie", "Confection sur mesure", "Conseiller en image", "Costumier",
     "Couturier", "Couturière", "Créateur d'accessoires", "Créateur de mode", "Designer textile",
     "Mannequin", "Maroquinier", "Modéliste", "Modiste", "Patronnier", "Retoucherie", "Styliste",
-    "Tailleur", "Teinturier", "Vente de tissus & pagne",
+    "Tailleur", "Teinturier", "Vente de chaussures", "Vente de costumes", "Vente de robes de mariage",
+    "Vente de tissus & pagne",
   ] },
   { id: "Restauration", name: "Restauration", icon: "🍽️", order: 10, metiers: [
     "Bar", "Boulanger", "Café", "Cuisinier à domicile", "Fast-food", "Glacier", "Pâtissier",
@@ -15822,6 +15910,37 @@ function PhotoLightbox({ photos, index, onClose, onIndex }: { photos: string[]; 
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+// Carte annonce/besoin en lecture seule, pour la fiche admin (pas de boutons contact/boost).
+function AdminPubCard({ pub }: { pub: Publication }) {
+  const isProp = pub.type === "propose";
+  const priceTxt = isProp ? (pub.budget ? "À partir de " + fmtFCFA(pub.budget) : "Tarif à discuter") : (pub.budget ? "Budget : " + fmtFCFA(pub.budget) : "Budget : à discuter");
+  const photos = pub.photos || [];
+  const isActive = (pub.status || "active") === "active";
+  return (
+    <div style={{ background: G.creme, border: `1.5px solid ${pub.is_boosted ? G.or : G.gris}`, borderRadius: 14, overflow: "hidden" }}>
+      {photos.length > 0 && <img src={photos[0]} alt="" loading="lazy" style={{ width: "100%", height: 130, objectFit: "cover", display: "block" }} />}
+      <div style={{ padding: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 6 }}>
+          <span style={{ fontSize: 10.5, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.4, padding: "3px 8px", borderRadius: 6, background: isProp ? "rgba(22,163,74,0.12)" : "rgba(212,168,67,0.18)", color: isProp ? "#16A34A" : "var(--c-goldText)" }}>{pub.category}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+            {pub.is_boosted && <span style={{ fontSize: 9.5, fontWeight: 800, color: "#fff", background: G.or, borderRadius: 6, padding: "2px 7px" }}>★ EN AVANT</span>}
+            {!isActive && <span style={{ fontSize: 9.5, fontWeight: 800, color: "#888", background: "rgba(0,0,0,0.06)", borderRadius: 6, padding: "2px 7px" }}>{pub.status}</span>}
+          </div>
+        </div>
+        <div style={{ fontSize: 14, fontWeight: 800, color: G.brun, marginBottom: 3, lineHeight: 1.3 }}>{pub.title}</div>
+        <div style={{ fontSize: 12.5, color: G.brunLight, lineHeight: 1.45, marginBottom: 8, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{pub.description}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 11.5, color: G.brun, fontWeight: 600 }}>
+          <span>{pub.location || pub.city}</span>
+          <span style={{ width: 1, height: 12, background: G.gris }} />
+          <span>{priceTxt}</span>
+          <span style={{ flex: 1 }} />
+          <span style={{ color: G.brunLight, fontWeight: 500 }}>{timeAgo(pub.created_at)}</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -17363,10 +17482,19 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
             : <button onClick={() => onToast("Numéro non disponible")} style={{ flex: 1, minWidth: 0, background: G.vert, color: "#fff", border: "none", borderRadius: 12, padding: "14px", textAlign: "center", fontWeight: 700, fontSize: "0.92rem", cursor: "pointer", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: 0.7 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Appeler</button>}
         </div>
       ) : (
-        <div style={{ padding: "16px", display: "flex", gap: 8 }}>
-          <button className="moyo-btn-primary" onClick={contactPro} style={{ flex: 1, minWidth: 0, background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", boxSizing: "border-box", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>Message</button>
-          {proIsPremium && wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: "#25D366", color: "#fff", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>WhatsApp</div></a>}
-          {proIsPremium && tel && <a href={`tel:${tel}`} style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, color: G.brun, borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>Appeler</div></a>}
+        <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button className="moyo-btn-primary" onClick={contactPro} style={{ flex: 1, minWidth: 0, background: G.or, color: "#fff", border: "none", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", boxSizing: "border-box", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>Message</button>
+            {proIsPremium && wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: "#25D366", color: "#fff", borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>WhatsApp</div></a>}
+            {proIsPremium && tel && <a href={`tel:${tel}`} style={{ flex: 1, minWidth: 0, textDecoration: "none" }}><div style={{ background: G.blanc, border: `1.5px solid ${G.gris}`, color: G.brun, borderRadius: 12, padding: "13px", textAlign: "center", fontWeight: 700, fontSize: "0.9rem", boxSizing: "border-box" }}>Appeler</div></a>}
+          </div>
+          {/* Nom d'utilisateur WhatsApp — même règle Premium que le numéro. Affiché en texte simple (pas de lien deviné, WhatsApp n'a pas encore documenté le format de lien par nom d'utilisateur). */}
+          {proIsPremium && pro.whatsapp_username && (
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.78rem", color: G.brunLight }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#25D366" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Nom d'utilisateur WhatsApp : <b style={{ color: G.brun }}>@{pro.whatsapp_username}</b>
+            </div>
+          )}
         </div>
       ))}
 
@@ -17859,7 +17987,7 @@ export default function App() {
     if (!document.getElementById("moyo-theme-vars")) {
       const s = document.createElement("style");
       s.id = "moyo-theme-vars";
-      s.textContent = ':root{--c-creme:#F8F9FB;--c-cremeDark:#EEF0F4;--c-blanc:#FFFFFF;--c-gris:#E5E7EB;--c-brun:#1A1A1A;--c-brunLight:#6B7280;--c-fond:#E8E9EE;--c-profile-bg:#EEF0F4;--c-pill-fg:#1A1A1A;--c-pill-bd:#E5E7EB;--c-goldText:var(--c-goldText)}:root[data-theme="dark"],[data-theme="dark"]{--c-creme:#08080D;--c-cremeDark:#121218;--c-blanc:#16161D;--c-gris:#26262F;--c-brun:#F3F4F6;--c-brunLight:#9CA3AF;--c-fond:#08080D;--c-profile-bg:radial-gradient(circle at top,#1B1B22 0%,#121218 45%,#08080D 100%);--c-pill-fg:#FFFFFF;--c-pill-bd:rgba(255,255,255,0.18);--c-goldText:#EAC25A}html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #root{background-color:#08080D}';
+      s.textContent = ':root{--c-creme:#F8F9FB;--c-cremeDark:#EEF0F4;--c-blanc:#FFFFFF;--c-gris:#E5E7EB;--c-brun:#1A1A1A;--c-brunLight:#6B7280;--c-fond:#E8E9EE;--c-profile-bg:#EEF0F4;--c-pill-fg:#1A1A1A;--c-pill-bd:#E5E7EB;--c-goldText:#B8860B}:root[data-theme="dark"],[data-theme="dark"]{--c-creme:#08080D;--c-cremeDark:#121218;--c-blanc:#16161D;--c-gris:#26262F;--c-brun:#F3F4F6;--c-brunLight:#9CA3AF;--c-fond:#08080D;--c-profile-bg:radial-gradient(circle at top,#1B1B22 0%,#121218 45%,#08080D 100%);--c-pill-fg:#FFFFFF;--c-pill-bd:rgba(255,255,255,0.18);--c-goldText:#EAC25A}html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #root{background-color:#08080D}';
       document.head.appendChild(s);
     }
     // ── Police Inter (identité Business) + comportements visuels (survol cartes/boutons) ──
