@@ -2939,7 +2939,7 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
           {/* 7bis · Nom d'utilisateur WhatsApp (optionnel) — même visibilité que le numéro : réservé aux membres Premium sur la fiche publique */}
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 500, marginBottom: 7, fontSize: "0.88rem", color: "#555" }}>Nom d'utilisateur WhatsApp <span style={{ color: "#aaa", fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
-            <input value={form.whatsapp_username} onChange={e => upd("whatsapp_username", e.target.value.replace(/[^a-zA-Z0-9_.]/g, "").slice(0, 30))} placeholder="Ex : R2G_officiel" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
+            <input value={form.whatsapp_username} onChange={e => upd("whatsapp_username", e.target.value.replace(/[^a-zA-Z0-9_.-]/g, "").slice(0, 30))} placeholder="Ex : Moyo_congo_Officiel" style={{ width: "100%", boxSizing: "border-box", display: "block", padding: "13px 14px", border: `2px solid ${G.gris}`, borderRadius: 12, fontSize: "0.93rem", background: G.blanc, color: G.brun, outline: "none" }} />
             <div style={{ fontSize: "0.74rem", color: "#aaa", marginTop: 5 }}>Visible sur ta fiche uniquement si tu es Premium, comme ton numéro.</div>
           </div>
           {/* 8 · Téléphone public (obligatoire) */}
@@ -7722,7 +7722,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           <input value={form.whatsapp || ""} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value.slice(0, 25) }))} placeholder="+242 06 000 00 00" style={I} />
 
           <label style={L}>Nom d'utilisateur WhatsApp <span style={{ color: G.brunLight, fontSize: "0.78rem", fontWeight: 400 }}>(optionnel)</span></label>
-          <input value={form.whatsapp_username || ""} onChange={e => setForm(f => ({ ...f, whatsapp_username: e.target.value.replace(/[^a-zA-Z0-9_.]/g, "").slice(0, 30) }))} placeholder="Ex : R2G_officiel" style={I} />
+          <input value={form.whatsapp_username || ""} onChange={e => setForm(f => ({ ...f, whatsapp_username: e.target.value.replace(/[^a-zA-Z0-9_.-]/g, "").slice(0, 30) }))} placeholder="Ex : Moyo_congo_Officiel" style={I} />
           <div style={{ fontSize: "0.74rem", color: G.brunLight, marginTop: -10, marginBottom: 4 }}>Visible sur ta fiche uniquement si tu es Premium, comme ton numéro.</div>
 
           <label style={L}>Téléphone public <span style={{ color: G.rouge, fontSize: "0.78rem", fontWeight: 600 }}>*</span></label>
@@ -16343,8 +16343,9 @@ function PublishModal({ auth, onClose, onPublished, embedded, presetType, editPu
   );
 
   if (embedded) {
+    const isWideForm = window.innerWidth >= 768;
     return (
-      <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
+      <div style={{ maxWidth: isWideForm ? 720 : 500, margin: "0 auto", width: "100%" }}>
         <div style={{ position: "sticky", top: 0, zIndex: 5, background: G.creme, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "16px 18px", borderBottom: `1px solid ${G.gris}` }}>
           <h3 style={{ fontSize: 18, fontWeight: 900, margin: 0, color: G.brun }}>{headerTitle}</h3>
           <button onClick={onClose} aria-label="Fermer" style={{ width: 32, height: 32, borderRadius: "50%", border: "none", background: G.gris, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
@@ -16824,6 +16825,7 @@ function PubDetail({ auth, pub: initialPub, onBack, onChanged }: { auth: Auth; p
 }
 
 function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: () => void; onGoMessages: (pid: string) => void }) {
+  const isWideMyPub = window.innerWidth >= 768;
   const [pubs, setPubs] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [boostTarget, setBoostTarget] = useState<Publication | null>(null);
@@ -16845,7 +16847,7 @@ function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: ()
   }
 
   return (
-    <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
+    <div style={{ maxWidth: isWideMyPub ? "none" : 500, margin: "0 auto", width: "100%" }}>
       <div style={{ position: "sticky", top: 0, zIndex: 5, background: G.creme, display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", borderBottom: `1px solid ${G.gris}` }}>
         <button onClick={onBack} aria-label="Retour" style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: G.blanc, boxShadow: "0 1px 4px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ color: G.brun }}><polyline points="15 18 9 12 15 6"/></svg>
@@ -16873,6 +16875,7 @@ function MyPublications({ auth, onBack, onGoMessages }: { auth: Auth; onBack: ()
 function PublierHub({ auth, accountType, onGoFeed, onGoMessages, onShowPremium }: { auth: Auth; accountType?: string; onGoFeed: () => void; onGoMessages: (pid: string) => void; onShowPremium?: (r: string) => void }) {
   const [view, setView] = useState<"menu" | "cherche" | "propose" | "mes" | "catalogue">("menu");
   const isPro = accountType === "pro";
+  const isWidePublier = window.innerWidth >= 768;
 
   if (view === "cherche" || view === "propose") {
     return <PublishModal auth={auth} embedded presetType={view} onClose={() => setView("menu")} onPublished={() => { setView("menu"); onGoFeed(); }} />;
@@ -16907,10 +16910,10 @@ function PublierHub({ auth, accountType, onGoFeed, onGoMessages, onShowPremium }
   const items = allItems.filter(it => it.key === "mes" || (isPro ? (it.key === "propose" || it.key === "catalogue") : it.key === "cherche"));
 
   return (
-    <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", boxSizing: "border-box", overflowX: "hidden", padding: "22px 16px 24px" }}>
+    <div style={{ maxWidth: isWidePublier ? "none" : 500, margin: "0 auto", width: "100%", boxSizing: "border-box", overflowX: "hidden", padding: "22px 16px 24px" }}>
       <h2 style={{ fontSize: "1.5rem", fontWeight: 900, color: G.brun, margin: "0 0 4px", letterSpacing: "-0.5px" }}>Publier</h2>
       <p style={{ fontSize: "0.92rem", color: G.brunLight, margin: "0 0 22px" }}>Que souhaitez-vous faire ?</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div className="dgrid" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {items.map(it => (
           <button key={it.key} onClick={() => setView(it.key)} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", maxWidth: "100%", boxSizing: "border-box", textAlign: "left", cursor: "pointer", background: G.blanc, border: `1px solid ${G.gris}`, borderRadius: 18, padding: "18px 16px", boxShadow: "0 2px 10px rgba(0,0,0,0.04)", fontFamily: "inherit" }}>
             <div style={{ width: 52, height: 52, flexShrink: 0, borderRadius: 14, background: it.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>{it.icon}</div>
@@ -16982,6 +16985,7 @@ async function uploadCatalogPhoto(token: string, userId: string, file: File): Pr
 
 // ── Gestion du catalogue par le professionnel (CRUD) ──
 function CatalogManager({ auth, onClose, onShowPremium }: { auth: Auth; onClose: () => void; onShowPremium?: (r: string) => void }) {
+  const isWideCat = window.innerWidth >= 768;
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<CatalogItem | null>(null);
@@ -17077,7 +17081,7 @@ function CatalogManager({ auth, onClose, onShowPremium }: { auth: Auth; onClose:
 
       {toast && <div style={{ position: "fixed", top: 70, left: "50%", transform: "translateX(-50%)", background: G.brun, color: "#fff", padding: "10px 18px", borderRadius: 50, fontSize: "0.82rem", zIndex: 5, boxShadow: "0 4px 14px rgba(0,0,0,0.2)" }} onAnimationEnd={() => setToast("")}>{toast}</div>}
 
-      <div style={{ maxWidth: 560, margin: "0 auto", padding: "16px" }}>
+      <div style={{ maxWidth: isWideCat ? "none" : 560, margin: "0 auto", padding: "16px" }}>
         {!missingTable && !editing && (auth.isPremium ? (
           <div style={{ background: "rgba(22,163,74,0.08)", border: "1.5px solid rgba(22,163,74,0.35)", borderRadius: 12, padding: "12px 14px", marginBottom: 14, display: "flex", gap: 10, alignItems: "center" }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={G.vert} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
