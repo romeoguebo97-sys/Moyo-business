@@ -15767,11 +15767,13 @@ const timeAgo = (iso?: string) => {
 
 function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(8,8,13,0.55)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: G.creme, width: "100%", maxWidth: 500, borderRadius: "20px 20px 0 0", maxHeight: "calc(100vh - env(safe-area-inset-top) - 8px)", overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(8,8,13,0.55)", display: "flex", alignItems: "flex-end", justifyContent: "center", overscrollBehavior: "contain", touchAction: "none" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: G.creme, width: "100%", maxWidth: 500, borderRadius: "20px 20px 0 0", maxHeight: "calc(100vh - env(safe-area-inset-top) - 8px)", overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain", touchAction: "pan-y" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 20px 14px", position: "sticky", top: 0, background: G.creme, borderBottom: `1px solid ${G.gris}`, zIndex: 2 }}>
           <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>{title}</h3>
-          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: "50%", border: "none", background: G.gris, fontSize: 18, cursor: "pointer", flexShrink: 0 }}>×</button>
+          <button onClick={onClose} aria-label="Fermer" style={{ width: 32, height: 32, minWidth: 32, borderRadius: "50%", border: "none", background: G.gris, cursor: "pointer", flexShrink: 0, padding: 0, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 0 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={G.brun} strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
         </div>
         <div style={{ padding: "18px 20px calc(28px + env(safe-area-inset-bottom))" }}>{children}</div>
       </div>
