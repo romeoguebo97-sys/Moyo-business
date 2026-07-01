@@ -1680,6 +1680,7 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
   return (
     <div className="mb-root">
       <style>{`
+        body, html { margin:0; padding:0; background:#0e1326; }
         .mb-root {
           --nuit:#0e1326; --or:#D4A843; --creme:#F8F9FB; --vert:#16A34A;
           --gris:#6B7280; --gris-clair:#E5E7EB; --blanc:#FFFFFF;
@@ -1698,9 +1699,9 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
         .mb-nav-outline{border:1.5px solid rgba(255,255,255,0.4);border-radius:8px;}
         .mb-nav-outline:hover{border-color:var(--or);}
         .mb-burger{display:none;width:42px;height:42px;align-items:center;justify-content:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:11px;color:#fff;cursor:pointer;padding:0;flex-shrink:0;}
-        .mb-menu-ov{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:90;opacity:0;pointer-events:none;transition:opacity .38s ease;backdrop-filter:blur(2px);}
+        .mb-menu-ov{position:fixed;inset:0;background:rgba(14,19,38,0.45);z-index:90;opacity:0;pointer-events:none;transition:opacity .38s ease;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
         .mb-menu-ov.open{opacity:1;pointer-events:auto;}
-        .mb-drawer{position:fixed;top:0;right:0;height:100vh;height:100dvh;width:82%;max-width:330px;background:#0d0d12;border-left:1px solid rgba(212,168,67,0.18);z-index:95;display:flex;flex-direction:column;gap:10px;padding:18px 18px calc(18px + env(safe-area-inset-bottom));transform:translateX(100%);transition:transform .42s cubic-bezier(0.22,0.61,0.36,1);box-shadow:-24px 0 70px rgba(0,0,0,0.55);will-change:transform;}
+        .mb-drawer{position:fixed;top:0;right:0;height:100vh;height:100dvh;width:82%;max-width:330px;background:#0e1326;border-left:1px solid rgba(212,168,67,0.18);z-index:95;display:flex;flex-direction:column;gap:10px;padding:18px 18px calc(18px + env(safe-area-inset-bottom));transform:translateX(100%);transition:transform .42s cubic-bezier(0.22,0.61,0.36,1);box-shadow:-24px 0 70px rgba(0,0,0,0.55);will-change:transform;}
         .mb-drawer.open{transform:translateX(0);}
         .mb-drawer-top{display:flex;align-items:center;justify-content:space-between;padding:4px 2px 14px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.08);}
         .mb-drawer-x{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;cursor:pointer;padding:0;}
