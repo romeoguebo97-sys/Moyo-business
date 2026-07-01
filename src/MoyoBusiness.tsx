@@ -94,7 +94,6 @@ const hasContactInfo = (text: string): boolean =>
   || (CONTACT_BANNED_REGEX !== null && CONTACT_BANNED_REGEX.test(text))
   || countObfuscatedDigits(text) >= 8; // 8 chiffres ou plus (sous n'importe quelle forme) = numéro déguisé
 
-
 // ── MODÉRATION : insultes, arnaques, contenu interdit ──
 const MODERATION_RULES: { pattern: RegExp; type: "insult" | "scam" | "sexual" }[] = [
   // Insultes français - liste étendue
@@ -132,17 +131,6 @@ const moderateMessage = (text: string): { blocked: boolean; type?: "insult" | "s
   return { blocked: false };
 };
 
-const getModerationMessage = (type: "insult" | "scam" | "sexual"): string => {
-  if (type === "insult") return "Ce message contient des termes irrespectueux et ne peut pas être envoyé. Sur Moyo Business, nous encourageons la bienveillance, la douceur et le respect mutuel.";
-  if (type === "scam") return "Ce message contient des demandes d'argent ou de transfert. Ce type de comportement est interdit sur Moyo Business et peut entraîner la suppression de votre compte.";
-  if (type === "sexual") return "Ce message contient du contenu inapproprié et ne peut pas être envoyé.";
-  return "Ce message ne respecte pas les règles de Moyo Business.";
-};
-
-// Fond messages style Moyo Business - compatible tous navigateurs mobiles
-const MSG_BG_STYLE: React.CSSProperties = {
-  position: "relative",
-};
 const SUPER_ADMIN_ID = "1d7a2e08-4454-43ea-8db0-4d1aeba8e69d";
 const REFERRAL_BONUS_DAYS = 7;
 // Intervalles de polling — modifiables via app_settings
@@ -486,28 +474,6 @@ type ToastState = { msg: string; type?: "success" | "error" | "premium" } | null
 
 const STATUS_BUCKETS = ["statuses", "status"] as const;
 // ── Envoie un message automatique de bienvenue dans un nouveau match ──
-
-const shuffleArray = <T,>(items: T[]): T[] => {
-  const arr = [...items];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-};
-
-const priorityRandomizeProfiles = (items: Profile[]): Profile[] => {
-  const score = (p: Profile) => (p.is_premium ? 4 : 0) + (p.is_verified ? 3 : 0) + ((p as any).is_certified ? 2 : 0);
-  const buckets = new Map<number, Profile[]>();
-  for (const item of items) {
-    const key = score(item);
-    const list = buckets.get(key) || [];
-    list.push(item);
-    buckets.set(key, list);
-  }
-  return Array.from(buckets.keys()).sort((a,b)=>b-a).flatMap(k => shuffleArray(buckets.get(k) || []));
-};
-
 
 const getStatusStoragePath = (url?: string | null): string | null => {
   if (!url) return null;
@@ -865,7 +831,6 @@ const sb = {
     });
   },
 
-
   subscribeRealtime(token: string, table: string, filter: string, callback: () => void): WebSocket | null {
     try {
       const wsUrl = SUPABASE_URL.replace("https://", "wss://").replace("http://", "ws://");
@@ -885,129 +850,6 @@ const sb = {
     } catch { return null; }
   },
 };
-
-const GLOBAL_CSS = `
-  :root{ --c-creme:#F8F9FB; --c-cremeDark:#EEF0F4; --c-blanc:#FFFFFF; --c-gris:#E5E7EB; --c-brun:#1A1A1A; --c-brunLight:#6B7280; --c-fond:#E8E9EE; --c-goldText:var(--c-goldText); }
-  :root[data-theme="dark"], [data-theme="dark"]{ --c-creme:#08080D; --c-cremeDark:#121218; --c-blanc:#16161D; --c-gris:#26262F; --c-brun:#F3F4F6; --c-brunLight:#9CA3AF; --c-fond:#08080D; --c-goldText:#EAC25A; }
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
-  html{overflow-x:hidden;width:100%;max-width:100vw;background-color:var(--c-fond);-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none}
-  body{overflow-x:hidden;width:100%;max-width:100vw;min-height:100vh;-webkit-text-size-adjust:100%;text-size-adjust:100%;background-color:var(--c-fond);overscroll-behavior:none}
-  /* PWA iOS 18 : forcer touch-action:auto sur les champs pour que le clavier natif apparaisse */
-  input,textarea,select{touch-action:auto !important}
-  html{background-color:var(--c-fond)}
-  #root{overflow-x:hidden;width:100%;max-width:100vw;min-height:100vh;background-color:var(--c-fond)}
-  /* Fix clavier iOS - la barre reste fixe au-dessus du clavier */
-  [data-chat-container]{height:100%;height:-webkit-fill-available;}
-  @supports(height:100dvh){[data-chat-container]{height:100dvh;}}
-  @media(min-width:520px){body{background-color:#EDE5D8;background-image:radial-gradient(circle,rgba(212,168,67,0.06) 1px,transparent 1px),radial-gradient(circle,rgba(212,168,67,0.05) 1px,transparent 1px);background-size:30px 30px,50px 50px}}
-  input,select,textarea,button{font-family:inherit;box-sizing:border-box;max-width:100%;-webkit-appearance:none}
-  input,select,textarea{display:block;width:100%}
-  img{max-width:100%;height:auto;display:block}
-  div,section,nav,header,footer{max-width:100%;box-sizing:border-box}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-  .msg-bg {
-    background-image: none;
-    background-color: var(--c-creme);
-  }
-  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
-  @keyframes shimmer{0%{background-position:-450px 0}100%{background-position:450px 0}}
-  .skeleton{background:#e7e4dd;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,0.7) 50%,rgba(255,255,255,0) 100%);background-size:450px 100%;background-repeat:no-repeat;animation:shimmer 1.25s ease-in-out infinite;border-radius:10px}
-  button{transition:transform .12s cubic-bezier(.34,1.56,.64,1)}
-  button:active{transform:scale(.95)}
-  .tap{transition:transform .14s cubic-bezier(.34,1.56,.64,1)}
-  .tap:active{transform:scale(.97)}
-  .card-hover:active{transform:scale(.985)}
-  @keyframes pageIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
-  .page-anim{animation:pageIn .26s cubic-bezier(.22,.61,.36,1)}
-  /* ── Transitions d'ouverture/fermeture des conversations (style WhatsApp/iMessage) ── */
-  @keyframes convSlideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
-  @keyframes convSlideOut{from{transform:translateX(0)}to{transform:translateX(100%)}}
-  @keyframes moyoSheetUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
-  .conv-enter{animation:convSlideIn .26s cubic-bezier(.22,.61,.36,1)}
-  .conv-leave{animation:convSlideOut .24s cubic-bezier(.4,0,.7,.3) forwards}
-  @media(prefers-reduced-motion:reduce){.skeleton{animation:none}.page-anim{animation:none}.conv-enter,.conv-leave{animation:none}button:active,.tap:active,.card-hover:active{transform:none}}
-  /* ── Chat textarea : comportement naturel iOS/Android ── */
-  .chat-textarea {
-    -webkit-appearance: none;
-    appearance: none;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    word-break: break-word;
-    white-space: pre-wrap;
-  }
-  .chat-textarea:focus { outline: none; }
-  /* iOS : empêche le zoom automatique sur focus */
-  @supports (-webkit-touch-callout: none) {
-    .chat-textarea { font-size: 16px !important; }
-    input, select, textarea { font-size: 16px !important; }
-  }
-  .admin-tabs::-webkit-scrollbar{display:none}
-  .match-subtabs::-webkit-scrollbar{display:none}
-  .msg-arrow{opacity:0;transition:opacity 0.15s}
-  .msg-row:hover .msg-arrow{opacity:1}
-  @media(hover:none){.msg-arrow{opacity:1}}
-  .fu2{animation:fadeUp 0.7s 0.25s both ease-out}
-  .fu3{animation:fadeUp 0.7s 0.4s both ease-out}
-  .fu4{animation:fadeUp 0.7s 0.55s both ease-out}
-  .fu5{animation:fadeUp 0.7s 0.7s both ease-out}
-  .fu6{animation:fadeUp 0.7s 0.85s both ease-out}
-  .heart{animation:float 3s ease-in-out infinite;display:inline-block}
-  .btn-p{transition:all 0.2s ease!important}
-  .btn-p:hover{transform:translateY(-3px)!important;box-shadow:0 14px 36px rgba(212,168,67,0.5)!important}
-  .btn-p:active{transform:translateY(0) scale(0.97)!important}
-  .btn-o{transition:all 0.2s ease!important;border:2px solid #1a1a1a!important}
-  .btn-o:hover{background:#1a1a1a!important;color:#ffffff!important;transform:translateY(-2px)!important}
-  .btn-o:active{transform:scale(0.97)!important}
-  .stat:hover{transform:translateY(-5px) scale(1.04)!important;box-shadow:0 10px 28px rgba(0,0,0,0.14)!important}
-  .stat{transition:all 0.25s ease!important}
-  .store:hover{transform:translateY(-3px);opacity:0.92}
-  .store{transition:all 0.22s ease!important}
-  .fb:hover{opacity:0.88;transform:translateY(-2px)}
-  .fb{transition:all 0.2s!important}
-  .nav-link:hover{color:#D4A843!important}
-  .nav-link{transition:color 0.2s!important}
-  .card-hover{transition:transform 0.18s ease,box-shadow 0.18s ease!important}
-  .card-hover:hover{transform:translateY(-2px)!important;box-shadow:0 8px 24px rgba(0,0,0,0.12)!important}
-  .card-hover:active{transform:scale(0.98)!important}
-  .trust-card{transition:transform 0.22s ease,box-shadow 0.22s ease!important}
-  .trust-card:hover{transform:translateY(-6px)!important;box-shadow:0 16px 40px rgba(0,0,0,0.13)!important}
-  .testi-card{transition:transform 0.22s ease,box-shadow 0.22s ease!important}
-  .testi-card:hover{transform:translateY(-5px)!important;box-shadow:0 14px 36px rgba(0,0,0,0.12)!important}
-  .social-icon{transition:transform 0.18s ease,opacity 0.18s ease!important}
-  .social-icon:hover{transform:translateY(-3px) scale(1.12)!important;opacity:0.85!important}
-  .profile-card{transition:transform 0.18s ease,box-shadow 0.18s ease!important}
-  .profile-card:hover{transform:translateY(-2px)!important;box-shadow:0 8px 28px rgba(0,0,0,0.13)!important}
-  .profile-card:active{transform:scale(0.99)!important}
-  .action-card{transition:transform 0.15s ease,box-shadow 0.15s ease,background 0.15s ease!important}
-  .action-card:hover{transform:translateX(3px)!important;box-shadow:0 4px 16px rgba(0,0,0,0.08)!important}
-  .action-card:active{transform:scale(0.98)!important}
-  .icon-btn{transition:transform 0.15s ease,opacity 0.15s ease!important}
-  .icon-btn:hover{transform:scale(1.08)!important;opacity:0.9!important}
-  .icon-btn:active{transform:scale(0.93)!important}
-  .nav-tab{transition:all 0.2s ease!important}
-  .nav-tab-active{background:rgba(212,168,67,0.12)!important;border-radius:14px!important}
-  .verified-badge{display:inline-flex;align-items:center;justify-content:center;background:#1d9bf0;border-radius:50%;width:18px;height:18px;flex-shrink:0}
-  @media(max-width:767px){
-    .landing-hero-text{text-align:center!important}
-    .fu3{text-align:center!important;margin-left:auto!important;margin-right:auto!important}
-    .landing-hero-btns{justify-content:center!important}
-  }
-  @media(min-width:768px){
-    .landing-hero{display:grid!important;grid-template-columns:1fr 1fr!important;gap:48px!important;align-items:center!important;text-align:left!important;max-width:1100px!important;margin:0 auto!important;padding:60px 40px 40px!important}
-    .landing-hero-text{text-align:left!important}
-    .landing-hero-btns{justify-content:flex-start!important}
-    .landing-stats{max-width:900px!important;margin:0 auto!important;padding:0 40px 0!important;grid-template-columns:repeat(3,1fr)!important}
-    .landing-sections{max-width:1100px!important;margin:0 auto!important;padding:0 40px!important}
-    .trust-grid{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:20px!important}
-    .testi-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:20px!important}
-    .steps-layout{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:32px!important}
-    .step-connector{display:block!important}
-    .nav-inner{max-width:1100px!important;margin:0 auto!important;padding:0 40px!important;width:100%!important}
-  }
-`;
 
 function Btn({ children, variant = "primary", onClick, style = {}, disabled = false, loading = false }: {
   children: React.ReactNode; variant?: string; onClick?: () => void;
@@ -1196,8 +1038,6 @@ function VerifiedBadge({ size = 16 }: { size?: number }) {
     </div>
   );
 }
-
-
 
 function PremiumBadge({ size = 16 }: { size?: number }) {
   return (
@@ -1565,46 +1405,6 @@ function ResetPassword({ onNav }: { onNav: (p: string) => void }) {
         Changer mon mot de passe ✓
       </Btn>
     </AuthLayout>
-  );
-}
-
-// Composant compteur animé
-function StatCounter({ target, suffix, label, svg }: { target: number; suffix: string; label: string; svg: React.ReactNode }) {
-  const [count, setCount] = useState(0);
-  const [started, setStarted] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !started) {
-        setStarted(true);
-        const duration = 1800;
-        const steps = 60;
-        const increment = target / steps;
-        let current = 0;
-        const timer = setInterval(() => {
-          current += increment;
-          if (current >= target) { setCount(target); clearInterval(timer); }
-          else setCount(Math.floor(current));
-        }, duration / steps);
-      }
-    }, { threshold: 0.3 });
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [target, started]);
-
-  const display = target >= 1000
-    ? (count >= 1000 ? `${Math.floor(count / 1000)} ${Math.floor((count % 1000) / 100) > 0 ? Math.floor((count % 1000) / 100) + "00" : "000"}` : count.toString())
-    : count.toString();
-
-  return (
-    <div ref={ref} className="stat" style={{ background: G.creme, borderRadius: 16, padding: "18px 12px", textAlign: "center" }}>
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>{svg}</div>
-      <div style={{ fontSize: "1.4rem", fontWeight: 700, color: G.rouge, marginBottom: 2 }}>
-        {target >= 1000 ? `${Math.floor(count / 1000)} ${String(count % 1000).padStart(3,'0')}${suffix}` : `${count}${suffix}`}
-      </div>
-      <div style={{ fontSize: "0.7rem", color: G.brunLight, fontWeight: 500 }}>{label}</div>
-    </div>
   );
 }
 
@@ -2290,7 +2090,6 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
     </div>
   );
 }
-
 
 function About({ onBack }: { onBack: () => void }) {
   return (
@@ -3123,7 +2922,6 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
         </>}
       </>}
 
-
       <p style={{ textAlign: "center", marginTop: 20, fontSize: "0.85rem", color: "#555" }}>
         Déjà un compte ? <span style={{ color: G.rouge, cursor: "pointer", fontWeight: 600 }} onClick={() => onNav("login")}>Se connecter</span>
       </p>
@@ -3136,7 +2934,6 @@ if (!patchRes.ok || !updatedRow || updatedRow.is_complete !== true) {
     </AuthLayout>
   );
 }
-
 
 // ── FAQ pour le bot ──
 const BOT_FAQ = [
@@ -5125,154 +4922,6 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
   </div>;
 }
 
-
-// ── CAROUSEL D'ENGAGEMENT PREMIUM ──
-const premiumConversionSlides = [
-  {
-    id: 1,
-    title: "Passe au niveau supérieur",
-    description: "Profitez d'une expérience plus complète pour développer votre activité.",
-    buttonText: "Découvrir Premium",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/>
-      </svg>
-    ),
-    accent: G.or,
-    bg: "linear-gradient(135deg,rgba(212,168,67,0.12),rgba(212,168,67,0.04))",
-  },
-  {
-    id: 2,
-    title: "Contactez les clients",
-    description: "Avec Premium, échangez avec les clients qui publient des besoins et décrochez des missions.",
-    buttonText: "Passer à Premium",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-      </svg>
-    ),
-    accent: G.rouge,
-    bg: "linear-gradient(135deg,rgba(212,168,67,0.08),rgba(212,168,67,0.02))",
-  },
-  {
-    id: 3,
-    title: "Sois plus visible",
-    description: "Ton profil peut être mieux mis en avant auprès des personnes compatibles.",
-    buttonText: "Améliorer mon profil",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-      </svg>
-    ),
-    accent: G.vert,
-    bg: "linear-gradient(135deg,rgba(26,92,58,0.08),rgba(26,92,58,0.02))",
-  },
-  {
-    id: 4,
-    title: "Des échanges plus qualifiés",
-    description: "Accède à une expérience pensée pour ceux qui veulent vraiment construire quelque chose.",
-    buttonText: "Découvrir Premium",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-      </svg>
-    ),
-    accent: "#7B5EA7",
-    bg: "linear-gradient(135deg,rgba(123,94,167,0.08),rgba(123,94,167,0.02))",
-  },
-  {
-    id: 5,
-    title: "Moins de limites, plus de liberté",
-    description: "Profite d'une navigation plus fluide et d'options avancées.",
-    buttonText: "Voir les avantages",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-      </svg>
-    ),
-    accent: G.or,
-    bg: "linear-gradient(135deg,rgba(212,168,67,0.12),rgba(212,168,67,0.04))",
-  },
-];
-
-const premiumAdviceSlides = [
-  {
-    id: 1,
-    title: "Choisis une photo claire",
-    description: "Une photo lumineuse, nette et récente inspire plus facilement confiance.",
-    buttonText: "Modifier mon profil",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-        <circle cx="12" cy="13" r="4"/>
-      </svg>
-    ),
-    accent: G.rouge,
-    bg: "linear-gradient(135deg,rgba(212,168,67,0.08),rgba(212,168,67,0.02))",
-    tab: "profile",
-  },
-  {
-    id: 2,
-    title: "Montre ton visage",
-    description: "Les profils avec un visage bien visible donnent plus envie d'engager la conversation.",
-    buttonText: "Ajouter une photo",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="8" r="4"/>
-        <path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
-      </svg>
-    ),
-    accent: G.vert,
-    bg: "linear-gradient(135deg,rgba(26,92,58,0.08),rgba(26,92,58,0.02))",
-    tab: "profile",
-  },
-  {
-    id: 3,
-    title: "Écris une bio simple",
-    description: "Quelques phrases suffisent pour présenter votre activité et ce que vous proposez.",
-    buttonText: "Compléter ma bio",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
-      </svg>
-    ),
-    accent: G.or,
-    bg: "linear-gradient(135deg,rgba(212,168,67,0.12),rgba(212,168,67,0.04))",
-    tab: "profile",
-  },
-  {
-    id: 4,
-    title: "Reste naturel",
-    description: "Les profils trop parfaits paraissent moins crédibles. Montre une vraie part de toi.",
-    buttonText: "Améliorer mon profil",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-      </svg>
-    ),
-    accent: "#7B5EA7",
-    bg: "linear-gradient(135deg,rgba(123,94,167,0.08),rgba(123,94,167,0.02))",
-    tab: "profile",
-  },
-  {
-    id: 5,
-    title: "Commence avec attention",
-    description: "Un message personnalisé fonctionne mieux qu'un simple \"salut\".",
-    buttonText: "Voir mes mises en relation",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-      </svg>
-    ),
-    accent: G.rouge,
-    bg: "linear-gradient(135deg,rgba(212,168,67,0.08),rgba(212,168,67,0.02))",
-    tab: "matches",
-  },
-];
-
-
-
-
 // ─── Types enrichis pour l'historique avancé ───────────────────────────────
 type LikeRecord = { from_user: string; to_user: string; created_at?: string };
 type ViewRecord  = { viewer_id: string; viewed_id: string; created_at?: string };
@@ -5280,10 +4929,6 @@ type VisitRecord = { visitor_id: string; visited_id: string; created_at?: string
 type MatchRecord = { id: string; user1: string; user2: string };
 
 // Helpers date
-const isRecent = (iso?: string, hours = 48) => {
-  if (!iso) return false;
-  return (Date.now() - new Date(iso).getTime()) < hours * 3600 * 1000;
-};
 const fmtDate = (iso?: string) => {
   if (!iso) return "";
   const d = new Date(iso);
@@ -5294,33 +4939,6 @@ const fmtDate = (iso?: string) => {
   if (diffH < 48) return "Hier";
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 };
-
-// Switch interne réutilisable
-function InnerSwitch({ options, value, onChange, compact }: {
-  options: { id: string; label: string; icon: React.ReactNode }[];
-  value: string;
-  onChange: (v: string) => void;
-  compact?: boolean;
-}) {
-  return (
-    <div style={{ display: "flex", background: G.creme, borderRadius: 50, padding: 4, gap: compact ? 2 : 4, marginBottom: 16 }}>
-      {options.map(o => (
-        <button key={o.id} onClick={() => onChange(o.id)}
-          style={{ flex: 1, minWidth: 0, border: "none", borderRadius: 50, padding: compact ? "8px 6px" : "8px 12px",
-            background: value === o.id ? G.blanc : "transparent",
-            color: value === o.id ? G.rouge : "#666",
-            fontWeight: value === o.id ? 700 : 500,
-            fontSize: compact ? "0.76rem" : "0.8rem", cursor: "pointer", display: "flex", alignItems: "center",
-            justifyContent: "center", gap: compact ? 4 : 5, whiteSpace: "nowrap",
-            boxShadow: value === o.id ? "0 2px 8px rgba(0,0,0,0.1)" : "none",
-            transition: "all 0.18s ease" }}>
-          <span style={{ flexShrink: 0, display: "flex" }}>{o.icon}</span>
-          <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{o.label}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
 
 // Badge générique
 const Badge = memo(function Badge({ label, color = G.rouge, bg = "rgba(212,168,67,0.1)" }: { label: React.ReactNode; color?: string; bg?: string }) {
@@ -5350,8 +4968,6 @@ const EmptyState = memo(function EmptyState({ icon, title, subtitle }: { icon: R
     </div>
   );
 });
-
-
 
 function getOnlineStatus(lastSeen?: string): { label: string; color: string } {
   if (!lastSeen) return { label: "Hors ligne", color: G.brunLight };
@@ -5919,7 +5535,6 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
     }
   };
 
-
   const openStatusViewer = (list: StatusPost[], startIndex = 0) => {
     const raw = (Array.isArray(list) ? list : []).filter(st => !!st.image_url);
     if (!raw.length) return;
@@ -6052,7 +5667,6 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
       setStatusActionLoading(false);
     }
   };
-
 
   const goStatusStep = (dir: 1 | -1) => {
     const list = statusPreviewList.length ? statusPreviewList : (statusPreview ? [statusPreview] : []);
@@ -6406,7 +6020,6 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
     setPreviewImg(prev => { if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev); return null; });
     setBurnMsg(null);
   };
-
 
   const isWideMsg = window.innerWidth >= 768;
 
@@ -7681,9 +7294,6 @@ function CropModal({ src, onConfirm, onCancel }: { src: string; onConfirm: (blob
   );
 }
 
-
-
-
 function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpenAdmin, adminBadgeCount, assistantEnabled = true, onToggleAssistant }: { auth: Auth; onLogout: () => void; onShowPremium: (r: string) => void; darkMode?: boolean; onToggleDark?: () => void; onOpenAdmin?: () => void; adminBadgeCount?: number; assistantEnabled?: boolean; onToggleAssistant?: () => void }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [notifStatus, setNotifStatus] = useState<"default" | "granted" | "denied" | "unsupported">(() => {
@@ -8438,9 +8048,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           );
         })()}
 
-
         {/* Parrainage - mis en avant */}
-
 
         {(!isWideProfile || ["parrainage","main"].includes(activeSection)) && <div onClick={() => {
           const refLink = `https://moyo-congo.com?ref=${auth.userId}`;
@@ -8571,9 +8179,6 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
           )}
         </div>}
 
-
-
-
         {/* Demande de vérification */}
         {(!isWideProfile || ["verification","main"].includes(activeSection)) && (!profile?.is_verified ? (
           <a href={`https://wa.me/${CONTACT_WHATSAPP}?text=${encodeURIComponent(`Bonjour, je souhaite faire vérifier ma fiche Moyo Business.\n\n👤 Nom : ${profile?.name || auth.name}\n💼 Métier : ${profile?.metier || "-"}\n🏢 Entreprise : ${profile?.company || "-"}\n📧 Email : ${auth.email}\n\nMerci !`)}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
@@ -8602,7 +8207,6 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
         ))}
 
         {/* Statut en ligne : toujours visible sur un site pro — le contrôle utilisateur a été retiré volontairement. */}
-
 
         {/* Assistant flottant (chatbot) — activable/désactivable par l'utilisateur */}
         {(!isWideProfile || ["darkmode","main"].includes(activeSection)) && <div style={{ background: G.blanc, borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", border: `1px solid #E8E8E8` }}>
@@ -8640,7 +8244,6 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             <div style={{ position: "absolute", top: 3, left: darkMode ? 27 : 3, width: 22, height: 22, borderRadius: "50%", background: G.blanc, boxShadow: "0 2px 6px rgba(0,0,0,0.2)", transition: "left 0.3s" }} />
           </div>
         </div>}
-
 
         {/* Notifications iPhone hors PWA : encart explicatif */}
         {(!isWideProfile || activeSection === "main") && notifStatus === "unsupported" && (() => {
@@ -8829,7 +8432,6 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
             </div>
           );
         })()}
-
 
         {/* ── Modifier mon mot de passe ── */}
         {(!isWideProfile || ["password","main"].includes(activeSection)) && (
@@ -9619,7 +9221,6 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     showToast(`${count} profil(s) supprimé(s).${skipped > 0 ? ` ${skipped} Super Admin(s) ignoré(s).` : ""}`, "success");
     loadUsers(userSearch, userPage, usersSort);
   };
-
 
   // ── Avis utilisateurs ──
   type ReviewRow = { id: string; user_id: string; rating: number; comment?: string; is_read?: boolean; is_featured?: boolean; created_at: string; updated_at: string; profile?: { name: string; city?: string; gender?: string } };
@@ -10831,7 +10432,6 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
     const statsInterval = setInterval(() => {
       if (activeTab === "stats") loadStats(false);
     }, POLL_STATS_MS);
-
 
     return () => { clearInterval(statsInterval); };
   }, [activeTab]);
@@ -13354,7 +12954,6 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
 
               {/* ── MODALE CONFIRMATION ÉVÉNEMENT PREMIUM (déplacée au niveau supérieur, sous-onglet Marketing) ── */}
 
-
               {/* ── VUE LISTE (compacte : clic sur la silhouette → fiche détaillée) ── */}
               {usersViewMode === "list" ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -15794,9 +15393,6 @@ CREATE POLICY "Admin can delete reports" ON public.reports FOR DELETE TO authent
         </div>
       )}
 
-
-
-
       {/* ── MODAL CRÉER UN MATCH DIRECT ── */}
 
     </div>
@@ -16129,7 +15725,6 @@ function catIcon(id: string, color: string, size = 16) {
 }
 const PinIcon = ({ color = "#9AA0A6", size = 14 }: { color?: string; size?: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
 const TagIcon = ({ color = "var(--c-brun)", size = 14 }: { color?: string; size?: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
-
 
 // PUB_CATS et BIZ_CATEGORIES DÉRIVENT de la source unique (mêmes id que la base).
 const PUB_CATS = [
@@ -16771,8 +16366,6 @@ function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: str
     </Sheet>
   );
 }
-
-const SEARCH_HINTS = BUSINESS_METIERS_FLAT.slice(0, 24);
 
 // Incrémente le compteur de vues/réponses d'une annonce via une fonction SQL sécurisée (RPC),
 // car un visiteur ne peut pas modifier directement l'annonce d'un autre (RLS).
@@ -18275,7 +17868,6 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
     </div>
   );
 }
-
 
 // ─── Partage (lien vers une annonce ou un profil pro) ───
 function makeShareUrl(kind: "pro" | "pub", id: string): string {
