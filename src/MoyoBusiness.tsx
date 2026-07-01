@@ -10482,6 +10482,8 @@ function Admin({ auth, onBack, onBadgeCount }: { auth: Auth; onBack: () => void;
       logAdminAction(auth.token, auth.userId, auth.name, successMsg, userId);
       // Mise à jour locale immédiate
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, ...updates } : u));
+      // ── Mettre aussi à jour la fiche détaillée ouverte (sinon badge/bouton restent figés sur l'ancien état) ──
+      setAdminViewedProfile(prev => prev && prev.id === userId ? { ...prev, ...updates } : prev);
       // ── Recharger les KPIs pour refléter le changement (premium, banni, vérifié…) ──
       loadStats();
     } catch (e: any) {
