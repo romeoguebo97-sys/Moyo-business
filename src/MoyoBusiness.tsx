@@ -1071,7 +1071,7 @@ const Avatar = memo(function Avatar({ url, gender, size = 54, border = false, pr
   return <div style={{ position: "relative", flexShrink: 0 }}><div style={{ width: size, height: size, borderRadius: "50%", overflow: "hidden", border: borderStyle, boxShadow, background: "linear-gradient(160deg,#E8C5A0,#C47A4A)", display: "flex", alignItems: "center", justifyContent: "center" }}>{url ? <img src={url} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" /> : (<svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>)}</div>{premium && <div style={{ position: "absolute", bottom: -2, right: -2, background: G.or, borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${G.blanc}` }}><svg width="10" height="10" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>}</div>;
 });
 
-function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: () => void; reason: string; userId: string; token: string; userEmail?: string }) {
+function PremiumModal({ onClose, reason, userId, token, userEmail, accountType }: { onClose: () => void; reason: string; userId: string; token: string; userEmail?: string; accountType?: string }) {
   const [step, setStep] = useState<"offer" | "mtn" | "airtel">("offer");
   const PREMIUM_PLANS = [
     { id: "1sem", label: "1 semaine", per: "semaine", amount: PREMIUM_PRICE_WEEK_FCFA, days: PREMIUM_DAYS_WEEK },
@@ -1124,14 +1124,29 @@ function PremiumModal({ onClose, reason, userId, token, userEmail }: { onClose: 
   const title = reason && reason.trim() ? reason.trim() : "Passez à Premium";
   const fmt = (n: number | null) => n === null ? "…" : n.toLocaleString("fr-FR");
 
-  const highlights = [
+  const isClientView = !!accountType && accountType !== "pro";
+  const highlights = isClientView ? [
+    { t: "Annonces boostées", d: "Vos demandes vues en priorité par les pros.", svg: <><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" /><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" /><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" /><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" /></> },
+    { t: "Trouvez plus vite", d: "Accédez en priorité aux meilleurs professionnels.", svg: <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></> },
+    { t: "Compte vérifié", d: "Un badge de confiance qui rassure les pros.", svg: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 11 14 15 10" /></> },
+    { t: "Messages illimités", d: "Échangez librement avec les professionnels.", svg: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /> },
+  ] : [
     { t: "Accès prioritaire aux marchés", d: "Recevez les nouvelles opportunités en premier.", svg: <><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" /><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" /><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" /><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" /></> },
     { t: "Visibilité prioritaire", d: "Apparaissez en tête des résultats de recherche.", svg: <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></> },
     { t: "Profil Professionnel Vérifié", d: "Renforcez la confiance de vos futurs clients.", svg: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 11 14 15 10" /></> },
     { t: "Messages illimités", d: "Échangez librement avec vos prospects.", svg: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /> },
   ];
 
-  const avantages = [
+  const avantages = isClientView ? [
+    { icon: "rocket", titre: "Annonces boostées", desc: "Vos demandes mises en avant auprès des pros." },
+    { icon: "eye", titre: "Trouvez plus vite", desc: "Accès prioritaire aux meilleurs professionnels." },
+    { icon: "shieldcheck", titre: "Compte vérifié", desc: "Badge de confiance qui rassure les professionnels." },
+    { icon: "msg", titre: "Messages illimités", desc: "Échangez librement avec les professionnels." },
+    { icon: "photo", titre: "Photos illimitées", desc: "Ajoutez plus de photos à vos demandes." },
+    { icon: "filter", titre: "Filtres avancés", desc: "Recherche par ville, catégorie et métier." },
+    { icon: "phone", titre: "Partage de coordonnées", desc: "Partagez téléphone et WhatsApp dans le chat." },
+    { icon: "headset", titre: "Support prioritaire", desc: "Assistance rapide en cas de besoin." },
+  ] : [
     { icon: "rocket", titre: "Accès prioritaire aux marchés", desc: "Recevez les nouvelles opportunités en premier." },
     { icon: "eye", titre: "Visibilité prioritaire", desc: "Apparaissez en tête des résultats de recherche." },
     { icon: "shieldcheck", titre: "Profil Professionnel Vérifié", desc: "Renforcez la confiance de vos futurs clients." },
@@ -7692,7 +7707,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
     { id: "main", label: "Mon profil", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
     { id: "edit", label: "Modifier mon profil", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
     { id: "photo", label: "Modifier ma photo", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> },
-    ...((FREE_LAUNCH_MODE || profile?.account_type !== "pro") ? [] : [{ id: "premium", label: "Premium", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, badge: auth.isPremium ? "✓" : null }]),
+    ...(FREE_LAUNCH_MODE ? [] : [{ id: "premium", label: "Premium", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, badge: auth.isPremium ? "✓" : null }]),
     { id: "parrainage", label: "Parrainer un ami", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
     { id: "verification", label: "Vérification", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, badge: profile?.is_verified ? "✓" : null },
     { id: "blocklist", label: "Liste noire", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> },
@@ -7984,7 +7999,6 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
         {/* « Mon catalogue » a été déplacé dans l'onglet Publier (réservé aux professionnels). */}
         {(!isWideProfile || ["premium","main"].includes(activeSection)) && (() => {
           if (FREE_LAUNCH_MODE) return null; // Mode lancement gratuit : aucun bandeau de paiement.
-          if (profile?.account_type !== "pro") return null; // Premium réservé aux professionnels.
           const stored = localStorage.getItem(`moyo_premium_until_${auth.userId}`);
           const daysLeft = stored ? Math.floor((new Date(stored).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : -1;
           const isLifetime = stored && new Date(stored).getFullYear() >= 2090;
@@ -8036,7 +8050,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
                   </span>
                 </div>
                 <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.75)" }}>
-                  {isExpired ? "Réabonnez-vous pour retrouver tous vos avantages" : "Contactez les clients · Partagez vos coordonnées · Envoyez des photos"}
+                  {isExpired ? "Réabonnez-vous pour retrouver tous vos avantages" : (profile?.account_type === "pro" ? "Contactez les clients · Partagez vos coordonnées · Envoyez des photos" : "Trouvez vite un pro · Boostez vos annonces · Discutez sans limite")}
                 </div>
               </div>
               <div style={{ marginLeft: 12, flexShrink: 0, textAlign: "right" }}>
@@ -18871,7 +18885,7 @@ export default function App() {
       {tab === "admin" && <AdminPinGate auth={auth} onBack={() => setTab("publications")} onBadgeCount={setAdminBadgeCount} />}
       </div>
     </AppShell>
-    {premiumModal && <PremiumModal reason={premiumModal} onClose={() => setPremiumModal(null)} userId={auth?.userId || ""} token={auth?.token || ""} userEmail={auth?.email || ""} />}
+    {premiumModal && <PremiumModal reason={premiumModal} onClose={() => setPremiumModal(null)} userId={auth?.userId || ""} token={auth?.token || ""} userEmail={auth?.email || ""} accountType={meType} />}
     {premiumSuccess && (
       <div onClick={() => setPremiumSuccess(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100000, padding: 20, backdropFilter: "blur(3px)" }}>
         <div onClick={e => e.stopPropagation()} style={{ background: G.blanc, borderRadius: 22, padding: "30px 24px 24px", maxWidth: 360, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", position: "relative", overflow: "hidden" }}>
