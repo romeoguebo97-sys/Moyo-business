@@ -1071,6 +1071,98 @@ const Avatar = memo(function Avatar({ url, gender, size = 54, border = false, pr
   return <div style={{ position: "relative", flexShrink: 0 }}><div style={{ width: size, height: size, borderRadius: "50%", overflow: "hidden", border: borderStyle, boxShadow, background: "linear-gradient(160deg,#E8C5A0,#C47A4A)", display: "flex", alignItems: "center", justifyContent: "center" }}>{url ? <img src={url} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" /> : (<svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>)}</div>{premium && <div style={{ position: "absolute", bottom: -2, right: -2, background: G.or, borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${G.blanc}` }}><svg width="10" height="10" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>}</div>;
 });
 
+// Écran de paiement (étape 2) réutilisable — MTN / Airtel. Partagé par Premium, Boost et Sponsor.
+function PaymentStep({ operator, amount, perLabel, userId, token, extra, successMsg, onBack, onClose }: { operator: "mtn" | "airtel"; amount: number; perLabel?: string; userId: string; token: string; extra?: Record<string, any>; successMsg: string; onBack: () => void; onClose: () => void }) {
+  const [txRef, setTxRef] = useState("");
+  const [txSent, setTxSent] = useState(false);
+  const [txLoading, setTxLoading] = useState(false);
+  const [txError, setTxError] = useState("");
+  const mtnLogo = (h = 20) => <svg viewBox="0 0 120 60" width={h * 2} height={h} xmlns="http://www.w3.org/2000/svg"><rect width="120" height="60" fill="#FFCC00" rx="8" /><ellipse cx="60" cy="30" rx="52" ry="24" fill="none" stroke="#1a1a1a" strokeWidth="5" /><text x="60" y="39" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="24" fill="#1a1a1a">MTN</text></svg>;
+  const airtelLogo = (h = 22) => <svg viewBox="0 0 80 60" width={h * 1.4} height={h} xmlns="http://www.w3.org/2000/svg"><rect width="80" height="60" fill="#E40000" rx="8" /><path d="M14 40 Q9 18 24 12 Q39 6 41 21 Q43 35 30 37 Q17 39 15 31" fill="white" stroke="none" /><text x="46" y="30" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="13" fill="white">airtel</text><text x="46" y="46" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="12" fill="#fff">money</text></svg>;
+  const OP = operator === "mtn"
+    ? { name: "MTN MoMo", main: "#FFCC00", onColor: "#1a1a1a", numBg: "#F5A623", numColor: "#fff", responsable: PAY_MTN_RESPONSABLE, ussd: `*105*1*1*${PAY_MTN_NUMBER}*${amount}#`, placeholder: "Ex : 7753031542", operator: "MTN", tint: "#fff8e6", tintBorder: "rgba(245,166,35,0.4)", tintText: "#9a6a00", logo: mtnLogo(20), subColor: "rgba(0,0,0,0.65)" }
+    : { name: "Airtel Money", main: "#E40000", onColor: "#fff", numBg: "#E40000", numColor: "#fff", responsable: PAY_AIRTEL_RESPONSABLE, ussd: `*128*2*1*1*${PAY_AIRTEL_NUMBER}*${amount}#`, placeholder: "Ex de l'ID : PP260523.2232.A52074", operator: "Airtel", tint: "#fff0f0", tintBorder: "rgba(228,0,0,0.3)", tintText: "#c0392b", logo: airtelLogo(22), subColor: "rgba(255,255,255,0.9)" };
+  const tel = `tel:${OP.ussd.replace(/#/g, "%23")}`;
+  const submit = async () => {
+    setTxLoading(true); setTxError("");
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/payment_requests`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${token}`, "Prefer": "return=representation" }, body: JSON.stringify({ user_id: userId, operator: OP.operator, tx_ref: txRef.trim(), amount, status: "pending", ...(extra || {}) }) });
+      const body = await r.json().catch(() => null);
+      const row = Array.isArray(body) ? body[0] : body;
+      if (!r.ok || !row?.id) { setTxError(row?.message || row?.code || "Échec de l'envoi. Votre demande n'a pas été enregistrée. Réessayez, et si le problème persiste contactez l'assistance."); setTxLoading(false); return; }
+      setTxSent(true);
+    } catch (e: any) {
+      setTxError("Échec de l'envoi (réseau) : " + (e?.message || "réessayez") + ". Votre demande n'a pas été enregistrée.");
+    }
+    setTxLoading(false);
+  };
+  const numBadge = (n: string) => <div style={{ width: 26, height: 26, borderRadius: "50%", background: OP.numBg, color: OP.numColor, fontWeight: 800, fontSize: "0.85rem", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{n}</div>;
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 99991, display: "flex", alignItems: "flex-end", justifyContent: "center", overscrollBehavior: "contain", touchAction: "none" }}>
+      <div style={{ background: G.creme, width: "100%", maxWidth: 460, height: "100%", maxHeight: "100vh", display: "flex", flexDirection: "column", overscrollBehavior: "contain" }}>
+        <div style={{ background: OP.main, padding: "calc(16px + env(safe-area-inset-top)) 18px 14px", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div onClick={onBack} style={{ cursor: "pointer", background: OP.onColor === "#fff" ? "rgba(255,255,255,0.22)" : "rgba(0,0,0,0.1)", borderRadius: "50%", width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={OP.onColor} strokeWidth="2.5" strokeLinecap="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+            </div>
+            {OP.logo}
+            <div style={{ fontWeight: 800, fontSize: "1.15rem", color: OP.onColor }}>{OP.name}</div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, marginLeft: 4, fontSize: "0.82rem", color: OP.subColor, fontWeight: 600 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={OP.onColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+            Paiement sécurisé • {amount.toLocaleString("fr-FR")} FCFA{perLabel ? ` / ${perLabel}` : ""}
+          </div>
+        </div>
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}>
+          <div style={{ background: G.blanc, borderRadius: 16, padding: 18, marginBottom: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>{numBadge("1")}<div style={{ fontWeight: 800, fontSize: "1.02rem", color: G.brun }}>Effectuez votre paiement</div></div>
+            <div style={{ fontSize: "0.86rem", color: G.brunLight, lineHeight: 1.55, marginBottom: 16 }}>Votre paiement {OP.name} sera reçu et traité par notre responsable des finances.<br /><span style={{ fontWeight: 700, color: G.brun }}>{OP.responsable}</span></div>
+            <a href={tel} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, width: "100%", background: OP.main, color: OP.onColor, borderRadius: 14, padding: "15px", fontSize: "0.95rem", fontWeight: 800, textDecoration: "none", boxSizing: "border-box" as any }}>
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={OP.onColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.53a16 16 0 0 0 6.06 6.06l1.09-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+              Appuyer pour payer - {amount.toLocaleString("fr-FR")} FCFA
+            </a>
+            <div style={{ background: G.creme, borderRadius: 12, padding: "12px", marginTop: 12, textAlign: "center" }}>
+              <div style={{ fontSize: "0.78rem", color: G.brunLight, marginBottom: 4 }}>ou composez ce code depuis votre mobile</div>
+              <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, fontFamily: "monospace", letterSpacing: 0.5 }}>{OP.ussd}</div>
+            </div>
+          </div>
+          <div style={{ background: G.blanc, borderRadius: 16, padding: 18, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>{numBadge("2")}<div style={{ fontWeight: 800, fontSize: "1.02rem", color: G.brun }}>Entrez le numéro ID ci-dessous</div></div>
+            <div style={{ fontSize: "0.84rem", color: G.brunLight, lineHeight: 1.55, marginBottom: 14 }}>Après validation du paiement {OP.operator}, vous recevrez un SMS avec un numéro de transaction (ID). Entrez ce numéro ID ci-dessous.</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, border: `1.5px solid ${txRef ? OP.main : "#e2e2e2"}`, borderRadius: 12, padding: "12px 14px", marginBottom: 14 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
+              <input value={txRef} onChange={e => setTxRef(e.target.value)} placeholder={OP.placeholder} style={{ flex: 1, minWidth: 0, border: "none", outline: "none", fontSize: "0.9rem", fontFamily: "inherit", fontWeight: 600, color: G.brun, background: "transparent" }} />
+            </div>
+            <div style={{ background: OP.tint, border: `1px solid ${OP.tintBorder}`, borderRadius: 12, padding: "12px 14px", display: "flex", gap: 10 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={OP.tintText} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+              <div><div style={{ fontWeight: 800, fontSize: "0.82rem", color: OP.tintText, marginBottom: 2 }}>Important</div><div style={{ fontSize: "0.78rem", color: G.brunLight, lineHeight: 1.5 }}>Vous devez entrer le numéro de transaction (ID) reçu par SMS pour que votre paiement soit confirmé.</div></div>
+            </div>
+          </div>
+          {txSent && (
+            <div style={{ background: "rgba(39,174,96,0.08)", border: "2px solid #27ae60", borderRadius: 14, padding: 18, textAlign: "center", marginTop: 14 }}>
+              <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#27ae60", marginBottom: 6 }}>✓ Numéro ID envoyé avec succès !</div>
+              <div style={{ fontSize: "0.82rem", color: G.brunLight, lineHeight: 1.6 }}>{successMsg}</div>
+              <button onClick={onClose} style={{ marginTop: 14, background: "#27ae60", color: "#fff", border: "none", borderRadius: 50, padding: "11px 26px", fontWeight: 700, cursor: "pointer", fontSize: "0.86rem" }}>Fermer</button>
+            </div>
+          )}
+        </div>
+        {!txSent && (
+          <div style={{ padding: "14px 16px calc(14px + env(safe-area-inset-bottom))", background: G.blanc, borderTop: "1px solid #eee", flexShrink: 0 }}>
+            {txError && (<div style={{ background: "rgba(231,76,60,0.08)", border: "1.5px solid #e74c3c", borderRadius: 12, padding: "10px 12px", marginBottom: 10, fontSize: "0.8rem", color: "#c0392b", lineHeight: 1.5 }}>{txError}</div>)}
+            <button disabled={!txRef.trim() || txLoading} onClick={submit} style={{ width: "100%", background: !txRef.trim() || txLoading ? "#d2d2d2" : OP.main, color: !txRef.trim() || txLoading ? "#888" : OP.onColor, border: "none", borderRadius: 50, padding: "15px", fontSize: "0.95rem", fontWeight: 800, cursor: !txRef.trim() ? "not-allowed" : "pointer" }}>
+              {txLoading ? "Envoi en cours…" : "✓ J'ai payé - Envoyer mon numéro ID"}
+            </button>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, color: G.brunLight, fontSize: "0.78rem", marginTop: 12 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a8a8a8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+              Paiement 100% sécurisé
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 function PremiumModal({ onClose, reason, userId, token, userEmail, accountType }: { onClose: () => void; reason: string; userId: string; token: string; userEmail?: string; accountType?: string }) {
   const [step, setStep] = useState<"offer" | "mtn" | "airtel">("offer");
   const PREMIUM_PLANS = [
@@ -1081,10 +1173,6 @@ function PremiumModal({ onClose, reason, userId, token, userEmail, accountType }
   const [planId, setPlanId] = useState("1mois");
   const selectedPlan = PREMIUM_PLANS.find(p => p.id === planId) || PREMIUM_PLANS[1];
   const planAmount = selectedPlan.amount;
-  const [txRef, setTxRef] = useState("");
-  const [txSent, setTxSent] = useState(false);
-  const [txLoading, setTxLoading] = useState(false);
-  const [txError, setTxError] = useState("");
   const [showAllAdv, setShowAllAdv] = useState(false);
   const [stats, setStats] = useState<{ connections: number | null; premium: number | null }>({ connections: null, premium: null });
   const [manualStats, setManualStats] = useState<{ connections: string; members: string }>({ connections: PREMIUM_STAT_CONNECTIONS, members: PREMIUM_STAT_MEMBERS });
@@ -1267,104 +1355,7 @@ function PremiumModal({ onClose, reason, userId, token, userEmail, accountType }
     </div>
   );
 
-  // ════════ ÉCRANS 2 & 3 : PAIEMENT (MTN / AIRTEL) ════════
-  const OP = step === "mtn"
-    ? { name: "MTN MoMo", main: "#FFCC00", onColor: "#1a1a1a", numBg: "#F5A623", numColor: "#fff", responsable: PAY_MTN_RESPONSABLE, ussd: `*105*1*1*${PAY_MTN_NUMBER}*${planAmount}#`, placeholder: "Ex : 7753031542", operator: "MTN", tint: "#fff8e6", tintBorder: "rgba(245,166,35,0.4)", tintText: "#9a6a00", logo: mtnLogo(20), subColor: "rgba(0,0,0,0.65)" }
-    : { name: "Airtel Money", main: "#E40000", onColor: "#fff", numBg: "#E40000", numColor: "#fff", responsable: PAY_AIRTEL_RESPONSABLE, ussd: `*128*2*1*1*${PAY_AIRTEL_NUMBER}*${planAmount}#`, placeholder: "Ex de l'ID : PP260523.2232.A52074", operator: "Airtel", tint: "#fff0f0", tintBorder: "rgba(228,0,0,0.3)", tintText: "#c0392b", logo: airtelLogo(22), subColor: "rgba(255,255,255,0.9)" };
-  const tel = `tel:${OP.ussd.replace(/#/g, "%23")}`;
-  const submit = async () => {
-    setTxLoading(true);
-    setTxError("");
-    try {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/payment_requests`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${token}`, "Prefer": "return=representation" }, body: JSON.stringify({ user_id: userId, operator: OP.operator, tx_ref: txRef.trim(), amount: planAmount, status: "pending" }) });
-      const body = await r.json().catch(() => null);
-      const row = Array.isArray(body) ? body[0] : body;
-      if (!r.ok || !row?.id) {
-        // L'enregistrement a échoué (colonne manquante, droits, réseau…) : surtout NE PAS afficher un faux succès.
-        setTxError(row?.message || row?.code || "Échec de l'envoi. Votre demande n'a pas été enregistrée. Réessayez, et si le problème persiste contactez l'assistance.");
-        setTxLoading(false);
-        return;
-      }
-      setTxSent(true);
-    } catch (e: any) {
-      setTxError("Échec de l'envoi (réseau) : " + (e?.message || "réessayez") + ". Votre demande n'a pas été enregistrée.");
-    }
-    setTxLoading(false);
-  };
-  const numBadge = (n: string) => <div style={{ width: 26, height: 26, borderRadius: "50%", background: OP.numBg, color: OP.numColor, fontWeight: 800, fontSize: "0.85rem", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{n}</div>;
-
-  return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 99990, display: "flex", alignItems: "flex-end", justifyContent: "center", overscrollBehavior: "contain", touchAction: "none" }}>
-      <div style={{ background: G.creme, width: "100%", maxWidth: 460, height: "100%", maxHeight: "100vh", display: "flex", flexDirection: "column", overscrollBehavior: "contain" }}>
-        <div style={{ background: OP.main, padding: "calc(16px + env(safe-area-inset-top)) 18px 14px", flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div onClick={() => { setStep("offer"); setTxSent(false); setTxRef(""); }} style={{ cursor: "pointer", background: OP.onColor === "#fff" ? "rgba(255,255,255,0.22)" : "rgba(0,0,0,0.1)", borderRadius: "50%", width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={OP.onColor} strokeWidth="2.5" strokeLinecap="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
-            </div>
-            {OP.logo}
-            <div style={{ fontWeight: 800, fontSize: "1.15rem", color: OP.onColor }}>{OP.name}</div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, marginLeft: 4, fontSize: "0.82rem", color: OP.subColor, fontWeight: 600 }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={OP.onColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-            Paiement sécurisé • {planAmount.toLocaleString("fr-FR")} FCFA / {selectedPlan.per}
-          </div>
-        </div>
-
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}>
-          {/* Étape 1 */}
-          <div style={{ background: G.blanc, borderRadius: 16, padding: 18, marginBottom: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>{numBadge("1")}<div style={{ fontWeight: 800, fontSize: "1.02rem", color: G.brun }}>Effectuez votre paiement</div></div>
-            <div style={{ fontSize: "0.86rem", color: G.brunLight, lineHeight: 1.55, marginBottom: 16 }}>Votre paiement {OP.name} sera reçu et traité par notre responsable des finances.<br /><span style={{ fontWeight: 700, color: G.brun }}>{OP.responsable}</span></div>
-            <a href={tel} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, width: "100%", background: OP.main, color: OP.onColor, borderRadius: 14, padding: "15px", fontSize: "0.95rem", fontWeight: 800, textDecoration: "none", boxSizing: "border-box" as any }}>
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={OP.onColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.53a16 16 0 0 0 6.06 6.06l1.09-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
-              Appuyer pour payer - {planAmount.toLocaleString("fr-FR")} FCFA
-            </a>
-            <div style={{ background: G.creme, borderRadius: 12, padding: "12px", marginTop: 12, textAlign: "center" }}>
-              <div style={{ fontSize: "0.78rem", color: G.brunLight, marginBottom: 4 }}>ou composez ce code depuis votre mobile</div>
-              <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, fontFamily: "monospace", letterSpacing: 0.5 }}>{OP.ussd}</div>
-            </div>
-          </div>
-
-          {/* Étape 2 */}
-          <div style={{ background: G.blanc, borderRadius: 16, padding: 18, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>{numBadge("2")}<div style={{ fontWeight: 800, fontSize: "1.02rem", color: G.brun }}>Entrez le numéro ID ci-dessous</div></div>
-            <div style={{ fontSize: "0.84rem", color: G.brunLight, lineHeight: 1.55, marginBottom: 14 }}>Après validation du paiement {OP.operator}, vous recevrez un SMS avec un numéro de transaction (ID). Entrez ce numéro ID ci-dessous.</div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, border: `1.5px solid ${txRef ? OP.main : "#e2e2e2"}`, borderRadius: 12, padding: "12px 14px", marginBottom: 14 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
-              <input value={txRef} onChange={e => setTxRef(e.target.value)} placeholder={OP.placeholder} style={{ flex: 1, minWidth: 0, border: "none", outline: "none", fontSize: "0.9rem", fontFamily: "inherit", fontWeight: 600, color: G.brun, background: "transparent" }} />
-            </div>
-            <div style={{ background: OP.tint, border: `1px solid ${OP.tintBorder}`, borderRadius: 12, padding: "12px 14px", display: "flex", gap: 10 }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={OP.tintText} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
-              <div><div style={{ fontWeight: 800, fontSize: "0.82rem", color: OP.tintText, marginBottom: 2 }}>Important</div><div style={{ fontSize: "0.78rem", color: G.brunLight, lineHeight: 1.5 }}>Vous devez entrer le numéro de transaction (ID) reçu par SMS pour que votre paiement soit confirmé.</div></div>
-            </div>
-          </div>
-
-          {txSent && (
-            <div style={{ background: "rgba(39,174,96,0.08)", border: "2px solid #27ae60", borderRadius: 14, padding: 18, textAlign: "center", marginTop: 14 }}>
-              <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#27ae60", marginBottom: 6 }}>✓ Numéro ID envoyé avec succès !</div>
-              <div style={{ fontSize: "0.82rem", color: G.brunLight, lineHeight: 1.6 }}>Notre équipe va vérifier votre paiement et activer votre Premium dans les plus brefs délais.</div>
-              <button onClick={onClose} style={{ marginTop: 14, background: "#27ae60", color: "#fff", border: "none", borderRadius: 50, padding: "11px 26px", fontWeight: 700, cursor: "pointer", fontSize: "0.86rem" }}>Fermer</button>
-            </div>
-          )}
-        </div>
-
-        {!txSent && (
-          <div style={{ padding: "14px 16px", background: G.blanc, borderTop: "1px solid #eee", flexShrink: 0 }}>
-            {txError && (
-              <div style={{ background: "rgba(231,76,60,0.08)", border: "1.5px solid #e74c3c", borderRadius: 12, padding: "10px 12px", marginBottom: 10, fontSize: "0.8rem", color: "#c0392b", lineHeight: 1.5 }}>{txError}</div>
-            )}
-            <button disabled={!txRef.trim() || txLoading} onClick={submit} style={{ width: "100%", background: !txRef.trim() || txLoading ? "#d2d2d2" : OP.main, color: !txRef.trim() || txLoading ? "#888" : OP.onColor, border: "none", borderRadius: 50, padding: "15px", fontSize: "0.95rem", fontWeight: 800, cursor: !txRef.trim() ? "not-allowed" : "pointer" }}>
-              {txLoading ? "Envoi en cours…" : "✓ J'ai payé - Envoyer mon numéro ID"}
-            </button>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, color: G.brunLight, fontSize: "0.78rem", marginTop: 12 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a8a8a8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-              Paiement 100% sécurisé
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  return <PaymentStep operator={step} amount={planAmount} perLabel={selectedPlan.per} userId={userId} token={token} successMsg="Notre équipe va vérifier votre paiement et activer votre Premium dans les plus brefs délais." onBack={() => setStep("offer")} onClose={onClose} />;
 }
 
 function ResetPassword({ onNav }: { onNav: (p: string) => void }) {
@@ -16210,53 +16201,17 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
     { price: BOOST_PRICE_3, days: 7, label: "Boost 7 jours", sub: "Visibilité maximale" },
   ];
   const [tier, setTier] = useState(TIERS[0]);
-  const [err, setErr] = useState("");
-  const [operator, setOperator] = useState<"MTN" | "Airtel">(PAY_MTN_ENABLED ? "MTN" : "Airtel");
-  const [txRef, setTxRef] = useState("");
-  const [paying, setPaying] = useState(false);
-  const [sent, setSent] = useState(false);
-  const payNumber = operator === "MTN" ? PAY_MTN_NUMBER : PAY_AIRTEL_NUMBER;
-  const payResp = operator === "MTN" ? PAY_MTN_RESPONSABLE : PAY_AIRTEL_RESPONSABLE;
+  const [pay, setPay] = useState<"mtn" | "airtel" | null>(null);
 
-  async function submit() {
-    if (!txRef.trim()) return;
-    setPaying(true);
-    setErr("");
-    try {
-      // On crée UNIQUEMENT une demande en attente. La mise en avant n'est accordée qu'après validation admin du paiement.
-      const rows = await sb.insert<any>(auth.token, "payment_requests", {
-        user_id: auth.userId, operator, amount: tier.price, currency: "XAF",
-        tx_ref: txRef.trim(), status: "pending",
-        kind: "boost", target_id: pub.id, duration_days: tier.days,
-      }, auth.refreshToken);
-      if (!rows?.[0]?.id) {
-        // L'INSERT a échoué (colonne manquante, droits…) : surtout ne pas afficher un faux « Demande envoyée ».
-        setErr((rows?.[0] as any)?.message || "Votre demande n'a pas pu être enregistrée. Réessayez, et si le problème persiste contactez l'assistance.");
-        setPaying(false);
-        return;
-      }
-      setSent(true);
-    } catch (e: any) {
-      setErr("Échec de l'envoi : " + (e?.message || "réseau") + ". Réessayez.");
-      setPaying(false);
-    }
-  }
-
-  if (sent) return (
-    <Sheet title="Demande envoyée" onClose={onClose}>
-      <div style={{ textAlign: "center", padding: "10px 4px 6px" }}>
-        <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(39,174,96,0.12)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>Paiement en cours de vérification</div>
-        <div style={{ fontSize: "0.86rem", color: G.brunLight, lineHeight: 1.55, marginBottom: 20 }}>
-          Dès que votre paiement de <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> est confirmé, votre annonce passera en tête des résultats pendant <b>{tier.days} jour{tier.days > 1 ? "s" : ""}</b>. Activation généralement sous 15 minutes.
-        </div>
-        <Btn variant="gold" onClick={onClose} style={{ width: "100%" }}>Terminé</Btn>
-      </div>
-    </Sheet>
+  // Étape 2 : écran de paiement dédié au moyen choisi (réutilise l'écran du Premium).
+  if (pay) return (
+    <PaymentStep operator={pay} amount={tier.price} perLabel={`${tier.days} j`} userId={auth.userId} token={auth.token}
+      extra={{ currency: "XAF", kind: "boost", target_id: pub.id, duration_days: tier.days }}
+      successMsg={`Dès validation de votre paiement, votre annonce passera en tête des résultats pendant ${tier.days} jour${tier.days > 1 ? "s" : ""}. Activation généralement sous 15 minutes.`}
+      onBack={() => setPay(null)} onClose={onClose} />
   );
 
+  // Étape 1 : choix de la formule + moyen de paiement (même disposition qu'avant).
   return (
     <Sheet title="Mettre en avant" onClose={onClose}>
       <div style={{ background: "rgba(212,168,67,0.1)", border: `1px solid ${G.or}`, borderRadius: 12, padding: 14, marginBottom: 18, fontSize: 13, color: "var(--c-goldText)", lineHeight: 1.5 }}>
@@ -16268,27 +16223,15 @@ function BoostModal({ auth, pub, onClose, onBoosted }: { auth: Auth; pub: Public
           <b style={{ fontSize: 16, color: tier.price === t.price ? "var(--c-goldText)" : G.brun }}>{t.price.toLocaleString("fr-FR")} FCFA</b>
         </div>
       ))}
-      <div style={{ display: "flex", gap: 9, margin: "16px 0 6px" }}>
-        {(["MTN", "Airtel"] as const).map(o => {
-          const okOp = o === "MTN" ? PAY_MTN_ENABLED : PAY_AIRTEL_ENABLED;
-          return (
-          <button key={o} disabled={!okOp} onClick={() => okOp && setOperator(o)} style={{ flex: 1, border: `1.5px solid ${operator === o && okOp ? "#111" : G.gris}`, background: okOp ? G.blanc : "#ececec", borderRadius: 10, padding: 11, fontSize: 12, fontWeight: 700, cursor: okOp ? "pointer" : "not-allowed", opacity: okOp ? 1 : 0.6 }}>
-            <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", marginRight: 5, background: o === "MTN" ? "#FFCC00" : "#E30613" }} />
-            {o === "MTN" ? "MTN MoMo" : "Airtel Money"}{!okOp && <span style={{ fontSize: "0.6rem", fontWeight: 700 }}> (indispo)</span>}
-          </button>
-          );
-        })}
-      </div>
-      <div style={{ background: G.creme, border: `1px solid ${G.gris}`, borderRadius: 12, padding: "13px 15px", margin: "12px 0", fontSize: "0.84rem", color: G.brun, lineHeight: 1.6 }}>
-        Envoyez <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> au numéro <b>{operator === "MTN" ? "MTN MoMo" : "Airtel Money"}</b> :
-        <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, margin: "4px 0 2px", letterSpacing: 0.5 }}>{payNumber}</div>
-        {payResp && <div style={{ fontSize: "0.76rem", color: G.brunLight }}>Au nom de : {payResp}</div>}
-      </div>
-      <div style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, marginBottom: 6 }}>Référence de la transaction reçue par SMS</div>
-      <input value={txRef} onChange={e => setTxRef(e.target.value)} placeholder="Ex : PP260523.2232.A52074" style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${txRef ? G.or : G.gris}`, borderRadius: 12, padding: "13px 14px", fontSize: "0.9rem", fontWeight: 600, fontFamily: "inherit", outline: "none", marginBottom: 14 }} />
-      {err && <div style={{ background: "rgba(231,76,60,0.08)", border: "1.5px solid #e74c3c", borderRadius: 12, padding: "10px 12px", marginBottom: 10, fontSize: "0.8rem", color: "#c0392b", lineHeight: 1.5 }}>{err}</div>}
-      <Btn variant="gold" onClick={submit} disabled={!txRef.trim()} loading={paying} style={{ width: "100%" }}>J'ai payé — envoyer la demande</Btn>
-      <div style={{ fontSize: "0.74rem", color: G.brunLight, textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>Votre annonce sera mise en avant après vérification du paiement (généralement sous 15 min).</div>
+      <div style={{ textAlign: "center", fontSize: "0.78rem", color: G.brunLight, margin: "14px 0 12px" }}>Formule sélectionnée : <b style={{ color: G.brun }}>{tier.label}</b> — <b style={{ color: "var(--c-goldText)" }}>{tier.price.toLocaleString("fr-FR")} FCFA</b></div>
+      <div style={{ textAlign: "center", fontSize: "0.66rem", fontWeight: 800, color: G.brunLight, letterSpacing: 1, marginBottom: 8 }}>PAYEZ AVEC</div>
+      <button onClick={() => PAY_MTN_ENABLED && setPay("mtn")} disabled={!PAY_MTN_ENABLED} style={{ width: "100%", background: PAY_MTN_ENABLED ? "#FFCC00" : "#dcdcdc", color: G.brun, border: "none", borderRadius: 14, padding: "13px", fontSize: "1rem", fontWeight: 800, cursor: PAY_MTN_ENABLED ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 9 }}>
+        <span style={{ display: "inline-block", width: 9, height: 9, borderRadius: "50%", background: "#1a1a1a" }} /> MTN MoMo{!PAY_MTN_ENABLED && <span style={{ fontSize: "0.62rem", fontWeight: 700 }}> (indisponible)</span>}
+      </button>
+      <button onClick={() => PAY_AIRTEL_ENABLED && setPay("airtel")} disabled={!PAY_AIRTEL_ENABLED} style={{ width: "100%", background: G.blanc, color: "#E40000", border: `2px solid ${PAY_AIRTEL_ENABLED ? "#E40000" : "#dcdcdc"}`, borderRadius: 14, padding: "11px", fontSize: "1rem", fontWeight: 800, cursor: PAY_AIRTEL_ENABLED ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12, opacity: PAY_AIRTEL_ENABLED ? 1 : 0.6 }}>
+        <span style={{ display: "inline-block", width: 9, height: 9, borderRadius: "50%", background: "#E40000" }} /> Airtel Money{!PAY_AIRTEL_ENABLED && <span style={{ fontSize: "0.62rem", fontWeight: 700 }}> (indisponible)</span>}
+      </button>
+      <div style={{ fontSize: "0.74rem", color: G.brunLight, textAlign: "center", lineHeight: 1.5 }}>Votre annonce sera mise en avant après vérification du paiement (généralement sous 15 min).</div>
     </Sheet>
   );
 }
@@ -16300,51 +16243,17 @@ function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: str
     { price: SPONSOR_PRICE_3, days: 62, label: "Sponsor 2 mois", sub: "Visibilité maximale" },
   ];
   const [tier, setTier] = useState(TIERS[1]);
-  const [err, setErr] = useState("");
-  const [operator, setOperator] = useState<"MTN" | "Airtel">(PAY_MTN_ENABLED ? "MTN" : "Airtel");
-  const [txRef, setTxRef] = useState("");
-  const [paying, setPaying] = useState(false);
-  const [sent, setSent] = useState(false);
-  const payNumber = operator === "MTN" ? PAY_MTN_NUMBER : PAY_AIRTEL_NUMBER;
-  const payResp = operator === "MTN" ? PAY_MTN_RESPONSABLE : PAY_AIRTEL_RESPONSABLE;
+  const [pay, setPay] = useState<"mtn" | "airtel" | null>(null);
 
-  async function submit() {
-    if (!txRef.trim()) return;
-    setPaying(true);
-    setErr("");
-    try {
-      const rows = await sb.insert<any>(auth.token, "payment_requests", {
-        user_id: auth.userId, operator, amount: tier.price, currency: "XAF",
-        tx_ref: txRef.trim(), status: "pending",
-        kind: "sponsor", target_id: profileId, duration_days: tier.days,
-      }, auth.refreshToken);
-      if (!rows?.[0]?.id) {
-        setErr((rows?.[0] as any)?.message || "Votre demande n'a pas pu être enregistrée. Réessayez, et si le problème persiste contactez l'assistance.");
-        setPaying(false);
-        return;
-      }
-      setSent(true);
-    } catch (e: any) {
-      setErr("Échec de l'envoi : " + (e?.message || "réseau") + ". Réessayez.");
-      setPaying(false);
-    }
-  }
-
-  if (sent) return (
-    <Sheet title="Demande envoyée" onClose={onClose}>
-      <div style={{ textAlign: "center", padding: "10px 4px 6px" }}>
-        <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(39,174,96,0.12)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#27ae60" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, marginBottom: 8 }}>Paiement en cours de vérification</div>
-        <div style={{ fontSize: "0.86rem", color: G.brunLight, lineHeight: 1.55, marginBottom: 20 }}>
-          Dès que votre paiement de <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> est confirmé, votre fiche sera sponsorisée et apparaîtra en tête du répertoire pendant <b>{tier.days} jours</b>. Activation généralement sous 15 minutes.
-        </div>
-        <Btn variant="gold" onClick={onClose} style={{ width: "100%" }}>Terminé</Btn>
-      </div>
-    </Sheet>
+  // Étape 2 : écran de paiement dédié au moyen choisi (réutilise l'écran du Premium).
+  if (pay) return (
+    <PaymentStep operator={pay} amount={tier.price} perLabel={`${tier.days} j`} userId={auth.userId} token={auth.token}
+      extra={{ currency: "XAF", kind: "sponsor", target_id: profileId, duration_days: tier.days }}
+      successMsg={`Dès validation de votre paiement, votre fiche sera sponsorisée et apparaîtra en tête du répertoire pendant ${tier.days} jours. Activation généralement sous 15 minutes.`}
+      onBack={() => setPay(null)} onClose={onClose} />
   );
 
+  // Étape 1 : choix de la formule + moyen de paiement (même disposition qu'avant).
   return (
     <Sheet title="Sponsoriser ma fiche" onClose={onClose}>
       <div style={{ background: "rgba(212,168,67,0.1)", border: `1px solid ${G.or}`, borderRadius: 12, padding: 14, marginBottom: 18, fontSize: 13, color: "var(--c-goldText)", lineHeight: 1.5 }}>
@@ -16356,27 +16265,15 @@ function SponsorModal({ auth, profileId, onClose }: { auth: Auth; profileId: str
           <b style={{ fontSize: 16, color: tier.price === t.price ? "var(--c-goldText)" : G.brun }}>{t.price.toLocaleString("fr-FR")} FCFA</b>
         </div>
       ))}
-      <div style={{ display: "flex", gap: 9, margin: "16px 0 6px" }}>
-        {(["MTN", "Airtel"] as const).map(o => {
-          const okOp = o === "MTN" ? PAY_MTN_ENABLED : PAY_AIRTEL_ENABLED;
-          return (
-          <button key={o} disabled={!okOp} onClick={() => okOp && setOperator(o)} style={{ flex: 1, border: `1.5px solid ${operator === o && okOp ? "#111" : G.gris}`, background: okOp ? G.blanc : "#ececec", borderRadius: 10, padding: 11, fontSize: 12, fontWeight: 700, cursor: okOp ? "pointer" : "not-allowed", opacity: okOp ? 1 : 0.6 }}>
-            <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", marginRight: 5, background: o === "MTN" ? "#FFCC00" : "#E30613" }} />
-            {o === "MTN" ? "MTN MoMo" : "Airtel Money"}{!okOp && <span style={{ fontSize: "0.6rem", fontWeight: 700 }}> (indispo)</span>}
-          </button>
-          );
-        })}
-      </div>
-      <div style={{ background: G.creme, border: `1px solid ${G.gris}`, borderRadius: 12, padding: "13px 15px", margin: "12px 0", fontSize: "0.84rem", color: G.brun, lineHeight: 1.6 }}>
-        Envoyez <b>{tier.price.toLocaleString("fr-FR")} FCFA</b> au numéro <b>{operator === "MTN" ? "MTN MoMo" : "Airtel Money"}</b> :
-        <div style={{ fontSize: "1.05rem", fontWeight: 800, color: G.brun, margin: "4px 0 2px", letterSpacing: 0.5 }}>{payNumber}</div>
-        {payResp && <div style={{ fontSize: "0.76rem", color: G.brunLight }}>Au nom de : {payResp}</div>}
-      </div>
-      <div style={{ fontSize: "0.82rem", fontWeight: 700, color: G.brun, marginBottom: 6 }}>Référence de la transaction reçue par SMS</div>
-      <input value={txRef} onChange={e => setTxRef(e.target.value)} placeholder="Ex : PP260523.2232.A52074" style={{ width: "100%", boxSizing: "border-box", border: `1.5px solid ${txRef ? G.or : G.gris}`, borderRadius: 12, padding: "13px 14px", fontSize: "0.9rem", fontWeight: 600, fontFamily: "inherit", outline: "none", marginBottom: 14 }} />
-      {err && <div style={{ background: "rgba(231,76,60,0.08)", border: "1.5px solid #e74c3c", borderRadius: 12, padding: "10px 12px", marginBottom: 10, fontSize: "0.8rem", color: "#c0392b", lineHeight: 1.5 }}>{err}</div>}
-      <Btn variant="gold" onClick={submit} disabled={!txRef.trim()} loading={paying} style={{ width: "100%" }}>J'ai payé — envoyer la demande</Btn>
-      <div style={{ fontSize: "0.74rem", color: G.brunLight, textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>Votre fiche sera sponsorisée après vérification du paiement (généralement sous 15 min).</div>
+      <div style={{ textAlign: "center", fontSize: "0.78rem", color: G.brunLight, margin: "14px 0 12px" }}>Formule sélectionnée : <b style={{ color: G.brun }}>{tier.label}</b> — <b style={{ color: "var(--c-goldText)" }}>{tier.price.toLocaleString("fr-FR")} FCFA</b></div>
+      <div style={{ textAlign: "center", fontSize: "0.66rem", fontWeight: 800, color: G.brunLight, letterSpacing: 1, marginBottom: 8 }}>PAYEZ AVEC</div>
+      <button onClick={() => PAY_MTN_ENABLED && setPay("mtn")} disabled={!PAY_MTN_ENABLED} style={{ width: "100%", background: PAY_MTN_ENABLED ? "#FFCC00" : "#dcdcdc", color: G.brun, border: "none", borderRadius: 14, padding: "13px", fontSize: "1rem", fontWeight: 800, cursor: PAY_MTN_ENABLED ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 9 }}>
+        <span style={{ display: "inline-block", width: 9, height: 9, borderRadius: "50%", background: "#1a1a1a" }} /> MTN MoMo{!PAY_MTN_ENABLED && <span style={{ fontSize: "0.62rem", fontWeight: 700 }}> (indisponible)</span>}
+      </button>
+      <button onClick={() => PAY_AIRTEL_ENABLED && setPay("airtel")} disabled={!PAY_AIRTEL_ENABLED} style={{ width: "100%", background: G.blanc, color: "#E40000", border: `2px solid ${PAY_AIRTEL_ENABLED ? "#E40000" : "#dcdcdc"}`, borderRadius: 14, padding: "11px", fontSize: "1rem", fontWeight: 800, cursor: PAY_AIRTEL_ENABLED ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12, opacity: PAY_AIRTEL_ENABLED ? 1 : 0.6 }}>
+        <span style={{ display: "inline-block", width: 9, height: 9, borderRadius: "50%", background: "#E40000" }} /> Airtel Money{!PAY_AIRTEL_ENABLED && <span style={{ fontSize: "0.62rem", fontWeight: 700 }}> (indisponible)</span>}
+      </button>
+      <div style={{ fontSize: "0.74rem", color: G.brunLight, textAlign: "center", lineHeight: 1.5 }}>Votre fiche sera sponsorisée après vérification du paiement (généralement sous 15 min).</div>
     </Sheet>
   );
 }
