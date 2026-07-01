@@ -5119,6 +5119,8 @@ const ReplyBanner = React.memo(function ReplyBanner({ replyTo, partnerName, myId
 type ReportRowLike = { id?: string; reason: string; reporter_id: string; reported_id: string | null; status?: string; created_at?: string };
 
 function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPartnerId, onConvOpen }: { auth: Auth; accountType?: string; onUnreadCount: (n: number) => void; onShowPremium: (r: string) => void; initialPartnerId?: string | null; onConvOpen?: (open: boolean) => void }) {
+  // Déclaré tout en haut : utilisé par plusieurs effets dès le rendu (dont la gestion clavier).
+  const isWideMsg = window.innerWidth >= 768;
   const [convs, setConvs] = useState<Match[]>([]);
   const [open, setOpen] = useState<Match | null>(null);
   useEffect(() => { onConvOpen?.(open !== null); }, [open]);
@@ -6084,8 +6086,6 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
     setPreviewImg(prev => { if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev); return null; });
     setBurnMsg(null);
   };
-
-  const isWideMsg = window.innerWidth >= 768;
 
   const statusGroups = useMemo(() => Array.from(
     statuses.reduce((acc, st) => {
@@ -16461,6 +16461,7 @@ async function incrementPubStat(token: string, pubId: string, kind: "view" | "re
 }
 
 function Publications({ auth, accountType, onGoMessages, onShowPremium, publishNonce, initialPubId, onPubConsumed }: { auth: Auth; accountType?: string; onGoMessages: (partnerId: string) => void; onShowPremium?: (r: string) => void; publishNonce?: number; initialPubId?: string | null; onPubConsumed?: () => void }) {
+  const isWidePub = window.innerWidth >= 768;
   const type: "cherche" | "propose" = accountType === "client" ? "propose" : "cherche";
   const [cat, setCat] = useState("all");
   const [metier, setMetier] = useState("");
@@ -16569,9 +16570,7 @@ function Publications({ auth, accountType, onGoMessages, onShowPremium, publishN
   }
 
   return (
-    <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", paddingBottom: 90 }}>
-
-      {/* Contrôles du feed — masqués pendant une recherche */}
+    <div style={{ maxWidth: isWidePub ? "none" : 500, margin: "0 auto", width: "100%", paddingBottom: 90 }}>
       {!q.trim() && (
         <div style={{ padding: "14px 16px 0" }}>
           {/* Deux sélecteurs : Catégorie + Métier */}
@@ -17764,6 +17763,7 @@ function ProFiche({ auth, pro, onClose, onGoMessages, onToast, isFav, onToggleFa
 
 function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, onGoMessages }: { auth: Auth; accountType?: string; myCategory?: string; initialProId?: string | null; onProConsumed?: () => void; onGoMessages: (partnerId: string) => void }) {
   const isPro = accountType === "pro";
+  const isWideRep = window.innerWidth >= 768;
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("all");
   const [metier, setMetier] = useState("");
@@ -17846,7 +17846,7 @@ function Annuaire({ auth, accountType, myCategory, initialProId, onProConsumed, 
   const metierSug = q.trim().length >= 2 ? fuzzyMetiers(q).filter(m => mbNorm(m) !== mbNorm(q)).slice(0, 4) : [];
 
   return (
-    <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", paddingBottom: 90 }}>
+    <div style={{ maxWidth: isWideRep ? "none" : 500, margin: "0 auto", width: "100%", paddingBottom: 90 }}>
       <div style={{ position: "sticky", top: 0, zIndex: 20, background: G.creme, padding: "14px 16px 8px" }}>
         {/* En-tête : Répertoire (client) ou Sous-traitants (pro, catégorie verrouillée) */}
         {isPro && (
