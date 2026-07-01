@@ -1491,17 +1491,25 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
   const suggestions = React.useMemo(() => {
     const q = mbNorm(lq);
     if (q.length < 1) return [] as string[];
+    const stem = q.length > 3 ? q.replace(/s$/, "") : q;
     const scored: { label: string; score: number }[] = [];
+    // Secteurs (catégories) : taper "BTP" doit proposer "BTP" comme raccourci vers tous ses métiers.
+    for (const c of BIZ_CATEGORIES) {
+      const nc = mbNorm(c.label);
+      if (nc === q) scored.push({ label: c.label, score: 4 });
+      else if (nc.startsWith(stem) || stem.startsWith(nc)) scored.push({ label: c.label, score: 3.6 });
+      else if (nc.includes(stem)) scored.push({ label: c.label, score: 2 });
+    }
     for (const m of METIER_SUGGESTIONS) {
       let score = -1;
       const hay = [m.label, ...m.keys].map(mbNorm);
       for (const t of hay) {
         if (t === q) { score = 4; break; }
-        if (t.startsWith(q)) score = Math.max(score, 3);
-        else if (t.includes(q)) score = Math.max(score, 1);
+        if (t.startsWith(stem)) score = Math.max(score, 3);
+        else if (t.includes(stem)) score = Math.max(score, 1);
       }
       // si le métier lui-même commence par la saisie, on le privilégie
-      if (mbNorm(m.label).startsWith(q)) score = Math.max(score, 3.5);
+      if (mbNorm(m.label).startsWith(stem)) score = Math.max(score, 3.5);
       // tolérance aux fautes de frappe (Levenshtein) en dernier recours
       if (score < 0) {
         const thr = q.length <= 4 ? 1 : 2;
@@ -1511,8 +1519,17 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
       }
       if (score >= 0) scored.push({ label: m.label, score });
     }
-    scored.sort((a, b) => b.score - a.score || a.label.localeCompare(b.label));
-    return scored.slice(0, 6).map(s => s.label);
+    // Complète avec le reste de la taxonomie complète des métiers (pas seulement la liste des synonymes)
+    // pour ne jamais rater un métier qui existe bien sur le site.
+    for (const label of fuzzyMetiers(lq, 6)) {
+      if (!scored.some(s => s.label === label)) scored.push({ label, score: 2.5 });
+    }
+    const seen = new Set<string>();
+    return scored
+      .sort((a, b) => b.score - a.score || a.label.localeCompare(b.label))
+      .filter(s => (seen.has(s.label) ? false : (seen.add(s.label), true)))
+      .slice(0, 6)
+      .map(s => s.label);
   }, [lq]);
   const [lcity, setLcity] = React.useState("");
   const [cityOpen, setCityOpen] = React.useState(false);
@@ -1538,11 +1555,31 @@ function Landing({ onNav }: { onNav: (p: string) => void }) {
     if (!term && !city) { setLres(null); setLsearching(false); return; }
     setLsearching(true);
     const h = setTimeout(async () => {
+      const nTerm = mbNorm(term);
+      // Racine simple singulier/pluriel ("technologies" → "technologie") pour que la recherche
+      // fonctionne peu importe la forme tapée, sans dépendre d'une saisie exacte.
+      const stem = nTerm.length > 3 ? nTerm.replace(/s$/, "") : nTerm;
+      // Un mot tapé peut désigner tout un SECTEUR (ex: "BTP") : dans ce cas on veut aussi tous les
+      // métiers qui en font partie (maçon, plombier…), pas seulement les fiches contenant "BTP".
+      const matchedCategories = term ? BIZ_CATEGORIES.filter(c => {
+        const nc = mbNorm(c.label);
+        return nc === nTerm || nc.startsWith(stem) || stem.startsWith(nc) || nc.includes(stem);
+      }) : [];
+      const expandedMetiers = new Set<string>();
+      matchedCategories.forEach(c => {
+        BUSINESS_CATEGORIES_SORTED.find(bc => bc.id === c.id)?.metiers.forEach(m => expandedMetiers.add(m));
+      });
+      // Le mot tapé peut aussi être un synonyme d'un métier précis (ex: "maconnerie" → "Maçon").
+      if (term) fuzzyMetiers(term, 8).forEach(m => expandedMetiers.add(m));
+
       const v = encodeURIComponent(term);
+      const vStem = encodeURIComponent(stem);
       const vcity = encodeURIComponent(city);
       const cityP = city ? `&city=ilike.*${vcity}*` : "";
-      const termPro = term ? `&or=(company.ilike.*${v}*,metier.ilike.*${v}*,name.ilike.*${v}*,category.ilike.*${v}*)` : "";
-      const termPub = term ? `&or=(title.ilike.*${v}*,description.ilike.*${v}*,category.ilike.*${v}*)` : "";
+      const metierIn = expandedMetiers.size ? `,metier.in.(${Array.from(expandedMetiers).map(encodeURIComponent).join(",")})` : "";
+      const catIn = matchedCategories.length ? `,category.in.(${matchedCategories.map(c => encodeURIComponent(c.id)).join(",")})` : "";
+      const termPro = term ? `&or=(company.ilike.*${v}*,metier.ilike.*${vStem}*,name.ilike.*${v}*,category.ilike.*${vStem}*${metierIn}${catIn})` : "";
+      const termPub = term ? `&or=(title.ilike.*${v}*,description.ilike.*${v}*,category.ilike.*${vStem}*${catIn})` : "";
       try {
         const [pros, pubs] = await Promise.all([
           sb.query<any>(SUPABASE_KEY, "profiles", `?account_type=eq.pro&is_visible=neq.false${termPro}${cityP}&select=id,name,company,metier,city,category,is_verified,photo_url&limit=24`),
@@ -4768,10 +4805,9 @@ function AppShell({ children, tab, setTab, unreadCount, notifCount, likesReceive
       .moyo-topbar-wide { padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; background: ${G.blanc}; border-bottom: 1px solid ${G.gris}; flex-shrink: 0; }
       .moyo-content-wide { flex: 1; min-height: 0; overflow-y: auto; padding: 24px 28px 72px; }
       .moyo-content-wide .page-anim { width: 100%; }
-      .moyo-content-wide .page-anim > * { max-width: 1120px !important; margin-left: auto !important; margin-right: auto !important; }
       .moyo-content-wide .dgrid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; align-items: start; }
       .moyo-content-wide .dspan { grid-column: 1 / -1; }
-      .moyo-content-wide .page-anim > .dfull { max-width: none !important; margin: 0 !important; height: 100% !important; }
+      .moyo-content-wide .page-anim > .dfull { margin: 0 !important; height: 100% !important; }
       .moyo-content-wide.moyo-content-full { padding: 0 !important; overflow: hidden !important; }
       .moyo-content-wide.moyo-content-full .page-anim { height: 100%; }
     `}</style>
@@ -5315,6 +5351,15 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
       if (footerRef.current) setFooterHeight(footerRef.current.offsetHeight);
       if (headerRef.current) setHeaderHeight(headerRef.current.offsetHeight);
     };
+    // ── Sur desktop/tablette (isWideMsg), il n'y a pas de clavier virtuel à compenser : le
+    //    conteneur suit déjà la mise en page flex normalement. Forcer sa hauteur sur
+    //    visualViewport.height (hauteur de la fenêtre entière, sans tenir compte de la barre
+    //    du haut ni de la sidebar) le rendait plus grand que l'espace réellement disponible,
+    //    ce qui masquait l'en-tête de la conversation. On ne branche donc ce hack qu'en mobile. ──
+    if (isWideMsg) {
+      const t = setTimeout(measure, 50);
+      return () => clearTimeout(t);
+    }
     const container = document.querySelector('[data-chat-container]') as HTMLElement | null;
     // Détection iOS (iPhone/iPad, y compris PWA Safari). iPadOS récent se fait passer pour Mac,
     // d'où le test 'MacIntel + écran tactile'.
@@ -5357,7 +5402,7 @@ function Messages({ auth, accountType, onUnreadCount, onShowPremium, initialPart
       }
       resetContainer();
     };
-  }, [open?.id, replyTo, showEmojiPicker]);
+  }, [open?.id, replyTo, showEmojiPicker, isWideMsg]);
 
   // Auto-resize textarea + remesure footer à chaque frappe
   const autoResizeTextarea = () => {
@@ -7748,7 +7793,7 @@ function Profile({ auth, onLogout, onShowPremium, darkMode, onToggleDark, onOpen
   };
 
   return (
-    <div style={{ background: G.fond, minHeight: "100%", display: isWideProfile ? "flex" : "block", height: isWideProfile ? "100%" : "auto", paddingBottom: isWideProfile ? 0 : 30 }}>
+    <div className={isWideProfile ? "dfull" : undefined} style={{ background: G.fond, minHeight: "100%", display: isWideProfile ? "flex" : "block", height: isWideProfile ? "100%" : "auto", paddingBottom: isWideProfile ? 0 : 30 }}>
       <ErrorModal msg={errorMsg} onClose={() => setErrorMsg("")} />
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
       <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display: "none" }} />
